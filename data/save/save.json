@@ -1,0 +1,45 @@
+{
+    "username": "Player 0",
+    "port": 5555,
+    "ips": [],
+    "settings": {
+        "rounds": 3,
+        "ss": 20,
+        "cards": 5,
+        "items": 3,
+        "spells": 1,
+        "cpus": 1,
+        "diff": 4
+    },
+    "cards": [
+        {
+            "name": "player 0",
+            "type": "user",
+            "description": "description",
+            "tags": [
+                "player"
+            ],
+            "color": [
+                56,
+                211,
+                161
+            ],
+            "image": "data/img/custom/0.png",
+            "keep_aspect": true,
+            "rotation": 0,
+            "outline": true,
+            "sound": "data/snd/custom/0.wav",
+            "id": 0,
+            "weight": 3,
+            "classname": "Player_0",
+            "custom": true,
+            "code": "",
+            "lines": [
+                0,
+                0
+            ],
+            "published": false,
+            "node_data": {}
+        }
+    ]
+}

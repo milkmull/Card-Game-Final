@@ -1,0 +1,87 @@
+from ui.element.compound.dropdown import Dropdown
+
+class Logged_Dropdown(Dropdown):
+    def __init__(
+        self,
+        port,
+        selection,
+        value=None
+    ):
+    
+        super().__init__(
+            selection,
+            selected=value,
+            size=(port.node.rect.width - 37, 22),
+            y_pad=2,
+            left_pad=2,
+            right_pad=20,
+            centery_aligned=True,
+            inf_width=False,
+            inf_height=False,
+            text_color=(255, 255, 255),
+            fill_color=(32, 32, 40),
+            outline_color=(0, 0, 0),
+            outline_width=3,
+            border_radius=5,
+            window_kwargs={
+                'fill_color': (32, 32, 40),
+                'outline_color': (200, 200, 200),
+                'outline_width': 3
+            },
+            max_buttons=10
+        )
+
+        self.add_animation([{
+            'attr': 'width',
+            'end': 200,
+            'frames': 10
+        }],
+        tag='open')
+        
+        self.last_text = self.text
+        
+    @property
+    def port(self):
+        return self.parent
+        
+    @property
+    def value(self):
+        return self.text
+        
+    def get_output(self):
+        return f"'{self.text}'" 
+        
+    def close(self):
+        super().close()
+        
+        if self.text != self.last_text:
+            self.port.manager.add_log({
+                't': 'val',
+                'e': self,
+                'v': (self.last_text, self.text)
+            })
+            self.last_text = self.text
+        
+    def update(self):
+        super().update()
+        
+        if self.port.port > 0:
+        
+            if self.port.connection:
+                self.set_enabled(False)
+                out = self.port.connection.get_output(self.port.connection_port.true_port)
+                try:
+                    out = eval(out)
+                except:
+                    pass
+                self.set_text(out)
+                
+            else:
+                self.set_enabled(True)
+        
+        
+        
+        
+        
+        
+        
