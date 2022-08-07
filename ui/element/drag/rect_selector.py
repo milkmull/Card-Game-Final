@@ -35,12 +35,21 @@ class Rect_Selector(Base_Element):
                 d.select()
         
     def events(self, events):
-        if mbd := events.get('mbd'):
+        if events['ctrl']:
+            kd = events.get('kd')
+            if kd:
+                if kd.key == pg.K_a:
+                    Dragger.select_all()
+                    events.pop('kd')
+        
+        mbd = events.get('mbd')
+        if mbd:
             if mbd.button == 1:
                 self.anchor = mbd.pos
                 events.pop('mbd')
 
-        if mbu := events.get('mbu'):
+        mbu = events.get('mbu')
+        if mbu:
             if mbu.button == 1:
                 self.select()
                 self.anchor = None

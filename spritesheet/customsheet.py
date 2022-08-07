@@ -181,7 +181,5 @@ class Customsheet(Base_Sheet):
                     )
         
         self.resave_sheet(surf)
-        SAVE.del_card(entry)
-        self.refresh()
         
 CUSTOMSHEET = Customsheet()

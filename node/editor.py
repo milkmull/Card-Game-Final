@@ -7,11 +7,12 @@ from .node.node_base import pack, unpack, Port, Node, Group_Node
 #from .tester import tester
 
 from .element.search_bar import Search_Bar
+from .element.node_menu import Node_Menu
 
 from ui.math import line
 from ui.element.drag.dragger import Dragger
 from ui.element.drag.rect_selector import Rect_Selector
-from ui.element.elements import Image, Textbox, Button, Input
+from ui.element.elements import Image, Textbox, Button, Input, Label
 from ui.menu.menu import Menu
    
 def save_group_node(gn):
@@ -135,13 +136,43 @@ def editor_objects(self):
 
     return objects
     
+def get_elements(menu):
+    body = menu.body
+    elements = []
+    
+    node_menu = Node_Menu(menu)
+    node_menu_label = Label(
+        node_menu,
+        height=30,
+        text='Nodes',
+        fill_color=(0, 198, 195),
+        text_color=(0, 0, 0),
+        layer=node_menu.layer - 1
+    )
+    elements.append(node_menu)
+    
+    node_menu_label.add_event(
+        tag='left_click',
+        func=node_menu.open_close
+    )
+    elements.append(node_menu_label)
+    
+    search_bar = Search_Bar(menu)
+    elements.append(search_bar)
+    
+    rect_selector = Rect_Selector()
+    elements.append(rect_selector)
+    
+    return elements
+    
 class Node_Editor(Menu):        
     def __init__(self, card):
         self.card = card
         
         self.nodes = []
+        Dragger.set(self.nodes)
 
-        super().__init__(lambda m: [Rect_Selector(), Search_Bar(m)], fill_color=(32, 32, 40))
+        super().__init__(get_elements, fill_color=(32, 32, 40))
         
         self.anchor = None
 
@@ -217,10 +248,9 @@ class Node_Editor(Menu):
             type = log['t']
             
             if type == 'carry':
-                nodes = log['draggers']
-                for n in nodes:
-                    dx, dy = nodes[n]
-                    n.rect.move_ip(-dx, -dy)
+                node = log['node']
+                dx, dy = log['dist']
+                node.move(-dx, -dy)
                     
             elif type == 'add':
                 n = log['node']
@@ -296,10 +326,9 @@ class Node_Editor(Menu):
             type = log['t']
             
             if type == 'carry':
-                nodes = log['draggers']
-                for n in nodes:
-                    dx, dy = nodes[n]
-                    n.rect.move_ip(dx, dy)
+                n = log['node']
+                dx, dy = log['dist']
+                n.move(dx, dy)
                     
             elif type == 'del':
                 n = log['node']
@@ -632,17 +661,13 @@ class Node_Editor(Menu):
             if y > self.body.height - 100:
                 y = 50
                 x += r.width + 20
-                
-        if draggers:
-            self.add_log({'t': 'carry', 'draggers': draggers})
 
 #run stuff--------------------------------------------------------------------
 
     def sub_events(self, events):
-        for n in self.nodes[::-1]:
-            if n.visible:
-                n.events(events)
-        super().sub_events(events)
+        for e in (self.elements[:2] + self.nodes[::-1] + self.elements[2:]):
+            if e.enabled:
+                e.events(events)
     
     def events(self):
         events = super().events()
@@ -698,9 +723,6 @@ class Node_Editor(Menu):
                 
     def draw(self):
         self.window.fill(self.fill_color)
-
-        for w in self.wires:
-            w.draw(self.window)
 
         for n in self.nodes:
             if n.visible:

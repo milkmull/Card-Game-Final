@@ -166,9 +166,18 @@ class Dropdown(Button.Text_Button):
             b.padding = self.padding
                 
             if v is None:
-                b.add_event(func=self.set_value, args=[k], tag='left_click')
+                b.add_event(
+                    tag='left_click',
+                    func=self.set_value, 
+                    args=[k]
+                )
             else:
-                b.add_event(func=self.new_window, args=[v], kwargs={'last': b, 'level': level + 1}, tag='left_click')
+                b.add_event(
+                    tag='left_click',
+                    func=self.new_window,
+                    args=[v],
+                    kwargs={'last': b, 'level': level + 1}
+                )
                 
                 i = Image(image=self.right_arrow)
                 i.set_enabled(False)

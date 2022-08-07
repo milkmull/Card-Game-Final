@@ -4,6 +4,7 @@ from spritesheet.customsheet import CUSTOMSHEET
 from builder.builder import run as run_builder
 
 from ui.menu.menu import Menu
+from ui.menu.templates.yes_no import Yes_No
 from ui.element.elements import Textbox, Image, Button, Live_Window, Label
 from ui.math.position import center_elements_y
 
@@ -34,10 +35,17 @@ def card_edit_menu(menu, card):
     b.rect.y = elements[-1].rect.bottom + b.rect.height
     elements.append(b)
     
+    def del_card(data):
+        m = Yes_No(text_kwargs={'text': 'Are you sure you want to delete this card?'})
+        if m.run():
+            SAVE.del_card(data)
+            menu.exit()
+    
     if card['id'] != 0:
         b = Button.Text_Button(
             text='delete card',
-            tag='exit'
+            func=del_card,
+            args=[card]
         )
         b.rect.centerx = body.centerx
         b.rect.y = elements[-1].rect.bottom + 5
@@ -95,6 +103,8 @@ def builder_menu(menu):
 
     b = Button.Text_Button(
         text='new',
+        func=run_builder,
+        args=[SAVE.get_new_card_data()],
         tag='refresh',
         **button_kwargs
     )

@@ -154,22 +154,18 @@ class Wire:
         self.ip.wire = self
 
         self.points = self.find_points()
+        self.dashed_points = line.segment(self.points)
 
         self.bad = False
-        self.dashed_points = line.segment(self.points)
-        
-        self.last_pos_out = self.op.rect.center
-        self.last_pos_in = self.ip.rect.center
-        
-    @property
-    def manager(self):
-        return self.op.manager
-        
+        self.last_pos = (
+            self.op.rect.center,
+            self.ip.rect.center
+        )
+
     def check_intersect(self, a, b):
         for i in range(len(self.points) - 1):
             c = self.points[i]
             d = self.points[i + 1]
-            
             if line.intersect(a, b, c, d):
                 return True
                     
@@ -191,76 +187,99 @@ class Wire:
     def clip(self):
         Node.del_wire(self)
         
-    def find_points(self): 
-        onode = self.op.parent
-        inode = self.ip.parent
-        
+    def find_points(self):
         start = self.op.rect.center
         end = self.ip.rect.center
         
         ox, oy = start
         ix, iy = end
-
-        if onode.rect.right < inode.rect.left:
-            cx = (onode.rect.right + inode.rect.left) // 2
+        
+        orect = self.op.parent.background_rect
+        irect = self.ip.parent.background_rect
+        
+        if orect.right < irect.left:
+            cx = (orect.right + irect.left) // 2
         else:
-            cx = (inode.rect.right + onode.rect.left) // 2
-        if onode.rect.bottom < inode.rect.top:
-            cy = (onode.rect.bottom + inode.rect.top) // 2
+            cx = (irect.right + orect.left) // 2
+        if orect.bottom < irect.top:
+            cy = (orect.bottom + irect.top) // 2
         else:
-            cy = (inode.rect.bottom + onode.rect.top) // 2
-
-        if ix - 10 < ox:
-                 
-            r = onode.rect.union(inode.rect)
-
-            orect = onode.rect
-            irect = inode.rect
+            cy = (irect.bottom + orect.top) // 2
             
-            oshift = 8
-            ishift = 8
-           
-            xmax = orect.right + oshift
+        if ix - Port.SIZE < ox:
+                 
+            r = orect.union(irect)
+            shift = Port.SIZE * 2
+            xmax = orect.right + shift
 
             if r.height - 5 > orect.height + irect.height:
-                xmin = irect.left - ishift
-                return (start, (xmax, oy), (xmax, cy), (xmin, cy), (xmin, iy), end)
+                xmin = irect.left - shift
+                return (
+                    start,
+                    (xmax, oy),
+                    (xmax, cy),
+                    (xmin, cy),
+                    (xmin, iy),
+                    end
+                )
                 
             else:
-
                 if orect.right > irect.left:
                     if orect.left < irect.left:
-                        xmin = orect.left - oshift
+                        xmin = orect.left - shift
                     else:
-                        xmin = irect.left - ishift
+                        xmin = irect.left - shift
                 else:
-                    xmin = orect.left - oshift
+                    xmin = orect.left - shift
             
                 if irect.top == r.top:
-                    ymax = r.bottom + oshift
-                    return (start, (xmax, oy), (xmax, ymax), (xmin, ymax), (xmin, iy), end)
+                    ymax = r.bottom + shift
+                    return (
+                        start,
+                        (xmax, oy),
+                        (xmax, ymax),
+                        (xmin, ymax),
+                        (xmin, iy),
+                        end
+                    )
+                    
                 else:
-                    ymin = r.top - oshift
-                    return (start, (xmax, oy), (xmax, ymin), (xmin, ymin), (xmin, iy), end)
+                    ymin = r.top - shift
+                    return (
+                        start,
+                        (xmax, oy),
+                        (xmax, ymin),
+                        (xmin, ymin),
+                        (xmin, iy),
+                        end
+                    )
 
         else:
-            return (start, (cx, oy), (cx, iy), end)
-        
+            return (
+                start,
+                (cx, oy),
+                (cx, iy),
+                end
+            )
+     
     def update(self):
         update_points = False
             
         bad = self.is_bad()
         if self.bad != bad:
             self.bad = bad
-            self.update_points = True
+            update_points = True
+            
+        current_pos = (
+            self.op.rect.center,
+            self.ip.rect.center
+        )
 
-        current_pos_out = self.op.rect.center
-        current_pos_in = self.ip.rect.center
-        if update_points or (self.last_pos_out != current_pos_out or self.last_pos_in != current_pos_in):
+        if update_points or current_pos != self.last_pos:
             self.points = self.find_points()
             self.dashed_points = line.segment(self.points)
-        self.last_pos_out = current_pos_out
-        self.last_pos_in = current_pos_in
+            
+        self.last_pos = current_pos
 
     def draw(self, surf):
         self.update()
@@ -311,7 +330,6 @@ class Port(Element):
         n1 = p1.node
         
         if (any({t in p1.types for t in p0.types}) or force) and p0.is_output() != p1.is_output():
-        
             p0.connect(n1, p1)
             p1.connect(n0, p0)
             
@@ -380,7 +398,6 @@ class Port(Element):
        
         self.connection = None
         self.connection_port = None
-        
         self.wire = None
         self.suppressed = False
         
@@ -409,7 +426,7 @@ class Port(Element):
             'connection_node': getattr(self.connection, 'name', None),
             'connection_port': getattr(self.connection_port, 'port', None)
         }
-        return json.dumps(data, indent=4)
+        return str(self.port)
         
     def __repr__(self):
         return str(self)
@@ -668,6 +685,9 @@ class Port(Element):
             )
 
         super().draw(surf)
+        
+        if self.port > 0 and self.wire:
+            self.wire.draw(surf)
             
     def draw_wire(self, surf):
         pg.draw.line(
@@ -709,6 +729,31 @@ class Node(Dragger, Element):
     def set_group_data(cls):
         with open(f'{NODE_DATA_PATH}group_nodes.json', 'r') as f:
             cls.GROUP_DATA = json.load(f)
+            
+    @classmethod
+    def get_categories(cls):
+        categories = {}
+        for name, n in cls.NODE_DATA.items():
+            if hasattr(n, 'cat'):
+                cat = n.cat
+                subcat = getattr(n, 'subcat', 'base')
+                if cat not in categories:
+                    categories[cat] = {}
+                if subcat not in categories[cat]:
+                    categories[cat][subcat] = [name]
+                else:
+                    categories[cat][subcat].append(name)
+                    
+        cat = 'group'
+        categories[cat] = {}
+        for name, data in cls.GROUP_DATA.items():
+            subcat = data.get('subcat', 'base')
+            if subcat not in categories[cat]:
+                categories[cat][subcat] = [name]
+            else:
+                categories[cat][subcat].append(name)
+                
+        return categories
         
     @classmethod
     def new_wire(cls, p0, p1):
@@ -730,7 +775,6 @@ class Node(Dragger, Element):
         Port.close_active_port()
         cls.WIRES.clear()
         cls.ID = 0
-        Dragger.reset()
         
     @classmethod
     def from_name(cls, name, **kwargs):
@@ -848,7 +892,12 @@ class Node(Dragger, Element):
         )
         label.set_enabled(False)
         label.rect.center = self.label_rect.center
-        self.add_child(label, current_offset=True)
+        self.add_child(
+            label, 
+            top_anchor='top',
+            top_offset=label.rect.top - self.rect.top,
+            centerx_anchor='centerx'
+        )
         
         return label
                
@@ -880,6 +929,23 @@ class Node(Dragger, Element):
         self.rect.width = self.WIDTH
         self.rect.height = y - self.rect.y
         self.rect.topleft = tl
+        
+    def get_raw_image(self, scale=1):
+        r = self.background_rect
+
+        w = r.width + Port.SIZE + 4
+        h = r.height
+        
+        surf = pg.Surface((w, h)).convert_alpha()
+        surf.fill((0, 0, 0, 0))
+
+        self.rect.bottomleft = (
+            (Port.SIZE // 2) + 2,
+            h - Node.OUTLINE_SPACE
+        )
+        self.update_position(all=True)
+        self.draw(surf)
+        return pg.transform.smoothscale(surf, (w * scale, h * scale))
 
 #writing stuff----------------------------------------------------------------------
 
@@ -993,6 +1059,16 @@ class Node(Dragger, Element):
             })
         
 #input stuff-------------------------------------------------------------------
+        
+    def drop(self, *args, **kwargs):
+        dist = super().drop()
+        
+        if any(dist):
+            self.manager.add_log({
+                't': 'carry',
+                'node': self,
+                'dist': dist
+            })
         
     def transform(self, form=None, d=False):
         self.clear_connections()

@@ -4,7 +4,6 @@ from ..utils.timer import Timer
 
 class Dragger:
     DRAGGERS = []
-    LAST_LOG = {'type': 'carry', 'draggers': set()}
     
     @classmethod
     def select_all(cls):
@@ -21,16 +20,14 @@ class Dragger:
     @classmethod
     def get_selected(cls):
         return [d for d in cls.DRAGGERS if d.selected]
+        
+    @classmethod
+    def set(cls, draggers):
+        cls.DRAGGERS = draggers
                 
     @classmethod
     def reset(cls):
         cls.DRAGGERS.clear()
-        
-    @classmethod
-    def get_logs(cls):
-        logs = {'type': 'carry', 'draggers': cls.LAST_LOG['draggers'].copy()}
-        cls.LAST_LOG['draggers'].clear()
-        return [logs]
     
     def __init__(
         self,
@@ -48,8 +45,6 @@ class Dragger:
         self.held_timer = Timer()  
 
         self.select_color = select_color        
-        
-        Dragger.DRAGGERS.append(self)
         
     @property
     def carry_dist(self):
@@ -83,10 +78,10 @@ class Dragger:
     def drop(self):
         self.held = False
         self.held_timer.reset()
-        
-        if any(self.carry_dist):
-            Dragger.LAST_LOG['draggers'].add(self)
-        
+        dist = self.carry_dist
+        self.pickup_pos = self.rect.topleft
+        return dist
+
     def select(self):
         self.selected = True
         
@@ -94,10 +89,6 @@ class Dragger:
         self.held = False
         self.selected = False
         self.held_timer.reset()
-        
-    def kill(self):
-        super().kill()
-        Dragger.DRAGGERS.remove(self)
         
     def update_drag(self):   
         if self.held:
@@ -131,13 +122,6 @@ class Dragger:
             if mbd:
                 if mbd.button == 1:
                     self.deselect_on_update = True
-                
-        elif events['ctrl']:
-            kd = events.get('kd')
-            if kd:
-                if kd.key == pg.K_a:
-                    Dragger.select_all()
-                    events.pop('kd')
 
         mbu = events.get('mbu')
         if mbu:

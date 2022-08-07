@@ -33,7 +33,11 @@ class Popup_Base:
         self.animation_kwargs = (Popup_Base.default_animation_kwargs | animation_kwargs)
             
         arrow = get_arrow(dir, **(Popup_Base.default_arrow_kwargs | arrow_kwargs))
-        self.button = Button.Image_Button(image=arrow, **(Popup_Base.default_button_kwargs | button_kwargs))
+        self.button = Button.Image_Button(
+            image=arrow,
+            func=self.open_close,
+            **(Popup_Base.default_button_kwargs | button_kwargs)
+        )
         
         if dir == '^':
             self.button.rect.bottomright = (self.rect.right, self.rect.top - 15)
@@ -43,42 +47,46 @@ class Popup_Base:
             self.button.rect.topleft = (self.rect.right + 15, self.rect.bottom - self.button.size[1])
         elif dir == '<':
             self.button.rect.topright = (self.rect.left - 15, self.rect.bottom - self.button.size[1])  
+            
+        self.open_animation = self.add_animation(
+            [{
+                'attr': 'y' if dir in 'v^' else 'x',
+                'end': 0
+            } | self.animation_kwargs],
+            tag='open'
+        ).sequence[0]
+            
         self.add_child(self.button, current_offset=True)
-
-        self.button.add_event(self.popup, tag='left_click')
         
     @property
     def is_closed(self):
         return not self.moving and not self.is_open
         
-    def popup(self):
-        if not self.moving:
-            if not self.is_open:
+    def open_close(self):
+        if self.is_closed:
+            self.open()
+        else:
+            self.close()
+        
+    def open(self):
+        if self.dir == '^':
+            end = self.rect.top - self.rect.height
+        elif self.dir == 'v':
+            end = self.rect.bottom
+        elif self.dir == '>':
+            end = self.rect.right
+        elif self.dir == '<':
+            end = self.rect.left - self.rect.width
+        self.open_animation.start_value = [self.rect.y]
+        self.open_animation.end_value = [end]
 
-                self.open()
-                if self.dir == '^':
-                    self.add_animation([{'attr': 'y', 'end': self.rect.top - self.rect.height} | self.animation_kwargs])
-                elif self.dir == 'v':
-                    self.add_animation([{'attr': 'y', 'end': self.rect.bottom} | self.animation_kwargs])
-                elif self.dir == '>':
-                    self.add_animation([{'attr': 'x', 'end': self.rect.right} | self.animation_kwargs])
-                elif self.dir == '<':
-                    self.add_animation([{'attr': 'x', 'end': self.rect.left - self.rect.width} | self.animation_kwargs])
-                    
-            else:
-            
-                self.close()
-                if self.dir == '^':
-                    self.add_animation([{'attr': 'y', 'end': self.rect.bottom} | self.animation_kwargs])
-                elif self.dir == 'v':
-                    self.add_animation([{'attr': 'y', 'end': self.rect.top - self.rect.height} | self.animation_kwargs])
-                elif self.dir == '>':
-                    self.add_animation([{'attr': 'x', 'end': self.rect.left - self.rect.width} | self.animation_kwargs])
-                elif self.dir == '<':
-                    self.add_animation([{'attr': 'x', 'end': self.rect.right} | self.animation_kwargs])
-                    
-            self.button.image = transform('rotate', self.button.image, 180)
-            
+        super().open()
+        self.button.image = transform('rotate', self.button.image, 180)
+        
+    def close(self):
+        super().close()
+        self.button.image = transform('rotate', self.button.image, 180)
+
     def events(self, events):
         if self.is_closed:
             self.button.events(events)

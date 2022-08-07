@@ -189,6 +189,9 @@ class Save:
             self.set_data('cards', cards)
       
     def del_card(self, entry):
+        from spritesheet.customsheet import CUSTOMSHEET
+        CUSTOMSHEET.del_card(entry)
+        
         image_file = CUSTOM_IMG_PATH + '{}.png'
         sound_file = CUSTOM_SND_PATH + '{}.wav'
         cards = self.get_data('cards')
@@ -230,6 +233,7 @@ class Save:
                     card['lines'] = (s + text_shift, e + text_shift)
             
         self.set_data('cards', cards)
+        CUSTOMSHEET.refresh()
 
     def new_card_id(self):
         return len(self.get_data('cards'))

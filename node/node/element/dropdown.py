@@ -1,17 +1,18 @@
-from ui.element.compound.dropdown import Dropdown
+from ui.element.base.text_element import Text_Element
+from ui.element.compound.input_dropdown import Input_Dropdown
 
-class Logged_Dropdown(Dropdown):
+class Logged_Dropdown(Input_Dropdown):
     def __init__(
         self,
         port,
         selection,
         value=None
     ):
-    
+        
         super().__init__(
             selection,
             selected=value,
-            size=(port.node.rect.width - 37, 22),
+            size=(port.node.rect.width - 38, 22),
             y_pad=2,
             left_pad=2,
             right_pad=20,
@@ -19,6 +20,7 @@ class Logged_Dropdown(Dropdown):
             inf_width=False,
             inf_height=False,
             text_color=(255, 255, 255),
+            cursor_color=(255, 255, 255),
             fill_color=(32, 32, 40),
             outline_color=(0, 0, 0),
             outline_width=3,
@@ -30,6 +32,7 @@ class Logged_Dropdown(Dropdown):
             },
             max_buttons=10
         )
+        self.default = self.find_default(self.selection)
 
         self.add_animation([{
             'attr': 'width',
@@ -69,17 +72,12 @@ class Logged_Dropdown(Dropdown):
         
             if self.port.connection:
                 self.set_enabled(False)
-                out = self.port.connection.get_output(self.port.connection_port.true_port)
-                try:
-                    out = eval(out)
-                except:
-                    pass
-                self.set_text(out)
+                out = self.port.connection.get_output(self.port.connection_port.true_port).strip("'")
+                super(Text_Element, self).set_text(out)
                 
-            else:
+            elif not self.enabled:
                 self.set_enabled(True)
-        
-        
+                self.set_text(self.last_text)
         
         
         

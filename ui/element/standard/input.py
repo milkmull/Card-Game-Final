@@ -28,7 +28,8 @@ class Input(Text_Element):
 
     @classmethod
     def copy(cls, text):
-        pyperclip.copy(text)
+        if text:
+            pyperclip.copy(text)
     
     @classmethod
     def paste(cls): 

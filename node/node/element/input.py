@@ -1,3 +1,4 @@
+from ui.element.base.text_element import Text_Element
 from ui.element.standard.input import Input
 
 class Logged_Input(Input):
@@ -27,10 +28,11 @@ class Logged_Input(Input):
         super().__init__(
             text=text.strip("'"),
             default=port.node.get_default(port.port).strip("'"),
-            size=(port.node.WIDTH - 18, 22),
+            size=(port.node.WIDTH - 19, 22),
             pad=2,
             inf_width=(type != 'code'),
             inf_height=(type == 'code'),
+            max_line_width=None if type != 'code' else 300,
             centery_aligned=(type != 'code'),
             text_check=text_check,
             max_length=max_length,
@@ -49,6 +51,12 @@ class Logged_Input(Input):
             
         elif type == 'code':
             self.pad['bottom'] = 0
+            self.add_animation([{
+                'attr': 'width',
+                'end': 300,
+                'frames': 10
+            }],
+            tag='open')
             self.add_animation([{
                 'attr': 'height',
                 'end': 300,
@@ -95,15 +103,17 @@ class Logged_Input(Input):
         
             if self.port.connection:
                 self.set_enabled(False)
-                out = self.port.connection.get_output(self.port.connection_port.true_port)
-                try:
-                    out = eval(out)
-                except:
-                    pass
-                self.set_text(out)
+                out = self.port.connection.get_output(self.port.connection_port.true_port).strip("'")
+                if self.type == 'num':
+                    try:
+                        out = str(eval(out))
+                    except:
+                        pass
+                super(Text_Element, self).set_text(out)
                 
-            else:
+            elif not self.enabled:
                 self.set_enabled(True)
+                self.set_text(self.last_text)
             
             
             

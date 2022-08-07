@@ -176,7 +176,6 @@ class If_Else(Node):
         return text
  
 class Bool(Node):
-    size = (50, 40)
     cat = 'boolean'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
@@ -195,7 +194,6 @@ class Bool(Node):
         return str(self.get_actual_value())
         
 class Num(Node):
-    size = (50, 40)
     cat = 'numeric'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
@@ -220,7 +218,6 @@ class Num(Node):
         return str(self.get_actual_value())
         
 class String(Node):
-    size = (100, 50)
     cat = 'string'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
@@ -242,7 +239,6 @@ class String(Node):
         return f"'{self.get_actual_value()}'"
  
 class Code(Node):
-    WIDTH = 300
     cat = 'flow'
     subcat = 'other'
     def __init__(self, id, **kwargs):

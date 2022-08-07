@@ -95,15 +95,17 @@ class Element(Style):
             if 'element' not in kwargs:
                 kwargs['element'] = self
                 
-        a = Sequence(
+        s = Sequence(
             [Animation(**kwargs) for kwargs in animations], 
             tag=tag
         )
         
         if tag == 'temp':
-            self.active_animations.append(a)
+            self.active_animations.append(s)
         else:
-            self.animations.append(a)
+            self.animations.append(s)
+            
+        return s
             
     def run_animations(self, type, reverse=False):
         if type == self.frozen_animation_type:

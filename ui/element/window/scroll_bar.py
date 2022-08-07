@@ -174,11 +174,11 @@ class Scroll_Bar(Slider):
     def can_scroll_left(self):
         return self.handel.rect.left > self.rect.left
         
-    def scroll(self, dir):
+    def scroll(self, dist):
         if self.dir:
-            self.handel.move(0, dir * max({self.handel.rect.height / 2, 1}))
+            self.handel.move(0, dist * max({self.handel.rect.height / 5, 1}))
         else:
-            self.handel.move(dir * max({self.handel.rect.width / 2, 1}), 0)
+            self.handel.move(dist * max({self.handel.rect.width / 5, 1}), 0)
         self.handel.update_limits()
         self.handel.set_stuck(True)
         

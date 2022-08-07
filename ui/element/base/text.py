@@ -90,6 +90,7 @@ class Text:
 
         inf_width=False,
         inf_height=False,
+        max_line_width=None,
         wrap=True,
         
         const_size=False,
@@ -121,6 +122,7 @@ class Text:
             
         self.inf_width = inf_width
         self.inf_height = inf_height
+        self.max_line_width = max_line_width
         self.wrap = wrap
         
         self.const_size = const_size
@@ -167,8 +169,9 @@ class Text:
         return self.text
   
     def set_text(self, text):
-        self.text = text
-        self.fit_text()
+        if self.text != text:
+            self.text = text
+            self.fit_text()
 
     def clear_text(self):
         self.set_text('')
@@ -227,7 +230,8 @@ class Text:
         else:
             size = self.text_size
         
-        max_width, max_height = self.rect.size
+        max_width = self.max_line_width or self.rect.width
+        max_height = self.rect.height
         block = Container()
         characters = []
         
@@ -247,7 +251,7 @@ class Text:
                             status = 1
                             break
                             
-                    if not self.inf_width:
+                    if not self.inf_width or (self.inf_width and self.max_line_width):
                         if x + word_rect.width >= max_width:
                             if not current_line or not self.wrap:
                                 status = 2
