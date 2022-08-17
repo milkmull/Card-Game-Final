@@ -2,7 +2,7 @@ import pygame as pg
 
 from ..node.node_base import Node
 
-from ui.element.elements import Textbox, Button, Popup
+from ui.element.elements import Textbox, Button, Label, Popup
 from ui.element.utils.image import get_arrow
 
 class Node_Menu(Popup.Live_Popup):
@@ -64,6 +64,20 @@ class Node_Menu(Popup.Live_Popup):
         self.buttons[tab].run_animations('hover')
         self.set_tab(tab)
         
+        self.label = Label(
+            self,
+            height=30,
+            text='Nodes',
+            fill_color=(0, 198, 195),
+            text_color=(0, 0, 0),
+            layer=self.layer - 1
+        )
+
+        self.label.add_event(
+            tag='left_click',
+            func=self.open_close
+        )
+        
     @property
     def total_rect(self):
         sb = self.y_scroll_bar
@@ -77,7 +91,8 @@ class Node_Menu(Popup.Live_Popup):
         
     @property
     def click_close(self):
-        return not (self.hit or self.hit_any() or self.safety_rect.collidepoint(pg.mouse.get_pos())) and self.is_open
+        hits = self.hit or self.hit_any() or self.safety_rect.collidepoint(pg.mouse.get_pos()) or self.label.hit
+        return not hits and self.is_open
         
     def set_tab(self, tab):
         elements = []
@@ -127,10 +142,18 @@ class Node_Menu(Popup.Live_Popup):
         
     def events(self, events):
         super().events(events)
+        self.label.events(events)
         
         mbd = events.get('mbd_a')
         if mbd and self.click_close:
             if mbd.button == 1 or mbd.button == 3:
                 if self.is_open:
                     self.close() 
-            
+                    
+    def update(self):
+        super().update()
+        self.label.update()
+        
+    def draw(self, surf):
+        self.label.draw(surf)
+        super().draw(surf)

@@ -6,9 +6,9 @@ import pygame as pg
 
 from data.constants import CONSTANTS, CUSTOM_IMG_PATH, CUSTOM_SND_PATH, TEMP_SND_PATH
 
-#from node.node.node_base import pack
-#from node.parser import Node_Parser
-#from node.tester import tester
+from node.node.node_base import pack
+from node.compiler import Compiler
+from node.tester import tester
 
 from ui.element.base.image_element import Image_Element
 from ui.element.base.style import Style
@@ -28,15 +28,6 @@ def is_valid_code(code):
     return True
 
 class Card(Image_Element):
-    @staticmethod
-    def load_pic(path):
-        if os.path.exists(path):
-            pic = pg.image.load(path).convert_alpha()
-            pic = pg.transform.smoothscale(pic, IMAGE_SIZE)
-        else:
-            pic = pg.Surface(IMAGE_SIZE).convert_alpha()
-        return pic
-        
     @classmethod
     def build_card(cls, info):
         return cls(**info).get_card_image()
@@ -122,7 +113,7 @@ class Card(Image_Element):
         self.elements_dict['name'] = name
 
         pic = Fitted_Image(
-            image=Card.load_pic(image),
+            image=pg.image.load(image).convert_alpha(),
             size=IMAGE_SIZE,
             keep_aspect=keep_aspect,
             rotation=rotation,
@@ -317,14 +308,14 @@ class Card(Image_Element):
         self.node_data = data
         
         prev_code = self.code
-        parser = Node_Parser(self, nodes)
-        code = parser.get_text()
+        compiler = Compiler(nodes, card=self)
+        code = compiler.compile()
         self.set_code(code)
         
         if prev_code != code:
             self.published = False
             
-        return parser
+        return compiler
    
     def set_code(self, code):
         self.code = code
@@ -334,31 +325,27 @@ class Card(Image_Element):
         
     def publish(self, nodes=None):
         if nodes is not None:
-            parser = self.set_node_data(nodes)
-            missing = parser.missing
+            compiler = self.set_node_data(nodes)
+            missing = compiler.missing
             if missing:
                 if len(missing) == 1:
                     text = f'Missing {missing[0]} node.\n'
                 else:
                     text = f"Missing {', '.join(missing)} nodes.\n"
-                m = Menu.notice(text, tsize=20, size=(400, 200))
-                m.run()
+                Notice(text_kwargs={'text': text}).run()
                 return
             
         if not self.code:
-            m = Menu.notice('No writable nodes found.')
-            m.run()
+            Notice(text_kwargs={'text': 'No writable nodes found.'}).run()
             return
             
         saved = self.save(suppress=True)
         if not saved:
-            m = Menu.notice('An error occurred while saving.')
-            m.run()
+            Notice(text_kwargs={'text': 'An error occurred while saving.'}).run()
             return
         
         if not is_valid_code(self.code):
-            m = Menu.notice('Error: invalid code.')
-            m.run()
+            Notice(text_kwargs={'text': 'Error: invalid code.'}).run()
             return
   
         passed = tester.run_tester(self)
@@ -372,8 +359,7 @@ class Card(Image_Element):
         self.published = True
         self.save(suppress=True)
         
-        m = Menu.notice('Card has been published successfully!')
-        m.run()
+        Notice(text_kwargs={'text': 'Card has been published successfully!'}).run()
             
     def save(self, nodes=None, suppress=False):
         self.set_sound()

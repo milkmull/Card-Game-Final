@@ -197,6 +197,9 @@ class Position(Base_Element):
         p = pg.mouse.get_pos()
         if self.rect.collidepoint(p):
             return True
+        return self.hit_children()
+                
+    def hit_children(self):
         for c in self.children:
             if c.hit_any():
                 return True
@@ -348,8 +351,7 @@ class Position(Base_Element):
             centery=centery_anchor,
             centery_offset=centery_offset
         )
-        
-        
+ 
         self.set_stuck(False)
         self.update_position()
         if current_offset:
@@ -357,13 +359,14 @@ class Position(Base_Element):
     
     def update_stuck(self):
         if self.parent:
+            p = (
+                self.parent.rect.x + self.stuck_pos[0],
+                self.parent.rect.y + self.stuck_pos[1]
+            )
             setattr(
                 self.rect,
                 self.stuck_anchor,
-                (
-                    self.parent.rect.x + self.stuck_pos[0],
-                    self.parent.rect.y + self.stuck_pos[1]
-                )
+                p
             )
         else:
             setattr(self.rect, self.stuck_anchor, self.stuck_pos)

@@ -4,7 +4,6 @@ from ..base.text_element import Text_Element
 from ...icons.icons import icons
 
 class Check_Box(Text_Element):
-    
     default_kwargs = {
         'size': (15, 15),
         'fill_color': (255, 255, 255),
@@ -29,6 +28,9 @@ class Check_Box(Text_Element):
         )
         
         self.value = value
+        
+    def __bool__(self):
+        return bool(self.value)
         
     def get_value(self):
         return self.value

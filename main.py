@@ -1,9 +1,12 @@
 import pygame as pg
 
 from ui import ui
+from ui.element.base.text import Text
 from data.constants import CONSTANTS
 
 ui.init(size=CONSTANTS['screen_size'], flags=pg.SCALED | pg.RESIZABLE)
+Text.load_font('data/fonts/courier_new.ttf')
+Text.load_font('data/fonts/JetBrainsMonoNL-Regular.ttf')
 
 from data.save import SAVE
 if SAVE.failed_to_load:

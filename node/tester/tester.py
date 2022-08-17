@@ -1,37 +1,49 @@
+import os
 import traceback
 import random
 import json
 import inspect
+import importlib
 
-from data.save import TEST_CARD_FILE, TEST_CARD_HEADER
+from data.constants import TEST_CARD_FILE, TEST_CARD_HEADER
 from game.game import game_base
-from spritesheet import spritesheet
-from menu import screens
 
-from ui.menu import Menu
+from ui.menu.templates.loading import Loading
+from .errors_screen import run as run_errors
+
+#from . import testing_card
   
 def step_test(t):
     t.step_sim()
-    if t.get_sims() == 100:
-        return 1
+    return t.get_sims() / 300
         
 def run_tester(card):
     t = Tester(card)
-    m = Menu.loading_screen(step_test, fargs=[t], message='testing card...')
+    m = Loading(
+        func_kwargs={
+            'func': step_test, 
+            'args': [t]
+        },
+        text_kwargs={
+            'text': 'Testing Card...'
+        },
+        fps=120
+    )
     m.run()
-    t.process()
-    messages = t.get_error_messages()
-    if messages:
-        m = Menu(get_objects=screens.error_screen, args=[messages])
-        m.run()
+    if m.status:
         return
-    return True
+
+    t.process()
+    if not t.errors:
+        return True
+
+    run_errors(t.get_formatted_errors())
 
 class Tester:
     @staticmethod
     def get_cards():
         from . import testing_card
-        from card import cards as card_manager
+        from game.card import cards as card_manager
         cards = card_manager.get_playable_card_data()
         test_card = inspect.getmembers(testing_card, inspect.isclass)[0][1]
         cards[test_card.type][test_card.name] = test_card
@@ -39,7 +51,7 @@ class Tester:
         
     @staticmethod
     def get_settings():
-        settings = {
+        return {
             'rounds': 1, 
             'ss': 20, 
             'cards': 5,
@@ -48,7 +60,6 @@ class Tester:
             'cpus': 3,
             'diff': 1
         }
-        return settings
         
     def __init__(self, card):
         self.card = card
@@ -60,14 +71,20 @@ class Tester:
         self.errors = []
         
     def write_card(self):         
-        with open(TEST_CARD_FILE, 'w') as f:
-            f.write(TEST_CARD_HEADER + self.card.code) 
+        with open(TEST_CARD_FILE, 'wb') as f:
+            f.write((TEST_CARD_HEADER + self.card.code).encode('utf-8'))
+            
+        from . import testing_card
+        importlib.reload(testing_card)
   
     def get_errors(self):
         return self.errors
         
     def get_error_messages(self):
-        return [err.splitlines()[-2] for err in self.errors]
+        return [err.splitlines()[-2].strip() for err in self.errors]
+        
+    def get_formatted_errors(self):
+        return [err.replace(os.getcwd(), '') for err in self.errors]
         
     def get_error_lines(self):
         lines = []
@@ -111,12 +128,14 @@ class Tester:
             try:
                 while not g.done():
                     g.main()
+                    if g.turn > 600:
+                        g.debug()
+                        raise Exception(f"game took too long ({g.turn} turns)")
             except:
                 err = traceback.format_exc()
 
             if err and err not in self.errors:
                 self.errors.append(err)
-                print_logs(g)
             self.sims += 1
             
     def process(self):

@@ -73,7 +73,7 @@ def builder(menu):
     
     save_button = Button.Text_Button(
         text='Save',
-        func=menu.card.save,
+        func=menu.save_card,
         **button_kwargs
     )
     save_button.rect.topleft = (x, y)
@@ -91,7 +91,7 @@ def builder(menu):
     
     publish_button = Button.Text_Button(
         text='Publish',
-        func=menu.card.publish,
+        func=menu.publish_card,
         **button_kwargs
     )
     publish_button.rect.topleft = (x, y)
@@ -104,6 +104,7 @@ def builder(menu):
     )
     publish_button.add_child(publish_icon, right_anchor='right', centery_anchor='centery')
     publish_icon.set_enabled(False) 
+    menu.elements_dict['published'] = publish_icon
     
     y += publish_button.rect.height + 3
     
@@ -410,7 +411,7 @@ def builder(menu):
     image_section.rect.topleft = (tags_section.rect.left, tags_section.rect.bottom + 20)
     elements.append(image_section)
 
-    def draw_line(surf):
+    def draw_line(self, surf):
         y = (camera_button.padded_rect.bottom + rotate_button.padded_rect.top) // 2
         pg.draw.line(
             surf,
@@ -496,6 +497,7 @@ class Builder(Menu):
     def update(self):
         super().update()  
         self.update_color()
+        self.update_published()
         
     def exit(self):
         m = Yes_No(text_kwargs={'text': 'Save before quitting?'})
@@ -513,7 +515,7 @@ class Builder(Menu):
 
     def open_image(self):
         files = (
-            ('All Image Files', ('*.jpg', '*.jpeg', '*.png', '*.bmp'))
+            ('All Image Files', ('*.jpg', '*.jpeg', '*.png', '*.bmp')),
             ('JPEG', ('*.jpg', '*.jpeg')),
             ('PNG', '*.png'),
             ('BMP', '*.bmp'),
@@ -540,19 +542,20 @@ class Builder(Menu):
         file = filedialog.asksaveasfilename(
             initialdir='/',
             title='Save As',
-            filetypes=files
+            filetypes=files,
+            defaultextension='*.*'
         )
         if file:
             self.card.export_image(file)
 
     def update_published(self):
-        t = self.elements_dict['published']
-        if self.card.published and 'True' not in t.message:
-            t.fgcolor = (0, 255, 0)
-            t.set_message('published: True')
-        elif not self.card.published and 'False' not in t.message:
-            t.fgcolor = (255, 0, 0)
-            t.set_message('published: False')
+        icon = self.elements_dict['published']
+        if self.card.published and icon.text_color != (0, 255, 0):
+            icon.text_color = (0, 255, 0)
+            icon.set_text(icons['check'])
+        elif not self.card.published and icon.text_color != (255, 0, 0):
+            icon.text_color = (255, 0, 0)
+            icon.set_text(icons['x'])
 
     def update_color(self):
         color = [
@@ -565,7 +568,7 @@ class Builder(Menu):
 #card stuff-------------------------------------------------------------------------------------
 
     def save_card(self):
-        self.card.save()#nodes=self.node_editor.nodes)
+        self.card.save(nodes=self.node_editor.nodes)
         
     def publish_card(self):
         self.card.publish(nodes=self.node_editor.nodes)

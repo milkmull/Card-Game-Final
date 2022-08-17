@@ -1,5 +1,3 @@
-import re
-
 import pygame as pg
 import pygame.freetype
 
@@ -38,15 +36,12 @@ class Character:
     def pos(self, pos):
         self.rect.topleft = pos
         
-    @property
-    def is_renderable(self):
-        return self.font.get_metrics(self.character, size=self.size)
-        
     def move(self, dx, dy):
         self.rect.move_ip(dx, dy)
         
 class Text:
     pg.freetype.init()
+    VALID_CHARS = (set(range(32, 384)) | {9, 10})
     DEFAULT_FONT = pg.freetype.get_default_font()
     FONTS = {
         DEFAULT_FONT: pg.freetype.Font(None),
@@ -108,6 +103,7 @@ class Text:
         self.text_color = text_color
         self.last_text_color = text_color
         self.text_background_color = text_background_color
+        self.text_style = {}
 
         self.alignment = {
             'right': False,
@@ -165,13 +161,23 @@ class Text:
         self.block.pos = self.text_rect.topleft
         return self._characters
         
+    @property
+    def default_style(self):
+        return {
+            'fgcolor': self.text_color,
+            'bgcolor': self.text_background_color
+        }
+            
     def get_text(self):
         return self.text
   
-    def set_text(self, text):
-        if self.text != text:
+    def set_text(self, text, force=False):
+        if self.text != text or force:
             self.text = text
             self.fit_text()
+            
+    def set_value(self, text):
+        self.set_text(text)
 
     def clear_text(self):
         self.set_text('')
@@ -219,6 +225,9 @@ class Text:
             if h > mh:
                 mh = h
         return (mw, mh)
+
+    def can_render(self, text):
+        return all({self.font.get_metrics(c, size=1)[0] or c == '\n' for c in text})
 
     def fit_text(self):
         lines = [line.split(' ') for line in self.text.splitlines()]
@@ -338,18 +347,21 @@ class Text:
                 surf.fill((0, 0, 0, 0))
             
             block.pos = (0, 0)
+            i = 0
+            default_style = self.default_style
             for line in block:
                 for word in line:
                     for character in word:
-                        if character.is_renderable:
+                        if self.can_render(character.character):
                             self.font.render_to(
                                 surf, 
                                 character.rect, 
                                 character.character,  
                                 size=size, 
-                                fgcolor=self.text_color
+                                **self.text_style.get(i, default_style)
                             )
                         characters.append(character)
+                        i += 1
 
         self.block = block
         self._characters = characters
@@ -363,17 +375,20 @@ class Text:
     def render(self):
         self.text_surf.fill((0, 0, 0, 0))
         self.block.pos = (0, 0)
+        i = 0
+        default_style = self.default_style
         for line in self.block:
             for word in line:
                 for character in word:
-                    if character.is_renderable:
+                    if self.can_render(character.character):
                         self.font.render_to(
                             self.text_surf, 
                             character.rect, 
                             character.character,  
                             size=character.size, 
-                            fgcolor=self.text_color
+                            **self.text_style.get(i, default_style)
                         )
+                    i += 1
                     
     def draw_text(self, surf):
         if self.text_color != self.last_text_color:

@@ -9,8 +9,6 @@ from ..base.text import Text
 from ..base.text_element import Text_Element
 
 class Input(Text_Element):
-    VALID_CHARS = set(range(32, 127)) | {9, 10}
-
     BLINK_TIMER_MAX = 20
     
     default_kwargs = {
@@ -104,7 +102,7 @@ class Input(Text_Element):
     def text_rect(self):
         r = super().text_rect
         if self.is_open:
-        
+
             if self.can_scroll_x:
                 r.left = self.rect.left - self.scroll_offset[0]
                 self.block.pos = r.topleft
@@ -141,6 +139,7 @@ class Input(Text_Element):
     def open(self):
         super().open()
         self.blink_timer.reset()
+        self.index = len(self.text)
         
     def close(self):
         if not self.text:
@@ -187,7 +186,7 @@ class Input(Text_Element):
         return i
         
     def set_text(self, text):
-        check = self.text_check(text) and all({ord(c) in Input.VALID_CHARS for c in text})
+        check = self.text_check(text) and self.can_render(text)
         length = self.max_length is None or len(text) <= self.max_length
         lines = self.max_lines is None or len(text.splitlines()) <= self.max_lines
         if not text or (check and length and lines):
@@ -261,6 +260,10 @@ class Input(Text_Element):
             self.close()
 
         if self.is_open:
+            
+            if events.get('text'):
+                self.add_text(events['text'].text)
+                self.held_key = None
 
             kd = events.get('kd', self.held_key if self.key_timer.time > 15 else None)
             if kd:
@@ -308,9 +311,6 @@ class Input(Text_Element):
                         self.close()
                 elif kd.key == pg.K_TAB:
                     self.add_text('    ')
-
-                elif kd.unicode:
-                    self.add_text(kd.unicode)
 
             if events.get('ku') and self.held_key:
                 self.held_key = None

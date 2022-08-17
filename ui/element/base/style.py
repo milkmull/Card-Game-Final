@@ -9,6 +9,8 @@ class Style(Position):
         fill_color=None,
         outline_color=None,
         outline_width=0,
+        inner_outline_color=None,
+        inner_outline_width=0,
         key_color=None,
         
         border_radius=0,
@@ -32,6 +34,8 @@ class Style(Position):
         self.fill_color = fill_color
         self.outline_color = outline_color
         self.outline_width = outline_width
+        self.inner_outline_color = inner_outline_color
+        self.inner_outline_width = inner_outline_width
         self.key_color = key_color
         
         self.border_radius = border_radius
@@ -68,7 +72,7 @@ class Style(Position):
     @property
     def outline_rect(self):
         return self.padded_rect.inflate(self.outline_width * 2, self.outline_width * 2)
-        
+
     @property
     def padding(self):
         return list(self.pad.values())
@@ -123,7 +127,16 @@ class Style(Position):
                 self.fill_color,
                 self.padded_rect,
                 **bk
-            )        
+            )
+
+        if self.inner_outline_color and self.inner_outline_width:
+            pg.draw.rect(
+                surf,
+                self.inner_outline_color,
+                self.padded_rect,
+                width=self.inner_outline_width,
+                **bk
+            )
             
     def draw(self, surf):
         self.draw_rect(surf)

@@ -34,12 +34,14 @@ class Logged_Dropdown(Input_Dropdown):
         )
         self.default = self.find_default(self.selection)
 
-        self.add_animation([{
-            'attr': 'width',
-            'end': 200,
-            'frames': 10
-        }],
-        tag='open')
+        self.add_animation(
+            [{
+                'attr': 'width',
+                'end': 200,
+                'frames': 10
+            }],
+            tag='open'
+        )
         
         self.last_text = self.text
         
@@ -54,16 +56,21 @@ class Logged_Dropdown(Input_Dropdown):
     def get_output(self):
         return f"'{self.text}'" 
         
+    def reset_value(self, text):
+        self.set_text(text)
+        self.last_text = self.text
+        
     def close(self):
         super().close()
         
-        if self.text != self.last_text:
-            self.port.manager.add_log({
-                't': 'val',
-                'e': self,
-                'v': (self.last_text, self.text)
-            })
-            self.last_text = self.text
+        if self.port.manager:
+            if self.text != self.last_text:
+                self.port.manager.add_log({
+                    't': 'val',
+                    'e': self,
+                    'v': (self.last_text, self.text)
+                })
+                self.last_text = self.text
         
     def update(self):
         super().update()

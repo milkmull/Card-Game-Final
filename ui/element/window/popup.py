@@ -4,7 +4,6 @@ from ..standard.button import Button
 from ..utils.image import transform, get_arrow
 
 class Popup_Base:
-    
     default_animation_kwargs = {
         'frames': 15
     }

@@ -8,6 +8,7 @@ from .node.node_base import pack, unpack, Port, Node, Group_Node
 
 from .element.search_bar import Search_Bar
 from .element.node_menu import Node_Menu
+from .element.context_manager import Context_Manager
 
 from ui.math import line
 from ui.element.drag.dragger import Dragger
@@ -141,22 +142,8 @@ def get_elements(menu):
     elements = []
     
     node_menu = Node_Menu(menu)
-    node_menu_label = Label(
-        node_menu,
-        height=30,
-        text='Nodes',
-        fill_color=(0, 198, 195),
-        text_color=(0, 0, 0),
-        layer=node_menu.layer - 1
-    )
     elements.append(node_menu)
-    
-    node_menu_label.add_event(
-        tag='left_click',
-        func=node_menu.open_close
-    )
-    elements.append(node_menu_label)
-    
+
     search_bar = Search_Bar(menu)
     elements.append(search_bar)
     
@@ -171,6 +158,7 @@ class Node_Editor(Menu):
         
         self.nodes = []
         Dragger.set(self.nodes)
+        self.cm = None
 
         super().__init__(get_elements, fill_color=(32, 32, 40))
         
@@ -187,9 +175,6 @@ class Node_Editor(Menu):
         if self.card.node_data:
             self.load_save_data(self.card.node_data)
             
-        n = self.get_node('String')
-        n.rect.center = self.body.center
-            
     @property
     def wires(self):
         return Node.WIRES
@@ -197,6 +182,10 @@ class Node_Editor(Menu):
     @property
     def active_port(self):
         return Port.ACTIVE_PORT
+        
+    @property
+    def anchor_dist(self):
+        return line.distance(self.anchor, pg.mouse.get_pos())
         
     def exists(self, name):
         return any({n.name == name for n in self.nodes})
@@ -248,9 +237,10 @@ class Node_Editor(Menu):
             type = log['t']
             
             if type == 'carry':
-                node = log['node']
+                n = log['node']
                 dx, dy = log['dist']
-                node.move(-dx, -dy)
+                n.move(-dx, -dy)
+                n.pickup_pos = None
                     
             elif type == 'add':
                 n = log['node']
@@ -329,6 +319,7 @@ class Node_Editor(Menu):
                 n = log['node']
                 dx, dy = log['dist']
                 n.move(dx, dy)
+                n.pickup_pos = None
                     
             elif type == 'del':
                 n = log['node']
@@ -448,38 +439,32 @@ class Node_Editor(Menu):
         if not d:
             self.add_log({'t': 'add', 'node': n})
              
-    def get_node(self, name, val=None, pos=None, held=True):
+    def get_node(self, name, val=None, pos=(0, 0), held=True):
         if len(self.nodes) == 50:
             return
-    
-        if pos is None and held:
-            pos = pg.mouse.get_pos()
-        
+
         n = Node.from_name(name, val=val, pos=pos)
         
         if held:
+            n.rect.center = pg.mouse.get_pos()
             n.start_held()
             
         self.add_node(n)
         return n
         
-    def get_group_node(self, name, pos=None, held=True):
+    def get_group_node(self, name, pos=(0, 0), held=True):
         data = Node.GROUP_DATA[name]
         
         if len(self.nodes) + len(data['nodes']) + 1 > 50:
             return
-            
-        if pos is None and held:
-            pos = pg.mouse.get_pos()
         
         nodes = unpack(data)
         for n in nodes:
             self.add_node(n)
         n = nodes[-1]
         
-        if pos:
-            n.rect.center = pos
         if held:
+            n.rect.center = pg.mouse.get_pos()
             n.start_held()
   
         return n
@@ -509,7 +494,6 @@ class Node_Editor(Menu):
     def delete_nodes(self, nodes=None):
         if nodes is None:
             nodes = self.get_all_selected()
-        print(nodes, set(nodes))
         for n in nodes:
             self.del_node(n)
             
@@ -543,7 +527,7 @@ class Node_Editor(Menu):
         
     def copy_nodes(self, nodes=None):
         if nodes is None:
-            nodes = self.get_all_selected()
+            nodes = self.get_selected()
         self.copy_data = pack(nodes)
 
     def paste_nodes(self):
@@ -634,8 +618,6 @@ class Node_Editor(Menu):
                 x += max({n.background_rect.width for n in col}) + 20
                 y = self.body.height // 2
 
-        draggers = {}
-
         x = 50
         y = 50
             
@@ -652,20 +634,33 @@ class Node_Editor(Menu):
             
             for n in nodes:
                 n.rect.move_ip(dx, dy)
-                dist = n.carry_dist
-                if dist:
-                    draggers[n] = dist
                 n.drop()
                 
             y += r.height + 20
             if y > self.body.height - 100:
                 y = 50
                 x += r.width + 20
+                
+    def new_context(self, node=None):
+        if node and self.anchor:
+            return
+            
+        self.close_context()
+        cm = Context_Manager(self, node=node)
+        if cm.height:
+            self.elements.insert(1, cm)
+            self.cm = cm
+        
+    def close_context(self):
+        if self.cm:
+            self.elements.remove(self.cm)
+            self.cm = None
 
 #run stuff--------------------------------------------------------------------
 
     def sub_events(self, events):
-        for e in (self.elements[:2] + self.nodes[::-1] + self.elements[2:]):
+        split = 1 if not self.cm else 2
+        for e in (self.elements[:split] + self.nodes[::-1] + self.elements[split:]):
             if e.enabled:
                 e.events(events)
     
@@ -697,20 +692,22 @@ class Node_Editor(Menu):
                 
             elif kd.key == pg.K_DELETE:
                 self.delete_nodes()
+                
+        if 'mbd_a' in events:
+            self.close_context()
 
         if mbd := events.get('mbd'):
-            if mbd.button == 1:
-                click_down = True 
-                
-            elif mbd.button == 3:
+            if mbd.button == 3:
                 self.anchor = pg.mouse.get_pos()
 
         elif mbu := events.get('mbu'):
-            if mbu.button == 1:
-                click_up = True
-            elif mbu.button == 3 and self.anchor:
-                breaks = self.check_wire_break()
-                self.anchor = None
+            if mbu.button == 3:
+                if not self.cm:
+                    if self.anchor and self.anchor_dist < 2:
+                        self.new_context()
+                if self.anchor:
+                    breaks = self.check_wire_break()
+                    self.anchor = None
 
     def update(self):   
         super().update()
@@ -732,10 +729,14 @@ class Node_Editor(Menu):
             Port.ACTIVE_PORT.draw_wire(self.window)
             
         if self.anchor:
-            s = self.anchor
-            e = pg.mouse.get_pos()
-            if line.distance(s, e) > 2:
-                pg.draw.line(self.window, (0, 0, 255), s, e, width=4)
+            if self.anchor_dist > 2:
+                pg.draw.line(
+                    self.window,
+                    (0, 0, 255),
+                    self.anchor,
+                    pg.mouse.get_pos(),
+                    width=4
+                )
                 
         super().lite_draw()
        

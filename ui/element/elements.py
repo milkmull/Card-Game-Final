@@ -5,6 +5,7 @@ from .standard.button import Button
 from .standard.input import Input
 from .standard.slider import Slider
 from .standard.check_box import Check_Box
+from .standard.progress_bar import Progress_Bar
 
 from .compound.dropdown import Dropdown
 from .compound.flipper import Flipper

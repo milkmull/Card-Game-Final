@@ -1,132 +1,182 @@
+import pygame as pg
 
-class Context_Manager(Compound_Object):
-    def __init__(self, ne):
-        super().__init__()
-        self.rect = pg.Rect(0, 0, 1, 1)
-        
-        self.ne = ne
-        self.node = None
-        
-        self.objects_dict = {}
-        
-        kwargs = {'size': (100, 25), 'border_radius': 0, 'color1': (255, 255, 255), 'fgcolor': (0, 0, 0), 'tsize': 12}
-        
-        b = Button.text_button('copy', func=self.ne.copy_nodes, **kwargs)
-        self.objects_dict['copy'] = b
-        
-        b = Button.text_button('delete', func=self.ne.delete_nodes, **kwargs)
-        self.objects_dict['delete'] = b
-        
-        b = Button.text_button('transform', **kwargs)
-        self.objects_dict['transform'] = b
-        
-        b = Button.text_button('info', func=Menu.build_and_run, **kwargs)
-        self.objects_dict['info'] = b
-        
-        b = Button.text_button('spawn required', func=self.ne.get_required, **kwargs)
-        self.objects_dict['spawn'] = b
-        
-        b = Button.text_button('group', func=self.ne.create_new_group_node, **kwargs)
-        self.objects_dict['group'] = b
-        
-        b = Button.text_button('ungroup', func=self.ne.ungroup_node, **kwargs)
-        self.objects_dict['ungroup'] = b
-        
-        b = Button.text_button('paste', func=self.ne.paste_nodes, **kwargs)
-        self.objects_dict['paste'] = b
-        
-        b = Button.text_button('select all', func=self.ne.drag_manager.select_all, **kwargs)
-        self.objects_dict['select_all'] = b
-        
-        b = Button.text_button('clean up', func=self.ne.spread, **kwargs)
-        self.objects_dict['clean_up'] = b
-        
-        self.close()
-        
-    @property
-    def objects(self):
-        return list(self.objects_dict.values())
-        
-    def is_open(self):
-        return self.rect.topleft != (-100, -100)
-        
-    def open(self, pos, node):
-        self.clear_children()
+from ui.element.drag.dragger import Dragger
+from ui.element.elements import Button, Live_Window
+from ..screens.info import run as run_info
+from ..screens.output import run as run_output
 
+class Context_Manager(Live_Window):
+    def __init__(
+        self,
+        menu,
+        node=None
+    ):
+        self.separators = []
+
+        button_kwargs = {
+            'size': (95, 25),
+            'fill_color': (255, 255, 255),
+            'text_color': (0, 0, 0),
+            'text_size': 15,
+            'centery_aligned': True,
+            'hover_color': (100, 100, 100),
+            'left_pad': 5
+        }
+        buttons = []
+        
+        def add_sep():
+            self.separators.append(len(buttons))
+        
         if node:
-            selected = self.ne.get_selected()
-
-        x, y = self.rect.topleft
-        for name, b in self.objects_dict.items():
-            add = False
             
-            if node:
-                if name == 'copy':
-                    if not selected:
-                        b.set_args(kwargs={'nodes': [node]})
-                        add = True
-                    elif node in selected:
-                        b.set_args(kwargs={'nodes': selected})
-                        add = True
-                elif name == 'delete':
-                    if not selected:
-                        b.set_args(kwargs={'nodes': [node]})
-                        add = True
-                    elif node in selected:
-                        b.set_args(kwargs={'nodes': selected})
-                        add = True
-                elif name == 'transform':
-                    if node.can_transform():
-                        b.set_func(node.transform)
-                        add = True
-                elif name == 'info':
-                    b.set_args(args=[screens.info_menu, node])
-                    add = True
-                elif name == 'spawn':
-                    if node.get_required():
-                        b.set_args(args=[node])
-                        add = True
-                elif name == 'group':
-                    add = [n for n in selected if not n.is_group() and n is not node]
-                elif name == 'ungroup':
-                    add = node.is_group()
-                    if add:
-                        b.set_args(args=[node])
+            if not node.selected:
+                node.select()
 
-            else:
-                if name == 'paste':
-                    add = self.ne.copy_data
-                elif name == 'select_all':
-                    add = True
-                elif name == 'clean_up':
-                    add = True
-                    
-            if name == 'select_all':
-                add = True
-                
-            if add:
-                b.rect.topleft = (x, y)
-                self.add_child(b, current_offset=True)
-                y += b.rect.height
-            else:
-                self.remove_child(b)
-                
-        x, y = pos
-        w = self.children[0].rect.width
-        h = sum([c.rect.height for c in self.children])
-        if y + h > HEIGHT:
-            y -= h
-        if x + w > WIDTH:
-            x -= w
-        self.rect.topleft = (x, y)
+            selected = menu.get_selected()
             
-    def close(self):
-        self.rect.topleft = (-100, -100)
-        for b in self.objects_dict.values():
-            b.rect.topleft = self.rect.topleft
-
+            b = Button.Text_Button(
+                text='Copy',
+                func=menu.copy_nodes,
+                **button_kwargs
+            )
+            buttons.append(b)
+            
+            b = Button.Text_Button(
+                text='Delete',
+                func=menu.delete_nodes,
+                **button_kwargs
+            )
+            buttons.append(b)
+            
+            add_sep()
+    
+            if node.is_group:
+                b = Button.Text_Button(
+                    text='Ungroup',
+                    func=menu.ungroup_node,
+                    args=[node],
+                    **button_kwargs
+                )
+                buttons.append(b)
+                
+            elif selected:
+                b = Button.Text_Button(
+                    text='Group',
+                    func=menu.create_new_group_node,
+                    **button_kwargs
+                )
+                buttons.append(b)
+                
+            add_sep()
+            
+            if node.get_required():
+                b = Button.Text_Button(
+                    text='Get Required',
+                    func=menu.get_required,
+                    args=[node],
+                    **button_kwargs
+                )
+                buttons.append(b)
+                
+            if not node.is_group:
+                b = Button.Text_Button(
+                    text='Info',
+                    func=run_info,
+                    args=[node],
+                    **button_kwargs
+                )
+                buttons.append(b)
+                
+                if node.ports:
+                    b = Button.Text_Button(
+                        text='View Output',
+                        func=run_output,
+                        args=[node],
+                        **button_kwargs
+                    )
+                    buttons.append(b)
+                
+            add_sep()
+                
+        elif menu.copy_data:
+            b = Button.Text_Button(
+                text='Paste',
+                func=menu.paste_nodes,
+                **button_kwargs
+            )
+            buttons.append(b)
+            
+            add_sep()
+            
+        def select_all(menu):
+            menu.get_current_events().update({
+                'ctrl': True,
+                'kd': pg.event.Event(pg.KEYDOWN, key=pg.K_a)
+            })
+            
+        b = Button.Text_Button(
+            text='Select All',
+            func=select_all,
+            args=[menu],
+            **button_kwargs
+        )
+        buttons.append(b)
+        
+        b = Button.Text_Button(
+            text='Clean Up',
+            func=menu.spread,
+            **button_kwargs
+        )
+        buttons.append(b)
+        
+        for b in buttons:
+            b.add_animation(
+                [{
+                    'attr': 'text_color',
+                    'end': (255, 255, 255)
+                }],
+                tag='hover'
+            )
+            
+        super().__init__(
+            size=(100, sum([b.rect.height for b in buttons])),
+            pos=pg.mouse.get_pos(),
+            outline_color=(0, 0, 0),
+            outline_width=3
+        )
+        
+        if buttons:
+            self.join_elements(
+                buttons,
+                borderx=5
+            )
+            
+        if self.rect.bottom > menu.body.height:
+            self.rect.bottom = menu.body.height - 10
+        if self.rect.right > menu.body.width:
+            self.rect.right = menu.body.width - 10
+        
     def draw(self, surf):
         super().draw(surf)
-        if self.is_open():
-            for b in self.children[1:]:
-                pg.draw.line(surf, (0, 0, 0), (b.rect.x + 5, b.rect.y - 1), (b.rect.right - 5, b.rect.y - 1), width=2)
+        
+        for i in self.separators:
+            e = self.elements[i]
+            pg.draw.line(
+                surf,
+                (150, 150, 150),
+                (e.rect.left, e.rect.top - 1),
+                (e.rect.right - 10, e.rect.top - 1),
+                width=2
+            )
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

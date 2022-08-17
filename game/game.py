@@ -1,6 +1,6 @@
 from data import save
 
-from card import cards as card_manager
+from .card import cards as card_manager
 from .player import Player, Auto_Player
 
 from . import game_base

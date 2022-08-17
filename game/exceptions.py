@@ -1,0 +1,3 @@
+
+class InfiniteLoop(Exception):
+    pass

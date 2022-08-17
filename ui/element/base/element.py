@@ -15,6 +15,7 @@ class Element(Style):
         self,
         
         clip=False,
+        clip_size=None,
         
         cursor=pg.SYSTEM_CURSOR_ARROW,
 
@@ -28,7 +29,9 @@ class Element(Style):
         self.hit = False
         self.click = None
         self.is_open = False
+        
         self.clip = clip
+        self.clip_size = clip_size
         
         self.cursor = cursor
 
@@ -45,6 +48,14 @@ class Element(Style):
     def total_rect(self):
         self.update_position()
         return self.outline_rect.unionall([c.total_rect for c in self.children if c.visible])
+        
+    @property
+    def clip_rect(self):
+        r = self.padded_rect
+        if self.clip_size:
+            r.size = self.clip_size
+            r.center = self.rect.center
+        return r
         
     @property
     def moving(self):
@@ -202,12 +213,11 @@ class Element(Style):
         self.draw_rect(surf)
         if self.clip:
             clip = surf.get_clip()
-            surf.set_clip(self.padded_rect)
+            surf.set_clip(self.clip_rect)
             super().draw(surf)
             surf.set_clip(clip)
         else:
             super().draw(surf)
             
         self.run_events('draw')
-        
         

@@ -16,6 +16,7 @@ class Menu(Base_Loop):
         init_kwargs=None,
         
         overlay=False,
+        get_status=False,
         
         **kwargs
     ):
@@ -43,6 +44,10 @@ class Menu(Base_Loop):
         return self.window.get_rect()
         
     @property
+    def rect(self):
+        return self.window.get_rect()
+        
+    @property
     def all_elements(self):
         elements = set()
         for e in self.elements:
@@ -51,7 +56,7 @@ class Menu(Base_Loop):
                 elements |= e.all_children
         return elements
         
-    def set_elements(self):
+    def refresh(self):
         self.elements = self.init(self, *self.args, **self.kwargs)
         self.set_funcs()
         
@@ -65,7 +70,7 @@ class Menu(Base_Loop):
                     func=lambda e=e: self.set_return(e.get_return('left_click'))
                 )
             elif e.tag == 'refresh':
-                e.add_event(tag='left_click', func=self.set_elements)
+                e.add_event(tag='left_click', func=self.refresh)
 
     def set_return(self, value):
         self.return_value = value
@@ -93,10 +98,10 @@ class Menu(Base_Loop):
         pg.display.flip()
         
     def run(self):
-        self.set_elements()
+        self.refresh()
         self.running = True
         while self.running:
-            self.clock.tick(Base_Loop.FPS)
+            self.clock.tick(self.fps)
             self.events()
             if not self.running or self.return_value is not None:
                 break

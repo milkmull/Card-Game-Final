@@ -8,7 +8,9 @@ class Logged_Check_Box(Check_Box):
     ):
         
         super().__init__(
-            value=value
+            value=value,
+            outline_color=(0, 0, 0),
+            outline_width=3
         )
         
         self.last_value = self.value
@@ -20,15 +22,21 @@ class Logged_Check_Box(Check_Box):
     def get_output(self):
         return str(self.value)
         
+    def reset_value(self, value):
+        self.set_value(value)
+        self.last_value = self.value
+        
     def left_click(self):
         super().left_click()
-        if self.value != self.last_value:
-            self.port.manager.add_log({
-                't': 'val',
-                'e': self,
-                'v': (self.last_value, self.value)
-            })
-            self.last_value = self.value
+        
+        if self.port.manager:
+            if self.value != self.last_value:
+                self.port.manager.add_log({
+                    't': 'val',
+                    'e': self,
+                    'v': (self.last_value, self.value)
+                })
+                self.last_value = self.value
             
     def update(self):
         super().update()

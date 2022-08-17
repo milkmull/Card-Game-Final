@@ -24,6 +24,7 @@ class Event:
                 *[(a if self.no_call or not callable(a) else a()) for a in self.args],
                 **{key: (value if self.no_call or not callable(value) else value()) for key, value in self.kwargs.items()}
             )
+            return self.return_value
         
     def set_args(self, *args, **kwargs):
         self.args = args

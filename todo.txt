@@ -1,0 +1,11 @@
+
+
+node:
+-nodes with open elements should appear on top
+
+flow
+-color arrows
+-color text in total output
+-find tighter font
+-back button
+-fix scroll bar

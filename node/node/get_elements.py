@@ -1,14 +1,13 @@
 from ui.element.standard.button import Button
-from .element.input import Logged_Input as Input
+from .element.input import INPUTS
 from .element.check_box import Logged_Check_Box as Check_Box
 from .element.dropdown import Logged_Dropdown as Dropdown
 from ui.element.utils.image import get_arrow
 from ui.icons.icons import icons
 
 def set_input_element(port, type, value=''):
-    i = Input(
+    i = INPUTS[type](
         port,
-        type,
         text=value
     )
     port.set_element(i)

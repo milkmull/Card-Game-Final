@@ -238,6 +238,12 @@ class Player_Base:
         return cards
    
     def add_card(self, c, deck_string=None, i=None):
+        if c is None:
+            raise Exception("Attempted to add 'None' value to card deck.")
+            
+        if c.type == 'play' and deck_string == 'items':
+            raise Exception(f'{c}')
+            
         if deck_string is None:
             deck_string = Player_Base.card_to_deck_string(c)
         nd = self.string_to_deck(deck_string)

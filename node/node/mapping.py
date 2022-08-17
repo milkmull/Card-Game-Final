@@ -42,7 +42,15 @@ def map_ports(n, ports, skip_ip=False, skip_op=False, all_ports=False, out_type=
                         ports.append(ip)
                         op = ip.connection_port
                         if op not in ports:
-                            map_ports(op.node, ports, skip_ip=skip_ip, skip_op=skip_op, all_ports=all_ports, out_type=out_type, in_type=in_type)
+                            map_ports(
+                                op.node,
+                                ports,
+                                skip_ip=skip_ip,
+                                skip_op=skip_op,
+                                all_ports=all_ports,
+                                out_type=out_type,
+                                in_type=in_type
+                            )
                     elif all_ports:
                         ports.append(ip)
             
@@ -54,7 +62,15 @@ def map_ports(n, ports, skip_ip=False, skip_op=False, all_ports=False, out_type=
                         ports.append(op)
                         ip = op.connection_port
                         if ip not in ports:
-                            map_ports(ip.node, ports, skip_ip=skip_ip, skip_op=skip_op, all_ports=all_ports, out_type=out_type, in_type=in_type) 
+                            map_ports(
+                                ip.node,
+                                ports,
+                                skip_ip=skip_ip,
+                                skip_op=skip_op,
+                                all_ports=all_ports,
+                                out_type=out_type,
+                                in_type=in_type
+                            ) 
                     elif all_ports:
                         ports.append(op)
                 

@@ -23,9 +23,11 @@ class Live_Window(Window_Base, Element):
             
     def draw(self, surf):
         super().draw(surf)
-        surf.set_clip(self.rect)
+        clip = surf.get_clip()
+        r = self.clip_rect if self.clip_size else self.rect
+        surf.set_clip(r)
         for e in sorted(self.elements, key=lambda e: e.layer):
-            if e.visible and self.rect.colliderect(e.rect):
+            if e.visible and r.colliderect(e.rect):
                 e.draw(surf)
-        surf.set_clip(None)
+        surf.set_clip(clip)
                 

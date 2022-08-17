@@ -1,8 +1,8 @@
-from ui.menu.menu import Menu
-from ui.element.base.style import Style
-from ui.element.elements import Textbox, Button
+from ..menu import Menu
+from ...element.base.style import Style
+from ...element.elements import Textbox, Button
 
-from ui.ui import get_constants
+from ...ui import get_constants
 
 def yes_no(
     menu,

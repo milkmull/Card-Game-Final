@@ -12,7 +12,7 @@ class Window_Base:
         
         inf_width=False,
         inf_height=True,
-        
+
         left_scroll=False,
         top_scroll=False,
 
@@ -26,13 +26,13 @@ class Window_Base:
 
         self.inf_width = inf_width
         self.inf_height = inf_height
-        
+
         self.x_scroll_bar = None
         self.y_scroll_bar = None
         
         if inf_width:
             self.x_scroll_bar = Scroll_Bar(size=(1, 0), dir=0, scroll_parent=self, **scroll_bar_kwargs)
-            self.x_scroll_bar.set_size(self.rect.width)
+            self.x_scroll_bar.set_size(self.outline_rect.width)
             if not top_scroll:
                 self.add_child(self.x_scroll_bar, top_anchor='bottom', centerx_anchor='centerx')
             else:
@@ -40,7 +40,7 @@ class Window_Base:
         
         if inf_height:
             self.y_scroll_bar = Scroll_Bar(size=(0, 1), dir=1, scroll_parent=self, **scroll_bar_kwargs)
-            self.y_scroll_bar.set_size(self.rect.height)
+            self.y_scroll_bar.set_size(self.outline_rect.height)
             if not left_scroll:
                 self.add_child(self.y_scroll_bar, left_anchor='right', centery_anchor='centery')
             else:
@@ -59,6 +59,10 @@ class Window_Base:
         }
         
     @property
+    def border_rect(self):
+        return self.rect.inflate(-2 * self.orientation_cache['borderx'], -2 * self.orientation_cache['bordery'])
+        
+    @property
     def visible_elements(self):
         return [e for e in self.elements if self.rect.colliderect(e.rect)]
         
@@ -69,8 +73,8 @@ class Window_Base:
     def compare_elements(self, elements):
         return all({e0 == e1 for e0, e1 in zip(self.elements, elements)})
         
-    def sort_elements(self, key):
-        elements = sorted(self.elements, key=key)
+    def sort_elements(self, key, reverse=False):
+        elements = sorted(self.elements, key=key, reverse=reverse)
         self.join_elements(elements, use_last=True)
         
     def swap_elements(self, elements):

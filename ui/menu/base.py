@@ -40,6 +40,8 @@ class Base_Loop:
                 events['ku'] = e
                 if e.key == pg.K_RCTRL or e.key == pg.K_LCTRL:
                     cls.CTRL = False
+            elif e.type == pg.TEXTINPUT:
+                events['text'] = e
 
         events['ctrl'] = cls.CTRL
         cls.LAST_EVENT_BATCH = events.copy()
@@ -48,6 +50,8 @@ class Base_Loop:
     
     def __init__(
         self,
+        fps=None,
+        can_quit=True,
         elements=None,
         fill_color=(0, 0, 0)
     ):
@@ -57,9 +61,12 @@ class Base_Loop:
         self.window = pg.display.get_surface()
         self.clock = pg.time.Clock()
 
-        self.elements = elements if elements is not None else []
+        self.fps = fps or Base_Loop.FPS
+        self.can_quit = can_quit
+        self.elements = elements or []
         self.fill_color = fill_color
-   
+        self.current_event_batch = {}
+
     def set_status(self, status):
         self.status = status
         
@@ -74,13 +81,19 @@ class Base_Loop:
     def get_events(self):
         return Base_Loop.get_event_batch()
         
-    def exit(self, status=0):
+    def post_event(self, key, value):
+        self.current_event_batch[key] = value
+        
+    def exit(self):
         self.running = False
-        self.status = status
+        self.status = 1
         
     def quit(self):
         pg.quit()
         sys.exit()
+        
+    def get_current_events(self):
+        return self.current_event_batch
         
     def sub_events(self, events):
         for e in sorted(self.elements, key=lambda e: e.layer, reverse=True):
@@ -89,12 +102,14 @@ class Base_Loop:
                 
     def events(self):
         events = self.get_events()
+        self.current_event_batch = events
 
-        if events.get('q'):
-            self.quit()
-        elif events.get('e'):
-            self.exit()
-            return
+        if self.can_quit:
+            if events.get('q'):
+                self.quit()
+            elif events.get('e'):
+                self.exit()
+                return
 
         self.sub_events(events)
         
@@ -123,7 +138,7 @@ class Base_Loop:
     def run(self):
         self.running = True
         while self.running:
-            self.clock.tick(Base_Loop.FPS)
+            self.clock.tick(self.fps)
             self.events()
             if not self.running:
                 break

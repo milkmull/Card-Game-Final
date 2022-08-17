@@ -3,12 +3,11 @@ import json
 import pygame as pg
 
 from . import mapping
-
 from ui.math import line
 from ui.element.standard.textbox import Textbox
-from ui.element.standard.input import Input
 from ui.element.drag.dragger import Dragger
 from ui.element.base.element import Element
+from .element.input import Logged_Label_Input as Input
 
 NODE_DATA_PATH = 'data/node/'
 
@@ -20,6 +19,7 @@ def pack(_nodes):
     for n in _nodes:
         if n.is_group:
             nodes['groups'].append(n)
+            nodes['nodes'] += n.nodes
         else:
             nodes['nodes'].append(n)
     
@@ -31,7 +31,7 @@ def pack(_nodes):
     for n in nodes['nodes']:
         node_data = {
             'name': n.__class__.__name__,
-            'pos': n.rect.center,
+            'pos': n.rect.topleft,
             'contains': getattr(n, 'contains', None),
             'form': n.form
         }
@@ -53,14 +53,14 @@ def pack(_nodes):
     for g in nodes['groups']:
         data['groups'][str(g.id)] = {
             'name': g.group_name,
-            'pos': g.rect.center,
+            'pos': g.rect.topleft,
             'nodes': [n.id for n in g.nodes],
             'rel_node_pos': g.get_rel_node_pos()
         }
 
     return data
         
-def unpack(data):
+def unpack(data, map=True):
     if not data:
         return {}
         
@@ -74,10 +74,13 @@ def unpack(data):
         contains = d['contains']
         form = d['form']
         n = Node.from_name(name, pos=pos)
+        if not map:
+            n.id = id
+        n.oid = id
         new_id = n.id
         id_map[id] = new_id
         nodes[new_id] = n
-        if form:
+    if form:
             n.tf(form=form)
 
     while True:
@@ -107,6 +110,9 @@ def unpack(data):
                 p0.suppressed = suppressed
                 p0.visible = visible
                 p0.parent_port = parent_port
+                if parent_port:
+                    p0.remove_child(p0.label)
+                    p0.label = None
                 p0.added = added
                 if connection is not None and port < 0:
                     connection = id_map.get(connection)
@@ -132,6 +138,8 @@ def unpack(data):
         n = Group_Node.get_new(group_nodes, pos=pos)
         n.group_name = name
         n.rel_node_pos = {nodes[id_map[int(nid)]]: pos for nid, pos in d['rel_node_pos'].items()}
+        if not map:
+            n.id = id
         new_id = n.id
         id_map[id] = new_id
         nodes[new_id] = n
@@ -209,7 +217,7 @@ class Wire:
         if ix - Port.SIZE < ox:
                  
             r = orect.union(irect)
-            shift = Port.SIZE * 2
+            shift = Port.SIZE
             xmax = orect.right + shift
 
             if r.height - 5 > orect.height + irect.height:
@@ -457,12 +465,20 @@ class Port(Element):
     @value.setter
     def value(self, value):
         if self.element:
-            self.element.set_value(value)
+            self.element.reset_value(value)
             
-    def get_output(self):
+    def _get_output(self):
         if self.element:
             return self.element.get_output()
         return ''
+            
+    def get_output(self):
+        text = self._get_output()
+        return text if not self.node.mark else self.node.mark_text(text, port=self.port)
+        
+    @property
+    def is_flow(self):
+        return 'flow' in self.types
  
     def set_element(self, e):
         self.clear_element()
@@ -783,7 +799,6 @@ class Node(Dragger, Element):
     def __init__(
         self,
         id,
-        val=None,
         pos=(0, 0),
         form=0,
         manager=None,
@@ -795,12 +810,13 @@ class Node(Dragger, Element):
         self.manager = manager
         
         self.nid = id
-        self.val = val
+        self.oid = id
         self.form = form
         self.group_node = None
+        self.mark = False
 
         self.rect = pg.Rect(0, 0, Node.WIDTH, Node.WIDTH)
-        self.rect.center = pos
+        self.rect.topleft = pos
 
         self.label = self.get_label()
 
@@ -826,7 +842,7 @@ class Node(Dragger, Element):
         
     @id.setter
     def id(self, id):
-        pass
+        self.nid = id
         
     @property
     def color(self):
@@ -878,6 +894,9 @@ class Node(Dragger, Element):
         
     def get_required(self):
         return []
+        
+    def copy(self):
+        return unpack(pack([self]))[0]
         
 #image and element stuff-------------------------------------------------------------------
                
@@ -949,23 +968,59 @@ class Node(Dragger, Element):
 
 #writing stuff----------------------------------------------------------------------
 
+    def mark_text(self, text, port=0):
+        if not text:
+            return text
+
+        mark = f'#<{self.id},{port}>#'
+        start_lines = 0
+        end_lines = 0
+        nl = '\n'
+        
+        while text[0] == nl:
+            text = text[1:]
+            start_lines += 1
+        
+        while text[-1] == nl:
+            text = text[:-1]
+            end_lines += 1
+            
+        return f"{(nl * start_lines)}{mark}{text}{mark}{(nl * end_lines)}"
+
+    def _get_text(self):
+        return ''
+        
     def get_text(self):
+        text = self._get_text()
+        return text if not self.mark else self.mark_text(text)
+        
+    def _get_output(self, p):
         return ''
         
     def get_output(self, p):
-        return ''
-        
-    def get_dec(self):
-        return ''
-        
+        text = self._get_output(p)
+        return text if not self.mark else self.mark_text(text, port=p)
+
     def get_default(self, p):
         return ''
         
+    def get_default(self, p):
+        text = self._get_default(p)
+        return text if not self.mark else self.mark_text(text, port=p)
+        
+    def _get_start(self):
+        return ''
+        
     def get_start(self):
+        text = self._get_start()
+        return text if not self.mark else self.mark_text(text)
+        
+    def _get_end(self):
         return ''
         
     def get_end(self):
-        return ''
+        text = self._get_end()
+        return text if not self.mark else self.mark_text(text)
         
     def get_input(self):
         input = []
@@ -988,6 +1043,13 @@ class Node(Dragger, Element):
             return ip.get_output()
         else:
             return self.get_default(ip.port)
+            
+    def get_func_out(self):
+        header = self.get_text()
+        start = self.get_start()
+        end = self.get_end()
+        nl = '\n'
+        return f"{header}{start}{f'...{nl}' if end else ''}{end}"
      
 #port stuff-------------------------------------------------------------------
 
@@ -1063,13 +1125,14 @@ class Node(Dragger, Element):
     def drop(self, *args, **kwargs):
         dist = super().drop()
         
-        if any(dist):
-            self.manager.add_log({
-                't': 'carry',
-                'node': self,
-                'dist': dist
-            })
-        
+        if self.manager:
+            if any(dist):
+                self.manager.add_log({
+                    't': 'carry',
+                    'node': self,
+                    'dist': dist
+                })
+            
     def transform(self, form=None, d=False):
         self.clear_connections()
         
@@ -1088,6 +1151,13 @@ class Node(Dragger, Element):
             
     def get_hit(self):
         return self.background_rect.collidepoint(pg.mouse.get_pos())
+        
+    def context_click(self):
+        return self.get_hit() and not any({p.hit or (p.element.hit if p.element else False) for p in self.ports})
+        
+    def click_up(self, button):
+        if button == 3 and self.context_click() and self.manager:
+            self.manager.new_context(node=self)
         
     def update(self):
         super().update()
@@ -1157,37 +1227,23 @@ class Group_Node(Node):
         
     @group_name.setter
     def group_name(self, name):
-        self.label.set_text(name)
+        self.label.reset_value(name)
         
     def get_label(self):
         label = Input(
+            self,
             text=self.get_name(),
-            text_color=(255, 255, 255),
-            size=self.label_rect.size,
-            inf_width=False,
-            centerx_aligned=True,
-            centery_aligned=True,
-            fill_color=None
         )
         label.rect.center = self.label_rect.center
         self.add_child(label, current_offset=True)
         
-        setattr(label, 'last_text', label.text)
-        def close(self, label):
-            if label.text != label.last_text:
-                self.manager.add_log({
-                    't': 'val',
-                    'e': label,
-                    'v': (label.last_text, label.text)
-                })
-                label.last_text = label.text
-        label.add_event(
-            tag='close',
-            func=close,
-            args=[self, label]
-        )
-        
         return label
+        
+    def copy(self):
+        nodes = unpack(pack([self]))
+        for n in nodes:
+            if n.is_group:
+                return n
         
     def reset_ports(self):
         self.ports = self.get_group_ports(self.nodes)

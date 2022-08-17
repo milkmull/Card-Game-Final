@@ -6,9 +6,7 @@ from ui.element.elements import Input, Live_Window, Button
 from ui.element.utils.timer import Timer
 
 def sort_strings(a, b):
-    d = difflib.SequenceMatcher(None, a, b).ratio()
-    d = -int(d * 100)
-    return d
+    return difflib.SequenceMatcher(a=a, b=b, isjunk=None).ratio()
 
 class Search_Bar(Input):
     def __init__(self, menu):
@@ -80,8 +78,8 @@ class Search_Bar(Input):
     def set_text(self, text):
         super().set_text(text)
         
-        key = lambda b: sort_strings(self.text, b.text)
-        self.search_window.sort_elements(key)
+        key = lambda b: sort_strings(self.text.lower(), b.text.lower())
+        self.search_window.sort_elements(key, reverse=True)
         self.search_window.y_scroll_bar.go_to_top()
     
     def events(self, events):

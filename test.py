@@ -1,30 +1,33 @@
-import pygame as pg
+import random
 
-pg.init()
-pg.freetype.init()
+from game.game_base import Game_Base
+from game.card import cards as card_manager
 
-font = pg.freetype.Font(None)
-window = pg.display.set_mode((1024, 576))
-clip = pg.Rect(0, 0, 100, 20)
+cards = card_manager.get_playable_card_data()
+
+settings = {
+    'rounds': 1, 
+    'ss': 20, 
+    'cards': 5,
+    'items': 3,
+    'spells': 1,
+    'cpus': 3,
+    'diff': 1
+}
+
+i = 0
+err_seed = 1182
 
 while True:
+    random.seed(err_seed)
+    print('seed:', i)
     
-    if any({e.type == pg.QUIT for e in pg.event.get()}):
-        break
+    g = Game_Base.simulator(settings, cards)
 
-    window.fill((0, 0, 0))
-    window.set_clip(clip)
-    
-    pg.draw.rect(window, (255, 0, 0), clip)
-    font.render_to(
-        window,
-        (0, 0),
-        'this text should be clipped inside the red box',
-        size=20,
-        fgcolor=(255, 255, 255)
-    )
-    
-    pg.display.flip()
-    window.set_clip(None)
-    
-pg.quit()
+    try:
+        while not g.done():
+            g.main()
+    except KeyboardInterrupt:
+        break
+        
+    i += 1

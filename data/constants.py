@@ -10,7 +10,7 @@ CUSTOM_CARDS_HEADER = 'from . import card_base\n'
 SAVE_DATA_PATH = 'data/save/'
 SAVE_DATA_FILE = SAVE_DATA_PATH + 'save.json'
 TEST_CARD_FILE = 'node/tester/testing_card.py'
-TEST_CARD_HEADER = 'from card import card_base\n'
+TEST_CARD_HEADER = 'from game.card import card_base\n'
 INFO_SHEET_FILE = 'data/node/sheet_info.json'
 
 BASE_NAMES = (

@@ -39,7 +39,8 @@ def settings(menu):
         'outline_color': (255, 255, 255),
         'outline_width': 3,
         'cursor_color': (255, 255, 255),
-        'centery_aligned': True
+        'centery_aligned': True,
+        'max_lines': 1
     }
 
     i = Input(text=SAVE.get_data('username'), **input_kwargs)

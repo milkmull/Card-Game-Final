@@ -18,6 +18,11 @@ class Dragger:
                 d.deselect_on_update = False
                 
     @classmethod
+    def deselect_all(cls):
+        for d in cls.DRAGGERS:
+            d.deselect()
+                
+    @classmethod
     def get_selected(cls):
         return [d for d in cls.DRAGGERS if d.selected]
         
@@ -38,7 +43,7 @@ class Dragger:
         self.selected = False
         self.deselect_on_update = False
         self.hover = False
-        self.stuck = False
+        self._stuck = False
         
         self.rel_pos = (0, 0)
         self.pickup_pos = None
@@ -63,7 +68,7 @@ class Dragger:
         )
         
     def start_held(self, all=False):
-        if not self.stuck:
+        if not self._stuck:
             self.held = True
             
             if self.selected:

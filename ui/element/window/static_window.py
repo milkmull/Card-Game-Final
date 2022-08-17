@@ -29,7 +29,7 @@ class Static_Window(Window_Base, Image_Element):
         self.redraw()
  
     def redraw(self):
-        self.refresh_image()
+        self.reset_image()
         for e in self.elements: 
             e.update_position()
             if e.rect.colliderect(self.rect):

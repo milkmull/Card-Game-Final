@@ -1,4 +1,5 @@
 import colorsys
+import math
 
 GOLDEN_RATIO = (1 + 5 ** 0.5) / 2
 
@@ -24,7 +25,11 @@ def grayscale(c):
     return sum(c) // 3
     
 def is_light(c):
-    return sum(c) < 382
+    r, g, b = c[:3]
+    return (0.2126 * r) + (0.7152 * g) + (0.0722 * b) < 40
     
 def is_dark(c):
-    return sum(c) > 382
+    return not is_light(c)
+    
+def color_text(c):
+    return (0, 0, 0) if not is_light(c) else (255, 255, 255)

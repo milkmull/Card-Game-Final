@@ -257,7 +257,7 @@ class Save:
         s, e = card.lines
         text = card.code
 
-        with open(CUSTOM_CARDS_FILE, 'r') as f:
+        with open(CUSTOM_CARDS_FILE, 'rb') as f:
             lines = f.readlines()
             
         if s or e:
@@ -265,9 +265,9 @@ class Save:
             shift_start = e
             shift = -(e - s)
             
-        with open(CUSTOM_CARDS_FILE, 'w') as f:
+        with open(CUSTOM_CARDS_FILE, 'wb') as f:
             f.writelines(lines)
-            f.write(text)
+            f.write(text.encode('utf-8'))
                 
         s = len(lines)
         e = s + len(text.splitlines())
@@ -275,7 +275,7 @@ class Save:
         if shift_start:
             self.shift_cards(shift_start, shift)
             
-        from card import cards
+        from game.card import cards
         cards.load_custom_cards()
             
         return (s, e)

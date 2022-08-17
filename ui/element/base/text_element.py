@@ -12,11 +12,12 @@ class Text_Element(Element, Text):
         
     @size.setter
     def size(self, size):
-        self.rect.size = size
-        self.fit_text()
+        if tuple(self.size) != tuple(size):
+            self.rect.size = size
+            self.fit_text()
         
-    def set_text(self, text):
-        super().set_text(text)
+    def set_text(self, text, force=False):
+        super().set_text(text, force=force)
         self.run_events('set')
         
     def draw(self, surf):

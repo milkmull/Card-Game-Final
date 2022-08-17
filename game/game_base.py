@@ -1,6 +1,6 @@
 import random
 
-import exceptions
+from . import exceptions
 
 from . import player_base
 
@@ -52,6 +52,7 @@ class Game_Base:
 
         self.mem = []
         self.counter = 0
+        self.turn = 0
         
     def done(self):
         return self.status == 'new game' or self.status == 'next round'
@@ -75,6 +76,7 @@ class Game_Base:
         
         self.mem.clear()
         self.counter = 0
+        self.turn = 0
   
         self.new_turn()
         self.new_status('playing')
@@ -92,6 +94,7 @@ class Game_Base:
 
         self.mem.clear()
         self.counter = 0
+        self.turn = 0
    
         self.new_turn()
         self.new_status('playing')
@@ -239,8 +242,7 @@ class Game_Base:
             self.mem = up
             self.counter = 0
         
-        if self.counter > 100:
-            #self.debug()
+        if self.counter > 200:
             #self.debug()
             raise exceptions.InfiniteLoop
                      
@@ -306,6 +308,8 @@ class Game_Base:
     def advance_turn(self):
         if self.status != 'playing':
             return 
+        self.check_loop()
+        self.turn += 1
             
         finished_round = set()
         finished_playing = set()

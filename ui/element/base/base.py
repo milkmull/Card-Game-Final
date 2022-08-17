@@ -1,3 +1,4 @@
+from types import MethodType
 
 class Base_Element:
     ID = 0
@@ -10,7 +11,11 @@ class Base_Element:
     def __init__(
         self,
         tag='',
-        layer=None,
+        layer=0,
+        
+        enabled=True,
+        refresh=True,
+        visible=True,
         
         events=None,
         update=None,
@@ -21,18 +26,18 @@ class Base_Element:
         
         self._id = Base_Element.new_id()
         self.tag = tag
-        self.layer = layer if layer is not None else 0
+        self.layer = layer
         
         if events:
-            self.events = events
+            self.events = MethodType(events, self)
         if update:
-            self.update = update
+            self.update = MethodType(update, self)
         if draw:
-            self.draw = draw
+            self.draw = MethodType(draw, self)
 
-        self.enabled = True
-        self.refresh = True
-        self.visible = True
+        self.enabled = enabled
+        self.refresh = refresh
+        self.visible = visible
 
         self.leftover_kwargs = kwargs
         
