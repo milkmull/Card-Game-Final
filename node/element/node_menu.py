@@ -1,6 +1,6 @@
 import pygame as pg
 
-from ..node.node_base import Node
+from ..node.node_base import Node, unpack
 
 from ui.element.elements import Textbox, Button, Label, Popup
 from ui.element.utils.image import get_arrow
@@ -108,14 +108,25 @@ class Node_Menu(Popup.Live_Popup):
             buttons = []
             
             for name in names:
-                b = Button.Image_Button(
-                    image=Node.NODE_DATA[name](0).get_raw_image(scale=0.75),
-                    pad=5,
-                    func=self.get_node,
-                    args=[name],
-                    hover_color=(100, 100, 100),
-                    border_radius=10
-                )
+                if tab == 'group':
+                    data = Node.GROUP_DATA[name]
+                    b = Button.Image_Button(
+                        image=unpack(data)[-1].get_raw_image(scale=0.75),
+                        pad=5,
+                        func=self.get_group_node,
+                        args=[name],
+                        hover_color=(100, 100, 100),
+                        border_radius=10
+                    )
+                else:
+                    b = Button.Image_Button(
+                        image=Node.NODE_DATA[name](0).get_raw_image(scale=0.75),
+                        pad=5,
+                        func=self.get_node,
+                        args=[name],
+                        hover_color=(100, 100, 100),
+                        border_radius=10
+                    )
                 buttons.append(b)
                 
             buttons.sort(key=lambda b: b.rect.height)

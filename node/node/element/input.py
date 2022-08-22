@@ -1,5 +1,6 @@
 from ui.element.base.text_element import Text_Element
 from ui.element.standard.input import Input
+from ui.color.ops import style_text
 
 class Logged_Input(Input):
     def __init__(
@@ -87,6 +88,12 @@ class Logged_Num_Input(Logged_Input):
             pass
         return out
         
+    def get_output(self):
+        out = super().get_output()
+        if not out.lstrip('-'):
+            return '0'
+        return out
+        
 class Logged_String_Input(Logged_Input):
     def __init__(
         self,
@@ -128,6 +135,7 @@ class Logged_Code_Input(Logged_Input):
         super().__init__(
             port,
             text=text,
+            font_name='JetBrainsMonoNL-Regular.ttf',
             default=port.node.get_default(port.port),
             size=(port.node.WIDTH - 19, 22),
             x_pad=2,
@@ -138,6 +146,9 @@ class Logged_Code_Input(Logged_Input):
             max_line_width=300,
             max_length=500,
             max_lines=10,
+            text_size=15,
+            fill_color=(41, 49, 52),
+            text_color=(224, 226, 228),
             outline_color=(0, 0, 0),
             outline_width=3
         )
@@ -158,6 +169,10 @@ class Logged_Code_Input(Logged_Input):
             }],
             tag='open'
         )
+        
+    def set_text(self, text):
+        self.text_style = style_text(text)
+        super().set_text(text)
         
 class Logged_Label_Input(Logged_Input):
     def __init__(

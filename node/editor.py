@@ -1,5 +1,3 @@
-import json
-
 import pygame as pg
 
 from .node import mapping
@@ -14,34 +12,21 @@ from ui.math import line
 from ui.element.drag.dragger import Dragger
 from ui.element.drag.rect_selector import Rect_Selector
 from ui.element.elements import Image, Textbox, Button, Input, Label
+from ui.element.base.style import Style
 from ui.menu.menu import Menu
+from ui.icons.icons import icons
    
 def save_group_node(gn):
+    import json
     nodes = gn.nodes.copy() + [gn]
     data = pack(nodes)
-    with open('data/group_nodes.json', 'r') as f:
+    with open('data/node/group_nodes.json', 'r') as f:
         group_data = json.load(f)
-    group_data[gn.get_name()] = data
-    with open('data/group_nodes.json', 'w') as f:
+    group_data[gn.group_name] = data
+    with open('data/node/group_nodes.json', 'w') as f:
         json.dump(group_data, f, indent=4)
         
-def write_node_data(nodes):
-    import json
-    with open(f'{node_base.NODE_DATA_PATH}node_info.json', 'r') as f:
-        data = json.load(f)
-        
-    for i, old_name in enumerate(data.copy()):
-        new_name = list(nodes)[i]
-        data[new_name] = data.pop(old_name)
-
-    with open('data/node_info1.json', 'w') as f:
-        json.dump(data, f, indent=4)
-
-#menu stuff--------------------------------------------------------------------
-
-def run_data_sheet(ne):
-    m = Menu(get_objects=screens.data_sheet_menu, args=[ne])
-    m.run()
+    print('saved')
 
 #sorting stuff-------------------------------------------------------------------------
 
@@ -61,81 +46,31 @@ def move_nodes(nodes, c):
 
 #node editor--------------------------------------------------------------------------
 
-def editor_objects(self):
-    objects = []
-
-    buttons = []
-    for name, obj in Node.NODE_DATA.items():
-        b = Button.text_button(name, size=(100, 30), border_radius=0, func=self.get_node, args=[name], tsize=15)
-        buttons.append(b)
-    for name, data in Node.GROUP_DATA.items():
-        b = Button.text_button(name, size=(100, 30), border_radius=0, func=self.load_group_node, args=[name, data], tsize=15)
-        buttons.append(b)
-
-    sb = Search_Bar(buttons, (WIDTH, HEIGHT))
-    self.objects_dict['search_bar'] = sb
-    objects.append(sb)
-
-    b = Button.text_button('save', func=self.save, tsize=15)
-    b.rect.topleft = (5, 5)
-    objects.append(b)
-
-    b = Button.text_button('test', tsize=15, func=tester.run_tester, args=[self.card])
-    b.rect.topleft = objects[-1].rect.bottomleft
-    b.rect.top += 5
-    objects.append(b)
-
-    def test_run():
-        text = tester.test_run(self.card)
-        if text:
-            Menu.notice(text)
+def get_section(elements, label, menu):
+    r = elements[0].rect.unionall([e.padded_rect for e in elements]).inflate(20, 30)
+    section = Style(
+        size=r.size,
+        pos=r.topleft,
+        fill_color=menu.fill_color,
+        outline_color=(255, 255, 255),
+        outline_width=1,
+        layer=-1
+    )
     
-    b = Button.text_button('test game', func=test_run, tsize=15)
-    b.rect.topleft = objects[-1].rect.bottomleft
-    b.rect.top += 5
-    objects.append(b)
-            
-    b = Button.text_button('publish card', func=self.publish, tsize=15)
-    b.rect.top = 5
-    b.rect.midleft = objects[-1].rect.midright
-    b.rect.y += 5
-    objects.append(b)
-
-    b = Button.text_button('group node', func=self.create_new_group_node, tsize=15)
-    b.rect.top = 5
-    b.rect.left = objects[-1].rect.right + 5
-    objects.append(b)
+    for e in elements:
+        section.add_child(e, current_offset=True)
+        
+    label = Textbox(
+        text=label,
+        text_size=15,
+        fill_color=menu.fill_color,
+        left_pad=5,
+        right_pad=5
+    )
+    label.rect.midleft = (section.rect.left + 15, section.rect.top)
+    section.add_child(label, current_offset=True)
     
-    b = Button.text_button('ungroup node', func=self.ungroup_nodes, tsize=15)
-    b.rect.top = 5
-    b.rect.left = objects[-1].rect.right + 5
-    objects.append(b)
-    
-    b = Button.text_button('data sheet', func=run_data_sheet, args=[self], tsize=15)
-    b.rect.top = 5
-    b.rect.left = objects[-1].rect.right + 5
-    objects.append(b)
-    
-    b = Button.text_button('save group node', func=self.save_group_node, tsize=15)
-    b.rect.midleft = objects[-1].rect.midright
-    b.rect.x -= 5
-    b.rect.y += 5
-    objects.append(b)
-    
-    b = Button.text_button('exit', func=self.exit, tsize=15)
-    b.rect.midtop = objects[-1].rect.midbottom
-    b.rect.y += 5
-    objects.append(b)
-    
-    nm = Node_Menu(self)
-    objects.append(nm)
-    self.objects_dict['menu'] = nm
-    
-    cm = Context_Manager(self)
-    objects.append(cm)
-    self.objects_dict['context'] = cm
-
-    return objects
+    return section
     
 def get_elements(menu):
     body = menu.body
@@ -149,6 +84,141 @@ def get_elements(menu):
     
     rect_selector = Rect_Selector()
     elements.append(rect_selector)
+    
+    button_kwargs = {
+        'text_size': 15,
+        'size': (150, 25),
+        'x_pad': 5,
+        'top_pad': 2,
+        'centery_aligned': True,
+        'hover_color': (100, 100, 100)
+    }
+    
+    icon_kwargs = {
+        'font_name': 'icons.ttf',
+        'centerx_aligned': True,
+        'centery_aligned': True
+    }
+    
+#save section
+    
+    x = 15
+    y = 10
+    save_elements = []
+    
+    save_button = Button.Text_Button(
+        text='Save',
+        func=lambda: menu.card.save(nodes=menu.nodes),
+        **button_kwargs
+    )
+    save_button.rect.topleft = (x, y)
+    save_elements.append(save_button)
+    
+    save_icon = Textbox(
+        text=icons['save'],
+        text_color=(0, 0, 247),
+        **icon_kwargs
+    )
+    save_button.add_child(save_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    save_icon.set_enabled(False) 
+    
+    y += save_button.rect.height + 3
+    
+    publish_button = Button.Text_Button(
+        text='Publish',
+        func=lambda: menu.card.publish(nodes=menu.nodes),
+        **button_kwargs
+    )
+    publish_button.rect.topleft = (x, y)
+    save_elements.append(publish_button)
+    
+    publish_icon = Textbox(
+        text=icons['x'] if not menu.card.published else icons['check'],
+        text_color=(255, 0, 0) if not menu.card.published else (0, 255, 0),
+        **icon_kwargs
+    )
+    publish_button.add_child(publish_icon, right_anchor='right', centery_anchor='centery')
+    publish_icon.set_enabled(False)
+    
+    save_section = get_section(save_elements, 'Save:', menu)
+    save_section.rect.topleft = (20, 20)
+    elements.insert(0, save_section)
+    
+#do section
+
+    x = 15
+    y = 10
+    do_elements = []
+    
+    undo_button = Button.Text_Button(
+        text='Undo',
+        func=menu.undo_log,
+        **button_kwargs
+    )
+    undo_button.rect.topleft = (x, y)
+    do_elements.append(undo_button)
+    
+    undo_icon = Textbox(
+        text=icons['undo'],
+        **icon_kwargs
+    )
+    undo_button.add_child(undo_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    undo_icon.set_enabled(False) 
+    
+    y += undo_button.rect.height + 3
+    
+    redo_button = Button.Text_Button(
+        text='Redo',
+        func=menu.redo_log,
+        **button_kwargs
+    )
+    redo_button.rect.topleft = (x, y)
+    do_elements.append(redo_button)
+    
+    redo_icon = Textbox(
+        text=icons['redo'],
+        **icon_kwargs
+    )
+    redo_button.add_child(redo_icon, right_anchor='right', centery_anchor='centery')
+    redo_icon.set_enabled(False)
+    
+    do_section = get_section(do_elements, 'Actions:', menu)
+    do_section.rect.topleft = (save_section.rect.right + 20, 20)
+    elements.insert(0, do_section)
+    
+    back_button = Button.Text_Button(
+        text='Back',
+        size=(100, 25),
+        centerx_aligned=True,
+        centery_aligned=True,
+        fill_color=menu.fill_color,
+        outline_color=(255, 255, 255),
+        outline_width=1,
+        hover_color=(100, 100, 100),
+        tag='exit'
+    )
+    back_button.rect.topleft = (do_section.rect.right + 20, do_section.rect.top)
+    elements.insert(0, back_button)
+    
+    def save_gn():
+        for node in menu.nodes:
+            if node.is_group:
+                save_group_node(node)
+                break
+    
+    save_group_node_button = Button.Text_Button(
+        text='sgn',
+        size=(100, 25),
+        centerx_aligned=True,
+        centery_aligned=True,
+        fill_color=menu.fill_color,
+        outline_color=(255, 255, 255),
+        outline_width=1,
+        hover_color=(100, 100, 100),
+        func=save_gn
+    )
+    save_group_node_button.rect.topright = (menu.body.right - 20, 20)
+    elements.insert(0, save_group_node_button)
     
     return elements
     
@@ -253,7 +323,7 @@ class Node_Editor(Menu):
                 n = log['node']
                 m = log['m']
                 self.add_node(n, d=True) 
-                if m == 'ug':
+                if n.is_group:
                     n.recall_port_mem()
                     n.reset_ports()
                     
@@ -435,9 +505,8 @@ class Node_Editor(Menu):
 
     def add_node(self, n, d=False):
         self.nodes.append(n)
-        n.manager = self
-        if not d:
-            self.add_log({'t': 'add', 'node': n})
+        if not n.manager:
+            n.set_manager(self)
              
     def get_node(self, name, val=None, pos=(0, 0), held=True):
         if len(self.nodes) == 50:
@@ -458,7 +527,7 @@ class Node_Editor(Menu):
         if len(self.nodes) + len(data['nodes']) + 1 > 50:
             return
         
-        nodes = unpack(data)
+        nodes = unpack(data, manager=self)
         for n in nodes:
             self.add_node(n)
         n = nodes[-1]
@@ -468,18 +537,13 @@ class Node_Editor(Menu):
             n.start_held()
   
         return n
-        
-    def make_group_node(self, nodes, name='group', pos=(0, 0)):
-        n = Group_Node.get_new(nodes, name=name, pos=pos)
-        self.add_node(n)
-        self.add_log({'t': 'gn', 'gn': n, 'nodes': nodes})
-        return n
 
     def create_new_group_node(self):
         nodes = [n for n in self.get_selected() if not n.is_group]
         if len(nodes) <= 1:
             return
-        n = self.make_group_node(nodes)
+        n = Group_Node.get_new(nodes)
+        self.add_node(n)
         return n
 
     def ungroup_nodes(self):
@@ -498,11 +562,8 @@ class Node_Editor(Menu):
             self.del_node(n)
             
     def del_node(self, n, method='del', d=False):
-        n.kill()
+        n.kill(method=method, d=d)
         self.nodes.remove(n)
-        
-        if not d:
-            self.add_log({'t': 'del', 'node': n, 'm': method})
             
     def get_required(self, n):
         nodes = []
@@ -544,12 +605,6 @@ class Node_Editor(Menu):
 
 #loading stuff--------------------------------------------------------------------
 
-    def load_group_node(self, name, data):
-        nodes = unpack(data)
-        nodes[-1].set_name(name)
-        for n in nodes:
-            self.add_node(n)
-
     def load_save_data(self, data):
         self.reset()
         nodes = unpack(data)
@@ -561,12 +616,6 @@ class Node_Editor(Menu):
 
     def get_save_data(self):
         return pack(self.nodes)
-
-    def save(self):
-        self.card.save(nodes=self.nodes)
-    
-    def publish(self):
-        self.card.publish(nodes=self.nodes)
 
     def save_group_node(self):
         gn = None
@@ -659,7 +708,7 @@ class Node_Editor(Menu):
 #run stuff--------------------------------------------------------------------
 
     def sub_events(self, events):
-        split = 1 if not self.cm else 2
+        split = 5 if not self.cm else 6
         for e in (self.elements[:split] + self.nodes[::-1] + self.elements[split:]):
             if e.enabled:
                 e.events(events)

@@ -356,10 +356,4 @@ class Input(Text_Element):
             
             surf.set_clip(clip)
         
-        
-        
-        
-        
-        
-        
-        
+     

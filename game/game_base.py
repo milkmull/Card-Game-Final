@@ -162,6 +162,7 @@ class Game_Base:
             cls = deck.get(name)
             if cls:
                 return cls(self, uid)
+        raise exceptions.CardNotFound(name)
             
     def transform(self, c1, name):
         c2 = self.get_card(name, uid=c1.uid)

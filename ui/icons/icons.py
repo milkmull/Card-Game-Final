@@ -6,7 +6,7 @@ icons = {
     'folder': u'\ue92f',
     'open-folder': u'\ue930',
     'save': u'\ue962',
-    'undo': u'\ue962',
+    'undo': u'\ue967',
     'redo': u'\ue968',
     'sliders': u'\ue992',
     'gear': u'\ue994',

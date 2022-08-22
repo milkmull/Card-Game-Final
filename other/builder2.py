@@ -25,7 +25,8 @@ def get_section(elements, label, menu):
         size=r.size,
         pos=r.topleft,
         outline_color=(255, 255, 255),
-        outline_width=2,
+        outline_width=1,
+        border_radius=0,
         layer=-1
     )
     
@@ -48,7 +49,7 @@ def builder(menu):
     body = menu.body
     elements = [menu.card]
     menu.elements_dict['card'] = menu.card
-    
+
     button_kwargs = {
         'text_size': 15,
         'size': (150, 25),
@@ -123,7 +124,7 @@ def builder(menu):
     export_button.add_child(export_icon, right_anchor='right', centery_anchor='centery')
     export_icon.set_enabled(False) 
     
-    save_section = get_section(save_elements, 'Save:', menu)
+    save_section = get_section(save_elements, 'Save Card:', menu)
     save_section.rect.topleft = (menu.card.rect.right + 20, 20)
     elements.append(save_section)
     
@@ -198,7 +199,7 @@ def builder(menu):
             **icon_kwargs
         )
         b.turn_off()
-        b.rect.midright = (tag.rect.right - 5, tag.rect.centery)
+        b.rect.midright = (tag.rect.right + 21, tag.rect.centery)
         tag.add_child(b, current_offset=True)
         
         def clear(tag=tag, b=b, tags=tags):
@@ -223,13 +224,12 @@ def builder(menu):
     tag_elements += tags
 
     add_button = Button.Text_Button(
-        text=icons['left-arrow-2'],
+        text=icons['+'],
         pad=5,
         hover_color=(100, 100, 100),
         border_radius=5,
         **icon_kwargs
     )
-    add_button.rect.midleft = (tag_elements[0].rect.right + 5, tag_elements[0].rect.centery)
     tag_elements.append(add_button)
 
     tag_select = Input_Dropdown(
@@ -243,15 +243,16 @@ def builder(menu):
         y_pad=2,
         fill_color=(255, 255, 255),
         text_color=(0, 0, 0),
-        clip=True,
         window_kwargs={
             'fill_color': menu.fill_color,
             'outline_color': (255, 255, 255),
             'outline_width': 3
-        }    
+        },
+        layer=1
     )
     tag_select.height = 25
-    tag_select.rect.midleft = (add_button.padded_rect.right + 10, add_button.rect.centery)
+    tag_select.rect.bottomleft = (tags[0].rect.left, tags[0].rect.top - 25)
+    add_button.rect.midleft = (tag_select.padded_rect.right + 15, tag_select.rect.centery)
     tag_elements.append(tag_select)
     
     tags_section = get_section(tag_elements, 'Tags:', menu)
@@ -277,6 +278,18 @@ def builder(menu):
         tag='enter',
         func=add_tag
     )
+    
+    def draw_line(self, surf):
+        y = (tag_select.padded_rect.bottom + tags[0].padded_rect.top) // 2
+        pg.draw.line(
+            surf,
+            (255, 255, 255),
+            (tag_select.padded_rect.left, y),
+            (add_button.padded_rect.right, y),
+            width=2
+        )
+        
+    elements.append(Base_Element(draw=draw_line))
   
 #image section
     
@@ -457,6 +470,47 @@ def builder(menu):
     
     elements.append(audio_section)
     
+#alignment
+
+    menu.card.rect.center = menu.body.center
+
+    space = 20
+    x = menu.card.rect.left - space
+    y = space
+    
+    save_section.rect.topright = (x, y)
+    y += save_section.rect.height + space
+    
+    image_section.rect.topright = (x, y)
+    y += image_section.rect.height + space
+    
+    color_section.rect.topright = (x, y)
+    y += color_section.rect.height + space
+
+    x = menu.card.rect.right + space
+    y = space
+    
+    weight_section.width = tags_section.width
+    weight_section.rect.topleft = (x, y)
+    y += weight_section.rect.height + space
+    
+    type_section.width = tags_section.width
+    type_section.rect.topleft = (x, y)
+    y += type_section.rect.height + space
+    
+    tags_section.rect.topleft = (x, y)
+    y += tags_section.rect.height + space
+    
+    audio_section.rect.topleft = (x, y)
+
+    
+    #image_section.rect.topleft = (save_section.rect.left, save_section.rect.bottom + 40)
+    #tags_section.rect.topleft = (image_section.rect.left, image_section.rect.bottom + 40)
+    #
+    #audio_section.rect.topright = (menu.body.width - 40, save_section.rect.top)
+    #color_section.rect.topright = (audio_section.rect.right, audio_section.rect.bottom + 40)
+    #weight_section.rect.topright = (color_section.rect.right, color_section.rect.bottom + 40)
+
 #other
     
     return_button = Button.Text_Button(
@@ -468,7 +522,7 @@ def builder(menu):
         tag='exit'
     )
     return_button.rect.topleft = (weight_section.rect.right + 30, weight_section.rect.top)
-    elements.append(return_button)
+    #elements.append(return_button)
     
     node_button = Button.Text_Button(
         text='Node Editor',
@@ -479,7 +533,7 @@ def builder(menu):
         func=menu.node_editor.run
     )
     node_button.rect.midtop = (return_button.rect.centerx, return_button.rect.bottom + 20)
-    elements.append(node_button)
+    #elements.append(node_button)
     
     return elements
   
@@ -540,7 +594,6 @@ class Builder(Menu):
             ('BMP', '*.bmp')
         )
         file = filedialog.asksaveasfilename(
-            initialfile=self.card.classname,
             initialdir='/',
             title='Save As',
             filetypes=files,

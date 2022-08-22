@@ -47,10 +47,10 @@ class Search_Bar(Input):
             buttons.append(b)
             
         for name, data in Node.GROUP_DATA.items():
-            b = Button.text_button(
-                name, 
-                func=menu.load_group_node, 
-                args=[name, data],
+            b = Button.Text_Button(
+                text=name, 
+                func=menu.get_group_node, 
+                args=[name],
                 **button_kwargs
             )
             buttons.append(b)

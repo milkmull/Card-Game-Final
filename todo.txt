@@ -9,3 +9,12 @@ flow
 -find tighter font
 -back button
 -fix scroll bar
+
+-some nodes not clickable in output screen
+-change right click selecting multiple nodes
+-fix functions appearning in wrong spot on info screen
+-start with start node
+
+-add check box to publish button, when clicking on unchecked, will run publish process, when clicking on button while checked, will unpublish
+
+-text outline using bold

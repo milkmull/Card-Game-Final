@@ -55,7 +55,7 @@ def select_device(menu, mic):
 
     def refresh():
         mic.refresh()
-        menu.set_elements()
+        menu.refresh()
         
     exit_button = Button.Text_Button(
         text=icons['x'],
@@ -104,7 +104,7 @@ def audio_manager(manager):
     
     slider = Slider(
         range(200),
-        size=(200, 5),
+        size=(255, 5),
         fill_color=(255, 255, 255),
         handel_kwargs={
             'size': (10, 10),

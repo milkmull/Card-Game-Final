@@ -24,7 +24,7 @@ class Text_Element(Element, Text):
         self.draw_rect(surf)
         if self.clip:
             clip = surf.get_clip()
-            surf.set_clip(self.padded_rect)
+            surf.set_clip(self.clip_rect)
             self.draw_text(surf)
             self.child_draw(surf)
             surf.set_clip(clip)

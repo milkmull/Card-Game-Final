@@ -1,6 +1,3 @@
-import re
-import keyword
-
 import pygame as pg
 
 from ..compiler import Compiler
@@ -9,33 +6,7 @@ from ui.menu.menu import Menu
 from ui.element.base.base import Base_Element
 from ui.element.elements import Textbox, Button, Image, Check_Box, Live_Window
 from ui.element.utils.image import get_arrow
-from ui.color.ops import color_text
-
-def style_text(text):
-    style = {}
-    
-    number_style = {'fgcolor': (255, 205, 34)}
-    for match in re.finditer(r'(?<![a-zA-Z^_])(-?[0-9]+)', text):
-        style.update({i: number_style for i in range(match.start(), match.end())})
-        
-    keyword_style = {'fgcolor': (147, 199, 99), 'style': 1}
-    for word in keyword.kwlist:
-        for match in re.finditer(f'(?<![a-zA-Z^_])({word})( )', text):
-            style.update({i: keyword_style for i in range(match.start(), match.end())})
-   
-    string_style = {'fgcolor': (236, 118, 0)}
-    for match in re.finditer(r'''([/'"])([^'"]*)(['"])''', text):
-        style.update({i: string_style for i in range(match.start(), match.end())})
-        
-    class_style = {'fgcolor': (160, 130, 189), 'style': 1}
-    for match in re.finditer(r'(?<=class )([a-zA-Z0-9_]+)', text):
-        style.update({i: class_style for i in range(match.start(), match.end())})
-        
-    def_style = {'fgcolor': (103, 140, 177), 'style': 1}
-    for match in re.finditer(r'(?<=def )([a-zA-Z0-9_]+)', text):
-        style.update({i: def_style for i in range(match.start(), match.end())})
-        
-    return style
+from ui.color.ops import color_text, style_text
 
 def run(node):
     m = Menu(info_menu, init_args=[node])
@@ -131,11 +102,11 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
     )
     
     def refresh():
-        port = wire.port.port
+        port = wire.port.true_port
         menu.args = [original_node.get_port(port).connection]
         menu.kwargs = {
             'show_full_out': full_output.value,
-            'last_port': original_node.get_port(port).connection_port.port
+            'last_port': original_node.get_port(port).connection_port.true_port
         }
         menu.refresh()
 
@@ -240,7 +211,7 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
         ranges = Compiler.get_ranges(
             full_text,
             node.id,
-            port=port.port if not port.is_flow else 0
+            port=port.true_port if not port.is_flow else 0
         )
         style = {
             'bgcolor': visible_port.color,

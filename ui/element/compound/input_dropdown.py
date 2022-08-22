@@ -26,3 +26,7 @@ class Input_Dropdown(Dropdown, Input):
     @property
     def click_close(self):
         return not (self.hit or self.hit_any()) and self.is_open
+        
+    def draw(self, surf):
+        Input.draw(self, surf)
+        self.child_draw(surf)

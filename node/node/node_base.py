@@ -60,7 +60,7 @@ def pack(_nodes):
 
     return data
         
-def unpack(data, map=True):
+def unpack(data, manager=None):
     if not data:
         return {}
         
@@ -74,14 +74,15 @@ def unpack(data, map=True):
         contains = d['contains']
         form = d['form']
         n = Node.from_name(name, pos=pos)
-        if not map:
-            n.id = id
+        n.id = id
         n.oid = id
         new_id = n.id
         id_map[id] = new_id
         nodes[new_id] = n
-    if form:
+        if form:
             n.tf(form=form)
+        if manager:
+            n.set_manager(manager)
 
     while True:
     
@@ -138,11 +139,12 @@ def unpack(data, map=True):
         n = Group_Node.get_new(group_nodes, pos=pos)
         n.group_name = name
         n.rel_node_pos = {nodes[id_map[int(nid)]]: pos for nid, pos in d['rel_node_pos'].items()}
-        if not map:
-            n.id = id
+        n.id = id
         new_id = n.id
         id_map[id] = new_id
         nodes[new_id] = n
+        if manager:
+            n.set_manager(manager)
         
     nodes = list(nodes.values())
     for n in nodes:
@@ -362,7 +364,7 @@ class Port(Element):
     def disconnect(p0, p1, d=False):
         n0 = p0.node
         n1 = p1.node
-        
+
         if p0.manager and not d:
             p0.manager.add_log({
                 't': 'disconn',
@@ -828,6 +830,7 @@ class Node(Dragger, Element):
         
     def set_manager(self, manager):
         self.manager = manager
+        self.manager.add_log({'t': 'add', 'node': self})
         
     @property
     def name(self):
@@ -897,6 +900,10 @@ class Node(Dragger, Element):
         
     def copy(self):
         return unpack(pack([self]))[0]
+        
+    def same_group(self, n):
+        if n.group_node or self.group_node:
+            return n.group_node is self.group_node
         
 #image and element stuff-------------------------------------------------------------------
                
@@ -1001,7 +1008,7 @@ class Node(Dragger, Element):
         text = self._get_output(p)
         return text if not self.mark else self.mark_text(text, port=p)
 
-    def get_default(self, p):
+    def _get_default(self, p):
         return ''
         
     def get_default(self, p):
@@ -1082,9 +1089,12 @@ class Node(Dragger, Element):
         for p in self.ports.copy(): 
             p.clear()
             
-    def kill(self):
+    def kill(self, method='del', d=False):
         self.clear_connections()
         super().kill()
+        
+        if self.manager and not d:
+            self.manager.add_log({'t': 'del', 'node': self, 'm': method})
         
     def del_port(self, port):
         self.ports.remove(port)
@@ -1317,7 +1327,6 @@ class Group_Node(Node):
             rx, ry = self.rel_node_pos[n]
             n.rect.center = (sx + rx, sy + ry)
             n.set_port_pos()
-            n.drop()
         self.ports.clear()
         
     def new_output_port(self, parent):

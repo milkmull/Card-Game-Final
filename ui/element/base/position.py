@@ -431,7 +431,7 @@ class Position(Base_Element):
                     return True
                     
     def child_events(self, events):
-        for c in self.children:
+        for c in sorted(self.children, key=lambda c: c.layer, reverse=True):
             if c.enabled:
                 c.events(events)
                 

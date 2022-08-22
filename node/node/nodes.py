@@ -185,12 +185,9 @@ class Bool(Node):
         
         set_check_element(self.get_port(-1), True)
         self.set_port_pos()
-        
-    def get_actual_value(self):
-        return self.get_port(-1).element.get_state()
 
     def _get_output(self, p):
-        return str(self.get_actual_value())
+        return self.get_port(-1).get_output()
         
 class Num(Node):
     cat = 'numeric'
@@ -206,15 +203,9 @@ class Num(Node):
         
     def _get_default(self, p):
         return '0'
-        
-    def get_actual_value(self):
-        val = self.get_port(-1).element.text
-        if not val.strip('-'):
-            val = '0'
-        return int(val)
 
     def _get_output(self, p):
-        return str(self.get_actual_value())
+        return self.get_port(-1).get_output()
         
 class String(Node):
     cat = 'string'
@@ -231,11 +222,8 @@ class String(Node):
     def _get_default(self, p):
         return "''"
         
-    def get_actual_value(self):
-        return self.get_port(-1).element.text
-        
     def _get_output(self, p):
-        return f"'{self.get_actual_value()}'"
+        return self.get_port(-1).get_output()
  
 class Code(Node):
     cat = 'flow'
@@ -1167,7 +1155,7 @@ class Tag_Filter(Node):
     def _get_output(self, p):
         ip = self.get_port(2)
         if ip.connection:
-            if ip.connection.get_actual_value():
+            if ip.connection_port.value:
                 text = "[x for x in {2} if {0} in x.tags and x != self]"
             else:
                 text = "[x for x in {2} if {0} in x.tags]"
@@ -1202,7 +1190,7 @@ class Name_Filter(Node):
     def _get_output(self, p):
         ip = self.get_port(2)
         if ip.connection:
-            if ip.connection.get_actual_value():
+            if ip.connection_port.value:
                 text = "[x for x in {2} if x.name == {0} and x != self]"
             else:
                 text = "[x for x in {2} if x.name == {0}]"
@@ -1471,7 +1459,7 @@ class Select(Node):
         super().__init__(id, tag='func', **kwargs) 
         
         self.set_ports([
-            Port(-1, ['num'], description='number of selected items'),
+            Port(-1, ['num'], description='number selected'),
             Port(-2, ['player'], description='selected player'),
             Port(-3, ['card'], description='selected card'),
             Port(-4, ['flow'])

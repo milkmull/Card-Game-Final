@@ -128,9 +128,10 @@ class Dragger:
                 if mbd.button == 1:
                     self.deselect_on_update = True
 
-        mbu = events.get('mbu')
-        if mbu:
-            self.drop()
+        if self.held:
+            mbu = events.get('mbu')
+            if mbu:
+                self.drop()
         
     def update(self):
         if self.deselect_on_update:

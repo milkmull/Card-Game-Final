@@ -73,9 +73,9 @@ class Dropdown(Button.Text_Button):
             self.size = self.get_max_size(self.find_all_text(selection))
             self.width += self.pad['left']
                     
-        self.button_kwargs = button_kwargs
+        self.button_kwargs = Dropdown.default_button_kwargs | button_kwargs
         self.arrow_button_kwargs = arrow_button_kwargs
-        self.window_kwargs = window_kwargs
+        self.window_kwargs = Dropdown.default_window_kwargs | window_kwargs
         
         self.selection = selection
         self.max_buttons = max_buttons
@@ -161,7 +161,7 @@ class Dropdown(Button.Text_Button):
             b = Button.Text_Button(
                 size=(w, self.rect.height),
                 text=k,
-                **(Dropdown.default_button_kwargs | self.button_kwargs)
+                **self.button_kwargs
             )
             b.padding = self.padding
                 
@@ -189,7 +189,7 @@ class Dropdown(Button.Text_Button):
         h = sum([b.padded_rect.height for b in buttons[:self.max_buttons]])
         window = Live_Window(
             size=(max({b.padded_rect.width for b in buttons}), h),
-            **(Dropdown.default_window_kwargs | self.window_kwargs)
+            **self.window_kwargs
         )
 
         self.windows[window] = {
@@ -231,20 +231,4 @@ class Dropdown(Button.Text_Button):
             if mbd.button == 1 or mbd.button == 3:
                 if self.is_open:
                     self.close()   
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
