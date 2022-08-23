@@ -1,4 +1,19 @@
 
+def find_all_nodes(_nodes):
+    nodes = []
+    group_nodes = []
+    
+    for n in _nodes:
+        if n.is_group:
+            group_nodes.append(n)
+            data = find_all_nodes(n.nodes)
+            nodes += data[0]
+            group_nodes += data[1]
+        else:
+            nodes.append(n)
+            
+    return (list(set(nodes)), list(set(group_nodes)))
+
 def find_visible_chunk(n, nodes):
     nodes.append(n)
     

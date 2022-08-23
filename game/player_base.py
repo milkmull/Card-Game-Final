@@ -1,4 +1,6 @@
 import random
+
+from . import exceptions
      
 class Player_Base:
     type = 'player'
@@ -202,6 +204,8 @@ class Player_Base:
         
     def string_to_deck(self, deck_string):
         deck = getattr(self, deck_string, None)
+        if deck is None:
+            raise exceptions.DeckNotFound(deck_string)
         return deck.copy()
                 
     def find_card_deck_string(self, c):

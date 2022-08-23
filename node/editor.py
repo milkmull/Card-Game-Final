@@ -324,7 +324,6 @@ class Node_Editor(Menu):
                 m = log['m']
                 self.add_node(n, d=True) 
                 if n.is_group:
-                    n.recall_port_mem()
                     n.reset_ports()
                     
             elif type == 'conn':
@@ -539,7 +538,7 @@ class Node_Editor(Menu):
         return n
 
     def create_new_group_node(self):
-        nodes = [n for n in self.get_selected() if not n.is_group]
+        nodes = [n for n in self.get_selected()]# if not n.is_group]
         if len(nodes) <= 1:
             return
         n = Group_Node.get_new(nodes)
@@ -595,7 +594,7 @@ class Node_Editor(Menu):
         data = self.copy_data
         if not data or len(self.nodes) + len(data['nodes']) > 50:
             return
-        nodes = unpack(data)
+        nodes = unpack(data, manager=self)
         if nodes:
             move_nodes(nodes, pg.mouse.get_pos())
             for n in nodes:
@@ -607,7 +606,7 @@ class Node_Editor(Menu):
 
     def load_save_data(self, data):
         self.reset()
-        nodes = unpack(data)
+        nodes = unpack(data, manager=self)
         for n in nodes:
             self.add_node(n)
         self.reset_logs()
@@ -641,6 +640,8 @@ class Node_Editor(Menu):
                 func = mapping.find_visible_chunk(n, [])
                 if not any({set(o) == set(func) for o in funcs}):
                     funcs.append(func)
+                    
+        print(funcs)
 
         for nodes in funcs:
             lead = mapping.find_lead(nodes)

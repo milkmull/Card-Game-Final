@@ -1,5 +1,8 @@
 
 
+-selected group nodes still held after undo/redo
+
+
 node:
 -nodes with open elements should appear on top
 
@@ -14,6 +17,10 @@ flow
 -change right click selecting multiple nodes
 -fix functions appearning in wrong spot on info screen
 -start with start node
+-vertical scroll bar not alligned on output screen
+
+-connected output displays marked after compiling
+-suppressed ports on group nodes hidden when loading
 
 -add check box to publish button, when clicking on unchecked, will run publish process, when clicking on button while checked, will unpublish
 

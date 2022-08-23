@@ -12,17 +12,12 @@ from .element.input import Logged_Label_Input as Input
 NODE_DATA_PATH = 'data/node/'
 
 def pack(_nodes):
+    d = mapping.find_all_nodes(_nodes)
     nodes = {
-        'nodes': [],
-        'groups': []
+        'nodes': d[0],
+        'groups': d[1]
     }
-    for n in _nodes:
-        if n.is_group:
-            nodes['groups'].append(n)
-            nodes['nodes'] += n.nodes
-        else:
-            nodes['nodes'].append(n)
-    
+
     data = {
         'nodes': {},
         'groups': {}
@@ -55,12 +50,13 @@ def pack(_nodes):
             'name': g.group_name,
             'pos': g.rect.topleft,
             'nodes': [n.id for n in g.nodes],
-            'rel_node_pos': g.get_rel_node_pos()
+            'rel_node_pos': g.get_rel_node_pos(),
+            'visible_ports': g.get_visible_port_data()
         }
 
     return data
         
-def unpack(data, manager=None):
+def unpack(data, manager=None, map=True):
     if not data:
         return {}
         
@@ -74,7 +70,8 @@ def unpack(data, manager=None):
         contains = d['contains']
         form = d['form']
         n = Node.from_name(name, pos=pos)
-        n.id = id
+        if not map:
+            n.id = id
         n.oid = id
         new_id = n.id
         id_map[id] = new_id
@@ -84,62 +81,54 @@ def unpack(data, manager=None):
         if manager:
             n.set_manager(manager)
 
-    while True:
-    
-        missed = False
-    
-        for id, d in data['nodes'].items():
-            id = id_map[int(id)]
-            n0 = nodes[id]
-            ports = d['ports']
-            for port in ports:
-                connection = ports[port]['connection']
-                connection_port = ports[port]['connection_port']
-                parent_port = ports[port]['parent_port']
-                added = ports[port]['added']
-                suppressed = ports[port]['suppressed']
-                visible = ports[port]['visible']
-                types = ports[port]['types']
-                element_value = ports[port]['element_value']
-                if added:
-                    n0.ap()
-                if parent_port is not None:
-                    n0.get_port(parent_port).copy()
-                port = int(port)
-                p0 = n0.get_port(port)
-                p0.set_types(types)
-                p0.suppressed = suppressed
-                p0.visible = visible
-                p0.parent_port = parent_port
-                if parent_port:
-                    p0.remove_child(p0.label)
-                    p0.label = None
-                p0.added = added
-                if connection is not None and port < 0:
-                    connection = id_map.get(connection)
-                    if connection is not None:
-                        n1 = nodes[connection]
-                        p1 = n1.get_port(connection_port)
-                        if p0 and p1:
-                            Port.new_connection(p0, p1, force=True)
-                        else:
-                            missed = True
-                            
-                if element_value is not None:
-                    p0.value = element_value
-      
-        if not missed:
-            break
+    for id, d in data['nodes'].items():
+        id = id_map[int(id)]
+        n0 = nodes[id]
+        ports = d['ports']
+        for port in ports:
+            connection = ports[port]['connection']
+            connection_port = ports[port]['connection_port']
+            parent_port = ports[port]['parent_port']
+            added = ports[port]['added']
+            suppressed = ports[port]['suppressed']
+            visible = ports[port]['visible']
+            types = ports[port]['types']
+            element_value = ports[port]['element_value']
+            if added:
+                n0.ap()
+            if parent_port is not None:
+                n0.get_port(parent_port).copy()
+            port = int(port)
+            p0 = n0.get_port(port)
+            p0.set_types(types)
+            p0.suppressed = suppressed
+            p0.visible = visible
+            p0.parent_port = parent_port
+            if parent_port:
+                p0.remove_child(p0.label)
+                p0.label = None
+            p0.added = added
+            if connection is not None and port < 0:
+                connection = id_map.get(connection)
+                if connection is not None:
+                    n1 = nodes[connection]
+                    p1 = n1.get_port(connection_port)
+                    Port.new_connection(p0, p1, force=True)
+                        
+            if element_value is not None:
+                p0.value = element_value
 
-    for id, d in data['groups'].items():
+    for id, d in sorted(data['groups'].items(), key=lambda i: i[0]):
         id = int(id)
         name = d['name']
         group_nodes = [nodes[id_map[nid]] for nid in d['nodes']]
+        ports = [nodes[id_map[nid]].get_port(p) for nid, p in d['visible_ports']]
         pos = d['pos']
-        n = Group_Node.get_new(group_nodes, pos=pos)
+        n = Group_Node.get_new(group_nodes, ports=ports, pos=pos)
         n.group_name = name
         n.rel_node_pos = {nodes[id_map[int(nid)]]: pos for nid, pos in d['rel_node_pos'].items()}
-        n.id = id
+        if not map:
+            n.id = id
         new_id = n.id
         id_map[id] = new_id
         nodes[new_id] = n
@@ -1218,12 +1207,12 @@ class Group_Node(Node):
     def from_name(cls, name):
         return unpack(Node.GROUP_DATA[name])[-1]
     
-    def __init__(self, id, nodes, **kwargs):
+    def __init__(self, id, nodes, ports=[], **kwargs):
         self.nodes = nodes
-        self.port_mem = {}
+        self.visible_ports = []
         super().__init__(id, **kwargs)
 
-        self.set_ports(self.get_group_ports(nodes))
+        self.set_ports(self.get_group_ports(ports=ports))
         self.set_self_pos()
         self.set_rel_node_pos()
 
@@ -1256,12 +1245,7 @@ class Group_Node(Node):
                 return n
         
     def reset_ports(self):
-        self.ports = self.get_group_ports(self.nodes)
-        self.set_port_pos()
-        
-    def recall_port_mem(self):
-        for p, visible in self.port_mem.items():
-            p.set_visible(visible)
+        self.set_ports(self.get_group_ports(ports=self.visible_ports))
    
     def set_rel_node_pos(self):
         rel_node_pos = {}
@@ -1274,31 +1258,41 @@ class Group_Node(Node):
     def get_rel_node_pos(self):
         return {n.id: pos for n, pos in self.rel_node_pos.items()}
         
-    def get_group_ports(self, nodes):
+    def get_visible_port_data(self):
+        return [(p.node.id, p.port) for p in self.ports]
+        
+    def get_visible_ports(self):
+        return self.ports.copy()
+        
+    def get_group_ports(self, ports=[]):
         ipp = []
         opp = []
         
-        for n in nodes:
+        for p in ports:
+            if p.port > 0:
+                ipp.append(p)
+            else:
+                opp.append(p)
+        
+        for n in self.nodes:
             n.group_node = self
             n.turn_off()
             
-            for ip in n.get_input_ports():
-                if (not ip.suppressed or (ip.suppressed and self.port_mem.get(ip, False))) and ip.connection not in nodes:
-                    ipp.append(ip)
-                else:
-                    ip.turn_off()
+            for p in n.ports:
+                if p not in ports:
+                    if not p.suppressed and p.connection not in self.nodes:
+                        if p.port > 0:
+                            if p not in ipp:
+                                ipp.append(p)
+                        elif p not in opp:
+                            opp.append(p)
+                    else:
+                        p.turn_off()
                     
-            for op in n.get_output_ports():
-                if (not op.suppressed or (op.suppressed and self.port_mem.get(op, False))) and op.connection not in nodes:
-                    opp.append(op)
-                else:
-                    op.turn_off()
-
         ipp.sort(key=lambda p: p.port if 'flow' not in p.types else 10)
         opp.sort(key=lambda p: abs(p.port) if 'flow' not in p.types else 10)
-        ports = opp + ipp
         
-        return ports
+        return opp + ipp
         
     def del_port(self, port):
         super().del_port(port)
@@ -1310,17 +1304,15 @@ class Group_Node(Node):
         self.rect.centery = sum([n.rect.centery for n in self.nodes]) // len(self.nodes)
         self.set_port_pos()
         
-    def set_port_mem(self):
-        self.port_mem.clear()
-        for n in self.nodes:
-            for p in n.ports:
-                self.port_mem[p] = p.visible
+    def set_visible_ports(self):
+        self.visible_ports = self.ports.copy()
 
     def ungroup(self):
-        self.set_port_mem()
+        self.set_visible_ports()
         sx, sy = self.rect.center
         for n in self.nodes:
             n.turn_on()
+            n.held = False
             n.group_node = None
             for p in n.ports:
                 p.turn_on()
