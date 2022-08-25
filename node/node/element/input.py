@@ -190,12 +190,10 @@ class Logged_Label_Input(Logged_Input):
             centery_aligned=True,
             fill_color=None
         )
-        print(self.text)
         
     def update(self):
         Input.update(self)
         
-            
 INPUTS = {
     'num': Logged_Num_Input,
     'string': Logged_String_Input,

@@ -193,16 +193,17 @@ class Position(Base_Element):
             c.update_position()
             c.move_children()
             
-    def hit_any(self):
+    def hit_any(self, inclusive=False):
         p = pg.mouse.get_pos()
         if self.rect.collidepoint(p):
             return True
-        return self.hit_children()
+        return self.hit_children(inclusive=inclusive)
                 
-    def hit_children(self):
+    def hit_children(self, inclusive=False):
         for c in self.children:
-            if c.hit_any():
-                return True
+            if c.enabled or (not c.enabled and inclusive):
+                if c.hit_any():
+                    return True
             
     def copy_position(self, other):
         self.parent = other.parent

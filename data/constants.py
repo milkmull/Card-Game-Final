@@ -81,7 +81,6 @@ TAGS_DICT = {
         'monster': None,
         'plant': None
     }
-    
 }
     
 TYPES_DICT = {
@@ -108,6 +107,48 @@ REQUESTS_DICT = {
     'roll': None,
     'select': None,
     'og': None
+}
+
+LOGS_DICT = {
+    'buy': None,
+    'cast': None,
+    'cfe': None,
+    'cont': None,
+    'draw': None,
+    'dre': None,
+    'gp': None,
+    'lp': None,
+    'p': None,
+    'sp': None,
+    'ui': None
+}
+
+LOG_KEYS_DICT = {
+    'c': None,
+    'coin': None,
+    'deck': None,
+    'dice': None,
+    'give': None,
+    'gp': None,
+    'lp': None,
+    'sp': None,
+    't': None,
+    'target': None,
+    'u': None
+}
+
+EVENTS_DICT = {
+    'fishing trip': None,
+    'flu': None,
+    'harvest': None,
+    'hunting season': None,
+    'item frenzy': None,
+    'negative zone': None,
+    'sand storm': None,
+    'spell reverse': None,
+    'sunny day': None,
+    'parade': None,
+    'wind gust': None
 }
         
         

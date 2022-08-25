@@ -1,4 +1,17 @@
 
+def find_all_input_ports(n, ports=None):
+    if ports is None:
+        ports = []
+    
+    if not n.is_flow:
+        for ip in n.get_input_ports():
+            if not ip.connection:
+                ports.append(ip)
+            else:
+                find_all_input_ports(ip.connection, ports=ports)
+                
+    return ports
+
 def find_all_nodes(_nodes):
     nodes = []
     group_nodes = []
@@ -14,20 +27,25 @@ def find_all_nodes(_nodes):
             
     return (list(set(nodes)), list(set(group_nodes)))
 
-def find_visible_chunk(n, nodes):
-    nodes.append(n)
-    
+def find_visible_chunk(n, nodes, checked=None):
+    if checked is None:
+        checked = []
+        
+    if n.visible:
+        nodes.append(n)
+    checked.append(n)
+
     for ip in n.get_input_ports():
         if ip.connection:
             connected_node = ip.connection_port.parent
-            if connected_node not in nodes:
-                find_chunk(connected_node, nodes)
+            if connected_node not in checked:
+                find_visible_chunk(connected_node, nodes, checked=checked)
     
     for op in n.get_output_ports():
         if op.connection:
             connected_node = op.connection_port.parent
-            if connected_node not in nodes:
-                find_chunk(connected_node, nodes)
+            if connected_node not in checked:
+                find_visible_chunk(connected_node, nodes, checked=checked)
                 
     return nodes
     
@@ -118,53 +136,39 @@ def find_lead(nodes):
     lead = nodes[0]
     for n in nodes:
         for op in n.get_output_ports():
-            if 'flow' in op.types:
+            if op.is_flow:
                 ips = n.get_input_ports()
                 if not ips:
                     return n
                 else:
                     for ip in ips:
-                        if 'flow' in ip.types and not ip.connection:
+                        if ip.is_flow and not ip.connection:
                             return n
             elif not n.get_input_ports():
                 lead = n
                 
     return lead
-
-def map_flow(n, nodes, columns, column=0):
-    if column not in columns:
-        columns[column] = [n]
+    
+def map_flow(n, nodes, map, row=0, column=0):
+    if column not in map:
+        map[column] = {row: n}
     else:
-        columns[column].append(n)
+        map[column][row] = n
     nodes.remove(n)
 
-    for ip in n.get_input_ports()[::-1]:
-        if 'flow' not in ip.types and ip.connection:
+    for r, ip in enumerate(n.get_input_ports()):
+        if ip.connection:
             connected_node = ip.connection_port.parent
             if connected_node in nodes:
-                map_flow(connected_node, nodes, columns, column=column - 1)
-                
-    opp = n.get_output_ports()
-    opp.sort(key=lambda p: p.true_port, reverse=True)
-    
-    for op in opp[::-1]:
-        if 'flow' in op.types and op.connection:
+                map_flow(connected_node, nodes, map, row=row - r, column=column - 1)
+
+    for r, op in enumerate(n.get_output_ports()):
+        if op.connection:
             connected_node = op.connection_port.parent
             if connected_node in nodes:
-                map_flow(connected_node, nodes, columns, column=column + 1)
+                map_flow(connected_node, nodes, map, row=row - r, column=column + 1)
             
-    for op in opp:
-        if 'flow' not in op.types and op.connection:
-            connected_node = op.connection_port.parent
-            if connected_node in nodes:
-                in_flow = connected_node.get_in_flow()
-                if in_flow:
-                    if in_flow.connection:
-                        if in_flow.connection in nodes:
-                            continue
-                map_flow(connected_node, nodes, columns, column=column + 1)
-            
-    return columns
+    return map
 
 def check_bad_connection(n0, n1):   
     local_funcs = set()

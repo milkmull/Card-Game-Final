@@ -32,7 +32,7 @@ class Logged_Dropdown(Input_Dropdown):
             },
             max_buttons=10
         )
-        self.default = self.find_default(self.selection)
+        #self.default = self.find_default(self.selection)
 
         self.add_animation(
             [{

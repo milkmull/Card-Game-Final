@@ -124,7 +124,7 @@ class Context_Manager(Live_Window):
         
         b = Button.Text_Button(
             text='Clean Up',
-            func=menu.spread,
+            func=menu.clean_up,
             **button_kwargs
         )
         buttons.append(b)

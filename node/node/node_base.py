@@ -118,7 +118,7 @@ def unpack(data, manager=None, map=True):
             if element_value is not None:
                 p0.value = element_value
 
-    for id, d in sorted(data['groups'].items(), key=lambda i: i[0]):
+    for id, d in sorted(data['groups'].items(), key=lambda i: int(i[0])):
         id = int(id)
         name = d['name']
         group_nodes = [nodes[id_map[nid]] for nid in d['nodes']]
@@ -805,6 +805,9 @@ class Node(Dragger, Element):
         self.form = form
         self.group_node = None
         self.mark = False
+        
+        self.ports = None
+        self.defaults = {}
 
         self.rect = pg.Rect(0, 0, Node.WIDTH, Node.WIDTH)
         self.rect.topleft = pos
@@ -842,12 +845,12 @@ class Node(Dragger, Element):
         
     @property
     def label_color(self):
-        if self.is_func:
+        if self.is_group:
+            return (106, 0, 106)
+        elif self.is_func:
             return (193, 0, 61)
         elif self.is_flow:
             return (0, 106, 207)
-        elif self.is_group:
-            return (106, 0, 106)
         return (0, 106, 0)
 
     @property
@@ -1001,7 +1004,7 @@ class Node(Dragger, Element):
         return ''
         
     def get_default(self, p):
-        text = self._get_default(p)
+        text = self.defaults.get(p) or self._get_default(p)
         return text if not self.mark else self.mark_text(text, port=p)
         
     def _get_start(self):
@@ -1024,6 +1027,8 @@ class Node(Dragger, Element):
         for ip in self.get_input_ports():
             if ip.connection:
                 input.append(ip.connection.get_output(ip.connection_port.true_port))
+            elif self.defaults.get(ip.port):
+                input.append(self.get_default(ip.port))
             elif ip.element:
                 input.append(ip.get_output())
             else:
@@ -1035,10 +1040,12 @@ class Node(Dragger, Element):
         ip = self.get_port(p)
         if ip.connection:
             return ip.connection.get_output(ip.connection_port.true_port)
+        elif self.defaults.get(p):
+            return self.get_default(p)
         elif ip.element:
             return ip.get_output()
         else:
-            return self.get_default(ip.port)
+            return self.get_default(p)
             
     def get_func_out(self):
         header = self.get_text()
@@ -1280,7 +1287,7 @@ class Group_Node(Node):
             
             for p in n.ports:
                 if p not in ports:
-                    if not p.suppressed and p.connection not in self.nodes:
+                    if not p.suppressed and (not p.connection or (p.connection and p.connection_port.parent not in self.nodes)):
                         if p.port > 0:
                             if p not in ipp:
                                 ipp.append(p)
@@ -1288,9 +1295,9 @@ class Group_Node(Node):
                             opp.append(p)
                     else:
                         p.turn_off()
-                    
-        ipp.sort(key=lambda p: p.port if 'flow' not in p.types else 10)
-        opp.sort(key=lambda p: abs(p.port) if 'flow' not in p.types else 10)
+
+        ipp.sort(key=lambda p: 10 if 'split' in p.types else 11 if 'flow' in p.types else p.port)
+        opp.sort(key=lambda p: 10 if 'split' in p.types else 11 if 'flow' in p.types else abs(p.port))
         
         return opp + ipp
         

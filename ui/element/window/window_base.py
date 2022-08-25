@@ -1,3 +1,5 @@
+import pygame as pg
+
 from ..base.position import Position
 from .scroll_bar import Scroll_Bar
 from ..utils.container import Container
@@ -12,7 +14,7 @@ class Window_Base:
         
         inf_width=False,
         inf_height=True,
-
+        
         left_scroll=False,
         top_scroll=False,
 
@@ -22,6 +24,7 @@ class Window_Base:
     
         self.last_offset = (0, 0)
         self.bounding_box = Position(pos=self.pos, size=self.size)
+        self.bounding_box.set_enabled(False)
         self.add_child(self.bounding_box, left_anchor='left', top_anchor='top')
 
         self.inf_width = inf_width
@@ -31,7 +34,7 @@ class Window_Base:
         self.y_scroll_bar = None
         
         if inf_width:
-            self.x_scroll_bar = Scroll_Bar(size=(1, 0), dir=0, scroll_parent=self, **scroll_bar_kwargs)
+            self.x_scroll_bar = Scroll_Bar(size=(1, 0), dir=0, scroll_parent=self, no_wheel=inf_height, **scroll_bar_kwargs)
             self.x_scroll_bar.set_size(self.outline_rect.width)
             if not top_scroll:
                 self.add_child(self.x_scroll_bar, top_anchor='bottom', centerx_anchor='centerx')
@@ -45,6 +48,8 @@ class Window_Base:
                 self.add_child(self.y_scroll_bar, left_anchor='right', centery_anchor='centery')
             else:
                 self.add_child(self.y_scroll_bar, right_anchor='left', centery_anchor='centery')
+            if self.inf_width:
+                self.y_scroll_bar.pad['bottom'] = (self.x_scroll_bar.rect.bottom - self.y_scroll_bar.rect.bottom)
             
         self.elements = []
             

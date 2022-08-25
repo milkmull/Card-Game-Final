@@ -33,6 +33,7 @@ class Scroll_Bar(Slider):
         
         size=(0, 0),
         dir=1,
+        no_wheel=False,
         scroll_parent=None,
         
         handel_kwargs={},
@@ -61,6 +62,7 @@ class Scroll_Bar(Slider):
             **(kwargs | Scroll_Bar.default_kwargs)
         )
         
+        self.no_wheel = no_wheel
         self.scroll_parent = scroll_parent
         
         if dir:
@@ -212,11 +214,12 @@ class Scroll_Bar(Slider):
         
     def events(self, events):                
         super().events(events)
-
-        mw = events.get('mw')
-        if mw:
-            if self.can_scroll():
-                self.scroll(-mw.y)
+        
+        if not self.no_wheel:
+            mw = events.get('mw')
+            if mw:
+                if self.can_scroll():
+                    self.scroll(-mw.y)
         
         
         

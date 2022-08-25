@@ -80,9 +80,8 @@ class Node_Menu(Popup.Live_Popup):
         
     @property
     def total_rect(self):
-        sb = self.y_scroll_bar
-        if sb.visible:
-            return self.outline_rect.union(sb.total_rect)
+        if self.y_scroll_bar.visible:
+            return self.outline_rect.union(self.y_scroll_bar.total_rect)
         return self.outline_rect
         
     @property

@@ -35,12 +35,12 @@ def is_dark(c):
     
 def color_text(c):
     return (0, 0, 0) if not is_light(c) else (255, 255, 255)
- 
+
 def style_text(text):
     style = {}
     
     number_style = {'fgcolor': (255, 205, 34)}
-    for match in re.finditer(r'(?<![a-zA-Z^_])([0-9]+)', text):
+    for match in re.finditer(r'(?<![a-zA-Z0-9^_])([0-9]+)', text):
         style.update({i: number_style for i in range(match.start(), match.end())})
         
     keyword_style = {'fgcolor': (147, 199, 99), 'style': 1}

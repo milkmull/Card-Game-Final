@@ -10,7 +10,7 @@ class Rect_Selector(Base_Element):
         selection=None,
         
         color=(255, 0, 0),
-        line_width=2,
+        line_width=3,
         
         layer=-20,
         

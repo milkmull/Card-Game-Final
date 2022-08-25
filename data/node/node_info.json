@@ -402,7 +402,7 @@
             "-1": "Returns True if the card has the tag, and False if not."
         }
     },
-    "Is_Type": {
+    "Has_Type": {
         "info": "This node can be used to check if a card is a specific type of card. It will return True if the card has the type, and False if not.",
         "tips": null,
         "ports": {
@@ -810,16 +810,6 @@
         "ports": {
             "1": "The player who will discard the card. This defaults to the user.",
             "2": "The card to be discarded. This will default to a 'None' value",
-            "3": null,
-            "-1": null
-        }
-    },
-    "Safe_Discard": {
-        "info": "This node is used to discard any card. The discarded card will be removed from any associated decks including played cards. It is considered safe because the discarded card will not be added to the game's discard deck.",
-        "tips": "A safe discard is usually used when the card is to be removed from a player and given to another. Also, keep in mind that discarding a card will also end any ongoing process the card might be running.",
-        "ports": {
-            "1": "Player who will discard the card. This defaults to the user.",
-            "2": "The card to be discarded.",
             "3": null,
             "-1": null
         }

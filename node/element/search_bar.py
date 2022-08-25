@@ -14,9 +14,10 @@ class Search_Bar(Input):
             size=(0, 25),
             text_size=15,
             pad=5,
-            clip=False,
-            layer=2
+            clip=False
         )
+        self.manager = menu
+        
         names = [name for name in (Node.NODE_DATA | Node.GROUP_DATA)]
         self.size = self.get_max_size(names)
         
@@ -40,7 +41,7 @@ class Search_Bar(Input):
         for name, obj in Node.NODE_DATA.items():
             b = Button.Text_Button(
                 text=name,
-                func=menu.get_node,
+                func=self.get_node,
                 args=[name],
                 **button_kwargs
             )
@@ -49,7 +50,7 @@ class Search_Bar(Input):
         for name, data in Node.GROUP_DATA.items():
             b = Button.Text_Button(
                 text=name, 
-                func=menu.get_group_node, 
+                func=self.get_group_node, 
                 args=[name],
                 **button_kwargs
             )
@@ -99,7 +100,13 @@ class Search_Bar(Input):
 
         self.open_timer.step()
     
-    
+    def get_node(self, *args, **kwargs):
+        self.manager.get_node(*args, **kwargs)
+        self.close()
+        
+    def get_group_node(self, *args, **kwargs):
+        self.manager.get_group_node(*args, **kwargs)
+        self.close()
     
     
     

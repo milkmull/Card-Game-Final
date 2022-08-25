@@ -26,6 +26,7 @@ class Slider(Element):
         
         self.flipped = flipped
         self.held = False
+        self.held_pos = None
         
         if 'size' not in handel_kwargs:
             if not self.dir:
@@ -112,6 +113,11 @@ class Slider(Element):
         super().left_click()
         self.held = True
         self.handel.set_stuck(False)
+        p = pg.mouse.get_pos()
+        if self.handel.rect.collidepoint(p):
+            self.held_pos = (p[0] - self.handel.rect.x, p[1] - self.handel.rect.y)
+        else:
+            self.held_pos = (self.handel.rect.width // 2, self.handel.rect.height // 2)
         
     def click_up(self, button):
         if button == 1 and self.held:
@@ -120,5 +126,6 @@ class Slider(Element):
                 
     def update(self):
         if self.held:
-            self.handel.rect.center = pg.mouse.get_pos()
+            p = pg.mouse.get_pos()
+            self.handel.rect.topleft = (p[0] - self.held_pos[0], p[1] - self.held_pos[1])
         super().update()

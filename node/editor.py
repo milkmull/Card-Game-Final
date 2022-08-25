@@ -201,7 +201,7 @@ def get_elements(menu):
     elements.insert(0, back_button)
     
     def save_gn():
-        for node in menu.nodes:
+        for node in menu.nodes[::-1]:
             if node.is_group:
                 save_group_node(node)
                 break
@@ -293,7 +293,7 @@ class Node_Editor(Menu):
                 
             self.log_history.append(new_logs)
             
-            print('d', new_logs)
+            #print('d', new_logs)
 
     def undo_log(self):
         if not self.log_history or self.log_index == -1:
@@ -301,7 +301,7 @@ class Node_Editor(Menu):
             
         logs = self.log_history[self.log_index]
         
-        print('u', logs)
+        #print('u', logs)
         
         for log in logs[::-1]:
             type = log['t']
@@ -379,7 +379,7 @@ class Node_Editor(Menu):
             
         logs = self.log_history[self.log_index + 1]
         
-        print('r', logs)
+        #print('r', logs)
         
         for log in logs:
             type = log['t']
@@ -481,7 +481,7 @@ class Node_Editor(Menu):
                 self.get_node('Ongoing')
             if not self.exists('End'):
                 self.get_node('End')
-        self.spread()
+        self.clean_up()
         self.reset_logs()
      
 #wire stuff--------------------------------------------------------------------
@@ -569,7 +569,7 @@ class Node_Editor(Menu):
         for name in n.get_required():
             if not self.exists(name):
                 nodes.append(self.get_node(name))
-        self.spread(nodes=nodes)
+        self.clean_up(nodes=nodes)
 
 #selection stuff--------------------------------------------------------------------
             
@@ -630,67 +630,59 @@ class Node_Editor(Menu):
 
 #other stuff--------------------------------------------------------------------
 
-    def spread(self, nodes=None):
+    def clean_up(self, nodes=None):
         if nodes is None:
             nodes = self.nodes
             
-        funcs = []
-        for n in nodes:
-            if n.visible:
-                func = mapping.find_visible_chunk(n, [])
-                if not any({set(o) == set(func) for o in funcs}):
-                    funcs.append(func)
-                    
-        print(funcs)
+        chunks = []
+        for n in self.nodes:
+            chunk = set(mapping.find_visible_chunk(n, []))
+            if chunk and chunk not in chunks:
+                chunks.append(chunk)
+        chunks = [sorted(chunk, key=lambda n: n.id) for chunk in chunks]
+        
+        print(chunks)
 
-        for nodes in funcs:
-            lead = mapping.find_lead(nodes)
-            columns = mapping.map_flow(lead, nodes.copy(), {})
-            columns = [columns[key][::-1] for key in sorted(columns)]
+        for chunk in chunks:
+            map = mapping.map_flow(chunk[0], chunk.copy(), {})
+
+            x, y = self.body.center
+            space = 5
             
-            x = self.body.width // 2
-            y = self.body.height // 2
-            cy = y
-            
-            for col in columns:
-                r = pg.Rect(0, 0, 0, 0)
-                for n in col:
+            for column in sorted(map):
+                row = [map[column][row] for row in sorted(map[column], reverse=True)]
+                for n in row:
                     n.start_held()
                     n.rect.topleft = (x, y)
-                    y += n.background_rect.height + 10
-                    r.height += n.background_rect.height + 10
+                    y += n.background_rect.height + space
                     
-                r.top = col[0].rect.top
-                dy = cy - r.centery
-                for n in col:
+                r = row[0].background_rect.unionall([n.background_rect for n in row])
+                dy = self.body.centery - r.centery
+                for n in row:
                     n.rect.move_ip(0, dy)
-
-                x += max({n.background_rect.width for n in col}) + 20
-                y = self.body.height // 2
-
-        x = 50
-        y = 50
+                
+                x += max({n.background_rect.width for n in row}) + (2 * space)
+                y = self.body.centery
+                
+        x = 20
+        y = 130
+        space = 5
             
-        for nodes in funcs:
-            left = min({n.background_rect.left for n in nodes})
-            right = max({n.background_rect.right for n in nodes})
-            top = min({n.background_rect.top for n in nodes})
-            bottom = max({n.background_rect.bottom for n in nodes})
-            r = pg.Rect(left, top, right - left, bottom - top)
+        for chunk in chunks:
+            r = chunk[0].background_rect.unionall([n.background_rect for n in chunk])
             cx, cy = r.center
             r.topleft = (x, y)
             dx = r.centerx - cx
             dy = r.centery - cy
-            
-            for n in nodes:
+            for n in chunk:
                 n.rect.move_ip(dx, dy)
                 n.drop()
-                
-            y += r.height + 20
+        
+            y += r.height + (2 * space)
             if y > self.body.height - 100:
-                y = 50
-                x += r.width + 20
-                
+                y = 130
+                x += r.width + (2 * space)
+               
     def new_context(self, node=None):
         if node and self.anchor:
             return
@@ -710,7 +702,11 @@ class Node_Editor(Menu):
 
     def sub_events(self, events):
         split = 5 if not self.cm else 6
-        for e in (self.elements[:split] + self.nodes[::-1] + self.elements[split:]):
+        batch1 = self.elements[:split]
+        batch2 = self.elements[split:]
+        if batch2[-2].visible:
+            batch1.append(batch2.pop(-2))
+        for e in (batch1 + self.nodes[::-1] + batch2):
             if e.enabled:
                 e.events(events)
     
@@ -728,7 +724,7 @@ class Node_Editor(Menu):
                 elif kd.key == pg.K_v:
                     self.paste_nodes()
                 elif kd.key == pg.K_q:
-                    self.spread()
+                    self.clean_up()
                 elif kd.key == pg.K_z:
                     self.undo_log()
                 elif kd.key == pg.K_y:

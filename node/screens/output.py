@@ -11,6 +11,8 @@ from ui.color.ops import color_text, style_text
 def run(node):
     m = Menu(info_menu, init_args=[node])
     m.run()
+    for n in node.manager.nodes:
+        n.mark = False
     
 def info_menu(menu, node, show_full_out=False, last_port=None):
     body = menu.body
@@ -42,7 +44,8 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
     out_text = Textbox(
         font_name='JetBrainsMonoNL-Regular.ttf',
         text_size=17,
-        text_color=(224, 226, 228)
+        text_color=(224, 226, 228),
+        enabled=False
     )
     out_text.font.strength = 0.06
     text_window.join_elements([out_text], border=5)
@@ -228,6 +231,11 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
         text_label.text_color = color_text(visible_port.color)
         text_label.fill_color = visible_port.color
         text_label.set_text(f"Port {visible_port.port} {'Input' if visible_port.port > 0 else 'Output'}:")
+        
+        if text_window.y_scroll_bar.visible:
+            text_label.pad['right'] = text_window.y_scroll_bar.width
+        else:
+            text_label.pad['right'] = 5
         
     found_port = False
 
