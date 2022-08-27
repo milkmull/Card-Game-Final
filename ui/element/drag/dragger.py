@@ -102,7 +102,7 @@ class Dragger:
         dx = 0
         dy = 0
 
-        if self.held and self.held_timer.time >= 4:
+        if self.held and self.held_timer.time >= 5:
             x0, y0 = self.rect.topleft
             px, py = pg.mouse.get_pos()
             rx, ry = self.rel_pos
@@ -118,6 +118,11 @@ class Dragger:
     def left_click(self):
         super().left_click()
         self.start_held()
+        
+    def right_click(self):
+        super().right_click()
+        if not self.selected:
+            Dragger.deselect_all()
         
     def events(self, events):
         super().events(events)

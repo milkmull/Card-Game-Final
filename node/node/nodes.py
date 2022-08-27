@@ -448,7 +448,7 @@ class Add(Node):
     def _get_output(self, p):
         return '({} + {})'.format(*self.get_input())
         
-class Incriment(Node):
+class Increment(Node):
     cat = 'numeric'
     subcat = 'operators'
     def __init__(self, id, **kwargs):
@@ -465,7 +465,7 @@ class Incriment(Node):
     def _get_output(self, p):
         return '({} + 1)'.format(*self.get_input())
         
-class Decriment(Node):
+class Decrement(Node):
     cat = 'numeric'
     subcat = 'operators'
     def __init__(self, id, **kwargs):
@@ -1690,7 +1690,7 @@ class Extract_Value(Node):
         op = self.get_port(-1)
         
         if ip.connection:
-            text = ip.connection.get_string_val()
+            text = ip.connection_port.get_output()
             t = self.eval_text(text)
             if t and t not in op.types:
                 op.update_types([t])
@@ -1866,12 +1866,8 @@ class Check_Index(Node):
     def _get_text(self):
         ip = self.get_port(3)
         input = self.get_input()
-        if ip.connection:
-            if ip.connection.get_string_val().strip("'"):
-                text = f"added{self.id}, c{self.id} = self.check_index({'{0}'}, {'{1}'}, tags=[{'{2}'}])\n"
-            else:
-                text = f"added{self.id}, c{self.id} = self.check_index({'{0}'}, {'{1}'})\n"
-                input.pop(-1)
+        if ip.value:
+            text = f"added{self.id}, c{self.id} = self.check_index({'{0}'}, {'{1}'}, tags=[{'{2}'}])\n"
         else:
             text = f"added{self.id}, c{self.id} = self.check_index({'{0}'}, {'{1}'})\n"
             input.pop(-1)
@@ -2505,4 +2501,69 @@ class Is_Card(Node):
 
     def _get_output(self):
         return "isinstance({0}, card_base.Card)".format(*self.get_input())  
+        
+class Get_Shop(Node):
+    cat = 'card'
+    subcat = 'iterator'
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)
+        
+        self.set_ports([
+            Port(-1, ['cs'], description='shop cards')
+        ])
+        
+    def _get_output(self, p):
+        return 'self.game.get_shop()'
+        
+class Buy_Card(Node):
+    cat = 'player'
+    subcat = 'card operator'
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)
+        
+        self.set_ports([
+            Port(1, ['bool'], description='free?'),
+            Port(2, ['card']),
+            Port(3, ['flow']),
+            Port(-1, ['card']),
+            Port(-2, ['flow'])
+        ])
+        
+        set_check_element(self.get_port(1))
+        self.set_port_pos()
+        
+    def _get_default(self, p):
+        if p == 1:
+            return 'False'
+        elif p == 2:
+            return 'self'
+            
+    def _get_text(self):
+        text = 'player.buy_card({1}.uid, free={0})\n'
+        return text.format(*self.get_input())
+        
+class Random_Cards(Node):
+    cat = 'card'
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['string'], description='type'),
+            Port(2, ['num'], description='number of cards'),
+            Port(-1, ['cs'], description='cards')
+        ])
+        
+        set_dropdown_element(self.get_port(1), TYPES_DICT, value='play')
+        set_input_element(self.get_port(2), 'num')
+        self.set_port_pos()
+        
+    def _get_default(self, p):
+        if p == 1:
+            return "'play'"
+        elif p == 2:
+            return '1'
+        
+    def _get_output(self, p):
+        text = "self.game.draw_cards(type={0}, num={1})"
+        return text.format(*self.get_input())
         

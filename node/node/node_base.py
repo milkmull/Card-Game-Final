@@ -208,10 +208,10 @@ class Wire:
         if ix - Port.SIZE < ox:
                  
             r = orect.union(irect)
-            shift = Port.SIZE
+            shift = Port.SIZE // 2
             xmax = orect.right + shift
 
-            if r.height - 5 > orect.height + irect.height:
+            if r.height > orect.height + irect.height:
                 xmin = irect.left - shift
                 return (
                     start,
@@ -322,6 +322,10 @@ class Port(Element):
     @classmethod
     def get_comparison_types(cls):
         return cls.comparison_types.copy()
+        
+    @classmethod
+    def get_list_types(cls):
+        return list(cls.contains_dict)
         
     @staticmethod
     def new_connection(p0, p1, force=False, d=False):
@@ -1162,8 +1166,9 @@ class Node(Dragger, Element):
         return self.get_hit() and not any({p.hit or (p.element.hit if p.element else False) for p in self.ports})
         
     def click_up(self, button):
-        if button == 3 and self.context_click() and self.manager:
-            self.manager.new_context(node=self)
+        if self.manager:
+            if button == 3 and self.context_click() and not self.manager.cm:
+                self.manager.new_context(node=self)
         
     def update(self):
         super().update()
@@ -1214,7 +1219,7 @@ class Group_Node(Node):
     def from_name(cls, name):
         return unpack(Node.GROUP_DATA[name])[-1]
     
-    def __init__(self, id, nodes, ports=[], **kwargs):
+    def __init__(self, id, nodes, ports=[], pos=None, **kwargs):
         self.nodes = nodes
         self.visible_ports = []
         super().__init__(id, **kwargs)
@@ -1222,6 +1227,9 @@ class Group_Node(Node):
         self.set_ports(self.get_group_ports(ports=ports))
         self.set_self_pos()
         self.set_rel_node_pos()
+        
+        if pos is not None:
+            self.pos = pos
 
     @property
     def is_group(self):

@@ -676,7 +676,7 @@
                 }
             },
             "68": {
-                "name": "Incriment",
+                "name": "Increment",
                 "pos": [
                     189,
                     171
@@ -1061,11 +1061,253 @@
     },
     "Check Next Played Range": {
         "nodes": {
-            "80": {
-                "name": "Get_Deck",
+            "106": {
+                "name": "Range",
+                "pos": [
+                    355,
+                    177
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": 117,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "num"
+                        ],
+                        "element_value": "(player.played.index(self) + 1)"
+                    },
+                    "2": {
+                        "connection": 112,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "num"
+                        ],
+                        "element_value": "len(player.string_to_deck('played'))"
+                    },
+                    "-1": {
+                        "connection": 127,
+                        "connection_port": 1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "ns"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "125": {
+                "name": "Start_Ongoing",
+                "pos": [
+                    394,
+                    111
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": true,
+                        "types": [
+                            "flow"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "127": {
+                "name": "For",
+                "pos": [
+                    189,
+                    214
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": 106,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "cs",
+                            "ps",
+                            "ns",
+                            "ss",
+                            "bs"
+                        ],
+                        "element_value": null
+                    },
+                    "2": {
+                        "connection": 131,
+                        "connection_port": -2,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "flow"
+                        ],
+                        "element_value": null
+                    },
+                    "-1": {
+                        "connection": 122,
+                        "connection_port": 2,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "num"
+                        ],
+                        "element_value": null
+                    },
+                    "-2": {
+                        "connection": 122,
+                        "connection_port": 4,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "split",
+                            "flow"
+                        ],
+                        "element_value": null
+                    },
+                    "-3": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": true,
+                        "visible": false,
+                        "types": [
+                            "flow"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "131": {
+                "name": "Ongoing",
+                "pos": [
+                    394,
+                    350
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "-1": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": true,
+                        "visible": false,
+                        "types": [
+                            "log"
+                        ],
+                        "element_value": null
+                    },
+                    "-2": {
+                        "connection": 127,
+                        "connection_port": 2,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "flow"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "112": {
+                "name": "Length",
+                "pos": [
+                    189,
+                    271
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": 102,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "ps",
+                            "cs",
+                            "ns",
+                            "bs"
+                        ],
+                        "element_value": null
+                    },
+                    "-1": {
+                        "connection": 106,
+                        "connection_port": 2,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "num"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "108": {
+                "name": "Self_Index",
                 "pos": [
                     23,
                     156
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "-1": {
+                        "connection": 117,
+                        "connection_port": 1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "num"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "102": {
+                "name": "Get_Deck",
+                "pos": [
+                    23,
+                    230
                 ],
                 "contains": null,
                 "form": 0,
@@ -1095,7 +1337,7 @@
                         "element_value": null
                     },
                     "-1": {
-                        "connection": 73,
+                        "connection": 112,
                         "connection_port": 1,
                         "parent_port": null,
                         "added": false,
@@ -1108,17 +1350,17 @@
                     }
                 }
             },
-            "96": {
+            "121": {
                 "name": "If",
                 "pos": [
                     521,
-                    225
+                    226
                 ],
                 "contains": null,
                 "form": 0,
                 "ports": {
                     "1": {
-                        "connection": 93,
+                        "connection": 122,
                         "connection_port": -2,
                         "parent_port": null,
                         "added": false,
@@ -1139,7 +1381,7 @@
                         "element_value": null
                     },
                     "2": {
-                        "connection": 93,
+                        "connection": 122,
                         "connection_port": -3,
                         "parent_port": null,
                         "added": false,
@@ -1177,306 +1419,7 @@
                     }
                 }
             },
-            "93": {
-                "name": "Check_Index",
-                "pos": [
-                    355,
-                    156
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": true,
-                        "visible": false,
-                        "types": [
-                            "player"
-                        ],
-                        "element_value": null
-                    },
-                    "2": {
-                        "connection": 97,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "num"
-                        ],
-                        "element_value": "i97"
-                    },
-                    "3": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "string"
-                        ],
-                        "element_value": ""
-                    },
-                    "4": {
-                        "connection": 97,
-                        "connection_port": -2,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "flow"
-                        ],
-                        "element_value": null
-                    },
-                    "-1": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "card"
-                        ],
-                        "element_value": null
-                    },
-                    "-2": {
-                        "connection": 96,
-                        "connection_port": 1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "bool"
-                        ],
-                        "element_value": null
-                    },
-                    "-3": {
-                        "connection": 96,
-                        "connection_port": 2,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "flow"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "84": {
-                "name": "Decriment",
-                "pos": [
-                    189,
-                    271
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": 85,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "num"
-                        ],
-                        "element_value": null
-                    },
-                    "-1": {
-                        "connection": 70,
-                        "connection_port": 1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "num"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "70": {
-                "name": "Range",
-                "pos": [
-                    355,
-                    177
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": 84,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "num"
-                        ],
-                        "element_value": "(player.played.index(self) - 1)"
-                    },
-                    "2": {
-                        "connection": 73,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "num"
-                        ],
-                        "element_value": "len(player.string_to_deck('played'))"
-                    },
-                    "-1": {
-                        "connection": 97,
-                        "connection_port": 1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "ns"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "89": {
-                "name": "Start_Ongoing",
-                "pos": [
-                    394,
-                    111
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "flow"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "85": {
-                "name": "Self_Index",
-                "pos": [
-                    23,
-                    311
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "-1": {
-                        "connection": 84,
-                        "connection_port": 1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "num"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "97": {
-                "name": "For",
-                "pos": [
-                    189,
-                    213
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": 70,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "cs",
-                            "ps",
-                            "ns",
-                            "ss",
-                            "bs"
-                        ],
-                        "element_value": null
-                    },
-                    "2": {
-                        "connection": 95,
-                        "connection_port": -2,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "flow"
-                        ],
-                        "element_value": null
-                    },
-                    "-1": {
-                        "connection": 93,
-                        "connection_port": 2,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "num"
-                        ],
-                        "element_value": null
-                    },
-                    "-2": {
-                        "connection": 93,
-                        "connection_port": 4,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "split",
-                            "flow"
-                        ],
-                        "element_value": null
-                    },
-                    "-3": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": true,
-                        "visible": false,
-                        "types": [
-                            "flow"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "94": {
+            "128": {
                 "name": "Init_Ongoing",
                 "pos": [
                     394,
@@ -1486,7 +1429,7 @@
                 "form": 0,
                 "ports": {
                     "-1": {
-                        "connection": 92,
+                        "connection": 129,
                         "connection_port": 2,
                         "parent_port": null,
                         "added": false,
@@ -1499,7 +1442,42 @@
                     }
                 }
             },
-            "92": {
+            "117": {
+                "name": "Increment",
+                "pos": [
+                    189,
+                    173
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": 108,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "num"
+                        ],
+                        "element_value": null
+                    },
+                    "-1": {
+                        "connection": 106,
+                        "connection_port": 1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "num"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "129": {
                 "name": "Add_To_Ongoing",
                 "pos": [
                     560,
@@ -1521,7 +1499,7 @@
                         "element_value": "cont"
                     },
                     "2": {
-                        "connection": 94,
+                        "connection": 128,
                         "connection_port": -1,
                         "parent_port": null,
                         "added": false,
@@ -1546,33 +1524,30 @@
                     }
                 }
             },
-            "73": {
-                "name": "Length",
+            "122": {
+                "name": "Check_Index",
                 "pos": [
-                    189,
-                    173
+                    355,
+                    156
                 ],
                 "contains": null,
                 "form": 0,
                 "ports": {
                     "1": {
-                        "connection": 80,
-                        "connection_port": -1,
+                        "connection": null,
+                        "connection_port": null,
                         "parent_port": null,
                         "added": false,
-                        "suppressed": false,
+                        "suppressed": true,
                         "visible": false,
                         "types": [
-                            "ps",
-                            "cs",
-                            "ns",
-                            "bs"
+                            "player"
                         ],
                         "element_value": null
                     },
-                    "-1": {
-                        "connection": 70,
-                        "connection_port": 2,
+                    "2": {
+                        "connection": 127,
+                        "connection_port": -1,
                         "parent_port": null,
                         "added": false,
                         "suppressed": false,
@@ -1580,33 +1555,58 @@
                         "types": [
                             "num"
                         ],
+                        "element_value": "i127"
+                    },
+                    "3": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": true,
+                        "types": [
+                            "string"
+                        ],
+                        "element_value": ""
+                    },
+                    "4": {
+                        "connection": 127,
+                        "connection_port": -2,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "flow"
+                        ],
                         "element_value": null
-                    }
-                }
-            },
-            "95": {
-                "name": "Ongoing",
-                "pos": [
-                    394,
-                    350
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
+                    },
                     "-1": {
                         "connection": null,
                         "connection_port": null,
                         "parent_port": null,
                         "added": false,
-                        "suppressed": true,
-                        "visible": false,
+                        "suppressed": false,
+                        "visible": true,
                         "types": [
-                            "log"
+                            "card"
                         ],
                         "element_value": null
                     },
                     "-2": {
-                        "connection": 97,
+                        "connection": 121,
+                        "connection_port": 1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "bool"
+                        ],
+                        "element_value": null
+                    },
+                    "-3": {
+                        "connection": 121,
                         "connection_port": 2,
                         "parent_port": null,
                         "added": false,
@@ -1621,144 +1621,144 @@
             }
         },
         "groups": {
-            "100": {
-                "name": "Ongoing Process",
-                "pos": [
-                    23,
-                    257
-                ],
-                "nodes": [
-                    95,
-                    92,
-                    94,
-                    89
-                ],
-                "rel_node_pos": {
-                    "95": [
-                        -41,
-                        129
-                    ],
-                    "92": [
-                        125,
-                        -3
-                    ],
-                    "94": [
-                        -41,
-                        -2
-                    ],
-                    "89": [
-                        -41,
-                        -122
-                    ]
-                },
-                "visible_ports": [
-                    [
-                        95,
-                        -2
-                    ],
-                    [
-                        92,
-                        1
-                    ],
-                    [
-                        89,
-                        1
-                    ]
-                ]
-            },
-            "87": {
-                "name": "Played Range",
-                "pos": [
-                    23,
-                    183
-                ],
-                "nodes": [
-                    70,
-                    73,
-                    80,
-                    84,
-                    85
-                ],
-                "rel_node_pos": {
-                    "70": [
-                        200,
-                        -7
-                    ],
-                    "73": [
-                        34,
-                        -56
-                    ],
-                    "80": [
-                        -132,
-                        -45
-                    ],
-                    "84": [
-                        34,
-                        42
-                    ],
-                    "85": [
-                        -132,
-                        70
-                    ]
-                },
-                "visible_ports": [
-                    [
-                        70,
-                        -1
-                    ]
-                ]
-            },
-            "102": {
+            "135": {
                 "name": "Check Next Played Range",
                 "pos": [
                     222,
                     200
                 ],
                 "nodes": [
-                    87,
-                    93,
-                    96,
-                    97,
-                    100
+                    119,
+                    121,
+                    122,
+                    127,
+                    133
                 ],
                 "rel_node_pos": {
-                    "87": [
+                    "119": [
                         -199,
                         -69
                     ],
-                    "93": [
-                        133,
-                        9
-                    ],
-                    "96": [
+                    "121": [
                         299,
                         9
                     ],
-                    "97": [
+                    "122": [
+                        133,
+                        8
+                    ],
+                    "127": [
                         -33,
                         9
                     ],
-                    "100": [
+                    "133": [
                         -199,
-                        45
+                        46
                     ]
                 },
                 "visible_ports": [
                     [
-                        93,
+                        122,
                         -1
                     ],
                     [
-                        96,
+                        121,
                         -1
                     ],
                     [
-                        93,
+                        122,
                         3
                     ],
                     [
-                        89,
+                        125,
                         1
+                    ]
+                ]
+            },
+            "133": {
+                "name": "Ongoing Process",
+                "pos": [
+                    23,
+                    258
+                ],
+                "nodes": [
+                    131,
+                    129,
+                    128,
+                    125
+                ],
+                "rel_node_pos": {
+                    "131": [
+                        -41,
+                        129
+                    ],
+                    "129": [
+                        125,
+                        -3
+                    ],
+                    "128": [
+                        -41,
+                        -2
+                    ],
+                    "125": [
+                        -41,
+                        -122
+                    ]
+                },
+                "visible_ports": [
+                    [
+                        131,
+                        -2
+                    ],
+                    [
+                        129,
+                        1
+                    ],
+                    [
+                        125,
+                        1
+                    ]
+                ]
+            },
+            "119": {
+                "name": "Played Range",
+                "pos": [
+                    23,
+                    184
+                ],
+                "nodes": [
+                    102,
+                    106,
+                    108,
+                    112,
+                    117
+                ],
+                "rel_node_pos": {
+                    "102": [
+                        -132,
+                        46
+                    ],
+                    "106": [
+                        200,
+                        9
+                    ],
+                    "108": [
+                        -132,
+                        -69
+                    ],
+                    "112": [
+                        34,
+                        58
+                    ],
+                    "117": [
+                        34,
+                        -40
+                    ]
+                },
+                "visible_ports": [
+                    [
+                        106,
+                        -1
                     ]
                 ]
             }
@@ -1766,10 +1766,86 @@
     },
     "Get All Played": {
         "nodes": {
-            "20": {
-                "name": "Get_Deck",
+            "1": {
+                "name": "For",
                 "pos": [
                     189,
+                    234
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": 2,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "cs",
+                            "ps",
+                            "ns",
+                            "ss",
+                            "bs"
+                        ],
+                        "element_value": null
+                    },
+                    "2": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": true,
+                        "types": [
+                            "flow"
+                        ],
+                        "element_value": null
+                    },
+                    "-1": {
+                        "connection": 3,
+                        "connection_port": 2,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "player"
+                        ],
+                        "element_value": null
+                    },
+                    "-2": {
+                        "connection": 0,
+                        "connection_port": 2,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "split",
+                            "flow"
+                        ],
+                        "element_value": null
+                    },
+                    "-3": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": true,
+                        "types": [
+                            "flow"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "3": {
+                "name": "Get_Deck",
+                "pos": [
+                    355,
                     156
                 ],
                 "contains": null,
@@ -1788,7 +1864,7 @@
                         "element_value": "played"
                     },
                     "2": {
-                        "connection": 16,
+                        "connection": 1,
                         "connection_port": -1,
                         "parent_port": null,
                         "added": false,
@@ -1800,7 +1876,7 @@
                         "element_value": null
                     },
                     "-1": {
-                        "connection": 17,
+                        "connection": 0,
                         "connection_port": 1,
                         "parent_port": null,
                         "added": false,
@@ -1813,17 +1889,17 @@
                     }
                 }
             },
-            "17": {
+            "0": {
                 "name": "For",
                 "pos": [
                     355,
-                    234
+                    312
                 ],
                 "contains": null,
                 "form": 0,
                 "ports": {
                     "1": {
-                        "connection": 20,
+                        "connection": 3,
                         "connection_port": -1,
                         "parent_port": null,
                         "added": false,
@@ -1839,7 +1915,7 @@
                         "element_value": null
                     },
                     "2": {
-                        "connection": 16,
+                        "connection": 1,
                         "connection_port": -2,
                         "parent_port": null,
                         "added": false,
@@ -1889,7 +1965,7 @@
                     }
                 }
             },
-            "19": {
+            "2": {
                 "name": "All_Players",
                 "pos": [
                     23,
@@ -1899,7 +1975,7 @@
                 "form": 0,
                 "ports": {
                     "-1": {
-                        "connection": 16,
+                        "connection": 1,
                         "connection_port": 1,
                         "parent_port": null,
                         "added": false,
@@ -1911,130 +1987,54 @@
                         "element_value": null
                     }
                 }
-            },
-            "16": {
-                "name": "For",
-                "pos": [
-                    189,
-                    312
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": 19,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "cs",
-                            "ps",
-                            "ns",
-                            "ss",
-                            "bs"
-                        ],
-                        "element_value": null
-                    },
-                    "2": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "flow"
-                        ],
-                        "element_value": null
-                    },
-                    "-1": {
-                        "connection": 20,
-                        "connection_port": 2,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "player"
-                        ],
-                        "element_value": null
-                    },
-                    "-2": {
-                        "connection": 17,
-                        "connection_port": 2,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "split",
-                            "flow"
-                        ],
-                        "element_value": null
-                    },
-                    "-3": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "flow"
-                        ],
-                        "element_value": null
-                    }
-                }
             }
         },
         "groups": {
-            "22": {
+            "5": {
                 "name": "Get All Played",
                 "pos": [
-                    189,
-                    244
+                    332,
+                    292
                 ],
                 "nodes": [
-                    16,
-                    17,
-                    19,
-                    20
+                    0,
+                    1,
+                    2,
+                    3
                 ],
                 "rel_node_pos": {
-                    "16": [
-                        0,
+                    "0": [
+                        125,
                         80
                     ],
-                    "17": [
-                        166,
+                    "1": [
+                        -41,
                         2
                     ],
-                    "19": [
-                        -166,
+                    "2": [
+                        -207,
                         2
                     ],
-                    "20": [
-                        0,
+                    "3": [
+                        125,
                         -83
                     ]
                 },
                 "visible_ports": [
                     [
-                        17,
+                        0,
                         -1
                     ],
                     [
-                        17,
+                        0,
                         -2
                     ],
                     [
-                        16,
+                        1,
                         -3
                     ],
                     [
-                        16,
+                        1,
                         2
                     ]
                 ]
@@ -2232,7 +2232,7 @@
                 }
             },
             "72": {
-                "name": "Decriment",
+                "name": "Decrement",
                 "pos": [
                     189,
                     171
@@ -2654,67 +2654,7 @@
     },
     "Card In Deck": {
         "nodes": {
-            "82": {
-                "name": "Custom_Filter",
-                "pos": [
-                    189,
-                    238
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": 84,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "bool",
-                            "num",
-                            "string",
-                            "ps",
-                            "cs",
-                            "ns",
-                            "ss",
-                            "bs",
-                            "player",
-                            "card"
-                        ],
-                        "element_value": "(self.name == 'aunt peg')"
-                    },
-                    "2": {
-                        "connection": 81,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "cs",
-                            "ps",
-                            "ns",
-                            "ss",
-                            "bs"
-                        ],
-                        "element_value": null
-                    },
-                    "-1": {
-                        "connection": 79,
-                        "connection_port": 1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "cs"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "79": {
+            "84": {
                 "name": "Any",
                 "pos": [
                     355,
@@ -2724,7 +2664,7 @@
                 "form": 0,
                 "ports": {
                     "1": {
-                        "connection": 82,
+                        "connection": 83,
                         "connection_port": -1,
                         "parent_port": null,
                         "added": false,
@@ -2753,58 +2693,11 @@
                     }
                 }
             },
-            "81": {
-                "name": "Get_Deck",
-                "pos": [
-                    23,
-                    156
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "string"
-                        ],
-                        "element_value": "active_spells"
-                    },
-                    "2": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "player"
-                        ],
-                        "element_value": null
-                    },
-                    "-1": {
-                        "connection": 82,
-                        "connection_port": 2,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "cs"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "84": {
+            "86": {
                 "name": "Has_Name",
                 "pos": [
                     23,
-                    312
+                    156
                 ],
                 "contains": null,
                 "form": 0,
@@ -2834,7 +2727,7 @@
                         "element_value": null
                     },
                     "-1": {
-                        "connection": 82,
+                        "connection": 83,
                         "connection_port": 1,
                         "parent_port": null,
                         "added": false,
@@ -2846,54 +2739,161 @@
                         "element_value": null
                     }
                 }
+            },
+            "85": {
+                "name": "Get_Deck",
+                "pos": [
+                    23,
+                    312
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": true,
+                        "types": [
+                            "string"
+                        ],
+                        "element_value": "active_spells"
+                    },
+                    "2": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": true,
+                        "types": [
+                            "player"
+                        ],
+                        "element_value": null
+                    },
+                    "-1": {
+                        "connection": 83,
+                        "connection_port": 2,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "cs"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "83": {
+                "name": "Custom_Filter",
+                "pos": [
+                    189,
+                    238
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": 86,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "bool",
+                            "num",
+                            "string",
+                            "ps",
+                            "cs",
+                            "ns",
+                            "ss",
+                            "bs",
+                            "player",
+                            "card"
+                        ],
+                        "element_value": "(self.name == 'aunt peg')"
+                    },
+                    "2": {
+                        "connection": 85,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "cs",
+                            "ps",
+                            "ns",
+                            "ss",
+                            "bs"
+                        ],
+                        "element_value": null
+                    },
+                    "-1": {
+                        "connection": 84,
+                        "connection_port": 1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "cs"
+                        ],
+                        "element_value": null
+                    }
+                }
             }
         },
         "groups": {
-            "85": {
+            "88": {
                 "name": "Card In Deck",
                 "pos": [
                     147,
                     205
                 ],
                 "nodes": [
-                    79,
-                    81,
-                    82,
-                    84
+                    83,
+                    84,
+                    85,
+                    86
                 ],
                 "rel_node_pos": {
-                    "79": [
-                        208,
-                        0
-                    ],
-                    "81": [
-                        -124,
-                        -78
-                    ],
-                    "82": [
+                    "83": [
                         42,
                         0
                     ],
                     "84": [
+                        208,
+                        0
+                    ],
+                    "85": [
                         -124,
                         78
+                    ],
+                    "86": [
+                        -124,
+                        -78
                     ]
                 },
                 "visible_ports": [
                     [
-                        79,
+                        84,
                         -1
                     ],
                     [
-                        81,
+                        85,
                         1
                     ],
                     [
-                        84,
+                        86,
                         1
                     ],
                     [
-                        81,
+                        85,
                         2
                     ]
                 ]

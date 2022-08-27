@@ -15,7 +15,7 @@ def set_input_element(port, type, value=''):
 def set_check_element(port, value=True):
     cb = Check_Box(
         port,
-        value=value
+        value=bool(port.node.get_output(port.port))
     )
     port.set_element(cb)
     

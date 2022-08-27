@@ -7,6 +7,7 @@ from ui.element.base.base import Base_Element
 from ui.element.elements import Textbox, Button, Flipper, Live_Window, Label
 from ui.element.utils.image import get_arrow
 from ui.color.ops import is_light
+from data.constants import NODE_DATA_FILE
 
 def run(node):
     m = Menu(info_menu, init_args=[node])
@@ -20,9 +21,8 @@ def info_menu(menu, node):
     node._stuck = True
     elements.append(node)
     
-    with open('data/node/node_info.json', 'r') as f:
-        data = json.load(f)    
-    data = data.get(node.name, {})
+    with open(NODE_DATA_FILE, 'r') as f:
+        data = json.load(f).get(node.name, {})   
 
     title = Textbox(
         pos=(30, 20),

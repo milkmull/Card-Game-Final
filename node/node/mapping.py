@@ -149,24 +149,28 @@ def find_lead(nodes):
                 
     return lead
     
-def map_flow(n, nodes, map, row=0, column=0):
+def map_flow(n, nodes, map, port=None, row=0, column=0):
     if column not in map:
         map[column] = {row: n}
     else:
         map[column][row] = n
     nodes.remove(n)
 
-    for r, ip in enumerate(n.get_input_ports()):
+    ipp = sorted([p for p in n.get_input_ports() if p.visible], key=lambda p: p.rect.top, reverse=True)
+    i = ipp.index(port) if port in ipp else 0
+    for j, ip in enumerate(ipp):
         if ip.connection:
             connected_node = ip.connection_port.parent
             if connected_node in nodes:
-                map_flow(connected_node, nodes, map, row=row - r, column=column - 1)
+                map_flow(connected_node, nodes, map, port=ip.connection_port, row=row + (i - j), column=column - 1)
 
-    for r, op in enumerate(n.get_output_ports()):
+    opp = sorted([p for p in n.get_output_ports() if p.visible], key=lambda p: p.rect.top, reverse=True)
+    i = opp.index(port) if port in opp else 0
+    for j, op in enumerate(opp):
         if op.connection:
             connected_node = op.connection_port.parent
             if connected_node in nodes:
-                map_flow(connected_node, nodes, map, row=row - r, column=column + 1)
+                map_flow(connected_node, nodes, map, port=op.connection_port, row=row + (i - j), column=column + 1)
             
     return map
 

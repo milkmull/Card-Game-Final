@@ -154,7 +154,7 @@ class Game_Base:
         for i, name in enumerate(cards):
             cards[i] = self.get_card(name)
         return cards
-        
+ 
     def get_card(self, name, uid=None):
         if uid is None:
             uid = self.get_new_uid()
@@ -226,6 +226,9 @@ class Game_Base:
                 self.shop.remove(c)
                 self.fill_shop()
                 return c
+                
+    def get_shop(self):
+        return self.shop.copy()
 
 #update info stuff---------------------------------------------------------------------------------------
             

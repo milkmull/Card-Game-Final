@@ -4,6 +4,7 @@ from ui.element.drag.dragger import Dragger
 from ui.element.elements import Button, Live_Window
 from ..screens.info import run as run_info
 from ..screens.output import run as run_output
+from data.constants import NODE_DATA
 
 class Context_Manager(Live_Window):
     def __init__(
@@ -78,7 +79,7 @@ class Context_Manager(Live_Window):
                 )
                 buttons.append(b)
                 
-            if not node.is_group:
+            if node.name in NODE_DATA:
                 b = Button.Text_Button(
                     text='Info',
                     func=run_info,
@@ -87,14 +88,14 @@ class Context_Manager(Live_Window):
                 )
                 buttons.append(b)
                 
-                if node.ports:
-                    b = Button.Text_Button(
-                        text='View Output',
-                        func=run_output,
-                        args=[node],
-                        **button_kwargs
-                    )
-                    buttons.append(b)
+            if not node.is_group and node.ports:
+                b = Button.Text_Button(
+                    text='View Output',
+                    func=run_output,
+                    args=[node],
+                    **button_kwargs
+                )
+                buttons.append(b)
                 
             add_sep()
                 

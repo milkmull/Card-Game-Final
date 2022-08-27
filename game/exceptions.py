@@ -9,3 +9,7 @@ class CardNotFound(Exception):
 class DeckNotFound(Exception):
     def __init__(self, deck):
         super().__init__(f"Deck of name '{deck}' not found")
+        
+class NotInShop(Exception):
+    def __init__(self, name):
+        super().__init__(f"Card of name '{name}' not found in shop")

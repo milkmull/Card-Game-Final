@@ -15,6 +15,16 @@ from ui.element.elements import Image, Textbox, Button, Input, Label
 from ui.element.base.style import Style
 from ui.menu.menu import Menu
 from ui.icons.icons import icons
+
+def test_info():
+    from .screens.info import run
+    
+    for sc in Node.get_subclasses():
+        n = sc(0)
+        try:
+            run(n)
+        except:
+            print('missing', n)
    
 def save_group_node(gn):
     import json
@@ -233,6 +243,7 @@ class Node_Editor(Menu):
         super().__init__(get_elements, fill_color=(32, 32, 40))
         
         self.anchor = None
+        self.scroll_anchor = None
 
         self.log = []
         self.logs = []
@@ -640,8 +651,6 @@ class Node_Editor(Menu):
             if chunk and chunk not in chunks:
                 chunks.append(chunk)
         chunks = [sorted(chunk, key=lambda n: n.id) for chunk in chunks]
-        
-        print(chunks)
 
         for chunk in chunks:
             map = mapping.map_flow(chunk[0], chunk.copy(), {})
@@ -650,7 +659,7 @@ class Node_Editor(Menu):
             space = 5
             
             for column in sorted(map):
-                row = [map[column][row] for row in sorted(map[column], reverse=True)]
+                row = [map[column][row] for row in sorted(map[column])]
                 for n in row:
                     n.start_held()
                     n.rect.topleft = (x, y)
@@ -722,6 +731,7 @@ class Node_Editor(Menu):
                 if kd.key == pg.K_c:
                     self.copy_nodes()
                 elif kd.key == pg.K_v:
+                    Dragger.deselect_all()
                     self.paste_nodes()
                 elif kd.key == pg.K_q:
                     self.clean_up()
@@ -729,7 +739,6 @@ class Node_Editor(Menu):
                     self.undo_log()
                 elif kd.key == pg.K_y:
                     self.redo_log()
-                    
                 elif kd.key == pg.K_g:
                     self.create_new_group_node()
                 elif kd.key == pg.K_u:

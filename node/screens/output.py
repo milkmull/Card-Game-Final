@@ -20,6 +20,8 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
     
     original_node = node
     node = original_node.copy()
+    for p in node.ports:
+        p.set_visible(True)
     node.enabled = False
     node.refresh = False
     elements.append(node)
