@@ -28,7 +28,7 @@ def grayscale(c):
     
 def is_light(c):
     r, g, b = c[:3]
-    return (0.2126 * r) + (0.7152 * g) + (0.0722 * b) < 40
+    return (0.299 * r) + (0.587 * g) + (0.114 * b) < 60
     
 def is_dark(c):
     return not is_light(c)

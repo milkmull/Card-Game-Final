@@ -3,13 +3,14 @@ import pygame as pg
 from ..compiler import Compiler
 
 from ui.menu.menu import Menu
+
 from ui.element.base.base import Base_Element
-from ui.element.elements import Textbox, Button, Image, Check_Box, Live_Window
+from ui.element.elements import Textbox, Button, Check_Box, Live_Window
 from ui.element.utils.image import get_arrow
 from ui.color.ops import color_text, style_text
 
 def run(node):
-    m = Menu(info_menu, init_args=[node])
+    m = Menu(info_menu, init_args=[node], fill_color=(32, 32, 40))
     m.run()
     for n in node.manager.nodes:
         n.mark = False
@@ -25,6 +26,13 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
     node.enabled = False
     node.refresh = False
     elements.append(node)
+    
+    id_text = Textbox(
+        text=f'Node ID: {original_node.id}',
+        text_size=25
+    )
+    id_text.rect.topleft = (20, 20)
+    elements.append(id_text)
 
     text_window = Live_Window(
         size=(700, 400),
@@ -128,29 +136,7 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
     )
     navigation_button.rect.midtop = (node.rect.centerx, full_output.rect.bottom + 20)
     elements.append(navigation_button)
-    
-    back_button = Button.Text_Button(
-        text='Back',
-        size=(200, 25),
-        centerx_aligned=True,
-        centery_aligned=True,
-        outline_color=(255, 255, 255),
-        outline_width=3,
-        border_radius=5,
-        hover_color=(255, 0, 0),
-        tag='exit'
-    )
-    back_button.rect.midtop = (node.rect.centerx, navigation_button.rect.bottom + 20)
-    elements.append(back_button)
-    
-    back_button.add_animation(
-        [{
-            'attr': 'text_color',
-            'end': (0, 0, 0)
-        }],
-        tag='hover'
-    )
-    
+
     compiler = Compiler(
         original_node.manager.nodes,
         card=original_node.manager.card,
@@ -225,8 +211,7 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
         for s, e in ranges:
             text_style.update({i: style for i in range(s, e)})
 
-        out_text.text_style = text_style
-        out_text.set_text(Compiler.unmark(full_text).strip(), force=True)
+        out_text.set_text(Compiler.unmark(full_text).strip(), force=True, style=text_style)
         text_window.join_elements([out_text], border=5)
         text_window.outline_color = visible_port.color
 
@@ -258,6 +243,27 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
         if last_port is None or (last_port is not None and p.port == last_port):
             b.left_click()
             found_port = True
+            
+    back_button = Button.Text_Button(
+        text='Back',
+        size=(200, 25),
+        centerx_aligned=True,
+        centery_aligned=True,
+        outline_color=(255, 255, 255),
+        outline_width=3,
+        border_radius=5,
+        hover_color=(255, 0, 0),
+        tag='exit'
+    )
+    back_button.rect.midbottom = (body.centerx, body.height - 20)
+    elements.append(back_button)
+    
+    back_button.add_animation(
+        [{
+            'attr': 'text_color',
+            'end': (0, 0, 0)
+        }],
+        tag='hover'
+    )
     
     return elements
- 

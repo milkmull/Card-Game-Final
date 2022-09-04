@@ -1,47 +1,27 @@
 {
-	"types": [
-		"play",
-		"item",
-		"spell",
-		"treasure",
-		"landscape",
-		"event"
-	],
-    "tags": {
-        "biomes": [
-            "city",
-            "forest",
-            "farm",
-            "water",
-            "sky",
-            "garden",
-            "desert",
-            "graveyard"
-        ],
-        "descriptors": [
-            "human",
-            "animal",
-            "plant",
-            "monster",
-            "dog",
-			"bug"
-        ]
+	"types": {
+		"play": "These are the cards that are played to progress your turn. They can be drawn and can appear in the shop.",
+		"item": "These cards reside in the players' hand. They can be activated whenever the player decides to use them. Equipment cards are a subset of item cards. These cards start an ongoing process while in your hand and are discarded once a condition is met. To make an Equipment card simply add an ongoing process to an Item card. Item cards can appear in the shop.",
+        "spell": "These cards reside in in the players' hand. They can be sent to a player at any point during the game. They will continue to affect the player until a condition is met or the round ends. Spell cards can appear in the shop.",
+        "treasure": "These cards are usually obtained through meeting special conditions and tend to grant a sizable reward. Often times, Treasure cards will have an 'End' function which will activate at the end of the round. This rewards the player for holding onto the card for the whole round.",
+        "landscape": "These cards are granted to players at the beginning of each round. They allow Play cards that are tagged with their name to take effect twice when played.",
+        "event": "These cards are set into play once at the beginning of each round. They effect all players and sometimes will set some bonus condition to be met at the end of the round."
     },
-    "decks": [
-        "played",
-        "unplayed",
-        "items",
-        "spells",
-        "active_spells",
-        "treasure",
-        "landscapes"
-    ],
-	"requests": [
-		"flip",
-		"roll",
-		"select",
-		"og"
-	],
+    "decks": {
+        "played": "This deck contains all Play cards that have been used by a player so far. This is the main deck that is displayed during games.",
+        "unplayed": "This deck is only visible to the player. It contains all Play cards in the players' hand.",
+        "items": "This deck contains all Items in the players' hand. Items that are equipped with some ongoing process will not be included.",
+        "spells": "This deck contains all Spells in the players' hand.",
+        "active_spells": "This deck contains all Spells currently affecting the player.",
+        "treasure": "This deck contains all Treasure cards in the players' hand",
+        "landscapes": "This deck contains all Landscape cards currently affecting the player."
+    },
+	"requests": {
+		"flip": "This will activate a coin flip event.",
+		"roll": "This will activate a dice roll event.",
+		"select": "This will activate a selection event.",
+		"og": "This will activate an ongoing process."
+	},
     "logs": {
 		"cont": {
 			"info": "Occurs when the player is updated every frame. Use this tag if you would like the card's ongoing function to run every time the player is updated.",
@@ -58,7 +38,7 @@
             }
         },
         "play": {
-            "info": "When a player plays a card.",
+            "info": "Occurs when a player plays a card.",
             "data": {
 				"t": "'p'",
 				"c": "The card that was played."
@@ -90,7 +70,7 @@
             "info": "Occurs when the results of a coin flip have been decided. If you are looking to manually set the results of a coin flip, you should do it once this log appears.",
             "data": {
 				"t": "'cfe'",
-				"coin": "Flip result as boolean value."
+				"coin": "Flip result as Boolean value."
 			}
         },
 		"dice roll end": {

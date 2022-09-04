@@ -427,11 +427,11 @@
     },
     "Ongoing Process": {
         "nodes": {
-            "26": {
+            "75": {
                 "name": "Ongoing",
                 "pos": [
-                    394,
-                    350
+                    239,
+                    344
                 ],
                 "contains": null,
                 "form": 0,
@@ -441,8 +441,8 @@
                         "connection_port": null,
                         "parent_port": null,
                         "added": false,
-                        "suppressed": true,
-                        "visible": false,
+                        "suppressed": false,
+                        "visible": true,
                         "types": [
                             "log"
                         ],
@@ -462,34 +462,11 @@
                     }
                 }
             },
-            "29": {
-                "name": "Start_Ongoing",
-                "pos": [
-                    394,
-                    111
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "flow"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "27": {
+            "77": {
                 "name": "Add_To_Ongoing",
                 "pos": [
-                    560,
-                    190
+                    405,
+                    183
                 ],
                 "contains": null,
                 "form": 0,
@@ -507,7 +484,7 @@
                         "element_value": "cont"
                     },
                     "2": {
-                        "connection": 28,
+                        "connection": 78,
                         "connection_port": -1,
                         "parent_port": null,
                         "added": false,
@@ -532,17 +509,17 @@
                     }
                 }
             },
-            "28": {
+            "78": {
                 "name": "Init_Ongoing",
                 "pos": [
-                    394,
-                    231
+                    239,
+                    225
                 ],
                 "contains": null,
                 "form": 0,
                 "ports": {
                     "-1": {
-                        "connection": 27,
+                        "connection": 77,
                         "connection_port": 2,
                         "parent_port": null,
                         "added": false,
@@ -554,50 +531,77 @@
                         "element_value": null
                     }
                 }
+            },
+            "76": {
+                "name": "Start_Ongoing",
+                "pos": [
+                    239,
+                    105
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": true,
+                        "types": [
+                            "flow"
+                        ],
+                        "element_value": null
+                    }
+                }
             }
         },
         "groups": {
-            "32": {
+            "80": {
                 "name": "Ongoing Process",
                 "pos": [
-                    435,
-                    193
+                    365,
+                    282
                 ],
                 "nodes": [
-                    26,
-                    27,
-                    28,
-                    29
+                    75,
+                    76,
+                    77,
+                    78
                 ],
                 "rel_node_pos": {
-                    "26": [
+                    "75": [
                         -41,
                         129
                     ],
-                    "27": [
+                    "76": [
+                        -41,
+                        -122
+                    ],
+                    "77": [
                         125,
                         -3
                     ],
-                    "28": [
+                    "78": [
                         -41,
                         -2
-                    ],
-                    "29": [
-                        -41,
-                        -122
                     ]
                 },
                 "visible_ports": [
                     [
-                        26,
+                        75,
+                        -1
+                    ],
+                    [
+                        75,
                         -2
                     ],
                     [
-                        27,
+                        77,
                         1
                     ],
                     [
-                        29,
+                        76,
                         1
                     ]
                 ]
@@ -656,7 +660,7 @@
                         "suppressed": false,
                         "visible": true,
                         "types": [
-                            "split",
+                            "process",
                             "flow"
                         ],
                         "element_value": null
@@ -1188,7 +1192,7 @@
                         "suppressed": false,
                         "visible": false,
                         "types": [
-                            "split",
+                            "process",
                             "flow"
                         ],
                         "element_value": null
@@ -1400,7 +1404,7 @@
                         "suppressed": false,
                         "visible": true,
                         "types": [
-                            "split",
+                            "process",
                             "flow"
                         ],
                         "element_value": null
@@ -1823,7 +1827,7 @@
                         "suppressed": false,
                         "visible": false,
                         "types": [
-                            "split",
+                            "process",
                             "flow"
                         ],
                         "element_value": null
@@ -1946,7 +1950,7 @@
                         "suppressed": false,
                         "visible": true,
                         "types": [
-                            "split",
+                            "process",
                             "flow"
                         ],
                         "element_value": null
@@ -2374,7 +2378,7 @@
                         "suppressed": false,
                         "visible": true,
                         "types": [
-                            "split",
+                            "process",
                             "flow"
                         ],
                         "element_value": null
@@ -2654,46 +2658,7 @@
     },
     "Card In Deck": {
         "nodes": {
-            "84": {
-                "name": "Any",
-                "pos": [
-                    355,
-                    263
-                ],
-                "contains": null,
-                "form": 0,
-                "ports": {
-                    "1": {
-                        "connection": 83,
-                        "connection_port": -1,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": false,
-                        "types": [
-                            "cs",
-                            "ps",
-                            "ns",
-                            "ss",
-                            "bs"
-                        ],
-                        "element_value": null
-                    },
-                    "-1": {
-                        "connection": null,
-                        "connection_port": null,
-                        "parent_port": null,
-                        "added": false,
-                        "suppressed": false,
-                        "visible": true,
-                        "types": [
-                            "bool"
-                        ],
-                        "element_value": null
-                    }
-                }
-            },
-            "86": {
+            "71": {
                 "name": "Has_Name",
                 "pos": [
                     23,
@@ -2727,7 +2692,7 @@
                         "element_value": null
                     },
                     "-1": {
-                        "connection": 83,
+                        "connection": 73,
                         "connection_port": 1,
                         "parent_port": null,
                         "added": false,
@@ -2740,7 +2705,46 @@
                     }
                 }
             },
-            "85": {
+            "70": {
+                "name": "Any",
+                "pos": [
+                    355,
+                    263
+                ],
+                "contains": null,
+                "form": 0,
+                "ports": {
+                    "1": {
+                        "connection": 73,
+                        "connection_port": -1,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": false,
+                        "types": [
+                            "cs",
+                            "ps",
+                            "ns",
+                            "ss",
+                            "bs"
+                        ],
+                        "element_value": null
+                    },
+                    "-1": {
+                        "connection": null,
+                        "connection_port": null,
+                        "parent_port": null,
+                        "added": false,
+                        "suppressed": false,
+                        "visible": true,
+                        "types": [
+                            "bool"
+                        ],
+                        "element_value": null
+                    }
+                }
+            },
+            "72": {
                 "name": "Get_Deck",
                 "pos": [
                     23,
@@ -2759,7 +2763,7 @@
                         "types": [
                             "string"
                         ],
-                        "element_value": "active_spells"
+                        "element_value": "played"
                     },
                     "2": {
                         "connection": null,
@@ -2774,7 +2778,7 @@
                         "element_value": null
                     },
                     "-1": {
-                        "connection": 83,
+                        "connection": 73,
                         "connection_port": 2,
                         "parent_port": null,
                         "added": false,
@@ -2787,7 +2791,7 @@
                     }
                 }
             },
-            "83": {
+            "73": {
                 "name": "Custom_Filter",
                 "pos": [
                     189,
@@ -2797,7 +2801,7 @@
                 "form": 0,
                 "ports": {
                     "1": {
-                        "connection": 86,
+                        "connection": 71,
                         "connection_port": -1,
                         "parent_port": null,
                         "added": false,
@@ -2818,7 +2822,7 @@
                         "element_value": "(self.name == 'aunt peg')"
                     },
                     "2": {
-                        "connection": 85,
+                        "connection": 72,
                         "connection_port": -1,
                         "parent_port": null,
                         "added": false,
@@ -2834,7 +2838,7 @@
                         "element_value": null
                     },
                     "-1": {
-                        "connection": 84,
+                        "connection": 70,
                         "connection_port": 1,
                         "parent_port": null,
                         "added": false,
@@ -2849,51 +2853,51 @@
             }
         },
         "groups": {
-            "88": {
+            "74": {
                 "name": "Card In Deck",
                 "pos": [
                     147,
-                    205
+                    240
                 ],
                 "nodes": [
-                    83,
-                    84,
-                    85,
-                    86
+                    73,
+                    70,
+                    72,
+                    71
                 ],
                 "rel_node_pos": {
-                    "83": [
+                    "73": [
                         42,
                         0
                     ],
-                    "84": [
+                    "70": [
                         208,
                         0
                     ],
-                    "85": [
+                    "72": [
                         -124,
                         78
                     ],
-                    "86": [
+                    "71": [
                         -124,
                         -78
                     ]
                 },
                 "visible_ports": [
                     [
-                        84,
+                        70,
                         -1
                     ],
                     [
-                        85,
+                        72,
                         1
                     ],
                     [
-                        86,
+                        71,
                         1
                     ],
                     [
-                        85,
+                        72,
                         2
                     ]
                 ]

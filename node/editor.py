@@ -1,32 +1,32 @@
 import pygame as pg
 
-from .node import mapping
 from .node.node_base import pack, unpack, Port, Node, Group_Node
-#from .tester import tester
+from .node import mapping
+from .compiler import Compiler
+
+from ui.menu.menu import Menu
+
+from .screens.info_sheet import run as run_info_sheet
+
+from ui.element.base.style import Style
+from ui.element.elements import Textbox, Button, Check_Box
+from ui.element.drag.dragger import Dragger
+from ui.element.drag.rect_selector import Rect_Selector
+from ui.math import line
+from ui.icons.icons import icons
 
 from .element.search_bar import Search_Bar
 from .element.node_menu import Node_Menu
 from .element.context_manager import Context_Manager
-
-from ui.math import line
-from ui.element.drag.dragger import Dragger
-from ui.element.drag.rect_selector import Rect_Selector
-from ui.element.elements import Image, Textbox, Button, Input, Label
-from ui.element.base.style import Style
-from ui.menu.menu import Menu
-from ui.icons.icons import icons
-
-def test_info():
-    from .screens.info import run
-    
-    for sc in Node.get_subclasses():
-        n = sc(0)
-        try:
-            run(n)
-        except:
-            print('missing', n)
    
-def save_group_node(gn):
+def save_group_node(_nodes):
+    for node in _nodes[::-1]:
+        if node.is_group:
+            gn = node
+            break
+    else:
+        return
+
     import json
     nodes = gn.nodes.copy() + [gn]
     data = pack(nodes)
@@ -37,24 +37,6 @@ def save_group_node(gn):
         json.dump(group_data, f, indent=4)
         
     print('saved')
-
-#sorting stuff-------------------------------------------------------------------------
-
-def move_nodes(nodes, c):
-    left = min({n.rect.left for n in nodes})
-    right = max({n.rect.right for n in nodes})
-    top = min({n.rect.top for n in nodes})
-    bottom = max({n.rect.bottom for n in nodes})
-    r = pg.Rect(left, top, right - left, bottom - top)
-    cx, cy = r.center
-    r.center = c
-    dx = r.centerx - cx
-    dy = r.centery - cy
-    
-    for n in nodes:
-        n.rect.move_ip(dx, dy)
-
-#node editor--------------------------------------------------------------------------
 
 def get_section(elements, label, menu):
     r = elements[0].rect.unionall([e.padded_rect for e in elements]).inflate(20, 30)
@@ -70,15 +52,16 @@ def get_section(elements, label, menu):
     for e in elements:
         section.add_child(e, current_offset=True)
         
-    label = Textbox(
-        text=label,
-        text_size=15,
-        fill_color=menu.fill_color,
-        left_pad=5,
-        right_pad=5
-    )
-    label.rect.midleft = (section.rect.left + 15, section.rect.top)
-    section.add_child(label, current_offset=True)
+    if label:
+        label = Textbox(
+            text=label,
+            text_size=15,
+            fill_color=menu.fill_color,
+            left_pad=5,
+            right_pad=5
+        )
+        label.rect.midleft = (section.rect.left + 15, section.rect.top)
+        section.add_child(label, current_offset=True)
     
     return section
     
@@ -86,14 +69,14 @@ def get_elements(menu):
     body = menu.body
     elements = []
     
-    node_menu = Node_Menu(menu)
-    elements.append(node_menu)
+    rect_selector = Rect_Selector()
+    elements.append(rect_selector)
 
     search_bar = Search_Bar(menu)
     elements.append(search_bar)
     
-    rect_selector = Rect_Selector()
-    elements.append(rect_selector)
+    node_menu = Node_Menu(menu)
+    elements.append(node_menu)
     
     button_kwargs = {
         'text_size': 15,
@@ -110,7 +93,7 @@ def get_elements(menu):
         'centery_aligned': True
     }
     
-#save section
+# save section
     
     x = 15
     y = 10
@@ -118,47 +101,114 @@ def get_elements(menu):
     
     save_button = Button.Text_Button(
         text='Save',
-        func=lambda: menu.card.save(nodes=menu.nodes),
+        func=menu.builder.save_card,
         **button_kwargs
     )
     save_button.rect.topleft = (x, y)
     save_elements.append(save_button)
     
     save_icon = Textbox(
-        text=icons['save'],
+        text=icons['floppy-disk'],
         text_color=(0, 0, 247),
         **icon_kwargs
     )
-    save_button.add_child(save_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    save_button.add_child(save_icon, right_anchor='right', right_offset=-1, centery_anchor='centery')
     save_icon.set_enabled(False) 
     
     y += save_button.rect.height + 3
     
     publish_button = Button.Text_Button(
         text='Publish',
-        func=lambda: menu.card.publish(nodes=menu.nodes),
+        func=menu.builder.publish_card,
         **button_kwargs
     )
     publish_button.rect.topleft = (x, y)
     save_elements.append(publish_button)
     
-    publish_icon = Textbox(
-        text=icons['x'] if not menu.card.published else icons['check'],
-        text_color=(255, 0, 0) if not menu.card.published else (0, 255, 0),
-        **icon_kwargs
+    publish_icon = Check_Box(
+        value=menu.card.published,
+        outline_color=(0, 0, 0),
+        outline_width=2
     )
-    publish_button.add_child(publish_icon, right_anchor='right', centery_anchor='centery')
+    publish_button.add_child(publish_icon, right_anchor='right', right_offset=-3, centery_anchor='centery', centery_offset=-1)
     publish_icon.set_enabled(False)
+
+    publish_icon.add_event(
+        tag='update',
+        func=publish_icon.set_value,
+        args=[menu.card.get_published]
+    )
     
     save_section = get_section(save_elements, 'Save:', menu)
     save_section.rect.topleft = (20, 20)
-    elements.insert(0, save_section)
+    elements.append(save_section)
     
-#do section
+# back section
+
+    x = 15
+    y = 10
+    back_elements = []
+    
+    back_button = Button.Text_Button(
+        text='Back',
+        tag='exit',
+        **button_kwargs
+    )
+    back_button.rect.topleft = (x, y)
+    back_elements.append(back_button)
+    
+    back_icon = Textbox(
+        text=icons['arrow-left2'],
+        text_color=(255, 0, 0),
+        **icon_kwargs
+    )
+    back_button.add_child(back_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    back_icon.set_enabled(False) 
+    
+    y += back_button.rect.height + 3
+    
+    info_button = Button.Text_Button(
+        text='Info Sheet',
+        func=run_info_sheet,
+        **button_kwargs
+    )
+    info_button.rect.topleft = (x, y)
+    back_elements.append(info_button)
+    
+    info_icon = Textbox(
+        text=icons['file-text'],
+        text_color=(255, 255, 0),
+        **icon_kwargs
+    )
+    info_button.add_child(info_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    info_icon.set_enabled(False) 
+    
+    back_section = get_section(back_elements, 'Navigation:', menu)
+    back_section.rect.topleft = (save_section.rect.right + 20, 20)
+    elements.append(back_section)
+    
+# do section
 
     x = 15
     y = 10
     do_elements = []
+    
+    home_button = Button.Text_Button(
+        text='Home',
+        func=menu.go_home,
+        **button_kwargs
+    )
+    home_button.rect.topleft = (x, y)
+    do_elements.append(home_button)
+    
+    home_icon = Textbox(
+        text=icons['home3'],
+        **icon_kwargs
+    )
+    home_button.add_child(home_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    home_icon.set_enabled(False) 
+    
+    y += home_button.rect.height + 3
     
     undo_button = Button.Text_Button(
         text='Undo',
@@ -169,7 +219,7 @@ def get_elements(menu):
     do_elements.append(undo_button)
     
     undo_icon = Textbox(
-        text=icons['undo'],
+        text=icons['undo2'],
         **icon_kwargs
     )
     undo_button.add_child(undo_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
@@ -186,64 +236,31 @@ def get_elements(menu):
     do_elements.append(redo_button)
     
     redo_icon = Textbox(
-        text=icons['redo'],
+        text=icons['redo2'],
         **icon_kwargs
     )
     redo_button.add_child(redo_icon, right_anchor='right', centery_anchor='centery')
     redo_icon.set_enabled(False)
     
     do_section = get_section(do_elements, 'Actions:', menu)
-    do_section.rect.topleft = (save_section.rect.right + 20, 20)
-    elements.insert(0, do_section)
-    
-    back_button = Button.Text_Button(
-        text='Back',
-        size=(100, 25),
-        centerx_aligned=True,
-        centery_aligned=True,
-        fill_color=menu.fill_color,
-        outline_color=(255, 255, 255),
-        outline_width=1,
-        hover_color=(100, 100, 100),
-        tag='exit'
-    )
-    back_button.rect.topleft = (do_section.rect.right + 20, do_section.rect.top)
-    elements.insert(0, back_button)
-    
-    def save_gn():
-        for node in menu.nodes[::-1]:
-            if node.is_group:
-                save_group_node(node)
-                break
-    
-    save_group_node_button = Button.Text_Button(
-        text='sgn',
-        size=(100, 25),
-        centerx_aligned=True,
-        centery_aligned=True,
-        fill_color=menu.fill_color,
-        outline_color=(255, 255, 255),
-        outline_width=1,
-        hover_color=(100, 100, 100),
-        func=save_gn
-    )
-    save_group_node_button.rect.topright = (menu.body.right - 20, 20)
-    elements.insert(0, save_group_node_button)
-    
-    return elements
+    do_section.rect.topleft = (back_section.rect.right + 20, 20)
+    elements.append(do_section)
+
+    return elements[::-1]
     
 class Node_Editor(Menu):        
-    def __init__(self, card):
+    def __init__(self, card, builder):
         self.card = card
+        self.builder = builder
         
         self.nodes = []
         Dragger.set(self.nodes)
         self.cm = None
-
-        super().__init__(get_elements, fill_color=(32, 32, 40))
-        
+  
         self.anchor = None
         self.scroll_anchor = None
+        self.last_scroll_pos = None
+        self.scroll_offset = (0, 0)
 
         self.log = []
         self.logs = []
@@ -251,27 +268,30 @@ class Node_Editor(Menu):
         self.log_index = -1
 
         self.copy_data = None
-        self.input = []
+        
+        super().__init__(get_elements, fill_color=(32, 32, 40))
 
         if self.card.node_data:
             self.load_save_data(self.card.node_data)
-            
-    @property
-    def wires(self):
-        return Node.WIRES
-        
-    @property
-    def active_port(self):
-        return Port.ACTIVE_PORT
-        
+        if not self.nodes:
+            self.load_required_nodes()
+        self.reset_logs()
+
     @property
     def anchor_dist(self):
         return line.distance(self.anchor, pg.mouse.get_pos())
         
-    def exists(self, name):
-        return any({n.name == name for n in self.nodes})
+    def reset(self):
+        self.delete_nodes(nodes=self.nodes.copy())
+        Node.reset()
         
-#log stuff--------------------------------------------------------------------
+    def load_save_data(self, data):
+        self.reset()
+        nodes = unpack(data, manager=self)
+        for n in nodes:
+            self.add_node(n)
+        
+# log stuff
 
     def reset_logs(self):
         self.logs.clear()
@@ -279,7 +299,18 @@ class Node_Editor(Menu):
         self.log_index = -1
 
     def add_log(self, log):
+        if self.logs and log['t'] == 'disconn':
+            last_log = self.logs[-1]
+            if last_log['t'] == 'conn':
+                if (
+                    set(last_log['ports']) == set(log['ports']) and 
+                    set(last_log['nodes']) == set(log['nodes'])
+                ):
+                    self.logs.pop(-1)
+                    return
+                    
         self.logs.append(log)
+        self.card.set_node_data(self.nodes)
         
     def get_logs(self):
         logs = self.logs.copy()
@@ -303,17 +334,13 @@ class Node_Editor(Menu):
                 self.log_index += 1
                 
             self.log_history.append(new_logs)
-            
-            #print('d', new_logs)
 
     def undo_log(self):
         if not self.log_history or self.log_index == -1:
             return
             
         logs = self.log_history[self.log_index]
-        
-        #print('u', logs)
-        
+
         for log in logs[::-1]:
             type = log['t']
             
@@ -383,15 +410,14 @@ class Node_Editor(Menu):
                 n.ap(p=p)
                 
         self.log_index -= 1
+        self.card.set_node_data(self.nodes)
         
     def redo_log(self):
         if not self.log_history or self.log_index == len(self.log_history) - 1:
             return
             
         logs = self.log_history[self.log_index + 1]
-        
-        #print('r', logs)
-        
+
         for log in logs:
             type = log['t']
             
@@ -461,57 +487,17 @@ class Node_Editor(Menu):
                 n.rp(p=p)
                 
         self.log_index += 1
+        self.card.set_node_data(self.nodes)
 
-#base node stuff--------------------------------------------------------------------
-
-    def reset(self):
-        self.delete_nodes(nodes=self.nodes.copy())
-        Node.reset()
-        
-    def load_required_nodes(self):
-        t = self.card.type
-        if t == 'play':
-            if not self.exists('Start'):
-                self.get_node('Start')
-        elif t == 'item':
-            if not self.exists('Can_Use'):
-                self.get_node('Can_Use')
-        elif t == 'spell':
-            if not self.exists('Can_Cast'):
-                self.get_node('Can_Cast')
-            if not self.exists('Ongoing'):
-                self.get_node('Ongoing')
-        elif t == 'treasure':
-            if not self.exists('End'):
-                self.get_node('End')
-        elif t == 'landscape':
-            if not self.exists('Ongoing'):
-                self.get_node('Ongoing')
-        elif t == 'event':
-            if not self.exists('Ongoing'):
-                self.get_node('Ongoing')
-            if not self.exists('End'):
-                self.get_node('End')
-        self.clean_up()
-        self.reset_logs()
-     
-#wire stuff--------------------------------------------------------------------
+# wire stuff
         
     def check_wire_break(self):
-        breaks = 0
         a = self.anchor
         b = pg.mouse.get_pos()
-        for w in self.wires.copy():
-            if w.check_break(a, b):
-                breaks += 1
-        return breaks
+        for w in Node.WIRES.copy():
+            w.check_break(a, b)
 
-#node management stuff--------------------------------------------------------------------
-
-    def add_nodes(self, nodes):
-        for n in nodes:
-            n.manager = self
-            self.add_node(n)
+# node management stuff
 
     def add_node(self, n, d=False):
         self.nodes.append(n)
@@ -519,7 +505,7 @@ class Node_Editor(Menu):
             n.set_manager(self)
              
     def get_node(self, name, val=None, pos=(0, 0), held=True):
-        if len(self.nodes) == 50:
+        if len(self.nodes) >= 50:
             return
 
         n = Node.from_name(name, val=val, pos=pos)
@@ -549,8 +535,8 @@ class Node_Editor(Menu):
         return n
 
     def create_new_group_node(self):
-        nodes = [n for n in self.get_selected()]# if not n.is_group]
-        if len(nodes) <= 1:
+        nodes = [n for n in self.get_selected()]
+        if len(self.nodes) >= 50 or len(nodes) <= 1:
             return
         n = Group_Node.get_new(nodes)
         self.add_node(n)
@@ -574,15 +560,17 @@ class Node_Editor(Menu):
     def del_node(self, n, method='del', d=False):
         n.kill(method=method, d=d)
         self.nodes.remove(n)
-            
-    def get_required(self, n):
+        
+    def get_required(self):
+        return Compiler(self.nodes, self.card).missing
+        
+    def load_required_nodes(self):
         nodes = []
-        for name in n.get_required():
-            if not self.exists(name):
-                nodes.append(self.get_node(name))
+        for name in self.get_required():
+            nodes.append(self.get_node(name))
         self.clean_up(nodes=nodes)
 
-#selection stuff--------------------------------------------------------------------
+# selection stuff
             
     def get_selected(self):
         return [n for n in Dragger.get_selected() if n.visible]
@@ -594,7 +582,7 @@ class Node_Editor(Menu):
                 nodes += n.nodes
         return nodes
         
-#copy and paste stuff--------------------------------------------------------------------
+# copy and paste stuff
         
     def copy_nodes(self, nodes=None):
         if nodes is None:
@@ -602,46 +590,31 @@ class Node_Editor(Menu):
         self.copy_data = pack(nodes)
 
     def paste_nodes(self):
+        Dragger.deselect_all()
+        
         data = self.copy_data
         if not data or len(self.nodes) + len(data['nodes']) > 50:
             return
         nodes = unpack(data, manager=self)
+        
         if nodes:
-            move_nodes(nodes, pg.mouse.get_pos())
+            r = nodes[0].rect.unionall([n.rect for n in nodes])
+            cx, cy = r.center
+            r.center = pg.mouse.get_pos()
+            dx = r.centerx - cx
+            dy = r.centery - cy
             for n in nodes:
+                n.rect.move_ip(dx, dy)
                 self.add_node(n)
                 n.start_held() 
+                
         return nodes
 
-#loading stuff--------------------------------------------------------------------
-
-    def load_save_data(self, data):
-        self.reset()
-        nodes = unpack(data, manager=self)
-        for n in nodes:
-            self.add_node(n)
-        self.reset_logs()
-
-#saving stuff--------------------------------------------------------------------
-
-    def get_save_data(self):
-        return pack(self.nodes)
-
-    def save_group_node(self):
-        gn = None
-        nodes = self.get_selected()
-        for n in nodes:
-            if n.is_group:
-                gn = n
-                break
-        else:
-            return
-
-        save_group_node(gn)
-
-#other stuff--------------------------------------------------------------------
+# other stuff
 
     def clean_up(self, nodes=None):
+        self.go_home()
+        
         if nodes is None:
             nodes = self.nodes
             
@@ -676,8 +649,11 @@ class Node_Editor(Menu):
         x = 20
         y = 130
         space = 5
-            
-        for chunk in chunks:
+        x_shift = 0
+        
+        chunks.sort(key=lambda chunk: chunk[0].background_rect.unionall([n.background_rect for n in chunk]).width)
+
+        for chunk in chunks: 
             r = chunk[0].background_rect.unionall([n.background_rect for n in chunk])
             cx, cy = r.center
             r.topleft = (x, y)
@@ -686,11 +662,15 @@ class Node_Editor(Menu):
             for n in chunk:
                 n.rect.move_ip(dx, dy)
                 n.drop()
+                
+            if r.width > x_shift:
+                x_shift = r.width
         
             y += r.height + (2 * space)
             if y > self.body.height - 100:
                 y = 130
-                x += r.width + (2 * space)
+                x += x_shift + (2 * space)
+                x_shift = 0
                
     def new_context(self, node=None):
         if node and self.anchor:
@@ -706,11 +686,33 @@ class Node_Editor(Menu):
         if self.cm:
             self.elements.remove(self.cm)
             self.cm = None
+            
+    def go_home(self):
+        sx, sy = self.scroll_offset
+        for n in self.nodes:
+            n.move(sx, sy)
+        self.scroll_offset = (0, 0)
+        
+    def scroll_screen(self):
+        x0, y0 = self.last_scroll_pos
+        x1, y1 = pg.mouse.get_pos()
+        dx = x1 - x0
+        dy = y1 - y0
+        if dx or dy:
+            for n in self.nodes:
+                n.move(dx, dy)
+            self.last_scroll_pos = (x1, y1)
+            sx, sy = self.scroll_offset
+            self.scroll_offset = (sx - dx, sy - dy)
 
-#run stuff--------------------------------------------------------------------
+# run stuff
+
+    def quit(self):
+        self.builder.ask_save()
+        return super().quit()
 
     def sub_events(self, events):
-        split = 5 if not self.cm else 6
+        split = 4 if not self.cm else 5
         batch1 = self.elements[:split]
         batch2 = self.elements[split:]
         if batch2[-2].visible:
@@ -727,11 +729,12 @@ class Node_Editor(Menu):
         if kd := events.get('kd'):
             
             if events['ctrl']:
-
-                if kd.key == pg.K_c:
+                
+                if kd.key == pg.K_s:
+                    self.builder.save_card()
+                elif kd.key == pg.K_c:
                     self.copy_nodes()
                 elif kd.key == pg.K_v:
-                    Dragger.deselect_all()
                     self.paste_nodes()
                 elif kd.key == pg.K_q:
                     self.clean_up()
@@ -743,26 +746,36 @@ class Node_Editor(Menu):
                     self.create_new_group_node()
                 elif kd.key == pg.K_u:
                     self.ungroup_nodes()
-                
-                
+ 
             elif kd.key == pg.K_DELETE:
                 self.delete_nodes()
+            elif kd.key == pg.K_HOME:
+                self.go_home()
                 
         if 'mbd_a' in events:
             self.close_context()
 
         if mbd := events.get('mbd'):
-            if mbd.button == 3:
-                self.anchor = pg.mouse.get_pos()
+            if mbd.button == 1:
+                self.scroll_anchor = mbd.pos
+                self.last_scroll_pos = mbd.pos
+            elif mbd.button == 3:
+                self.anchor = mbd.pos
 
         elif mbu := events.get('mbu'):
-            if mbu.button == 3:
+            if mbu.button == 1:
+                self.scroll_anchor = None
+                
+            elif mbu.button == 3:
                 if not self.cm:
                     if self.anchor and self.anchor_dist < 2:
                         self.new_context()
                 if self.anchor:
-                    breaks = self.check_wire_break()
+                    self.check_wire_break()
                     self.anchor = None
+                    
+        if self.scroll_anchor:
+            self.scroll_screen()
 
     def update(self):   
         super().update()
@@ -795,25 +808,4 @@ class Node_Editor(Menu):
                 
         super().lite_draw()
        
-        pg.display.flip()
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+        pg.display.flip()  

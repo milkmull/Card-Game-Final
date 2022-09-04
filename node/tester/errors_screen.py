@@ -1,4 +1,5 @@
 from ui.menu.menu import Menu
+
 from ui.element.base.style import Style
 from ui.element.elements import Textbox, Button, Live_Window, Static_Window
 from ui.icons.icons import icons
@@ -16,7 +17,7 @@ def full_error(menu, err):
     tb.size = tb.text_surf.get_size()
 
     window = Static_Window(
-        size=(tb.padded_rect.width, 430),
+        size=(tb.padded_rect.width, 450),
         fill_color=(41, 49, 52),
         outline_color=(255, 255, 255),
         outline_width=3
@@ -25,7 +26,7 @@ def full_error(menu, err):
     window.join_elements([tb], border=5)
     
     exit_button = Button.Text_Button(
-        text=icons['x'],
+        text=icons['X'],
         font_name='icons.ttf',
         text_color=(255, 0, 0),
         tag='exit'
@@ -69,7 +70,7 @@ def error_elements(menu, errors):
     
     window.join_elements(
         buttons,
-        border=10,
+        bordery=10,
         margin=15,
         centerx_aligned=True
     )
@@ -89,11 +90,13 @@ def error_elements(menu, errors):
         size=(200, 25),
         centerx_aligned=True,
         centery_aligned=True,
+        outline_color=(255, 255, 255),
+        outline_width=3,
         border_radius=5,
         hover_color=(0, 255, 0),
         tag='exit'
     )
-    ok_button.rect.midtop = (window.rect.centerx, window.rect.bottom + 10)
+    ok_button.rect.midbottom = (body.centerx, body.height - 20)
     elements.append(ok_button)
     
     ok_button.add_animation(
@@ -103,7 +106,7 @@ def error_elements(menu, errors):
         }],
         tag='hover'
     )
-
+    
     return elements
     
 def run(errors):

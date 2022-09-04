@@ -40,8 +40,16 @@ class Character:
         self.rect.move_ip(dx, dy)
         
 class Text:
+    OUTLINE_CACHE = {}
     pg.freetype.init()
-    VALID_CHARS = (set(range(32, 384)) | {9, 10})
+    STYLE_DICT = {
+        'normal': 0,
+        'strong': 1,
+        'oblique': 2,
+        'underline': 4,
+        'wide': 8,
+        'default': 255
+    }
     DEFAULT_FONT = pg.freetype.get_default_font()
     FONTS = {
         DEFAULT_FONT: pg.freetype.Font(None),
@@ -66,6 +74,32 @@ class Text:
         if font is None:
             font = Textbox.FONTS[Textbox.DEFAULT_FONT]
         return font.render_to(*args, **kwargs)
+        
+    @classmethod
+    def get_outline_points(cls, r):
+        points = cls.OUTLINE_CACHE.get(r)
+        
+        if not points:
+            x, y, e = r, 0, 1 - r
+            points = []
+
+            while x >= y:
+            
+                points.append((x, y))
+                y += 1
+                if e < 0:
+                    e += 2 * y - 1 
+                else:
+                    x -= 1
+                    e += 2 * (y - x) - 1
+                    
+            points += [(y, x) for x, y in points if x > y]
+            points += [(-x, y) for x, y in points if x]
+            points += [(x, -y) for x, y in points if y]
+            points.sort() 
+            cls.OUTLINE_CACHE[r] = points
+            
+        return points
 
     def __init__(
         self,
@@ -77,6 +111,7 @@ class Text:
   
         text_color=(255, 255, 255),
         text_background_color=None,
+        text_style=None,
 
         right_aligned=False,
         bottom_aligned=False,
@@ -103,7 +138,7 @@ class Text:
         self.text_color = text_color
         self.last_text_color = text_color
         self.text_background_color = text_background_color
-        self.text_style = {}
+        self.text_style = text_style or {}
 
         self.alignment = {
             'right': False,
@@ -171,8 +206,10 @@ class Text:
     def get_text(self):
         return self.text
   
-    def set_text(self, text, force=False):
+    def set_text(self, text, force=False, style=None):
         if self.text != text or force:
+            if style is not None:
+                self.text_style = style
             self.text = text
             self.fit_text()
             
@@ -389,6 +426,20 @@ class Text:
                             **self.text_style.get(i, default_style)
                         )
                     i += 1
+                    
+    def render_outline(self, surf, character):
+        width = 2
+        
+        points = Text.get_outline_points(width)
+        print(points)
+        for dx, dy in points:
+            self.font.render_to(
+                surf, 
+                character.rect.move(dx, dy), 
+                character.character,  
+                size=character.size, 
+                fgcolor=(255, 0, 0)
+            )  
                     
     def draw_text(self, surf):
         if self.text_color != self.last_text_color:

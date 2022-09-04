@@ -115,7 +115,7 @@
                                 "suppressed": false,
                                 "visible": true,
                                 "types": [
-                                    "split",
+                                    "process",
                                     "flow"
                                 ],
                                 "element_value": null
@@ -191,7 +191,7 @@
                                 "suppressed": false,
                                 "visible": true,
                                 "types": [
-                                    "split",
+                                    "process",
                                     "flow"
                                 ],
                                 "element_value": null
@@ -556,7 +556,7 @@
                                 "suppressed": false,
                                 "visible": true,
                                 "types": [
-                                    "split",
+                                    "process",
                                     "flow"
                                 ],
                                 "element_value": null

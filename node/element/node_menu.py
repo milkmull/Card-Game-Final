@@ -10,7 +10,7 @@ class Node_Menu(Popup.Live_Popup):
         self.manager = manager
         
         super().__init__(
-            size=(450, 350),
+            size=(560, 450),
             fill_color=(0, 0, 0),
             arrow_kwargs={
                 'color': (0, 0, 0)
@@ -36,7 +36,7 @@ class Node_Menu(Popup.Live_Popup):
         y = self.rect.y + 5
         for tab, _ in self.tabs.items():
             b = Button.Text_Button(
-                text=tab,
+                text=tab.title(),
                 pad=2,
                 fill_color=(155, 88, 108),
                 outline_color=(0, 0, 0),
@@ -95,12 +95,14 @@ class Node_Menu(Popup.Live_Popup):
         
     def set_tab(self, tab):
         elements = []
+        style = {'fgcolor': (255, 255, 255), 'style': 4}
         for subtab, names in self.tabs[tab].items():
         
             label = Textbox(
-                text=subtab,
+                text=subtab.title(),
                 text_size=40,
-                size=(self.rect.width - 30, 40)
+                size=(self.rect.width - 30, 40),
+                text_style={i: style for i in range(len(subtab))}
             )
             elements.append(label)
             
@@ -110,7 +112,7 @@ class Node_Menu(Popup.Live_Popup):
                 if tab == 'group':
                     data = Node.GROUP_DATA[name]
                     b = Button.Image_Button(
-                        image=unpack(data)[-1].get_raw_image(scale=0.75),
+                        image=unpack(data, map=False)[-1].get_raw_image(scale=0.75),
                         pad=5,
                         func=self.get_group_node,
                         args=[name],

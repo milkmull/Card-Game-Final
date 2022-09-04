@@ -5,8 +5,8 @@ from .scroll_bar import Scroll_Bar
 from ..utils.container import Container
 
 class ObjectFitError(Exception):
-    def __init__(self, object_size, rect_size):
-        super().__init__(f'Could not fit object of size {object_size} to rect of size {rect_size}')
+    def __init__(self, object_size, rect_size, pos):
+        super().__init__(f'Could not fit object of size {object_size} to rect of size {rect_size} at {pos}')
 
 class Window_Base:
     def __init__(
@@ -37,17 +37,17 @@ class Window_Base:
             self.x_scroll_bar = Scroll_Bar(size=(1, 0), dir=0, scroll_parent=self, no_wheel=inf_height, **scroll_bar_kwargs)
             self.x_scroll_bar.set_size(self.outline_rect.width)
             if not top_scroll:
-                self.add_child(self.x_scroll_bar, top_anchor='bottom', centerx_anchor='centerx')
+                self.add_child(self.x_scroll_bar, top_anchor='bottom', top_offset=self.pad['bottom'], centerx_anchor='centerx')
             else:
-                self.add_child(self.x_scroll_bar, bottom_anchor='top', centerx_anchor='centerx')
+                self.add_child(self.x_scroll_bar, bottom_anchor='top', bottom_offset=self.pad['top'], centerx_anchor='centerx')
         
         if inf_height:
             self.y_scroll_bar = Scroll_Bar(size=(0, 1), dir=1, scroll_parent=self, **scroll_bar_kwargs)
             self.y_scroll_bar.set_size(self.outline_rect.height)
             if not left_scroll:
-                self.add_child(self.y_scroll_bar, left_anchor='right', centery_anchor='centery')
+                self.add_child(self.y_scroll_bar, left_anchor='right', left_offset=self.pad['right'], centery_anchor='centery')
             else:
-                self.add_child(self.y_scroll_bar, right_anchor='left', centery_anchor='centery')
+                self.add_child(self.y_scroll_bar, right_anchor='left', right_offset=self.pad['left'], centery_anchor='centery')
             if self.inf_width:
                 self.y_scroll_bar.pad['bottom'] = (self.x_scroll_bar.rect.bottom - self.y_scroll_bar.rect.bottom)
             
@@ -145,48 +145,51 @@ class Window_Base:
         block = Container()
         current_line = Container()
         
-        for e in elements:
+        last_index = len(elements) - 1
+        
+        for i, e in enumerate(elements):
+            last = i == last_index
         
             if not dir:
             
-                if not self.inf_height and y + e.rect.height + marginy > max_height:
-                    raise ObjectFitError(e.rect.size, self.size)
+                if not self.inf_height and y + e.rect.height > max_height:
+                    raise ObjectFitError(e.rect.size, self.size, (x, y))
                 
                 if not self.inf_width:
-                    if x + e.rect.width + marginx > max_width:
+                    if x + e.rect.width > max_width:
                         if not current_line:
-                            raise ObjectFitError(e.rect.size, self.size)
+                            raise ObjectFitError(e.rect.size, self.size, (x, y))
                         
                         x = marginx
                         y += current_line.rect.height + marginy
                         
-                        if not self.inf_height:
-                            if y + e.rect.height + marginy > max_height:
-                                raise ObjectFitError(e.rect.size, self.size)
-                            if x + e.rect.width + marginx > max_width:
-                                raise ObjectFitError(e.rect.size, self.size)
+                        if not last and not self.inf_height:
+                            if y + e.rect.height > max_height:
+                                raise ObjectFitError(e.rect.size, self.size, (x, y))
+                            if x + e.rect.width > max_width:
+                                raise ObjectFitError(e.rect.size, self.size, (x, y))
                                 
                         block.add(current_line)
                         current_line = Container()
         
             else:
                 
-                if not self.inf_width and x + e.rect.width + marginx > max_width:
-                    raise ObjectFitError(e.rect.size, self.size)
+                if not self.inf_width and x + e.rect.width > max_width:
+                    raise ObjectFitError(e.rect.size, self.size, (x, y))
                 
                 if not self.inf_height:
-                    if y + e.rect.height + marginy > max_height:
+                    if y + e.rect.height > max_height:
                         if not current_line:
-                            raise ObjectFitError(e.rect.size, self.size)
+                            raise ObjectFitError(e.rect.size, self.size, (x, y))
                         
                         x += current_line.rect.width + marginx
                         y = marginy
                         
-                        if not self.inf_width:
-                            if y + e.rect.height + marginy > max_height:
-                                raise ObjectFitError(e.rect.size, self.size)
-                            if x + e.rect.width + marginx > max_width:
-                                raise ObjectFitError(e.rect.size, self.size)
+                        if not last and not self.inf_width:
+                            if y + e.rect.height > max_height:
+                                raise ObjectFitError(e.rect.size, self.size, (x, y))
+                            if x + e.rect.width > max_width:
+                                raise ObjectFitError(e.rect.size, self.size, (x, y))
                                 
                         block.add(current_line)
                         current_line = Container()
@@ -205,12 +208,12 @@ class Window_Base:
    
         if centerx_aligned and not self.inf_width:
             for line in (block.swap() if dir else block):
-                dx = (self.rect.width - (line.rect.width + (2 * marginx))) // 2
+                dx = (self.rect.width - line.rect.width) // 2
                 line.move(dx, 0)
  
         if centery_aligned and not self.inf_height:
             for line in (block if dir else block.swap()):
-                dy = (self.rect.height - (line.rect.height + (2 * marginy))) // 2
+                dy = (self.rect.height - line.rect.height) // 2
                 line.move(0, dy)
 
         block.pos = self.rect.topleft

@@ -13,6 +13,7 @@ SAVE_DATA_FILE = SAVE_DATA_PATH + 'save.json'
 TEST_CARD_FILE = 'node/tester/testing_card.py'
 TEST_CARD_HEADER = 'from game.card import card_base\n'
 NODE_DATA_FILE = 'data/node/node_info.json'
+GROUP_DATA_FILE = 'data/node/group_nodes.json'
 INFO_SHEET_FILE = 'data/node/sheet_info.json'
 
 BASE_NAMES = (

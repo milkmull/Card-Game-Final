@@ -14,22 +14,18 @@ class Search_Bar(Input):
             size=(0, 25),
             text_size=15,
             pad=5,
-            clip=False
+            clip=True
         )
         self.manager = menu
-        
-        names = [name for name in (Node.NODE_DATA | Node.GROUP_DATA)]
-        self.size = self.get_max_size(names)
-        
-        self.open_timer = Timer()
 
+        self.size = self.get_max_size(Node.NODE_DATA | Node.GROUP_DATA)
+        self.open_timer = Timer()
         self.search_window = Live_Window(
             size=(self.rect.width + 10, 200),
             fill_color=(0, 0, 0)
         )
         
-        buttons = []
-        
+        self.buttons = []
         button_kwargs = {
             'size': self.size,
             'pad': 5,
@@ -45,8 +41,8 @@ class Search_Bar(Input):
                 args=[name],
                 **button_kwargs
             )
-            buttons.append(b)
-            
+            self.buttons.append(b)
+
         for name, data in Node.GROUP_DATA.items():
             b = Button.Text_Button(
                 text=name, 
@@ -54,13 +50,15 @@ class Search_Bar(Input):
                 args=[name],
                 **button_kwargs
             )
-            buttons.append(b)
-            
-        self.search_window.join_elements(buttons, border=5, marginy=10)
+            self.buttons.append(b)
+
+        self.max_buttons = 12
+        self.search_window.join_elements(self.buttons[:self.max_buttons], border=5, marginy=10)
         self.search_window.rect.midtop = (self.rect.centerx, self.padded_rect.bottom)
         self.add_child(self.search_window, current_offset=True)
 
         self.set_visible(False)
+        self.rect.width += self.search_window.y_scroll_bar.rect.width
         
     @property
     def click_close(self):
@@ -80,7 +78,7 @@ class Search_Bar(Input):
         super().set_text(text)
         
         key = lambda b: sort_strings(self.text.lower(), b.text.lower())
-        self.search_window.sort_elements(key, reverse=True)
+        self.search_window.join_elements(sorted(self.buttons, key=key, reverse=True)[:self.max_buttons], use_last=True)
         self.search_window.y_scroll_bar.go_to_top()
     
     def events(self, events):
@@ -93,13 +91,7 @@ class Search_Bar(Input):
                 if self.open_timer < self.CLICK_TIMER_MAX:
                     self.open_search(mbd.pos)
                 self.open_timer.reset()
-            
-    def update(self):
-        if self.visible:
-            super().update()
-
-        self.open_timer.step()
-    
+                
     def get_node(self, *args, **kwargs):
         self.manager.get_node(*args, **kwargs)
         self.close()
@@ -107,8 +99,12 @@ class Search_Bar(Input):
     def get_group_node(self, *args, **kwargs):
         self.manager.get_group_node(*args, **kwargs)
         self.close()
+            
+    def update(self):
+        if self.visible:
+            super().update()
+        self.open_timer.step()
     
-    
-    
-    
-    
+    def draw(self, surf):
+        Input.draw(self, surf)
+        self.child_draw(surf)

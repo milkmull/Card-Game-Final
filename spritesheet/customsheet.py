@@ -7,6 +7,17 @@ from data.save import SAVE
 from data.constants import CONSTANTS, BASE_NAMES
 
 CARD_WIDTH, CARD_HEIGHT = CONSTANTS['card_size']
+
+def to_classname(name):
+    cname = ''
+    for char in name.title().replace(' ', '_'):
+        if char.isalnum() or char == '_':
+            cname += char
+            
+    if cname[0].isnumeric():
+        cname = '_' + cname
+
+    return cname
     
 class Customsheet(Base_Sheet):
     @staticmethod
@@ -79,13 +90,14 @@ class Customsheet(Base_Sheet):
             return self.names.index(name)
             
     def check_exists(self, card):
-        if card.name in BASE_NAMES:
-            return True
-        if card.name in self.names and card.id != self.get_id(card.name):
-            return True
-        #for c in self.cards:
-        #    if c.get('classname') == card.classname and card.id != self.get_id(c['name']):
-        #        return True
+        for name in BASE_NAMES:
+            if card.name.lower() == name.lower() or card.classname == to_classname(name):
+                return True
+                
+        for name in self.names:
+            if card.id != self.get_id(card.name):
+                if card.name.lower() == name.lower() or card.classname == to_classname(name):
+                    return True
             
     def save_card(self, card):
         if self.check_exists(card):

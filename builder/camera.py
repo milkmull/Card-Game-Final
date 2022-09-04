@@ -1,10 +1,12 @@
 import pygame as pg
 
 from .media.video_capture import Video_Capture
-from ui.element.base.element import Element
-from ui.element.elements import Textbox, Image, Button, Check_Box, Flipper
+
 from ui.menu.menu import Menu
 from ui.menu.templates.notice import Notice
+
+from ui.element.base.element import Element
+from ui.element.elements import Textbox, Image, Button
 from ui.icons.icons import icons
 
 def camera(menu):
@@ -60,10 +62,10 @@ def camera(menu):
     elements.append(flash)
     
     exit_button = Button.Text_Button(
-        text=icons['x'],
+        text=icons['X'],
         font_name='icons.ttf',
+        text_color=(255, 0, 0),
         pad=5,
-        hover_color=(128, 0, 0),
         centerx_aligned=True,
         centery_aligned=True,
         tag='exit'
@@ -75,13 +77,11 @@ def camera(menu):
     y = current_frame.rect.top + 10
     
     ok_button = Button.Text_Button(
-        text='ok',
+        text='Ok',
         centery_aligned=True,
         size=(100, 25),
         pad=5,
-        
-        hover_color=(0, 128, 0),
-        
+        hover_color=(0, 255, 0),
         layer=-1,
         func=lambda: current_frame.image,
         tag='return'
@@ -90,16 +90,22 @@ def camera(menu):
     ok_button.set_enabled(False)
     elements.append(ok_button)
     
+    ok_button.add_animation(
+        [{
+            'attr': 'text_color',
+            'end': (0, 0, 0)
+        }],
+        tag='hover'
+    )
+    
     y += ok_button.rect.height + 15
 
     retake_button = Button.Text_Button(
-        text='retake',
+        text='Retake',
         centery_aligned=True,
         size=(100, 25),
         pad=5,
-        
         hover_color=(100, 100, 100),
-        
         layer=-1
     ) 
     retake_button.rect.topleft = (x, y)
@@ -112,7 +118,6 @@ def camera(menu):
         camera_button.set_enabled(True)
         
         ok_button.set_enabled(False)
-        ok_button.cancel_animation('hover')
         retake_button.set_enabled(False)
         retake_button.cancel_animation('hover')
         
@@ -187,13 +192,4 @@ def run():
     if m.camera.exists:
         return m.run()
     m = Notice(text_kwargs={'text': 'No video capture devices could be found.'})
-    m.run()
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    m.run() 

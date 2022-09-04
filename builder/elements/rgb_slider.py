@@ -1,6 +1,8 @@
 import pygame as pg
 
 from ui.element.standard.slider import Slider
+from ui.element.standard.textbox import Textbox
+from ui.color.ops import color_text
 
 class RGB_Slider(Slider):
     CHANNELS = ('r', 'g', 'b')
@@ -29,6 +31,15 @@ class RGB_Slider(Slider):
             surf = pg.transform.rotate(surf, -90)
         self.image = pg.transform.scale(surf, self.rect.size)
         
+        color = self.get_color()
+        self.textbox = Textbox(pad=1)
+        self.handel.add_child(self.textbox, centerx_anchor='centerx', bottom_anchor='top', bottom_offset=-5)
+        
+        self.textbox.add_event(
+            tag='update',
+            func=self.update_textbox
+        )
+ 
     def flip(self):
         super().flip()
         if not self.dir:
@@ -40,6 +51,15 @@ class RGB_Slider(Slider):
         color = [0, 0, 0]
         color[self.channel] = self.get_state()
         return color
+        
+    def update_textbox(self):
+        p = pg.mouse.get_pos()
+        self.textbox.set_visible(self.held or self.handel.rect.collidepoint(p))
+        if self.textbox.visible:
+            color = self.get_color()
+            self.textbox.text_color = color
+            self.textbox.fill_color = color_text(color)
+            self.textbox.set_text(str(self.get_state()))
         
     def update(self):
         super().update()

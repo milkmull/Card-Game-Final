@@ -3,25 +3,29 @@ Tk().withdraw()
 
 import pygame as pg
 
-from .custom_card_base import Card
-from .camera import run as run_camera
-from node.editor import Node_Editor
-
 from data.constants import TYPES_DICT, TAGS_DICT
-from ui.element.base.base import Base_Element
-from ui.element.base.style import Style
-from ui.element.elements import Textbox, Image, Button, Check_Box, Input, Flipper, Dropdown, Input_Dropdown
-from ui.icons.icons import icons
+
+from .custom_card_base import Card
+from node.editor import Node_Editor
+from node.screens.info_sheet import run as run_info_sheet
+
 from ui.menu.menu import Menu
 from ui.menu.templates.notice import Notice
 from ui.menu.templates.yes_no import Yes_No
+
+from .camera import run as run_camera
+
+from ui.element.base.element import Element
+from ui.element.base.style import Style
+from ui.element.elements import Textbox, Button, Check_Box, Dropdown, Input_Dropdown, Flipper
+from ui.icons.icons import icons
 
 from .elements.rgb_slider import RGB_Slider
 from .elements.audio_manager import Audio_Manager
 
 def get_section(elements, label, menu):
     r = elements[0].rect.unionall([e.padded_rect for e in elements]).inflate(20, 30)
-    section = Style(
+    section = Element(
         size=r.size,
         pos=r.topleft,
         outline_color=(255, 255, 255),
@@ -37,7 +41,8 @@ def get_section(elements, label, menu):
         text_size=15,
         fill_color=menu.fill_color,
         left_pad=5,
-        right_pad=5
+        right_pad=5,
+        layer=-1
     )
     label.rect.midleft = (section.rect.left + 15, section.rect.top)
     section.add_child(label, current_offset=True)
@@ -46,9 +51,9 @@ def get_section(elements, label, menu):
 
 def builder(menu):
     body = menu.body
+    menu.card.rect.midleft = (15, body.centery)
     elements = [menu.card]
-    menu.elements_dict['card'] = menu.card
-    
+
     button_kwargs = {
         'text_size': 15,
         'size': (150, 25),
@@ -64,7 +69,7 @@ def builder(menu):
         'centery_aligned': True
     }
     
-#save section
+# save section
 
     x = 15
     y = 10
@@ -79,33 +84,41 @@ def builder(menu):
     save_elements.append(save_button)
     
     save_icon = Textbox(
-        text=icons['save'],
+        text=icons['floppy-disk'],
         text_color=(0, 0, 247),
         **icon_kwargs
     )
-    save_button.add_child(save_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    save_button.add_child(save_icon, right_anchor='right', right_offset=-1, centery_anchor='centery')
     save_icon.set_enabled(False) 
     
     y += save_button.rect.height + 3
     
-    publish_button = Button.Text_Button(
-        text='Publish',
-        func=menu.publish_card,
-        **button_kwargs
-    )
-    publish_button.rect.topleft = (x, y)
-    save_elements.append(publish_button)
+    if menu.card.id != 0:
     
-    publish_icon = Textbox(
-        text=icons['x'] if not menu.card.published else icons['check'],
-        text_color=(255, 0, 0) if not menu.card.published else (0, 255, 0),
-        **icon_kwargs
-    )
-    publish_button.add_child(publish_icon, right_anchor='right', centery_anchor='centery')
-    publish_icon.set_enabled(False) 
-    menu.elements_dict['published'] = publish_icon
-    
-    y += publish_button.rect.height + 3
+        publish_button = Button.Text_Button(
+            text='Publish',
+            func=menu.publish_card,
+            **button_kwargs
+        )
+        publish_button.rect.topleft = (x, y)
+        save_elements.append(publish_button)
+        
+        publish_icon = Check_Box(
+            value=menu.card.published,
+            outline_color=(0, 0, 0),
+            outline_width=2
+        )
+        publish_button.add_child(publish_icon, right_anchor='right', right_offset=-3, centery_anchor='centery', centery_offset=-1)
+        publish_icon.set_enabled(False) 
+        menu.elements_dict['published'] = publish_icon
+        
+        publish_icon.add_event(
+            tag='update',
+            func=publish_icon.set_value,
+            args=[menu.card.get_published]
+        )
+        
+        y += publish_button.rect.height + 3
     
     export_button = Button.Text_Button(
         text='Export As Image',
@@ -127,158 +140,168 @@ def builder(menu):
     save_section.rect.topleft = (menu.card.rect.right + 20, 20)
     elements.append(save_section)
     
-#weight section
+# weight section
 
-    weight_flipper = Flipper.Text_Flipper.Counter(
-        range(1, 5),
-        index=menu.card.weight - 1,
-        button_kwargs={
-            'pad': 5,
-            'border_radius': 5
-        }
-    )
-    weight_section = get_section([weight_flipper], 'Rarity:', menu)
-    weight_section.rect.inflate_ip(100, 0)
-    weight_flipper.rect.center = weight_section.rect.center
-    weight_flipper.set_stuck(True)
-    weight_section.rect.topleft = (save_section.rect.right + 20, save_section.rect.top)
-    elements.append(weight_section)
-    
-    weight_flipper.add_event(
-        tag='set',
-        func=menu.card.set_weight,
-        args=[lambda: int(weight_flipper.get_text())]
-    )
-    
-#type section
+    if menu.card.id != 0:
 
-    type_select = Dropdown(
-        TYPES_DICT,
-        selected=menu.card.type,
-        left_pad=5,
-        right_pad=25,
-        y_pad=2,
-        hover_color=(100, 100, 100),
-        window_kwargs = {
-            'fill_color': menu.fill_color,
-            'outline_color': (255, 255, 255),
-            'outline_width': 3
-        }
-    )
-    type_select.arrow.set_anchors(left='right', left_offset=7, centery='centery')
-    
-    type_section = get_section([type_select], 'Type:', menu)
-    type_section.rect.topleft = (weight_section.rect.left, weight_section.rect.bottom + 20)
-    type_section.layer = 2
-    elements.append(type_section)
-    
-    type_select.add_event(
-        tag='set',
-        func=menu.card.set_type,
-        args=[type_select.get_text]
-    )
-    
-#tag section
-    
-    tag_elements = []
-
-    tags = []
-    y = 0
-    for _ in range(3):
-        tag = Textbox(
-            size=(150, 25),
-            centery_aligned=True
+        weight_flipper = Flipper.Text_Flipper.Counter(
+            range(1, 5),
+            index=menu.card.weight - 1,
+            button_kwargs={
+                'pad': 5,
+                'border_radius': 5
+            }
         )
-        tag.rect.topright = (0, y)
-        tags.append(tag)
+        weight_section = get_section([weight_flipper], 'Rarity:', menu)
+        weight_section.rect.inflate_ip(100, 0)
+        weight_flipper.rect.center = weight_section.rect.center
+        weight_flipper.set_stuck(True)
+        elements.append(weight_section)
+
+        weight_flipper.add_event(
+            tag='set',
+            func=menu.card.set_weight,
+            args=[lambda: int(weight_flipper.get_text())]
+        )
+    
+# type section
+
+        type_select = Dropdown(
+            TYPES_DICT,
+            selected=menu.card.type,
+            left_pad=5,
+            right_pad=25,
+            y_pad=2,
+            hover_color=(100, 100, 100),
+            window_kwargs = {
+                'fill_color': menu.fill_color,
+                'outline_color': (255, 255, 255),
+                'outline_width': 3
+            }
+        )
+        type_select.arrow.set_anchors(left='right', left_offset=7, centery='centery')
         
-        b = Button.Text_Button(
-            text=icons['x'],
-            text_color=(255, 0, 0),
+        type_section = get_section([type_select], 'Type:', menu)
+        type_section.layer = 2
+        elements.append(type_section)
+
+        type_select.add_event(
+            tag='set',
+            func=menu.card.set_type,
+            args=[type_select.get_text]
+        )
+    
+# tag section
+    
+        tag_elements = []
+
+        tags = []
+        y = 0
+        for _ in range(3):
+            tag = Textbox(
+                size=(150, 25),
+                centery_aligned=True
+            )
+            tag.rect.topright = (0, y)
+            tags.append(tag)
+            
+            b = Button.Text_Button(
+                text=icons['X'],
+                text_color=(255, 0, 0),
+                **icon_kwargs
+            )
+            b.turn_off()
+            b.rect.midright = (tag.rect.right + 21, tag.rect.centery)
+            tag.add_child(b, current_offset=True)
+            
+            def clear(tag=tag, b=b, tags=tags):
+                menu.card.remove_tag(tag.text)
+                tag.clear()
+                current_tags = sorted([t.text for t in tags], key=lambda text: not text)
+                for tag, text in zip(tags, current_tags):
+                    tag.set_text(text)
+                    tag.first_born.set_on_off(text)
+       
+            b.add_event(
+                tag='left_click',
+                func=clear
+            )
+
+            y += tag.rect.height + 5
+            
+        for tag, textbox in zip(menu.card.tags, tags):
+            textbox.set_text(tag)
+            textbox.first_born.turn_on()
+            
+        tag_elements += tags
+
+        add_button = Button.Text_Button(
+            text=icons['plus'],
+            pad=5,
+            hover_color=(100, 100, 100),
+            border_radius=5,
             **icon_kwargs
         )
-        b.turn_off()
-        b.rect.midright = (tag.rect.right - 5, tag.rect.centery)
-        tag.add_child(b, current_offset=True)
-        
-        def clear(tag=tag, b=b, tags=tags):
-            menu.card.remove_tag(tag.text)
-            tag.clear()
-            current_tags = sorted([t.text for t in tags], key=lambda text: not text)
-            for tag, text in zip(tags, current_tags):
-                tag.set_text(text)
-                tag.first_born.set_on_off(text)
-   
-        b.add_event(
-            tag='left_click',
-            func=clear
+        tag_elements.append(add_button)
+
+        tag_select = Input_Dropdown(
+            TAGS_DICT,
+            selected=menu.card.tags[0] if menu.card.tags else None,
+            max_length=9,
+            max_lines=1,
+            text_check=lambda text: text.isalpha(),
+            centery_aligned=True,
+            left_pad=5,
+            right_pad=20,
+            y_pad=2,
+            fill_color=(255, 255, 255),
+            text_color=(0, 0, 0),
+            clip=True,
+            window_kwargs={
+                'fill_color': menu.fill_color,
+                'outline_color': (255, 255, 255),
+                'outline_width': 3
+            },
+            layer=1
         )
-
-        y += tag.rect.height + 5
+        tag_select.height = 25
+        tag_select.rect.bottomleft = (tags[0].rect.left, tags[0].rect.top - 25)
+        add_button.rect.midleft = (tag_select.padded_rect.right + 15, tag_select.rect.centery)
+        tag_elements.append(tag_select)
         
-    for tag, textbox in zip(menu.card.tags, tags):
-        textbox.set_text(tag)
-        textbox.first_born.turn_on()
+        line = Style(
+            size=(add_button.rect.right - tag_select.rect.left, 2),
+            fill_color=(255, 255, 255)
+        )
+        line.rect.center = (
+            (add_button.rect.right + tag_select.rect.left) // 2, 
+            (tag_select.padded_rect.bottom + tags[0].padded_rect.top) // 2
+        )
+        tag_elements.append(line)
         
-    tag_elements += tags
+        tags_section = get_section(tag_elements, 'Tags:', menu)
+        elements.append(tags_section)
 
-    add_button = Button.Text_Button(
-        text=icons['left-arrow-2'],
-        pad=5,
-        hover_color=(100, 100, 100),
-        border_radius=5,
-        **icon_kwargs
-    )
-    add_button.rect.midleft = (tag_elements[0].rect.right + 5, tag_elements[0].rect.centery)
-    tag_elements.append(add_button)
-
-    tag_select = Input_Dropdown(
-        TAGS_DICT,
-        selected=menu.card.tags[0],
-        max_length=9,
-        max_lines=1,
-        centery_aligned=True,
-        left_pad=5,
-        right_pad=20,
-        y_pad=2,
-        fill_color=(255, 255, 255),
-        text_color=(0, 0, 0),
-        clip=True,
-        window_kwargs={
-            'fill_color': menu.fill_color,
-            'outline_color': (255, 255, 255),
-            'outline_width': 3
-        }    
-    )
-    tag_select.height = 25
-    tag_select.rect.midleft = (add_button.padded_rect.right + 10, add_button.rect.centery)
-    tag_elements.append(tag_select)
-    
-    tags_section = get_section(tag_elements, 'Tags:', menu)
-    tags_section.rect.topleft = (save_section.rect.left, type_section.rect.bottom + 20)
-    tags_section.layer = 1
-    elements.append(tags_section)
-    
-    def add_tag():
-        text = tag_select.text
-        if menu.card.add_tag(text):
-            for tag in tags:
-                if not tag.text:
-                    tag.set_text(text)
-                    tag.first_born.turn_on()
-                    break
-                
-    add_button.add_event(
-        tag='left_click',
-        func=add_tag
-    )
-    
-    tag_select.add_event(
-        tag='enter',
-        func=add_tag
-    )
+        def add_tag():
+            text = tag_select.text
+            if menu.card.add_tag(text):
+                for tag in tags:
+                    if not tag.text:
+                        tag.set_text(text)
+                        tag.first_born.turn_on()
+                        break
+                    
+        add_button.add_event(
+            tag='left_click',
+            func=add_tag
+        )
+        
+        tag_select.add_event(
+            tag='enter',
+            func=add_tag
+        )
   
-#image section
+# image section
     
     image_elements = []
 
@@ -334,7 +357,7 @@ def builder(menu):
     image_elements.append(rotate_button)
     
     rotate_icon = Textbox(
-        text=icons['rotate'],
+        text=icons['spinner11'],
         text_size=18,
         **icon_kwargs
     ).to_image()
@@ -354,7 +377,7 @@ def builder(menu):
     
     keep_aspect = menu.card.elements_dict['pic'].keep_aspect
     aspect_icon = Textbox(
-        text=icons['check'] if keep_aspect else icons['x'],
+        text=icons['check'] if keep_aspect else icons['X'],
         text_color=(0, 255, 0) if keep_aspect else (255, 0, 0),
         **icon_kwargs
     )
@@ -371,7 +394,7 @@ def builder(menu):
             aspect_icon.set_text(icons['check'])
         else:
             aspect_icon.text_color = (255, 0, 0)
-            aspect_icon.set_text(icons['x'])
+            aspect_icon.set_text(icons['X'])
             
     aspect_button.add_event(tag='left_click', func=set_keep_aspect)
     
@@ -386,7 +409,7 @@ def builder(menu):
     
     outline = bool(menu.card.elements_dict['pic'].outline_color)
     outline_icon = Textbox(
-        text=icons['check'] if outline else icons['x'],
+        text=icons['check'] if outline else icons['X'],
         text_color=(0, 255, 0) if outline else (255, 0, 0),
         **icon_kwargs
     )
@@ -403,27 +426,24 @@ def builder(menu):
             outline_icon.set_text(icons['check'])
         else:
             outline_icon.text_color = (255, 0, 0)
-            outline_icon.set_text(icons['x'])
+            outline_icon.set_text(icons['X'])
             
     outline_button.add_event(tag='left_click', func=set_outline)
+    
+    line = Style(
+        size=(outline_button.rect.width - 5, 2),
+        fill_color=(255, 255, 255)
+    )
+    line.rect.center = (
+        camera_button.rect.centerx, 
+        (camera_button.padded_rect.bottom + rotate_button.padded_rect.top) // 2
+    )
+    image_elements.append(line)
 
     image_section = get_section(image_elements, 'Image:', menu)
-    image_section.rect.topleft = (tags_section.rect.left, tags_section.rect.bottom + 20)
     elements.append(image_section)
-
-    def draw_line(self, surf):
-        y = (camera_button.padded_rect.bottom + rotate_button.padded_rect.top) // 2
-        pg.draw.line(
-            surf,
-            (255, 255, 255),
-            (camera_button.rect.left, y),
-            (camera_button.rect.right, y),
-            width=2
-        )
-
-    elements.append(Base_Element(draw=draw_line))
     
-#color section
+# color section
     
     color_elements = []
     x = 15
@@ -446,10 +466,14 @@ def builder(menu):
         y += rgb_slider.rect.height + 20
 
     color_section = get_section(color_elements, 'Color:', menu)
-    color_section.rect.topleft = (image_section.rect.right + 20, image_section.rect.top)
     elements.append(color_section)
+
+    color_section.add_event(
+        tag='update',
+        func=lambda: menu.card.set_color([e.get_state() for e in color_elements])
+    )
  
-#audio section
+# audio section
 
     am = Audio_Manager(menu.card)
     audio_section = get_section([am], 'Audio:', menu)
@@ -457,29 +481,172 @@ def builder(menu):
     
     elements.append(audio_section)
     
-#other
+# navigation
+
+    x = 15
+    y = 10
+    navigation_elements = []
     
-    return_button = Button.Text_Button(
+    back_button = Button.Text_Button(
         text='Return To Menu',
-        size=(200, 30),
-        centerx_aligned=True,
-        centery_aligned=True,
-        hover_color=(100, 100, 100),
-        tag='exit'
+        tag='exit',
+        **button_kwargs
     )
-    return_button.rect.topleft = (weight_section.rect.right + 30, weight_section.rect.top)
-    elements.append(return_button)
+    back_button.rect.topleft = (x, y)
+    navigation_elements.append(back_button)
     
-    node_button = Button.Text_Button(
-        text='Node Editor',
-        size=(200, 30),
-        centerx_aligned=True,
-        centery_aligned=True,
-        hover_color=(100, 100, 100),
-        func=menu.node_editor.run
+    back_icon = Textbox(
+        text=icons['arrow-left2'],
+        text_color=(255, 0, 0),
+        **icon_kwargs
     )
-    node_button.rect.midtop = (return_button.rect.centerx, return_button.rect.bottom + 20)
-    elements.append(node_button)
+    back_button.add_child(back_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    back_icon.set_enabled(False) 
+    
+    y += back_button.rect.height + 3
+    
+    if menu.card.id != 0:
+    
+        node_button = Button.Text_Button(
+            text='Node Editor',
+            func=menu.node_editor.run,
+            **button_kwargs
+        )
+        node_button.rect.topleft = (x, y)
+        navigation_elements.append(node_button)
+        
+        node_icon = Textbox(
+            text=icons['arrow-right2'],
+            text_color=(0, 255, 0),
+            **icon_kwargs
+        )
+        node_button.add_child(node_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+        node_icon.set_enabled(False) 
+        
+        y += node_button.rect.height + 3
+        
+        info_button = Button.Text_Button(
+            text='Info Sheet',
+            func=run_info_sheet,
+            **button_kwargs
+        )
+        info_button.rect.topleft = (x, y)
+        navigation_elements.append(info_button)
+        
+        info_icon = Textbox(
+            text=icons['file-text'],
+            text_color=(255, 255, 0),
+            **icon_kwargs
+        )
+        info_button.add_child(info_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+        info_icon.set_enabled(False) 
+    
+    navigation_section = get_section(navigation_elements, 'Navigation:', menu)
+    navigation_section.rect.topleft = (save_section.rect.right + 20, 20)
+    elements.append(navigation_section)
+    
+# selection
+    
+    if menu.card.id != 0:
+        sections = {
+            'type': type_section,
+            'image': image_section,
+            'color': color_section,
+            'tags': tags_section,
+            'rarity': weight_section,
+            'audio': audio_section
+        }
+    else:
+        sections = {
+            'image': image_section,
+            'color': color_section,
+            'audio': audio_section
+        } 
+
+    buttons = {}
+    
+    def set_tab(tab):
+        for t, section in sections.items():
+            b = buttons[t]
+            if t != tab:
+                section.turn_off()
+                b.freeze_animation(None)
+                if not b.hit:
+                    b.run_animations('hover', reverse=True)
+            else:
+                section.turn_on()
+                section.rect.center = (
+                    (body.right + menu.card.rect.right) // 2,
+                    body.centery
+                )
+                b.run_animations('hover')
+                b.freeze_animation('hover')
+    
+    x = save_section.rect.left
+    y = save_section.rect.bottom + 25
+    for tab, section in sections.items():
+        b = Button.Text_Button(
+            text=tab.title(),
+            pad=2,
+            fill_color=(155, 88, 108),
+            outline_color=(0, 0, 0),
+            outline_width=2,
+            func=set_tab,
+            args=[tab],
+            hover_color=(253, 180, 100)
+        )
+        
+        b.add_animation(
+            [{
+                'attr': 'text_color',
+                'end': (0, 0, 0)
+            }],
+            tag='hover'
+        )
+        
+        buttons[tab] = b
+        b.rect.topleft = (x, y)
+        elements.append(b)
+        y += b.padded_rect.height + 15
+        
+    if menu.card.id != 0:
+
+        set_tab('type')
+        
+        b = Button.Text_Button(
+            size=menu.card.elements_dict['type'].rect.size,
+            func=set_tab,
+            args=['type'],
+            layer=1
+        )
+        b.set_parent(menu.card.elements_dict['type'], left_anchor='left', top_anchor='top')
+        elements.append(b)
+        
+        b = Button.Text_Button(
+            size=menu.card.elements_dict['tags'].rect.size,
+            func=set_tab,
+            args=['tags'],
+            layer=1
+        )
+        b.set_parent(menu.card.elements_dict['tags'], left_anchor='left', top_anchor='top')
+        elements.append(b)
+        
+    else:
+        
+        set_tab('image')
+    
+    b = Button.Text_Button(
+        size=menu.card.elements_dict['pic'].rect.size,
+        func=set_tab,
+        args=['image'],
+        layer=1
+    )
+    elements.append(b)
+    
+    b.add_event(
+        tag='update',
+        func=lambda: setattr(b, 'rect',  menu.card.elements_dict['pic'].image_rect.copy())
+    )
     
     return elements
   
@@ -490,30 +657,34 @@ def run(info):
 class Builder(Menu):
     def __init__(self, card_info):
         self.card = Card(**card_info)
-        self.node_editor = Node_Editor(self.card)
+        self.node_editor = Node_Editor(self.card, self)
+        self.last_save_data = self.card.get_info()
 
         super().__init__(builder, fill_color=(32, 32, 40))
-
-    def update(self):
-        super().update()  
-        self.update_color()
-        self.update_published()
         
+    def events(self):
+        events = super().events()
+        
+        if events.get('ctrl'):
+            if kd := events.get('kd'):
+                if kd.key == pg.K_s:
+                    self.save_card()
+                    
+    def ask_save(self):
+        if self.card.get_info() != self.last_save_data:
+            m = Yes_No(text_kwargs={'text': 'Save before quitting?'})
+            if m.run():
+                self.card.save()
+
     def exit(self):
-        m = Yes_No(text_kwargs={'text': 'Save before quitting?'})
-        if m.run():
-            self.card.save()
+        self.ask_save()
         return super().exit()
         
-    def quit2(self):
-        m = Yes_No(text_kwargs={'text': 'Save before quitting?'})
-        if m.run():
-            self.card.save()
+    def quit(self):
+        self.ask_save()
         return super().quit()
-            
-#image stuff--------------------------------------------------------------------------------------
 
-    def open_image(self):
+    def open_image(self):        
         files = (
             ('All Image Files', ('*.jpg', '*.jpeg', '*.png', '*.bmp')),
             ('JPEG', ('*.jpg', '*.jpeg')),
@@ -526,7 +697,6 @@ class Builder(Menu):
             filetypes=files
         )
         if file:
-        
             try:
                 image = pg.image.load(file).convert_alpha()
                 self.card.update_image(image)
@@ -549,30 +719,13 @@ class Builder(Menu):
         if file:
             self.card.export_image(file)
 
-    def update_published(self):
-        icon = self.elements_dict['published']
-        if self.card.published and icon.text_color != (0, 255, 0):
-            icon.text_color = (0, 255, 0)
-            icon.set_text(icons['check'])
-        elif not self.card.published and icon.text_color != (255, 0, 0):
-            icon.text_color = (255, 0, 0)
-            icon.set_text(icons['x'])
-
-    def update_color(self):
-        color = [
-            self.elements_dict['r'].get_state(),
-            self.elements_dict['g'].get_state(),
-            self.elements_dict['b'].get_state()
-        ]
-        self.card.set_color(color)
-        
-#card stuff-------------------------------------------------------------------------------------
-
     def save_card(self):
         self.card.save(nodes=self.node_editor.nodes)
+        self.last_save_data = self.card.get_info()
         
     def publish_card(self):
-        self.card.publish(nodes=self.node_editor.nodes)
-
-
-
+        if not self.card.published:
+            self.card.publish(nodes=self.node_editor.nodes)
+            self.last_save_data = self.card.get_info()
+        else:
+            self.card.set_published(False)

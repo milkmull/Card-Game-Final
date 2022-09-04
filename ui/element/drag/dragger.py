@@ -68,6 +68,7 @@ class Dragger:
         )
         
     def start_held(self, all=False):
+        _held = self.held
         if not self._stuck:
             self.held = True
             
@@ -78,7 +79,8 @@ class Dragger:
                 self.selected = True
 
             self.set_rel_pos()
-            self.pickup_pos = self.rect.topleft
+            if not _held:
+                self.pickup_pos = self.rect.topleft
    
     def drop(self):
         self.held = False

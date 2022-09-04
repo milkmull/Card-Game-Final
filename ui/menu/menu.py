@@ -16,6 +16,7 @@ class Menu(Base_Loop):
         init_kwargs=None,
         
         overlay=False,
+        opacity=180,
         get_status=False,
         
         **kwargs
@@ -24,15 +25,15 @@ class Menu(Base_Loop):
         super().__init__(**kwargs)
         
         self.init = init
-        self.args = init_args if init_args is not None else []
-        self.kwargs = init_kwargs if init_kwargs is not None else {}
+        self.args = init_args or []
+        self.kwargs = init_kwargs or {}
         self.return_value = None
         
         self.background = None
         if overlay:
             surf = self.window.copy()
             over = pg.Surface(surf.get_size()).convert_alpha()
-            over.fill((0, 0, 0, 180))
+            over.fill((0, 0, 0, opacity))
             surf.blit(over, (0, 0))
             self.background = surf
 

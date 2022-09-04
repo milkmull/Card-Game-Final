@@ -10,11 +10,13 @@ from node.node.node_base import pack
 from node.compiler import Compiler
 from node.tester import tester
 
+from ui.menu.templates.notice import Notice
+
 from ui.element.base.image_element import Image_Element
 from ui.element.base.style import Style
 from ui.element.elements import Textbox, Image, Button, Input
+
 from .elements.fitted_image import Fitted_Image
-from ui.menu.templates.notice import Notice
 
 CARD_SIZE = CONSTANTS['card_size']
 CARD_WIDTH, CARD_HEIGHT = CARD_SIZE
@@ -26,7 +28,7 @@ def is_valid_code(code):
     except SyntaxError:
         return False
     return True
-
+    
 class Card(Image_Element):
     @classmethod
     def build_card(cls, info):
@@ -113,7 +115,7 @@ class Card(Image_Element):
         self.elements_dict['name'] = name
 
         pic = Fitted_Image(
-            image=pg.image.load(image).convert_alpha(),
+            image=(pg.image.load(image) if image else pg.Surface(IMAGE_SIZE)).convert_alpha(),
             size=IMAGE_SIZE,
             keep_aspect=keep_aspect,
             rotation=rotation,
@@ -155,7 +157,7 @@ class Card(Image_Element):
 
         tags = Textbox(
             size=(pic.rect.width - type.rect.width - 20, 20),
-            text=str(tags).replace("'", ''), 
+            text=str(tags).replace("'", '') if tags else '', 
             text_size=45,
             **text_kwargs,
             **style_kwargs
@@ -171,7 +173,7 @@ class Card(Image_Element):
       
     @property
     def name(self):
-        return self.elements_dict['name'].text.lower()
+        return self.elements_dict['name'].text.strip()
         
     @property
     def type(self):
@@ -179,7 +181,7 @@ class Card(Image_Element):
         
     @property
     def description(self):
-        return self.elements_dict['desc'].text
+        return self.elements_dict['desc'].text.strip()
         
     @property
     def tags(self):
@@ -187,10 +189,8 @@ class Card(Image_Element):
         
     @property
     def classname(self):
-        name = self.name.title().replace(' ', '_')
-        
         cname = ''
-        for char in name:
+        for char in self.name.title().replace(' ', '_'):
             if char.isalnum() or char == '_':
                 cname += char
                 
@@ -263,7 +263,7 @@ class Card(Image_Element):
         
     def get_card_image(self):
         img = self.image.copy()
-        self.draw(img)
+        self.draw_on(img, self.rect)
         return img
         
     def export_image(self, filename):
@@ -276,7 +276,7 @@ class Card(Image_Element):
     def add_tag(self, tag):
         tag = tag.strip()
         tags = self.tags
-        if tag and tag not in tags:
+        if tag and tag not in tags and len(tags) < 3:
             tags.append(tag)
             tb = self.elements_dict['tags']
             tb.set_text(str(tags).replace("'", ''))
@@ -284,11 +284,10 @@ class Card(Image_Element):
         
     def remove_tag(self, tag):
         tags = self.tags
-        print(tags)
         if tag in tags:
             tags.remove(tag)
             tb = self.elements_dict['tags']
-            tb.set_text(str(tags).replace("'", ''))
+            tb.set_text(str(tags).replace("'", '') if tags else '')
             
     def set_weight(self, weight):
         self.weight = weight
@@ -322,6 +321,12 @@ class Card(Image_Element):
             
     def set_lines(self, s, e):
         self.lines = (s, e)
+        
+    def get_published(self):
+        return self.published
+        
+    def set_published(self, published):
+        self.published = published
         
     def publish(self, nodes=None):
         if nodes is not None:

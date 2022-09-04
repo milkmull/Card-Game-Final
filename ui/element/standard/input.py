@@ -61,7 +61,7 @@ class Input(Text_Element):
             kwargs['text'] = default
         super().__init__(**(Input.default_kwargs | kwargs))
 
-        self.default = default if default else self.text
+        self.default = default or self.text
 
         self.selecting = False
         self.held_key = None
@@ -311,6 +311,8 @@ class Input(Text_Element):
                         self.close()
                 elif kd.key == pg.K_TAB:
                     self.add_text('    ')
+                    
+                events.pop('kd')
 
             if events.get('ku') and self.held_key:
                 self.held_key = None

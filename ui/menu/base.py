@@ -2,6 +2,21 @@ import sys
 
 import pygame as pg
 
+cursors = (
+    'SYSTEM_CURSOR_ARROW',
+    'SYSTEM_CURSOR_IBEAM',
+    'SYSTEM_CURSOR_WAIT',
+    'SYSTEM_CURSOR_CROSSHAIR',
+    'SYSTEM_CURSOR_WAITARROW',
+    'SYSTEM_CURSOR_SIZENWSE',
+    'SYSTEM_CURSOR_SIZENESW',
+    'SYSTEM_CURSOR_SIZEWE',
+    'SYSTEM_CURSOR_SIZENS',
+    'SYSTEM_CURSOR_SIZEALL',
+    'SYSTEM_CURSOR_NO',
+    'SYSTEM_CURSOR_HAND'
+)
+
 class Base_Loop:
     FPS = 30
     TIME_STEP = 1
@@ -30,6 +45,8 @@ class Base_Loop:
                 events['mbu'] = e
             elif e.type == pg.MOUSEWHEEL:
                 events['mw'] = e
+            elif e.type == pg.MOUSEMOTION:
+                events['mm'] = e
             elif e.type == pg.KEYDOWN:
                 events['kd'] = e
                 if e.key == pg.K_ESCAPE:
@@ -109,7 +126,7 @@ class Base_Loop:
                 self.quit()
             elif events.get('e'):
                 self.exit()
-                return
+                return {}
 
         self.sub_events(events)
         

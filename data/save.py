@@ -241,6 +241,9 @@ class Save:
     def get_new_card_data(self):
         data = Save.get_blank_card_data()
         data['id'] = self.new_card_id()
+        data['type'] = 'play'
+        data['name'] = 'New Card'
+        data['tags'].clear()
         return data
 
     def get_custom_names(self):

@@ -6,13 +6,13 @@ import inspect
 import importlib
 
 from data.constants import TEST_CARD_FILE, TEST_CARD_HEADER
+
 from game.game import game_base
 
-from ui.menu.templates.loading import Loading
 from .errors_screen import run as run_errors
 
-#from . import testing_card
-  
+from ui.menu.templates.loading import Loading
+
 def step_test(t):
     t.step_sim()
     return t.get_sims() / 300
@@ -153,14 +153,4 @@ def test_run(card):
     finally:
         c.quit()
         return text
-        
-def print_logs(g):
-    for p in g.players:
-        print(f'{p.pid}: ' + '{')
-        for log in p.master_log:
-            print('\t{')
-            for k, v in log.items():
-                print(f'\t\t{k}: {v}')
-            print('\t}')
-        print('}\n')
     

@@ -14,10 +14,10 @@
         }
     },
     "If": {
-        "info": "If the Boolean input is True, the split path is run before continuing the main path. If it is False, the split path is skipped.",
-        "tips": "If nodes can evaluate all kinds of data, not just Boolean values.\n\nIf you plug in a number, if the number is not 0 it will evaluate to True, otherwise False.\n\nIf you plug in a list, if the list is not empty it will evaluate to True, otherwise False.\n\n",
+        "info": "If the Boolean input is True, the process path is run before continuing the main path. If it is False, the process path is skipped.",
+        "tips": "If nodes can evaluate all kinds of data, not just Boolean values.\n\nIf you plug in a number, if the number is not 0 it will evaluate to True, otherwise False.\n\nIf you plug in a list, if the list is not empty it will evaluate to True, otherwise False.",
         "ports": {
-            "1": "This Boolean argument decides if the split path is run or skipped",
+            "1": "This Boolean argument decides if the process path is run or skipped",
             "2": null,
             "-1": null,
             "-2": "This out-flow port can be wired to an 'Elif' node or an 'Else' node."
@@ -25,16 +25,16 @@
     },
     "Elif": {
         "info": "This node can only be placed after 'If' nodes or 'Elif' nodes. If the previous node is evaluated to be False, this node will be evaluated as an 'If' node. If the previous node is evaluated to be True, this whole node will be skipped.",
-        "tips": "Elif nodes can evaluate all kinds of data, not just Boolean values.\n\nIf you plug in a number, if the number is not 0 it will evaluate to True, otherwise False.\n\nIf you plug in a list, if the list is not empty it will evaluate to True, otherwise False.\n\n",
+        "tips": "Elif nodes can evaluate all kinds of data, not just Boolean values.\n\nIf you plug in a number, if the number is not 0 it will evaluate to True, otherwise False.\n\nIf you plug in a list, if the list is not empty it will evaluate to True, otherwise False.",
         "ports": {
-            "1": "This Boolean argument decides if the split path is run or skipped",
+            "1": "This Boolean argument decides if the process path is run or skipped",
             "2": "This in-flow port can only be wired to the out-flow of an 'If' node or another 'Elif' node.",
             "-1": null,
             "-2": "This out-flow port can be wired to an additional 'Elif' node or an 'Else' node."
         }
     },
     "Else": {
-        "info": "This node can only be placed after 'If' nodes or 'Elif' nodes. If all previous nodes are evaluated to be False, this node will run its split path. Otherwise, the split path will be skipped.",
+        "info": "This node can only be placed after 'If' nodes or 'Elif' nodes. If all previous nodes are evaluated to be False, this node will run its process path. Otherwise, the process path will be skipped.",
         "tips": null,
         "ports": {
             "1": "This in-flow port can only be wired to the out-flow of an 'If' node or 'Elif' node.",
@@ -87,13 +87,6 @@
         "ports": {
             "1": null,
             "-1": "block of code"
-        }
-    },
-    "Scope": {
-        "info": "This node lets you see the code output from ports. It can be connected to any output port.",
-        "tips": "Certain ports will return a variable. You can use this node to get the name of that returned variable. You can then reference that variable in a 'Line' or 'Block' node.",
-        "ports": {
-            "1": null
         }
     },
     "And": {
@@ -234,13 +227,13 @@
         }
     },
     "For": {
-        "info": "This node can be used to pull out each individual value from a list and run a process on them. Plug in a list of values to port 1. Port -1 will then open up with the type of values that the list contains. If an empty list is plugged in, the split path will be skipped.",
+        "info": "This node can be used to pull out each individual value from a list and run a process on them. Plug in a list of values to port 1. Port -1 will then open up with the type of values that the list contains. If an empty list is plugged in, the process path will be skipped.",
         "tips": "Say you want all players to gain 5 points. Just plug in a list containing all players, then add in a 'Gain' node wired to port -2. Finally wire in the output player to the 'Gain' node.",
         "ports": {
             "1": "This input takes any type of list.",
             "2": null,
-            "-1": "This port will output a value corresponding to the type of list at the input. This value represents each individual value in the input list. The output value can only be wired to nodes within the split path.",
-            "-2": "This split path will run for each value in the input list. If the list is empty, this split path will be skipped.",
+            "-1": "This port will output a value corresponding to the type of list at the input. This value represents each individual value in the input list. The output value can only be wired to nodes within the process path.",
+            "-2": "This process path will run for each value in the input list. If the list is empty, this process path will be skipped.",
             "-3": null
         }
     },
@@ -251,22 +244,22 @@
             "1": "This input takes any type of list.",
             "2": "This input takes any type of list.",
             "3": null,
-            "-1": "This port will output a value corresponding to the type of list at port 1. This value represents each individual value in the input list. The output value can only be wired to nodes within the split path.",
-            "-2": "This port will output a value corresponding to the type of list at port 2. This value represents each individual value in the input list. The output value can only be wired to nodes within the split path.",
-            "-3": "This split path will run for each value pair in the input lists. If both lists are empty, this split path will be skipped.",
+            "-1": "This port will output a value corresponding to the type of list at port 1. This value represents each individual value in the input list. The output value can only be wired to nodes within the process path.",
+            "-2": "This port will output a value corresponding to the type of list at port 2. This value represents each individual value in the input list. The output value can only be wired to nodes within the process path.",
+            "-3": "This process path will run for each value pair in the input lists. If both lists are empty, this process path will be skipped.",
             "-4": null
         }
     },
     "Break": {
-        "info": "This node can be used to exit a 'For' node split path prematurely. If you are only looking for a specific result, you can place this node after your result is found to return to the main path.",
-        "tips": "This node can only be used within the split path of a 'For' or 'Zipped For' node.",
+        "info": "This node can be used to exit a 'For' node process path prematurely. If you are only looking for a specific result, you can place this node after your result is found to return to the main path.",
+        "tips": "This node can only be used within the process path of a 'For' node or 'Zipped For' node.",
         "ports": {
             "1": null
         }
     },
     "Continue": {
-        "info": "This node can be used to skip to the next value in a 'For' node split path. If you don't want to evaluate a value, use this node to skip to the next.",
-        "tips": "This node can only be used within the split path of a 'For' or 'Zipped For' node.",
+        "info": "This node can be used to skip to the next value in a 'For' node process path. If you don't want to evaluate a value, use this node to skip to the next.",
+        "tips": "This node can only be used within the process path of a 'For' or 'Zipped For' node.",
         "ports": {
             "1": null
         }
@@ -481,8 +474,8 @@
         }
     },
     "Gain": {
-        "info": "This node adds points to a player’s score.",
-        "tips": "This node only accepts positive numbers as input. Use the 'Lose' node to subtract from a player’s score.",
+        "info": "This node adds points to a player's score.",
+        "tips": "This node only accepts positive numbers as input. Use the 'Lose' node to subtract from a player's score.",
         "ports": {
             "1": "Number representing the number of points that the player will gain.",
             "2": "The player who will gain points. This will default to the user.",
@@ -491,7 +484,7 @@
         }
     },
     "Lose": {
-        "info": "This node subtracts points from a player’s score.",
+        "info": "This node subtracts points from a player's score.",
         "tips": "This node only accepts positive numbers as input. Players cannot go into negative point values. If a player has a score of 0, they will not go any lower.",
         "ports": {
             "1": "The number of points that the player will lose.",
@@ -608,14 +601,14 @@
     },
     "Init_Ongoing": {
         "info": "This node is a function. It is used only for Play cards to set up and ongoing process. Use an 'Add to Ongoing' node within this function to finish setting up the ongoing process.",
-        "tips": "This function may seem unnecessary; however, it is used when a card is transferred to a player’s deck through means other than playing. The game will check to see if any new cards in a player's sequence have an 'Init Ongoing' function. If they do, the game will run it, adding the card to the new player's ongoing cards.",
+        "tips": "This function may seem unnecessary; however, it is used when a card is transferred to a player's deck through means other than playing. The game will check to see if any new cards in a player's sequence have an 'Init Ongoing' function. If they do, the game will run it, adding the card to the new player's ongoing cards.",
         "ports": {
             "-1": null
         }
     },
     "Add_To_Ongoing": {
         "info": "This node can only be used inside an 'Init Ongoing' function. It is used to tell the game which type of log the card will wait for in order to activate.",
-        "tips": "Port 1 takes a string representing the type of log to wait for. Passing 'cont' to the port will let your card continuously run its ongoing function every time the player is updated.",
+        "tips": "Port 1 takes a string representing the type of log to wait for. Passing 'cont' to the port will let your card continuously run its ongoing function every time the player is updated. (See Info Sheet >> Logs for a full list of log types, listed as the 't' data key)",
         "ports": {
             "1": "A string representing the type of log to wait for. Pass 'cont' for continuous updating.",
             "2": null,
@@ -623,16 +616,22 @@
         }
     },
     "Ongoing": {
-        "info": "This node is a function. It represents an ongoing process. Ongoing processes wait for a specific log to initiate. When that log appears, this function will run.",
+        "info": "This node is a function. It represents an ongoing process. Ongoing processes wait for a specific log to initiate. When that log appears, this function will run. Use an 'End Ongoing' node to end an ongoing process. If that node is not used, the ongoing process will run every time a new log of the specified type is created.",
         "tips": "Many cards depend on waiting for a card with a specific name or tag to be placed around it. To achieve this, simply activate an ongoing process with the 'cont' condition. In the ongoing process, check the index where you expect the special card to be played.",
         "ports": {
-            "-1": "This port will return the log that triggered your card's ongoing process. Different information from the log can be extracted using the 'Extract Value' node.",
+            "-1": "This port will return the log that triggered your card's ongoing process. Different information from the log can be extracted using the 'Extract Value' node. (See Info Sheet >> Logs for more info)",
             "-2": null
         }
     },
+    "End_Ongoing": {
+        "info": "Once your ongoing process has been completed, Use this node to end the process. If this node is not called, the ongoing process will continue every time a new log of the specified type is created.",
+        "ports": {
+            "1": null
+        }
+    },
     "Extract_Value": {
-        "info": "This is a special node which extracts data from a log inside an ongoing process.",
-        "tips": "The node will attempt to find the value in the log based on the string you pass. If no value is found, a 'None' value will be returned.",
+        "info": "This is a special node which extracts data from a log inside an ongoing process. (See Info Sheet >> Logs for more details on how to check log types and extract values)",
+        "tips": "The node will attempt to find the value in the log based on the key string you pass. If no value is found, a 'None' value will be returned.",
         "ports": {
             "1": "A string representing the value to extract from the log.",
             "2": null,
@@ -645,7 +644,7 @@
         "ports": {
             "1": "A string representing what the trojan card is to do once passed to an opponent. 'flip' will activate a flip request, 'roll' a roll request, 'select' a select request and 'og' will start an ongoing process.",
             "2": "List of players who will receive deployed cards. The user is automatically filtered out if they are included in the given list.",
-            "3": "A card which will be set as the extra card for all deployed cards. Often you will want to set this value to the original card (accessed by a 'Self' node). This will allow you to access the parent card from any trojan card.",
+            "3": "A card which will be set as the extra card for all deployed cards. Often you will want to set this value to the original card (accessed by a 'Card' node). This will allow you to access the parent card from any trojan card.",
             "4": "A player which will be set as the extra player for all deployed cards. Often you will want to set this value to the original user. This will allow you to access the original user from any trojan card.",
             "5": null,
             "-1": null
@@ -752,7 +751,7 @@
         }
     },
     "Play_Card": {
-        "info": "This node can be used to play a card. This will only work for cards which have a 'start' function. Types such as items, spells and landscapes are not playable, and when sent to this function will cause an error.",
+        "info": "This node can be used to play a card. This will only work for cards which have a 'Start' function. Types such as items, spells and landscapes are not playable, and when sent to this function will cause an error.",
         "tips": "If a card which already exists in the user's played cards is passed to this node, the card will be played a second time but will not be added again to the user's played cards. This is how landscapes work.",
         "ports": {
             "1": "Card which is to be played. This will default to this card.",

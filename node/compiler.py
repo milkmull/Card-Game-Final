@@ -3,6 +3,15 @@ import re
 from .node import mapping
 
 class Compiler:
+    REQUIRED = {
+        'play': ('Start',),
+        'item': ('Can_Use', 'Start'),
+        'spell': ('Can_Cast', 'Start_Ongoing', 'Init_Ongoing', 'Add_To_Ongoing', 'Ongoing'),
+        'treasure': ('End',),
+        'event': ('Start', 'Start_Ongoing', 'Init_Ongoing', 'Add_To_Ongoing', 'Ongoing'),
+        'landscape': ('Start_Ongoing', 'Init_Ongoing', 'Add_To_Ongoing', 'Ongoing')
+    }
+    
     @staticmethod
     def unmark(text):
         return re.sub(r'(#<)([0-9]+)(,-?[0-9]+)(>#)', '', text)
@@ -60,13 +69,10 @@ class Compiler:
             for name in n.get_required():
                 if not any({o.name == name for o in self.nodes}):
                     missing.add(name)
+        for name in Compiler.REQUIRED.get(self.card.type, ()):
+            if not any({o.name == name for o in self.nodes}):
+                missing.add(name)
         return list(missing)
-        
-    @property
-    def start_node(self):
-        for n in self.nodes:
-            if n.name == 'Start':
-                return n
                 
     @property
     def funcs(self):
@@ -76,7 +82,7 @@ class Compiler:
         for n in self.nodes:
             n.mark = mark
     
-        if not self.start_node or self.missing:
+        if self.missing:
             return ''
    
         data = {}
@@ -113,19 +119,19 @@ class Compiler:
                     text += (tabs * '\t') + line + '\n'
                 data['body'] += text
         
-        split_found = False
+        process_found = False
         for op in node.get_output_ports():
-            if 'split' in op.types:
+            if 'process' in op.types:
                 if op.connection:
                     self._compile(op.connection, data, tabs=tabs + 1)
-                split_found = True
+                process_found = True
                 break
      
-        if split_found:
+        if process_found:
             if data['body'].endswith(text):
                 data['body'] += ((tabs + 1) * '\t') + 'pass\n'
 
         for op in node.get_output_ports():
-            if 'flow' in op.types and 'split' not in op.types:
+            if 'flow' in op.types and 'process' not in op.types:
                 if op.connection:
                     self._compile(op.connection, data, tabs=tabs)

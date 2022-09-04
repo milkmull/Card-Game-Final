@@ -1,10 +1,13 @@
 import pygame as pg
 
-from ui.element.drag.dragger import Dragger
-from ui.element.elements import Button, Live_Window
-from ..screens.info import run as run_info
-from ..screens.output import run as run_output
 from data.constants import NODE_DATA
+
+from ..compiler import Compiler
+
+from ..screens.about_node import run as run_about
+from ..screens.output import run as run_output
+
+from ui.element.elements import Button, Live_Window
 
 class Context_Manager(Live_Window):
     def __init__(
@@ -15,7 +18,7 @@ class Context_Manager(Live_Window):
         self.separators = []
 
         button_kwargs = {
-            'size': (95, 25),
+            'size': (100, 25),
             'fill_color': (255, 255, 255),
             'text_color': (0, 0, 0),
             'text_size': 15,
@@ -60,7 +63,7 @@ class Context_Manager(Live_Window):
                 )
                 buttons.append(b)
                 
-            elif selected:
+            elif len(selected) > 1:
                 b = Button.Text_Button(
                     text='Group',
                     func=menu.create_new_group_node,
@@ -69,21 +72,12 @@ class Context_Manager(Live_Window):
                 buttons.append(b)
                 
             add_sep()
-            
-            if node.get_required():
-                b = Button.Text_Button(
-                    text='Get Required',
-                    func=menu.get_required,
-                    args=[node],
-                    **button_kwargs
-                )
-                buttons.append(b)
-                
+
             if node.name in NODE_DATA:
                 b = Button.Text_Button(
-                    text='Info',
-                    func=run_info,
-                    args=[node],
+                    text='About Node',
+                    func=run_about,
+                    args=[node.name],
                     **button_kwargs
                 )
                 buttons.append(b)
@@ -103,6 +97,16 @@ class Context_Manager(Live_Window):
             b = Button.Text_Button(
                 text='Paste',
                 func=menu.paste_nodes,
+                **button_kwargs
+            )
+            buttons.append(b)
+            
+            add_sep()
+            
+        if menu.get_required():
+            b = Button.Text_Button(
+                text='Get Required',
+                func=menu.load_required_nodes,
                 **button_kwargs
             )
             buttons.append(b)
@@ -140,7 +144,7 @@ class Context_Manager(Live_Window):
             )
             
         super().__init__(
-            size=(100, sum([b.rect.height for b in buttons])),
+            size=(105, sum([b.rect.height for b in buttons])),
             pos=pg.mouse.get_pos(),
             outline_color=(0, 0, 0),
             outline_width=3
@@ -169,15 +173,3 @@ class Context_Manager(Live_Window):
                 (e.rect.right - 10, e.rect.top - 1),
                 width=2
             )
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        

@@ -153,6 +153,13 @@ def map_flow(n, nodes, map, port=None, row=0, column=0):
     if column not in map:
         map[column] = {row: n}
     else:
+        if row in map[column]:
+            min_row = min({r for r in map[column]})
+            max_row = max({r for r in map[column]})
+            if abs(row - min_row) <= abs(row - max_row):
+                row = min_row - 1
+            else:
+                row = max_row + 1
         map[column][row] = n
     nodes.remove(n)
 
@@ -184,11 +191,11 @@ def check_bad_connection(n0, n1):
 
     for n in nodes:
         out_port = None
-        split_port = None
+        process_port = None
         check_ports = []
         for op in n.get_output_ports():
-            if 'split' in op.types:
-                split_port = op
+            if 'process' in op.types:
+                process_port = op
                 if op.connection:
                     check_ports.append(op)
             elif 'flow' in op.types:
@@ -196,7 +203,7 @@ def check_bad_connection(n0, n1):
             elif op.connection:
                 check_ports.append(op)
                 
-        if split_port and check_ports:
+        if process_port and check_ports:
             for op in check_ports:
                 ports = map_ports(op.connection, check_ports.copy(), all_ports=True, in_type='flow')
                 if out_port in ports:

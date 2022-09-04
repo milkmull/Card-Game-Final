@@ -41,18 +41,19 @@ class Rect_Selector(Base_Element):
                 if kd.key == pg.K_a:
                     Dragger.select_all()
                     events.pop('kd')
-        
-        mbd = events.get('mbd')
-        if mbd:
-            if mbd.button == 1:
-                self.anchor = mbd.pos
-                events.pop('mbd')
+                    
+        else:
+            mbd = events.get('mbd')
+            if mbd:
+                if mbd.button == 1:
+                    self.anchor = mbd.pos
+                    events.pop('mbd')
 
-        mbu = events.get('mbu')
-        if mbu:
-            if mbu.button == 1:
-                self.select()
-                self.anchor = None
+            mbu = events.get('mbu')
+            if mbu:
+                if mbu.button == 1:
+                    self.select()
+                    self.anchor = None
         
     def update(self):
         if self.anchor:

@@ -62,7 +62,7 @@ def main_menu(menu):
     b.rect.y = elements[-1].rect.bottom + b.rect.height
     elements.append(b)
     
-    tb = Textbox(text=icons['gear'], font_name='icons.ttf', text_size=30)
+    tb = Textbox(text=icons['cog'], font_name='icons.ttf', text_size=30)
     tb = tb.to_image(size=tb.rect.size, auto_fit=True)
     tb.set_enabled(False)
     tb.rect.midright = b.rect.midright

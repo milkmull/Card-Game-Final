@@ -6,11 +6,12 @@ import pygame as pg
 
 from ..media.audio_capture import Audio_Capture, get_sound_length
 
+from ui.menu.menu import Menu
+from ui.menu.templates.notice import Notice
+
 from ui.element.base.position import Position
 from ui.element.elements import Textbox, Button, Slider, Live_Window, Label, Dropdown
 from ui.icons.icons import icons
-from ui.menu.menu import Menu
-from ui.menu.templates.notice import Notice
 
 def select_device(menu, mic):
     body = menu.body
@@ -35,7 +36,6 @@ def select_device(menu, mic):
         
     def select():
         selected_name = mic_select.text
-        
         for i, (name, index) in enumerate(mic.devices):
             if name == selected_name:
                 mic.device_index = i
@@ -58,7 +58,7 @@ def select_device(menu, mic):
         menu.refresh()
         
     exit_button = Button.Text_Button(
-        text=icons['x'],
+        text=icons['X'],
         font_name='icons.ttf',
         centerx_aligned=True,
         centery_aligned=True,
@@ -77,7 +77,7 @@ def select_device(menu, mic):
     mic_select.add_child(exit_button, current_offset=True)
     
     refresh_button = Button.Text_Button(
-        text=icons['rotate'],
+        text=icons['spinner11'],
         font_name='icons.ttf',
         text_size=17,
         centerx_aligned=True,
@@ -90,6 +90,14 @@ def select_device(menu, mic):
     )
     refresh_button.rect.topright = (exit_button.padded_rect.left - 10, exit_button.rect.top)
     mic_select.add_child(refresh_button, current_offset=True)
+
+    b = Button.Text_Button(
+        size=body.size,
+        cursor=0,
+        tag='exit',
+        layer=-1
+    )
+    elements.append(b)
 
     return elements
     
@@ -162,7 +170,7 @@ def audio_manager(manager):
     x = slider.rect.right
     
     settings_button = Button.Text_Button(
-        text=icons['gear'],
+        text=icons['cog'],
         font_name='icons.ttf',
         text_color=(200, 200, 200),
         func=run_select_device,
@@ -189,7 +197,7 @@ def audio_manager(manager):
     x -= file_button.padded_rect.width + 5
 
     clear_button = Button.Text_Button(
-        text=icons['x'],
+        text=icons['X'],
         font_name='icons.ttf',
         text_color=(255, 0, 0),
         func=manager.clear_sound,

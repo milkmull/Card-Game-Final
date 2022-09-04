@@ -16,8 +16,8 @@ class Text_Element(Element, Text):
             self.rect.size = size
             self.fit_text()
         
-    def set_text(self, text, force=False):
-        super().set_text(text, force=force)
+    def set_text(self, text, force=False, style=None):
+        super().set_text(text, force=force, style=style)
         self.run_events('set')
         
     def draw(self, surf):

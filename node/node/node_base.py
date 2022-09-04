@@ -2,14 +2,16 @@ import json
 
 import pygame as pg
 
+from data.constants import GROUP_DATA_FILE
+
 from . import mapping
-from ui.math import line
+
+from ui.element.base.element import Element
 from ui.element.standard.textbox import Textbox
 from ui.element.drag.dragger import Dragger
-from ui.element.base.element import Element
-from .element.input import Logged_Label_Input as Input
+from ui.math import line
 
-NODE_DATA_PATH = 'data/node/'
+from .element.input import Logged_Label_Input as Input
 
 def pack(_nodes):
     d = mapping.find_all_nodes(_nodes)
@@ -69,9 +71,7 @@ def unpack(data, manager=None, map=True):
         pos = d['pos']
         contains = d['contains']
         form = d['form']
-        n = Node.from_name(name, pos=pos)
-        if not map:
-            n.id = id
+        n = Node.from_name(name, id=id if not map else None, pos=pos)
         n.oid = id
         new_id = n.id
         id_map[id] = new_id
@@ -124,11 +124,9 @@ def unpack(data, manager=None, map=True):
         group_nodes = [nodes[id_map[nid]] for nid in d['nodes']]
         ports = [nodes[id_map[nid]].get_port(p) for nid, p in d['visible_ports']]
         pos = d['pos']
-        n = Group_Node.get_new(group_nodes, ports=ports, pos=pos)
+        n = Group_Node.get_new(group_nodes, id=id if not map else None, ports=ports, pos=pos)
         n.group_name = name
         n.rel_node_pos = {nodes[id_map[int(nid)]]: pos for nid, pos in d['rel_node_pos'].items()}
-        if not map:
-            n.id = id
         new_id = n.id
         id_map[id] = new_id
         nodes[new_id] = n
@@ -644,7 +642,7 @@ class Port(Element):
             return (255, 0, 255)
         elif main_type == 'card':
             return (145, 30, 180)
-        elif main_type == 'split':
+        elif main_type == 'process':
             return (128, 128, 128)
         elif main_type == 'flow':
             return (255, 255, 255)
@@ -738,7 +736,7 @@ class Node(Dragger, Element):
           
     @classmethod
     def set_group_data(cls):
-        with open(f'{NODE_DATA_PATH}group_nodes.json', 'r') as f:
+        with open(GROUP_DATA_FILE, 'r') as f:
             cls.GROUP_DATA = json.load(f)
             
     @classmethod
@@ -788,8 +786,8 @@ class Node(Dragger, Element):
         cls.ID = 0
         
     @classmethod
-    def from_name(cls, name, **kwargs):
-        return cls.NODE_DATA[name](Node.get_new_id(), **kwargs)
+    def from_name(cls, name, id=None, **kwargs):
+        return cls.NODE_DATA[name](id if id is not None else cls.get_new_id(), **kwargs)
 
     def __init__(
         self,
@@ -1207,8 +1205,8 @@ class Node(Dragger, Element):
         
 class Group_Node(Node):
     @classmethod
-    def get_new(cls, nodes, **kwargs):
-        n = cls(Node.get_new_id(), nodes, **kwargs)
+    def get_new(cls, nodes, id=None, **kwargs):
+        n = cls(id if id is not None else Node.get_new_id(), nodes, **kwargs)
         return n
         
     @classmethod
@@ -1304,8 +1302,8 @@ class Group_Node(Node):
                     else:
                         p.turn_off()
 
-        ipp.sort(key=lambda p: 10 if 'split' in p.types else 11 if 'flow' in p.types else p.port)
-        opp.sort(key=lambda p: 10 if 'split' in p.types else 11 if 'flow' in p.types else abs(p.port))
+        ipp.sort(key=lambda p: 10 if 'process' in p.types else 11 if 'flow' in p.types else p.port)
+        opp.sort(key=lambda p: 10 if 'process' in p.types else 11 if 'flow' in p.types else abs(p.port))
         
         return opp + ipp
         

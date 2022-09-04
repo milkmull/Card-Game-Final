@@ -202,18 +202,18 @@ class Dropdown(Button.Text_Button):
                 last.outline_rect.right + self.pad['left'] + window.outline_width + 2,
                 last.outline_rect.top - self.pad['top'] - window.outline_width
             )
-            
-            w, h = get_size()
-            dy = window.rect.bottom - h
-            if dy > 0:
-                window.move(0, -dy - 5)
-            
             last.freeze_animation('hover')
         else:
             window.rect.midtop = (
                 self.padded_rect.centerx,
                 self.padded_rect.bottom + self.pad['top'] + window.outline_width + 2
             )
+            
+        w, h = get_size()
+        dy = window.rect.bottom - h
+        if dy > 0:
+            window.move(0, -dy - 5)
+            
         self.add_child(window, current_offset=True)
         window.join_elements(
             buttons,

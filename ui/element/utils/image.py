@@ -16,6 +16,11 @@ def get_arrow(
     color=(255, 255, 255),
     background_color=(0, 0, 0, 0)
 ):
+    w, h = size
+    size = (
+        w if not w % 2 else w + 1,
+        h if not h % 2 else h + 1
+    )
     surf = pg.Surface(size).convert_alpha()
     surf.fill(background_color)
     w, h = size
