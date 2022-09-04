@@ -19,6 +19,8 @@ Table top card game with local wireless play.
 ```python3 -m pip install -U opencv-python```
 * pyperclip
 ```python3 -m pip install -U pyperclip```
+* pyaudio
+```python3 -m pip install -U pyaudio```
 
 ### Disable Windows Defender to Allow Server to Run
 

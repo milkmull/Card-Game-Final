@@ -237,6 +237,7 @@ def builder(menu):
 
         add_button = Button.Text_Button(
             text=icons['plus'],
+            text_color=(0, 255, 0),
             pad=5,
             hover_color=(100, 100, 100),
             border_radius=5,
