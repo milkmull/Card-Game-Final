@@ -102,6 +102,8 @@ class Dropdown(Button.Text_Button):
         )
         self.arrow.set_enabled(False)
         self.add_child(self.arrow, left_anchor='right', centery_anchor='centery')
+        
+        self.original_width = self.rect.width
     
     @property
     def click_close(self):
@@ -156,7 +158,7 @@ class Dropdown(Button.Text_Button):
             return
                    
         buttons = []
-        w = max({self.get_max_size(data)[0], self.rect.width})
+        w = max({self.get_max_size(data)[0], self.original_width})
         for k, v in data.items():
             b = Button.Text_Button(
                 size=(w, self.rect.height),

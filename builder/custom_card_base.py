@@ -383,5 +383,3 @@ class Card(Image_Element):
                 menu = Notice(text_kwargs={'text': 'Card saved successfully!'}, overlay=True)
                 menu.run()
         return saved
-        
-    

@@ -30,9 +30,8 @@ class Logged_Dropdown(Input_Dropdown):
                 'outline_color': (200, 200, 200),
                 'outline_width': 3
             },
-            max_buttons=10
+            max_buttons=6
         )
-        #self.default = self.find_default(self.selection)
 
         self.add_animation(
             [{
