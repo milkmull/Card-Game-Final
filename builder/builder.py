@@ -671,18 +671,21 @@ class Builder(Menu):
                     self.save_card()
                     
     def ask_save(self):
+        r = 1
         if self.card.get_info() != self.last_save_data:
             m = Yes_No(text_kwargs={'text': 'Save before quitting?'})
-            if m.run():
+            r = m.run()
+            if r:
                 self.card.save()
+        return r
 
     def exit(self):
-        self.ask_save()
-        return super().exit()
+        if self.ask_save() is not None:
+            return super().exit()
         
     def quit(self):
-        self.ask_save()
-        return super().quit()
+        if self.ask_save() is not None:
+            return super().quit()
 
     def open_image(self):        
         files = (

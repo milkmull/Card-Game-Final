@@ -708,8 +708,8 @@ class Node_Editor(Menu):
 # run stuff
 
     def quit(self):
-        self.builder.ask_save()
-        return super().quit()
+        if self.builder.ask_save() is not None:
+            return super().quit()
 
     def sub_events(self, events):
         split = 4 if not self.cm else 5
