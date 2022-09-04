@@ -109,7 +109,7 @@ class Logged_String_Input(Logged_Input):
             inf_width=True,
             inf_height=False,
             centery_aligned=True,
-            text_check=lambda text: "'" not in text and '"' not in text,
+            text_check=lambda text: "'" not in text and '"' not in text and text.isascii(),
             max_length=20,
             max_lines=1,
             outline_color=(0, 0, 0),
@@ -188,6 +188,7 @@ class Logged_Label_Input(Logged_Input):
             inf_width=False,
             centerx_aligned=True,
             centery_aligned=True,
+            text_check=lambda text: text.isalnum(),
             fill_color=None
         )
         

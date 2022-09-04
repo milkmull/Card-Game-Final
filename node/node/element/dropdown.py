@@ -19,6 +19,7 @@ class Logged_Dropdown(Input_Dropdown):
             centery_aligned=True,
             inf_width=False,
             inf_height=False,
+            text_check=lambda text: "'" not in text and '"' not in text and text.isascii(),
             text_color=(255, 255, 255),
             cursor_color=(255, 255, 255),
             fill_color=(32, 32, 40),
