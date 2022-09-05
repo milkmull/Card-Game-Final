@@ -511,7 +511,7 @@ class Port(Element):
             n.add_child(p, current_offset=True)
         return p
 
-#visibility stuff-------------------------------------------------------------------
+# visibility stuff
 
     def set_suppressed(self, suppressed, d=False):
         if self.suppressed != suppressed:
@@ -530,7 +530,7 @@ class Port(Element):
         if self.parent_port is not None:
             return self.node.get_port(self.parent_port)
         
-#type stuff-------------------------------------------------------------------
+# type stuff
         
     def set_types(self, types):
         self.types.clear()
@@ -560,7 +560,7 @@ class Port(Element):
             return True
         return any({t in types for t in self.connection_port.types})
 
-#connection stuff-------------------------------------------------------------------
+# connection stuff
 
     def connect(self, connection, connection_port):
         self.set_suppressed(False)
@@ -621,7 +621,7 @@ class Port(Element):
 
         super().update()
         
-#draw stuff--------------------------------------------------------------------------
+# draw stuff
         
     @property
     def color(self):
@@ -872,6 +872,16 @@ class Node(Dragger, Element):
             self.rect.width + (2 * Node.OUTLINE_SPACE),
             self.rect.height + (3 * Node.OUTLINE_SPACE) + Node.LABEL_HEIGHT
         )
+        
+    @property
+    def offset_pos(self):
+        if not self.manager:
+            return self.pos
+        dx, dy = self.manager.scroll_offset
+        return (
+            dx + self.rect.left,
+            dy + self.rect.top
+        )
 
     @property
     def is_group(self):
@@ -899,7 +909,7 @@ class Node(Dragger, Element):
         if n.group_node or self.group_node:
             return n.group_node is self.group_node
         
-#image and element stuff-------------------------------------------------------------------
+# image and element stuff
                
     def get_label(self):
         label = Textbox(
@@ -967,7 +977,7 @@ class Node(Dragger, Element):
         self.draw(surf)
         return pg.transform.smoothscale(surf, (w * scale, h * scale))
 
-#writing stuff----------------------------------------------------------------------
+# writing stuff
 
     def mark_text(self, text, port=0):
         if not text:
@@ -1056,7 +1066,7 @@ class Node(Dragger, Element):
         nl = '\n'
         return f"{header}{start}{f'...{nl}' if end else ''}{end}"
      
-#port stuff-------------------------------------------------------------------
+# port stuff
 
     def get_port(self, num):
         for p in self.ports:
@@ -1092,7 +1102,7 @@ class Node(Dragger, Element):
         super().kill()
         
         if self.manager and not d:
-            self.manager.add_log({'t': 'del', 'node': self, 'm': method})
+            self.manager.add_log({'t': 'del', 'node': self, 'm': method, 'pos': self.offset_pos})
         
     def del_port(self, port):
         self.ports.remove(port)
@@ -1128,7 +1138,7 @@ class Node(Dragger, Element):
                 'port': p
             })
         
-#input stuff-------------------------------------------------------------------
+# input stuff
         
     def drop(self, *args, **kwargs):
         dist = super().drop()
@@ -1175,7 +1185,7 @@ class Node(Dragger, Element):
     def connection_update(self):
         pass
         
-#draw stuff-------------------------------------------------------------------
+# draw stuff
         
     def draw(self, surf):
         pg.draw.rect(
@@ -1254,7 +1264,7 @@ class Group_Node(Node):
     def copy(self):
         nodes = unpack(pack([self]))
         for n in nodes:
-            if n.is_group:
+            if n.visible:
                 return n
         
     def reset_ports(self):
@@ -1343,6 +1353,4 @@ class Group_Node(Node):
     def update(self):
         for n in self.nodes:
             n.connection_update()
-        super().update() 
-
- 
+        super().update()

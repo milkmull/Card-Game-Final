@@ -259,8 +259,9 @@ class Node_Editor(Menu):
   
         self.anchor = None
         self.scroll_anchor = None
-        self.last_scroll_pos = None
+        self.last_scroll_pos = (0, 0)
         self.scroll_offset = (0, 0)
+        self.scroll_vel = [0, 0]
 
         self.log = []
         self.logs = []
@@ -363,6 +364,9 @@ class Node_Editor(Menu):
                 self.add_node(n, d=True) 
                 if n.is_group:
                     n.reset_ports()
+                dx, dy = self.scroll_offset
+                px, py = log['pos']
+                n.rect.topleft = (px - dx, py - dy)
                     
             elif type == 'conn':
                 p0, p1 = log['ports']
@@ -598,15 +602,20 @@ class Node_Editor(Menu):
         nodes = unpack(data, manager=self)
         
         if nodes:
-            r = nodes[0].rect.unionall([n.rect for n in nodes])
+            
+            visible_nodes = [n for n in nodes if n.visible]
+            r = visible_nodes[0].rect.unionall([n.rect for n in visible_nodes])
             cx, cy = r.center
             r.center = pg.mouse.get_pos()
             dx = r.centerx - cx
             dy = r.centery - cy
+            
             for n in nodes:
                 n.rect.move_ip(dx, dy)
                 self.add_node(n)
-                n.start_held() 
+                
+                if n.visible:
+                    n.start_held() 
                 
         return nodes
 
@@ -692,16 +701,20 @@ class Node_Editor(Menu):
         for n in self.nodes:
             n.move(sx, sy)
         self.scroll_offset = (0, 0)
+        self.last_scroll_pos = (0, 0)
         
-    def scroll_screen(self):
-        x0, y0 = self.last_scroll_pos
-        x1, y1 = pg.mouse.get_pos()
-        dx = x1 - x0
-        dy = y1 - y0
+    def scroll_screen(self, dx=0, dy=0):
+        if self.scroll_anchor:
+            x0, y0 = self.last_scroll_pos
+            x1, y1 = pg.mouse.get_pos()
+            self.last_scroll_pos = (x1, y1)
+            
+            dx = x1 - x0
+            dy = y1 - y0
+  
         if dx or dy:
             for n in self.nodes:
                 n.move(dx, dy)
-            self.last_scroll_pos = (x1, y1)
             sx, sy = self.scroll_offset
             self.scroll_offset = (sx - dx, sy - dy)
 
@@ -746,11 +759,33 @@ class Node_Editor(Menu):
                     self.create_new_group_node()
                 elif kd.key == pg.K_u:
                     self.ungroup_nodes()
- 
+
             elif kd.key == pg.K_DELETE:
                 self.delete_nodes()
             elif kd.key == pg.K_HOME:
                 self.go_home()
+                
+            elif kd.key == pg.K_LEFT:
+                self.scroll_vel[0] = 15
+            elif kd.key == pg.K_RIGHT:
+                self.scroll_vel[0] = -15
+            elif kd.key == pg.K_UP:
+                self.scroll_vel[1] = 15
+            elif kd.key == pg.K_DOWN:
+                self.scroll_vel[1] = -15
+                
+        for e in events['all']:
+            if e.type == pg.KEYUP:
+                ku = e
+                
+                if ku.key == pg.K_LEFT:
+                    self.scroll_vel[0] = 0
+                elif ku.key == pg.K_RIGHT:
+                    self.scroll_vel[0] = 0
+                elif ku.key == pg.K_UP:
+                    self.scroll_vel[1] = 0
+                elif ku.key == pg.K_DOWN:
+                    self.scroll_vel[1] = 0
                 
         if 'mbd_a' in events:
             self.close_context()
@@ -776,6 +811,8 @@ class Node_Editor(Menu):
                     
         if self.scroll_anchor:
             self.scroll_screen()
+        elif any(self.scroll_vel):
+            self.scroll_screen(dx=self.scroll_vel[0], dy=self.scroll_vel[1])
 
     def update(self):   
         super().update()

@@ -80,7 +80,10 @@ class Dragger:
 
             self.set_rel_pos()
             if not _held:
-                self.pickup_pos = self.rect.topleft
+                self.set_pickup()
+                
+    def set_pickup(self):
+        self.pickup_pos = self.rect.topleft
    
     def drop(self):
         self.held = False
