@@ -835,7 +835,7 @@ class Card(Node):
       
 class Length(Node):
     cat = 'iterator'
-    subcat = 'operator'
+    subcat = 'operators'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
 
@@ -852,7 +852,7 @@ class Length(Node):
 
 class Merge_Lists(Node):
     cat = 'iterator'
-    subcat = 'operator'
+    subcat = 'operators'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
             
@@ -1172,7 +1172,7 @@ class Custom_Filter(Node):
         
 class Any(Node):
     cat = 'iterator'
-    subcat = 'operator'
+    subcat = 'operators'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -2014,7 +2014,7 @@ class Play_Card(Node):
            
 class Copy_Card(Node):
     cat = 'card'
-    subcat = 'operator'
+    subcat = 'operators'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -2271,7 +2271,7 @@ class Get_New_Card(Node):
      
 class Transfom(Node):
     cat = 'card'
-    subcat = 'operator'
+    subcat = 'operators'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -2296,7 +2296,7 @@ class Transfom(Node):
             
 class Swap(Node):
     cat = 'card'
-    subcat = 'operator'
+    subcat = 'operators'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         

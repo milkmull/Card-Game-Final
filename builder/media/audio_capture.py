@@ -51,7 +51,7 @@ class Audio_Capture:
             max_channels = device.get('maxInputChannels')
             if max_channels > 0:
                 devices.append((name, i))
-                
+
         return devices
     
     def __init__(self, seconds):
