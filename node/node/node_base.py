@@ -1138,7 +1138,18 @@ class Node(Dragger, Element):
                 'port': p
             })
         
-# input stuff
+# drag stuff
+
+    @property
+    def carry_dist(self):
+        if not self.pickup_pos:
+            return (0, 0)
+
+        px, py = self.offset_pos
+        return (
+            px - self.pickup_pos[0],
+            py - self.pickup_pos[1]
+        )
         
     def drop(self, *args, **kwargs):
         dist = super().drop()
@@ -1150,6 +1161,11 @@ class Node(Dragger, Element):
                     'node': self,
                     'dist': dist
                 })
+                
+    def set_pickup(self):
+        self.pickup_pos = self.offset_pos
+        
+# input stuff
             
     def transform(self, form=None, d=False):
         self.clear_connections()

@@ -625,7 +625,7 @@ class For(Node):
             return 'range(1)'
         
     def _get_text(self):
-        input = [self.get_loop_var()] + self.get_input()
+        input = [self.get_output(-1)] + self.get_input()
         text = 'for {0} in {1}:\n'.format(*input)   
         return text
         
@@ -679,7 +679,7 @@ class Zipped_For(Node):
         return 'range(1)'
         
     def _get_text(self):
-        vars = [self.get_loop_var(-1), self.get_loop_var(-2)]
+        vars = [self.get_output(-1), self.get_output(-2)]
         input = vars + self.get_input()
         text = 'for {0}, {1} in zip({2}.copy(), {3}.copy()):\n'.format(*input)   
         return text
@@ -1455,7 +1455,18 @@ class Select(Node):
         ])
                 
     def _get_start(self):
-        return '\t\tif not num:\n\t\t\treturn\n\t\tsel = player.selected[-1]\n\t\tself.t_select = sel\n\t\tsel_c = None\n\t\tsel_p = None\n\t\tif isinstance(sel, Card):\n\t\t\tsel_c = sel\n\t\telse:\n\t\t\tsel_p = sel\n'
+        return (
+            '\t\tif not num:\n'
+                '\t\t\treturn\n'
+            '\t\tsel = player.selected[-1]\n'
+            '\t\tself.t_select = sel\n'
+            '\t\tsel_c = None\n'
+            '\t\tsel_p = None\n'
+            '\t\tif isinstance(sel, Card):\n'
+                '\t\t\tsel_c = sel\n'
+            '\t\telse:\n'
+            '\t\t\tsel_p = sel\n'
+        )
             
     def _get_text(self):
         return '\n\tdef select(self, player, num):\n'
@@ -1636,7 +1647,7 @@ class Ongoing(Node):
         ])
         
     def _get_text(self):
-        return '\n\tdef ongoing(self, player, log):\n'
+        return f'\n\tdef ongoing(self, player, {self.get_output(-1)}):\n'
         
     def _get_output(self, p):
         if p == -1:
@@ -1764,7 +1775,8 @@ class Get_Flip_Results(Node):
         ])
         
     def _get_text(self):
-        return f'players{self.id}, results{self.id} = self.get_flip_results()\n'
+        input = [self.get_output(-1), self.get_output(-2)]
+        return '{0}, {1} = self.get_flip_results()\n'.format(*input)
         
     def _get_output(self, p):
         if p == -1:
@@ -1786,7 +1798,8 @@ class Get_Roll_Results(Node):
         ])
         
     def _get_text(self):
-        return f'players{self.id}, results{self.id} = self.get_roll_results()\n'
+        input = [self.get_output(-1), self.get_output(-2)]
+        return '{0}, {1} = self.get_roll_results()\n'.format(*input)
         
     def _get_output(self, p):
         if p == -1:
@@ -1808,7 +1821,8 @@ class Get_Select_Results(Node):
         ])
         
     def _get_text(self):
-        return f'players{self.id}, results{self.id} = self.get_select_results()\n'
+        input = [self.get_output(-1), self.get_output(-2)]
+        return '{0}, {1} = self.get_select_results()\n'.format(*input)
         
     def _get_output(self, p):
         if p == -1:
@@ -1887,9 +1901,9 @@ class Check_Index(Node):
         ip = self.get_port(3)
         input = self.get_input()
         if ip.value:
-            text = f"added{self.id}, c{self.id} = self.check_index({'{0}'}, {'{1}'}, tags=[{'{2}'}])\n"
+            text = f"{self.get_output(-2)}, {self.get_output(-1)} = self.check_index({'{0}'}, {'{1}'}, tags=[{'{2}'}])\n"
         else:
-            text = f"added{self.id}, c{self.id} = self.check_index({'{0}'}, {'{1}'})\n"
+            text = f"{self.get_output(-2)}, {self.get_output(-1)} = self.check_index({'{0}'}, {'{1}'})\n"
             input.pop(-1)
         return text.format(*input)
         
@@ -1964,7 +1978,7 @@ class Draw_Cards(Node):
         
     def _get_text(self):
         input = self.get_input()
-        input.insert(0, self._get_output(0))
+        input.insert(0, self.get_output(-1))
         return "{0} = {3}.draw_cards({1}, num={2})\n".format(*input)
         
     def _get_output(self, p):
@@ -2386,10 +2400,10 @@ class Steal_Random(Node):
 
     def _get_text(self):
         input = self.get_input()
-        input.insert(0, self._get_output())
+        input.insert(0, self.get_output(-1))
         return "{0} = player.steal_random_card({1}, {2})\n".format(*input)
         
-    def _get_output(self):
+    def _get_output(self, p):
         return f'c{self.id}'
         
 class Add_Card(Node):
@@ -2501,7 +2515,7 @@ class Is_Player(Node):
         return 'player'
 
     def _get_output(self):
-        return "{0}.type == 'player'".format(*self.get_input())        
+        return "({0}.type == 'player')".format(*self.get_input())        
         
 class Is_Card(Node):
     cat = 'card'
