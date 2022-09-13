@@ -112,6 +112,9 @@ class Text:
         text_color=(255, 255, 255),
         text_background_color=None,
         text_style=None,
+        
+        text_outline_color=None,
+        text_outline_width=0,
 
         right_aligned=False,
         bottom_aligned=False,
@@ -139,6 +142,9 @@ class Text:
         self.last_text_color = text_color
         self.text_background_color = text_background_color
         self.text_style = text_style or {}
+        
+        self.text_outline_color = text_outline_color
+        self.text_outline_width = text_outline_width
 
         self.alignment = {
             'right': False,
@@ -377,6 +383,7 @@ class Text:
                 for line in block:
                     line.move(0, dy)
 
+            block._rect = block.rect.inflate(2 * self.text_outline_width, 2 * self.text_outline_width)
             surf = pg.Surface(block.rect.size).convert_alpha()
             if self.text_background_color:
                 surf.fill(self.text_background_color)
@@ -386,6 +393,10 @@ class Text:
             block.pos = (0, 0)
             i = 0
             default_style = self.default_style
+            
+            if self.text_outline_color and self.text_outline_width:
+                self.render_outline(surf, block)
+            
             for line in block:
                 for word in line:
                     for character in word:
@@ -414,6 +425,10 @@ class Text:
         self.block.pos = (0, 0)
         i = 0
         default_style = self.default_style
+        
+        if self.text_outline_color and self.text_outline_width:
+            self.render_outline(self.text_surf, self.block)
+                
         for line in self.block:
             for word in line:
                 for character in word:
@@ -427,19 +442,21 @@ class Text:
                         )
                     i += 1
                     
-    def render_outline(self, surf, character):
-        width = 2
+    def render_outline(self, surf, block):
+        points = Text.get_outline_points(self.text_outline_width)
         
-        points = Text.get_outline_points(width)
-        print(points)
-        for dx, dy in points:
-            self.font.render_to(
-                surf, 
-                character.rect.move(dx, dy), 
-                character.character,  
-                size=character.size, 
-                fgcolor=(255, 0, 0)
-            )  
+        for line in block:
+            for word in line:
+                for character in word:
+                    if self.can_render(character.character):
+                        for dx, dy in points:
+                            self.font.render_to(
+                                surf, 
+                                character.rect.move(dx, dy), 
+                                character.character,  
+                                size=character.size, 
+                                fgcolor=self.text_outline_color
+                            )  
                     
     def draw_text(self, surf):
         if self.text_color != self.last_text_color:

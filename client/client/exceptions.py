@@ -1,0 +1,3 @@
+
+class CommunicationError(Exception):
+    pass

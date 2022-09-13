@@ -17,7 +17,7 @@
         "info": "If the Boolean input is True, the process path is run before continuing the main path. If it is False, the process path is skipped.",
         "tips": "If nodes can evaluate all kinds of data, not just Boolean values.\n\nIf you plug in a number, if the number is not 0 it will evaluate to True, otherwise False.\n\nIf you plug in a list, if the list is not empty it will evaluate to True, otherwise False.",
         "ports": {
-            "1": "This Boolean argument decides if the process path is run or skipped",
+            "1": "This Boolean argument decides if the process path is run or skipped.",
             "2": null,
             "-1": null,
             "-2": "This out-flow port can be wired to an 'Elif' node or an 'Else' node."
@@ -27,7 +27,7 @@
         "info": "This node can only be placed after 'If' nodes or 'Elif' nodes. If the previous node is evaluated to be False, this node will be evaluated as an 'If' node. If the previous node is evaluated to be True, this whole node will be skipped.",
         "tips": "Elif nodes can evaluate all kinds of data, not just Boolean values.\n\nIf you plug in a number, if the number is not 0 it will evaluate to True, otherwise False.\n\nIf you plug in a list, if the list is not empty it will evaluate to True, otherwise False.",
         "ports": {
-            "1": "This Boolean argument decides if the process path is run or skipped",
+            "1": "This Boolean argument decides if the process path is run or skipped.",
             "2": "This in-flow port can only be wired to the out-flow of an 'If' node or another 'Elif' node.",
             "-1": null,
             "-2": "This out-flow port can be wired to an additional 'Elif' node or an 'Else' node."
@@ -822,9 +822,10 @@
         "info": "This node is used to discard any card. The discarded card will be removed from any associated decks including played cards.",
         "tips": "Keep in mind that discarding a card will also end any ongoing process the card might be running.",
         "ports": {
-            "1": "The player who will discard the card. This defaults to the user.",
-            "2": "The card to be discarded. This will default to a 'None' value",
-            "3": null,
+            "1": "If this is 'True', the card will be added to the discard pile, otherwise it will not.",
+            "2": "The player who will discard the card. This defaults to the user.",
+            "3": "The card to be discarded. This will default to a 'None' value.",
+            "4": null,
             "-1": null
         }
     },

@@ -64,6 +64,9 @@ class Animation:
             self.set_value(self.start_value)
                 
     def update(self, t):
+        if self.start_value is None:
+            self.start()
+            
         cv = []
         for s, e in zip(self.start_value, self.end_value):
             v = s + ((e - s) * self.equation(t))

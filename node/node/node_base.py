@@ -64,7 +64,7 @@ def unpack(data, manager=None, map=True):
         
     nodes = {}
     id_map = {}
-
+    
     for id, d in data['nodes'].items():
         id = int(id)
         name = d['name']

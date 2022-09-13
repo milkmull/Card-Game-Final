@@ -51,19 +51,10 @@ class Container:
             return Container(rect=self._rect, data=self.data.copy())
 
         data = []
-        for i in range(max({len(d.data) for d in self.data})):
+        for i in range(max({len(d.data) for d in self.data}, default=-1)):
             c = Container()
             for d in self.data:
                 if i < len(d.data):
                     c.add(d.data[i])
             data.append(c)
         return Container(rect=self._rect, data=data)
-                    
-        
-        
-        
-        
-        
-        
-        
-        

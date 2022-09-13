@@ -191,7 +191,7 @@ class Bool(Node):
             Port(-1, ['bool'])
         ])
         
-        set_check_element(self.get_port(-1), True)
+        set_check_element(self.get_port(-1))
         self.set_port_pos()
 
     def _get_output(self, p):
@@ -2187,19 +2187,25 @@ class Discard(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['player']),
-            Port(2, ['card']),
-            Port(3, ['flow']),
+            Port(1, ['bool'], description='add to discard?'),
+            Port(2, ['player']),
+            Port(3, ['card']),
+            Port(4, ['flow']),
             Port(-1, ['flow'])
         ])
+        
+        set_check_element(self.get_port(1))
+        self.set_port_pos()
 
     def _get_text(self):
-        return '{0}.discard_card({1})\n'.format(*self.get_input())
+        return '{1}.discard_card({2}, add_to_discrd={0})\n'.format(*self.get_input())
         
     def _get_default(self, p):
         if p == 1:
-            return 'player'
+            return 'True'
         elif p == 2:
+            return 'player'
+        elif p == 3:
             return 'None'
                      
 class Use_Item(Node):
@@ -2561,7 +2567,7 @@ class Buy_Card(Node):
             Port(-2, ['flow'])
         ])
         
-        set_check_element(self.get_port(1), value=False)
+        set_check_element(self.get_port(1))
         self.set_port_pos()
         
     def _get_default(self, p):

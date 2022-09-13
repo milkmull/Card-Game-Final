@@ -8,41 +8,29 @@ class Player(player_base.Player_Base):
         super().__init__(game, pid)
         
         self.player_info = player_info
-        self.set_name()
-        self.name = self.player_info['name']
-
+        self.log_index = 0
         self.max = 60
         self.ft = 0
         self.rt = 0
+        
+    @property
+    def username(self):
+        return self.player_info['name']
 
     def is_auto(self):
         return isinstance(self, Auto_Player)
 
     def get_info(self):
         return self.player_info
-
-    def set_name(self):
-        name = self.player_info['name']
-        names = self.game.get_active_names()
-        
-        while True:
-            c = len(name) + 2
-            
-            if any({name == n for n in names}):
-                name = name.center(c)
-                c += 2
-            else:
-                break
-
-        self.player_info['name'] = name
         
     def copy(self, g):
         return Player_Copy(g, self)
 
-#starting stuff--------------------------------------------------------------------------------------------                
+# starting stuff                
 
     def reset(self):
         super().reset()
+        self.log_index = 0
         self.ft = 0
         self.rt = 0
 
@@ -50,7 +38,7 @@ class Player(player_base.Player_Base):
         super().start()
         self.max = 30 * len([p for p in self.game.players if not p.is_auto()]) * 2
  
-#card stuff-------------------------------------------------------------------------------------- 
+# card stuff 
                 
     def new_deck(self, deck, cards):
         setattr(self, deck, cards)
@@ -58,16 +46,16 @@ class Player(player_base.Player_Base):
         
     def discard_card(self, c, add_to_discard=True): 
         super().discard_card(c, add_to_discard=add_to_discard)
-        if add_to_discard:
-            self.add_log({'t': 'disc', 'c': c, 'tags': c.tags}) #maybe change in the future
+        #if add_to_discard:
+        #    self.add_log({'t': 'disc', 'c': c, 'tags': c.tags}) #maybe change in the future
     
-#vote stuff------------------------------------------------------------------------------------
+# vote stuff
 
     def set_vote(self, vote):
         self.vote = vote
         self.add_log({'t': 'v', 'v': vote})
 
-#request stuff--------------------------------------------------------------------------------------
+# request stuff
 
     def ready_coin(self):
         self.coin = -1
@@ -94,6 +82,7 @@ class Player(player_base.Player_Base):
             self.set_active_card(c)
   
         confirm = False
+        last_wait = c.wait
 
         if c.wait == 'flip' and not self.ft:
             if self.coin is not None:
@@ -127,6 +116,8 @@ class Player(player_base.Player_Base):
         elif confirm:
             self.soft_cancel_request()
             self.start_request(c)
+            if c.wait != last_wait:
+                self.set_active_card(c)
 
     def select(self, uid):
         if self.selection:
@@ -173,31 +164,25 @@ class Player(player_base.Player_Base):
     def flip(self):
         if self.ft == self.max / 2:
             self.coin = random.choice((1, 0))
-            self.add_log({'t': 'cfe', 'coin': self.coin, 'ft': self.ft - 2, 'd': False})
+            self.add_log({'t': 'cfe', 'coin': self.coin, 'd': False})
         self.ft = max(self.ft - 1, 0)
 
     def roll(self): 
         if self.rt == self.max / 2:
             self.dice = random.randrange(0, 6) + 1
-            self.add_log({'t': 'dre', 'dice': self.dice, 'rt': self.rt - 2, 'd': False})  
+            self.add_log({'t': 'dre', 'dice': self.dice, 'd': False})  
         self.rt = max(self.rt - 1, 0)
        
-#log stuff------------------------------------------------------------------------------------------
+# log stuff
 
-    def add_log(self, log, kwargs={}):
-        kwargs['u'] = self.pid
-        kwargs['frame'] = self.game.frame
-        log.update(kwargs)
+    def add_log(self, log):
+        log['u'] = self.pid
         self.log.append(log)
+        self.game.log.append(log)
         if not log.get('d'):
             self.og(log=log)
 
-    def update_logs(self):
-        self.master_log += self.log
-        self.game.update_player_logs(self)
-        self.log.clear()
-
-#turn stuff-----------------------------------------------------------------------------------------
+# turn stuff
 
     def end_round(self, end_all):
         if hasattr(self.game.event, 'end'):
@@ -237,10 +222,8 @@ class Player(player_base.Player_Base):
         if self.requests:
             self.process_request()
         self.og()
-        
-        self.update_logs()
 
-#point stuff-----------------------------------------------------------------------------------------
+# point stuff
  
     def update_score(self, score):
         self.score = score
@@ -298,7 +281,7 @@ class Auto_Player(Player):
         if temp_tree == self.temp_tree:
             self.stable_counter += 1
         else:
-            print(self.temp_tree)
+            #print(self.temp_tree)
             self.stable_counter = 0
             self.temp_tree = temp_tree
 
@@ -427,12 +410,14 @@ class Auto_Player(Player):
             
         if self.timer < 30:
             if self.coin == -1:
+                if not self.flipping:
+                    self.add_log({'t': 'cfs'})
                 self.flipping = True
-                self.add_log({'t': 'cfs'})
             elif self.dice == -1:
+                if not self.rolling:
+                    self.add_log({'t': 'drs'})   
                 self.rolling = True
-                self.add_log({'t': 'drs'})   
-                
+
         if self.flipping:
             self.flip()
         elif self.rolling:
@@ -444,16 +429,12 @@ class Auto_Player(Player):
         
         self.timer -= 1
         
-        self.update_logs()
-        
 class Player_Copy(player_base.Player_Base):
     def __init__(self, game, p):
         super().__init__(game, p.pid)
         
         self.player = p
-        
-        self.name = p.name
-        
+
         self.score = p.score
         self.vote = p.vote
         
@@ -467,7 +448,6 @@ class Player_Copy(player_base.Player_Base):
         self.coin = p.coin
         self.dice = p.dice
         
-        self.master_log = p.master_log.copy()
         self.log = p.log.copy()
 
         self.first_choice = None
@@ -492,9 +472,13 @@ class Player_Copy(player_base.Player_Base):
         self.active_og = [c.sim_copy(self.game) for c in self.player.active_og]
         
         self.requests = [c.sim_copy(self.game) for c in self.player.requests]
-        self.active_card = next(iter([c for c in self.requests if c == self.player.active_card]), None)  
+        self.active_card = None
+        for c in self.requests:
+            if c == self.player.active_card:
+                self.active_card = c
+                break 
 
-#auto stuff-----------------------------------------------------------------------------------------
+# auto stuff
 
     def auto_select(self):
         s = None

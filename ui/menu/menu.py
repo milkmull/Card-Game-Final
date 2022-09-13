@@ -88,6 +88,17 @@ class Menu(Base_Loop):
     def close(self):
         for e in self.all_elements:
             e.kill()
+            
+    def __del__(self):
+        self.close()
+        
+    def start_draw(self):
+        self.window.fill(self.fill_color)
+        if self.background:
+            self.window.blit(self.background, (0, 0))
+        for e in sorted(self.elements, key=lambda e: e.layer):
+            if e.visible:
+                e.draw(self.window)
         
     def draw(self):
         self.window.fill(self.fill_color)

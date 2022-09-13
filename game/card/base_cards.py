@@ -3,7 +3,7 @@ import random
 from . import card_base
 from . import extra_cards
 
-#play
+# play
 
 class Michael(card_base.Card):
     name = 'michael'
@@ -1093,7 +1093,7 @@ class ScubaBaby(card_base.Card):
     def start(self, player):
         player.gain(self, 3)
 
-#item
+# item
      
 class FishingPole(card_base.Card):
     name = 'fishing pole'
@@ -1401,15 +1401,14 @@ class MetalDetector(card_base.Card):
     type = 'item'
     weight = 3
     def can_use(self, player):
-        return self.game.get_discarded_items()
+        return any({c.type == 'item' and c.name != self.name for c in self.game.get_discard()})
             
     def start(self, player):
-        items = self.game.get_discarded_items()[::-1]
-        if items:
-            i = items.pop(0)
-            self.game.restore(i)
-            player.add_card(i, deck_string='items')
-            player.use_item(self)
+        for c in self.game.get_discard()[::-1]:
+            if c.type == 'item' and c.name != self.name:
+                self.game.restore(c)
+                player.add_card(c, deck_string='items')
+                player.use_item(self)
   
 class BigRock(card_base.Card):
     name = 'big rock'
@@ -1575,7 +1574,7 @@ class BugNet(card_base.Card):
                 player.discard_card(c)
                 player.use_item(self)
     
-#spell
+# spell
 
 class SpellTrap(card_base.Card):
     name = 'spell trap'
@@ -1787,7 +1786,7 @@ class TheVoid(card_base.Card):
         log[key2] = getattr(player, attr)(self, log[key1] * 2, d=True) // 2
         log['t'] = key2   
 
-#treasure
+# treasure
      
 class MustardStain(card_base.Card):
     name = 'mustard stain'
@@ -1876,7 +1875,7 @@ class MagicBean(card_base.Card):
     def end(self, player):
         player.gain(self, sum([5 for c in player.played if 'plant' in c.tags]))
   
-#event
+# event
          
 class Flu(card_base.Card):
     name = 'flu'
@@ -2064,7 +2063,7 @@ class Harvest(card_base.Card):
                 gp = 10 if any({l.name in c.tags for l in player.landscapes}) else 5
                 player.gain(self, gp)
    
-#landscape
+# landscape
 
 class Garden(card_base.Card):
     name = 'garden'

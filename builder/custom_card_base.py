@@ -365,6 +365,21 @@ class Card(Image_Element):
         self.save(suppress=True)
         
         Notice(text_kwargs={'text': 'Card has been published successfully!'}).run()
+        
+    def unpublish(self, nodes=None):
+        saved = self.save(nodes=nodes, suppress=True)
+        if not saved:
+            Notice(text_kwargs={'text': 'An error occurred while saving.'}).run()
+            return
+            
+        from data.save import SAVE
+        SAVE.unpublish_card(self.id)
+        
+        self.set_lines(0, 0)
+        self.published = False
+        self.save(suppress=True)
+        
+        Notice(text_kwargs={'text': 'Card has been unpublished.'}).run()
             
     def save(self, nodes=None, suppress=False):
         self.set_sound()

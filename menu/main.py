@@ -5,6 +5,7 @@ from ui.icons.icons import icons
 from .settings import run as run_settings
 from .wireless_play import run as run_wireless_play
 from .builder import run as run_builder
+from .client import run_client_single
 
 def main_menu(menu):
     body = menu.body
@@ -28,6 +29,7 @@ def main_menu(menu):
 
     b = Button.Text_Button(
         text='single player',
+        func=run_client_single,
         **button_kwargs
     )
     elements.append(b)

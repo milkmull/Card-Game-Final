@@ -260,6 +260,9 @@ class Input(Text_Element):
             self.close()
 
         if self.is_open:
+            if self.selecting:
+                if any({e.type == pg.WINDOWLEAVE for e in events['all']}):
+                    self.selecting = False
             
             if events.get('text'):
                 self.add_text(events['text'].text)
@@ -312,7 +315,7 @@ class Input(Text_Element):
                 elif kd.key == pg.K_TAB:
                     self.add_text('    ')
                     
-                events.pop('kd')
+                events.pop('kd', None)
 
             if events.get('ku') and self.held_key:
                 self.held_key = None
@@ -338,7 +341,7 @@ class Input(Text_Element):
                 surf.set_clip(self.rect)
 
             for c in self.selected_characters:
-                pg.draw.rect(surf, self.highlight_color, c.rect)
+                pg.draw.rect(surf, self.highlight_color, c.rect.inflate(2 * self.text_outline_width, 2 * self.text_outline_width))
                 s = self.font.render(
                     c.character,
                     size=c.size,

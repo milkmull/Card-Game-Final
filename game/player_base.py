@@ -35,34 +35,34 @@ class Player_Base:
             
     @staticmethod
     def sort_og_cards(c): 
-        if c.name in ('the void', 'negative zone'):
-            return 4
-        elif c.type == 'item':   
-            return 1   
-        elif c.type == 'spell':    
-            return 2   
-        elif c.type == 'landscape':   
-            return 3
-        else:
-            return 0
+        match c.name:
+            case 'the void' | 'negative zone':
+                return 4
+            case 'item': 
+                return 1  
+            case 'spell':
+                return 2   
+            case 'landscape':  
+                return 3
+            case _:
+                return 0
             
     @staticmethod
     def sort_request_cards(c): 
-        if c.type == 'item':   
-            return 1   
-        elif c.type == 'spell':   
-            return 2   
-        elif c.type == 'event':
-            return 3
-        else:   
-            return 0
+        match c.type:
+            case 'item':
+                return 1
+            case 'spell':
+                return 2
+            case 'event':
+                return 3
+            case _:
+                return 0
             
     def __init__(self, game, pid):
         self.game = game
         self.pid = pid
 
-        self.name = f'player {pid}'
-        
         self.score = 0
         self.vote = None
         
@@ -97,14 +97,16 @@ class Player_Base:
         self.requests = []
         self.active_card = None
         
-        self.master_log = []
         self.log = []
+        
+    @property
+    def name(self):
+        return f'player {self.pid}'
         
     def __eq__(self, other):
         if hasattr(other, 'get_id'):
             return self.pid == other.get_id()
-        else:
-            return False
+        return False
             
     def __hash__(self):
         return self.pid
@@ -127,12 +129,11 @@ class Player_Base:
     def is_auto(self):
         return True
         
-#starting stuff--------------------------------------------------------------------------------------------                
+# starting stuff                
 
     def reset(self):
-        self.master_log.clear()
         self.log.clear()
-        
+
         self.selecting = False
         self.gone = False
         self.flipping = False
@@ -190,7 +191,7 @@ class Player_Base:
         self.draw_cards('item', max((self.game.get_setting('items') - len(self.items), 0)))
         self.draw_cards('spell', max((self.game.get_setting('spells') - len(self.spells), 0)))
 
-#card stuff-------------------------------------------------------------------------------------- 
+# card stuff 
 
     def type_to_deck(self, type):
         deck_string = Player_Base.type_to_deck_string(type)
@@ -328,7 +329,7 @@ class Player_Base:
         for deck_string in Player_Base.deck_strings:
             self.remove_card(c, deck_string=deck_string)
         if add_to_discard:
-            self.game.discard.append(c)
+            self.game.add_discard(c)
 
     def get_items(self):
         return [c for c in self.items + self.equipped if c.wait is None]
@@ -359,7 +360,7 @@ class Player_Base:
                 c = cards[0]
         return c
 
-#equipment stuff------------------------------------------------------------------------------------
+# equipment stuff
 
     def equip(self, c):
         self.remove_card(c, deck_string='items')
@@ -374,7 +375,7 @@ class Player_Base:
         for c in self.equipped.copy():
             self.unequip(c)
             
-#spell stuff----------------------------------------------------------------------------------------
+# spell stuff
 
     def add_active_spell(self, c):
         self.add_card(c, deck_string='active_spells')
@@ -390,7 +391,7 @@ class Player_Base:
         target.add_active_spell(c)
         self.add_log({'t': 'cast', 'c': c, 'target': target, 'd': False})
             
-#buying stuff---------------------------------------------------------------------------------------
+# buying stuff
 
     def can_buy(self):
         return any({c.name == 'gold coins' for c in self.treasure}) and not self.game_over
@@ -411,7 +412,7 @@ class Player_Base:
                 self.new_deck('treasure', [t for t in self.treasure if t != c])        
                 return
 
-#request stuff--------------------------------------------------------------------------------------
+# request stuff
               
     def set_vote(self, vote):
         self.vote = vote
@@ -560,7 +561,7 @@ class Player_Base:
         self.add_log({'t': 'dre', 'dice': self.dice, 'd': False}) 
         self.rolling = False
 
-#ongoing stuff--------------------------------------------------------------------------------------
+# ongoing stuff
    
     def add_og(self, c, types):
         if types:
@@ -590,18 +591,14 @@ class Player_Base:
                     c.ongoing(self, log)
                 self.active_og.pop(-1)
   
-#log stuff------------------------------------------------------------------------------------------
+# log stuff
 
     def add_log(self, log):
         self.log.append(log)
         if not log.get('d'):
             self.og(log=log)
-            
-    def update_logs(self):
-        self.master_log += self.log
-        self.log.clear()
 
-#turn stuff-----------------------------------------------------------------------------------------
+# turn stuff
 
     def start_turn(self):
         self.gone = False  
@@ -658,9 +655,7 @@ class Player_Base:
             self.process_request()   
         self.og()
         
-        self.update_logs()
-        
-#auto stuff-----------------------------------------------------------------------------------------
+# auto stuff
 
     def get_selection(self):
         cards = [c for c in self.items if c.can_use(self)] + self.spells
@@ -674,12 +669,12 @@ class Player_Base:
             
         return cards
 
-#sim stuff------------------------------------------------------------------------------------------
+# sim stuff
 
     def sim_copy(self, game):
         return game.get_player(self.pid)        
 
-#point stuff-----------------------------------------------------------------------------------------
+# point stuff
  
     def update_score(self, score):
         self.score = score

@@ -187,6 +187,35 @@ class Save:
                 
         if update:
             self.set_data('cards', cards)
+            
+    def unpublish_card(self, id):
+        cards = self.get_data('cards')
+        for entry in cards:
+            if entry['id'] == id:
+                break
+    
+        s, e = entry['lines']
+        if s or e:
+            text_shift = self.remove_card_text(s, e)
+            text_shift_start = e
+        
+        for i, card in enumerate(cards):
+            if text_shift:
+                s, e = card['lines']
+                if (s or e) and s >= text_shift_start:
+                    card['lines'] = (s + text_shift, e + text_shift)
+                    
+        self.set_data('cards', cards)
+            
+    def remove_card_text(self, s, e):
+        with open(CUSTOM_CARDS_FILE, 'r') as f:
+            lines = f.readlines()
+        lines = lines[:s] + lines[e:]
+        with open(CUSTOM_CARDS_FILE, 'w') as f:
+            f.writelines(lines)
+        text_shift_start = e
+        text_shift = -(e - s)
+        return text_shift
       
     def del_card(self, entry):
         from spritesheet.customsheet import CUSTOMSHEET
@@ -206,13 +235,7 @@ class Save:
         
         s, e = entry['lines']
         if s or e:
-            with open(CUSTOM_CARDS_FILE, 'r') as f:
-                lines = f.readlines()
-            lines = lines[:s] + lines[e:]
-            with open(CUSTOM_CARDS_FILE, 'w') as f:
-                f.writelines(lines)
-            text_shift_start = e
-            text_shift = -(e - s)
+            text_shift = self.remove_card_text(s, e)
             
         for i, card in enumerate(cards):
             if i >= image_shift_start:

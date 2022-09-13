@@ -1,12 +1,10 @@
 from . import card_base
 
-class This_Is_My_Demo_Card(card_base.Card):
-    name = 'This is my demo card'
+class New_Card(card_base.Card):
+    name = 'New Card'
     type = 'play'
-    weight = 4
-    tags = ['human']
+    weight = 1
+    tags = []
     
     def start(self, player):
         self.reset()
-        for p2 in self.get_players():
-            p2.gain(self, 10)

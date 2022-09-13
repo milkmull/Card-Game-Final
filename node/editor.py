@@ -263,6 +263,7 @@ class Node_Editor(Menu):
         self.scroll_offset = (0, 0)
         self.scroll_vel = [0, 0]
 
+        self.no_logs = True
         self.log = []
         self.logs = []
         self.log_history = []
@@ -276,7 +277,7 @@ class Node_Editor(Menu):
             self.load_save_data(self.card.node_data)
         if not self.nodes:
             self.load_required_nodes()
-        self.reset_logs()
+        self.no_logs = False
 
     @property
     def anchor_dist(self):
@@ -300,6 +301,9 @@ class Node_Editor(Menu):
         self.log_index = -1
 
     def add_log(self, log):
+        if self.no_logs:
+            return
+            
         if self.logs and log['t'] == 'disconn':
             last_log = self.logs[-1]
             if last_log['t'] == 'conn':

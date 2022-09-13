@@ -57,7 +57,7 @@ class Game_Base:
     def done(self):
         return self.status == 'new game' or self.status == 'next round'
 
-#new game stuff-----------------------------------------------------------------------------------------------
+# new game stuff
 
     def new_game(self):
         for p in self.players: 
@@ -110,7 +110,7 @@ class Game_Base:
             self.players.append(p)      
             self.pid += 1
 
-#player stuff ------------------------------------------------------------------------
+# player stuff 
    
     def get_player(self, pid):
         for p in self.players:
@@ -134,7 +134,7 @@ class Game_Base:
     def shuffle_players(self):
         random.shuffle(self.players)
 
-#card stuff---------------------------------------------------------------------------------------
+# card stuff
      
     def add_card_data(self, cls):
         self.cards[cls.type][cls.name] = cls
@@ -180,32 +180,25 @@ class Game_Base:
         for p in self.players:
             if p.find_card_deck_string(c):
                 return p
-        
-    def get_discarded_items(self):
-        return [c.copy() for c in self.discard if c.type == 'item']
-        
+                
+    def add_discard(self, c):
+        self.discard.append(c)
+
     def get_discard(self):
         return self.discard.copy()
         
     def restore(self, c):
         restored = False
-        if c in self.discard:
+        while c in self.discard:
             self.discard.remove(c)
             restored = True
-        return restored
-            
-    def get_last_item(self):
-        items = self.get_discarded_items()
-        if items: 
-            return i[0] 
-        else:
-            return self.draw_cards('item')[0]    
+        return restored  
 
     def is_event(self, name):
         if self.event:
             return self.event.name == name 
   
-#shop stuff---------------------------------------------------------------------------------------
+# shop stuff
         
     def fill_shop(self, m=3):
         num = max({m - len(self.shop), 0})
@@ -230,7 +223,7 @@ class Game_Base:
     def get_shop(self):
         return self.shop.copy()
 
-#update info stuff---------------------------------------------------------------------------------------
+# update info stuff
             
     def new_status(self, stat):
         self.status = stat
@@ -250,7 +243,7 @@ class Game_Base:
             #self.debug()
             raise exceptions.InfiniteLoop
                      
-#settings stuff---------------------------------------------------------------------------------------
+# settings stuff
 
     def get_setting(self, setting):
         return self.settings[setting]
@@ -258,7 +251,7 @@ class Game_Base:
     def get_settings(self):
         return self.settings.copy()
 
-#turn stuff-----------------------------------------------------------------------------------------------
+# turn stuff
    
     def main(self):
         for p in self.players:
@@ -353,7 +346,7 @@ class Game_Base:
         self.event = self.draw_cards('event', 1)[0]
         self.event.start(self)
             
-#ending stuff---------------------------------------------------------------------------------------
+# ending stuff
 
     def get_winners(self):
         hs = max({p.score for p in self.players})

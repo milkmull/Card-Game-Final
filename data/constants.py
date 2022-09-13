@@ -15,6 +15,8 @@ TEST_CARD_HEADER = 'from game.card import card_base\n'
 NODE_DATA_FILE = 'data/node/node_info.json'
 GROUP_DATA_FILE = 'data/node/group_nodes.json'
 INFO_SHEET_FILE = 'data/node/sheet_info.json'
+SPRITESHEET_FILE = 'data/img/spritesheet.png'
+CUSTOMSHEET_FILE = 'data/img/customsheet.png'
 
 BASE_NAMES = (
     'michael', 'dom', 'jack', 'mary', 'daniel', 'emily', 'gambling boi', 'mom', 'dad',

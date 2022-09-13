@@ -30,9 +30,7 @@ class Timer:
         return self.time < time
         
     def step(self, step=None):
-        if step is None:
-            step = self.time_step
-        self.time += step
+        self.time += (step or self.time_step)
         if self.stop_time is not None:
             if self.time >= self.stop_time:
                 self.reset()

@@ -111,7 +111,7 @@ def builder(menu):
         publish_button.add_child(publish_icon, right_anchor='right', right_offset=-3, centery_anchor='centery', centery_offset=-1)
         publish_icon.set_enabled(False) 
         menu.elements_dict['published'] = publish_icon
-        
+
         publish_icon.add_event(
             tag='update',
             func=publish_icon.set_value,
@@ -730,6 +730,6 @@ class Builder(Menu):
     def publish_card(self):
         if not self.card.published:
             self.card.publish(nodes=self.node_editor.nodes)
-            self.last_save_data = self.card.get_info()
         else:
-            self.card.set_published(False)
+            self.card.unpublish(nodes=self.node_editor.nodes)
+        self.last_save_data = self.card.get_info()

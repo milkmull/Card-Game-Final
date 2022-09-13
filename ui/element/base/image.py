@@ -115,11 +115,14 @@ class Image:
 
             if self.keep_aspect:
                 w, h = self.image.get_size()
-                factor = min({
-                    self.rect.width / w,
-                    self.rect.height / h
-                })
-                self.scale_by_factor(factor)
+                if w and h:
+                    factor = min({
+                        self.rect.width / w,
+                        self.rect.height / h
+                    })
+                    self.scale_by_factor(factor)
+                else:
+                    self.scale((0, 0))
                     
             elif not self.auto_fit:
                 self.scale(self.size)

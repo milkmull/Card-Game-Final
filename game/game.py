@@ -9,14 +9,23 @@ def sort_logs(log):
     u = log.get('u')
     if u == 'g':
         return -1
-    else:
-        return u
+    return u
  
 class Game(game_base.Game_Base):
     @staticmethod
     def blank_player_info(pid):
-        return {'name': f'player {pid}', 'description': '', 'tags': ['player'], 'image': 'img/user.png'}
+        return {
+            'name': f'player {pid}',
+            'tags': ['player']
+        }
         
+    @staticmethod
+    def get_user_player_info():
+        return {
+            'name': save.SAVE.get_data('cards')[0]['name'],
+            'tags': ['player']
+        }
+
     @staticmethod
     def pack_log(logs):
         new_log = []
@@ -56,30 +65,26 @@ class Game(game_base.Game_Base):
         super().__init__(mode, settings, cards)
 
         self.pid = 0
-        
+
         self.log = []
-        self.master_log = []
-        self.logs = {}
-        self.frame = 0
+
+        self.turn = 0
 
         self.new_status('waiting')
 
         if self.mode == 'single':
-            player_info = save.SAVE.get_data('cards')[0]
-            player_info['name'] = save.SAVE.get_data('username')
-            self.add_player(0, player_info)
+            self.add_player(0, Game.get_user_player_info())
             self.add_cpus()
             
-#copy stuff---------------------------------------------------------------------------------------------------
+# copy stuff
 
     def copy(self):
         return game_base.Game_Base.copy(self)
         
-#new game stuff-----------------------------------------------------------------------------------------------
+# new game stuff
 
     def new_game(self):
         self.clear_logs()
-        self.frame = 0
         self.add_log({'t': 'res'})
 
         super().new_game()
@@ -88,7 +93,6 @@ class Game(game_base.Game_Base):
 
     def new_round(self):
         self.clear_logs()
-        self.frame = 0
         self.add_log({'t': 'nr'})
         
         super().new_round()
@@ -106,7 +110,7 @@ class Game(game_base.Game_Base):
             if len(self.players) > 1:
                 self.new_game()
 
-#networking------------------------------------------------------------------------------------------
+# networking
  
     def get_pid(self):
         return 0
@@ -197,62 +201,52 @@ class Game(game_base.Game_Base):
             self.balance_cpus()
         self.add_log({'t': 'set', 'settings': self.get_settings()})
 
-#log stuff--------------------------------------------------------------------------------------------------
+# log stuff
 
     def get_scores(self):
         return {p.pid: p.score for p in self.players}
 
     def add_log(self, log):
         log['u'] = 'g'
-        log['frame'] = self.frame
+        self.log.append(log)
+        
+    def add_player_log(self, log):
         self.log.append(log)
 
-    def clear_logs(self):
-        for key in self.logs:
-            self.logs[key].clear()      
+    def clear_logs(self):     
         self.log.clear()
-        self.master_log.clear()
 
     def get_info(self, pid):
         p = self.get_player(pid)
-        
-        logs = self.logs[pid][:6]
-        if logs:
-            info = Game.pack_log(logs)
-            self.logs[pid] = self.logs[pid][6:]
-        else:
-            info = logs
-
-        return info
-                
-    def update_game_logs(self):
-        for pid, sublog in self.logs.items():
-            sublog += self.log
-            sublog.sort(key=sort_logs)
-        self.master_log += self.log
-        self.log.clear()
-        
-    def update_player_logs(self, p):
-        for pid, sublog in self.logs.items():
-            sublog += p.log
-        
-    def get_startup_log(self):
         logs = []
-        logs.append({'u': 'g', 't': 'ns', 'stat': 'waiting'})
-        logs.append({'u': 'g', 't': 'set', 'settings': self.get_settings()})
+        count = 0
+        
+        for log in self.log[p.log_index:]:
+            p.log_index += 1
+            if log.get('exc', pid) == pid:
+                logs.append(log)
+                count += 1
+                if count == 5:
+                    break
+
+        return Game.pack_log(logs)
+        
+    def get_startup_log(self, pid):
+        logs = []
+        logs.append({'t': 'ns', 'stat': 'waiting', 'u': 'g'})
+        logs.append({'t': 'set', 'settings': self.get_settings(), 'u': 'g'})
         
         for p in self.players:
-            logs.append({'u': p.pid, 't': 'add', 'pid': p.pid})
-            logs.append({'u': p.pid, 't': 'cn', 'pid': p.pid, 'name': p.name})
+            logs.append({'t': 'add', 'pid': p.pid, 'name': p.username, 'u': p.pid})
             
-        logs.append({'u': 'g', 't': 'ord', 'ord': [p.pid for p in self.players]})
-
+        logs.append({'t': 'ord', 'ord': [p.pid for p in self.players], 'u': 'g'})
+        
         for log in logs:
-            log['frame'] = self.frame
+            log['exc'] = pid
 
-        return logs
+        self.log += logs
 
-#player stuff ------------------------------------------------------------------------
+# player stuff
 
     def add_cpus(self):
         self.pid = 1
@@ -260,24 +254,24 @@ class Game(game_base.Game_Base):
             player_info = Game.blank_player_info(self.pid)
             p = Auto_Player(self, self.pid, player_info)
             self.players.append(p)      
-            self.add_log({'t': 'add', 'pid': p.pid})
+            self.add_log({'t': 'add', 'pid': p.pid, 'name': p.username})
             self.pid += 1
+        self.new_status('waiting')
             
     def add_player(self, pid, player_info):
         if self.status == 'waiting':
             p = Player(self, pid, player_info)
             self.players.append(p)  
+            p.log_index = len(self.log)
             self.pid += 1
-            self.add_log({'t': 'add', 'pid': pid})
-            self.logs[pid] = self.get_startup_log()
+            self.add_log({'t': 'add', 'pid': pid, 'name': p.username})
+            self.get_startup_log(p.pid)
             self.new_status('waiting')
             return p 
             
     def remove_player(self, pid):
         p = self.get_player(pid)
         if p:
-            if p.pid in self.logs:
-                self.logs.pop(p.pid)
             self.players.remove(p)
             self.add_log({'t': 'del', 'pid': p.pid})
             if self.mode == 'online':
@@ -301,7 +295,7 @@ class Game(game_base.Game_Base):
                     self.remove_player(p.pid)        
             self.add_cpus()
    
-#main game logic---------------------------------------------------------------------------------
+# main game logic
 
     def update_round(self):
         text = f"round {self.round}/{self.get_setting('rounds')}"
@@ -320,10 +314,7 @@ class Game(game_base.Game_Base):
         if self.status != 'waiting':
             for p in self.players:
                 p.update()
-                self.advance_turn() 
-
-        self.update_game_logs()  
-        self.frame += 1
+                self.advance_turn()  
 
     def count_votes(self):
         v = 'keep'
@@ -389,7 +380,7 @@ class Game(game_base.Game_Base):
             if not voting:
                 self.vote_card.start()
 
-#in game operations------------------------------------------------------------------------------
+# in game operations
         
     def shift_up(self, player):
         super().shift_up(player)  
@@ -411,4 +402,11 @@ class Game(game_base.Game_Base):
         super().fill_shop(m=m)
         self.add_log({'t': 'fill', 'cards': self.shop.copy()})
                   
-
+    def add_discard(self, c):
+        super().add_discard(c)
+        self.add_log({'t': 'disc', 'c': self.discard[-1] if self.discard else None})
+        
+    def restore(self, c):
+        if super().restore(c):
+            self.add_log({'t': 'disc', 'c': self.discard[-1] if self.discard else None})
+            return True

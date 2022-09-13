@@ -1,8 +1,6 @@
 import inspect
 import importlib
 
-import data.save
-
 from . import card_base
 from . import base_cards
 from . import extra_cards
@@ -33,15 +31,31 @@ def get_custom_card_data():
         data[cls.type][cls.name] = cls
     return data
     
-def get_playable_card_data():
+def get_extra_card_data():
     data = {}
-    
-    for cls in card_base.Card.get_subclasses():
+    for name, cls in inspect.getmembers(extra_cards, predicate):
         if cls.type not in data:
             data[cls.type] = {}
         data[cls.type][cls.name] = cls
-    
     return data
+    
+def get_playable_card_data():
+    data = (
+        get_base_card_data(),
+        get_custom_card_data(),
+        get_extra_card_data()
+    )
+    
+    playable = {}
+    
+    for d in data:
+        for type, cards in d.items():
+            if type not in playable:
+                playable[type] = cards
+            else:
+                playable[type].update(cards)
+
+    return playable
     
     
     

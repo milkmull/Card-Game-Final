@@ -25,7 +25,7 @@ def run_tester(card):
         text_kwargs={
             'text': 'Testing Card...'
         },
-        fps=240
+        fps=120
     )
     m.run()
     if m.status:
