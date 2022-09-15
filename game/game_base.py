@@ -42,7 +42,8 @@ class Game_Base:
         self.status = ''
         self.current_turn = 0
         self.round = 0
-
+        
+        self.log = []
         self.players = [] 
         self.shop = []
         self.discard = []
@@ -103,9 +104,9 @@ class Game_Base:
         for p in self.players: 
             p.reset()   
                 
-    def add_cpus(self):
+    def add_cpus(self, num=0):
         self.pid = 0
-        for _ in range(self.get_setting('cpus')):  
+        for _ in range(num or self.get_setting('cpus')):  
             p = player_base.Player_Base(self, self.pid)
             self.players.append(p)      
             self.pid += 1
@@ -305,6 +306,7 @@ class Game_Base:
     def advance_turn(self):
         if self.status != 'playing':
             return 
+            
         self.check_loop()
         self.turn += 1
             

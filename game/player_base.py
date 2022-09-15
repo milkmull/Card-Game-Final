@@ -103,6 +103,10 @@ class Player_Base:
     def name(self):
         return f'player {self.pid}'
         
+    @property
+    def id(self):
+        return self.pid
+        
     def __eq__(self, other):
         if hasattr(other, 'get_id'):
             return self.pid == other.get_id()
@@ -465,31 +469,33 @@ class Player_Base:
             self.set_active_card(c)
   
         confirm = False
+        
+        match c.wait:
 
-        if c.wait == 'flip':
-            if self.coin is not None:
-                c.wait = None
-                c.flip(self, self.coin)
-                confirm = True
+            case 'flip':
+                if self.coin is not None:
+                    c.wait = None
+                    c.flip(self, self.coin)
+                    confirm = True
+                    
+            case 'roll':
+                if self.dice is not None:  
+                    c.wait = None
+                    c.roll(self, self.dice)
+                    confirm = True
+
+            case 'select':
+                if self.selected:   
+                    c.wait = None
+                    c.select(self, len(self.selected))                
+                    confirm = True
                 
-        elif c.wait == 'roll':
-            if self.dice is not None:  
-                c.wait = None
-                c.roll(self, self.dice)
-                confirm = True
-
-        elif c.wait == 'select':
-            if self.selected:   
-                c.wait = None
-                c.select(self, len(self.selected))                
-                confirm = True
-            
-        elif c.wait == 'cast': 
-            if self.selected:
-                c.wait = None
-                target = self.selected.pop(0)
-                self.cast(target, c)
-                confirm = True
+            case 'cast': 
+                if self.selected:
+                    c.wait = None
+                    target = self.selected.pop(0)
+                    self.cast(target, c)
+                    confirm = True
 
         if c.wait is None:
             self.requests.pop(0)
@@ -531,9 +537,8 @@ class Player_Base:
         if c in self.selection:
             self.selected.append(c)
 
-        elif not (self.gone or self.requests):
-            if c in self.unplayed:
-                self.play_card(c)
+        elif not (self.gone or self.requests) and c in self.unplayed:
+            self.play_card(c)
    
         elif not self.game_over and c not in self.requests:
         
@@ -594,7 +599,9 @@ class Player_Base:
 # log stuff
 
     def add_log(self, log):
+        log['u'] = self.pid
         self.log.append(log)
+        self.game.log.append(log)
         if not log.get('d'):
             self.og(log=log)
 
@@ -658,12 +665,21 @@ class Player_Base:
 # auto stuff
 
     def get_selection(self):
-        cards = [c for c in self.items if c.can_use(self)] + self.spells
+        cards = []
+
+        for c in self.items:
+            if c.can_use(self):
+                cards.append(c)
         
+        for c in self.spells:
+            if any({c.can_cast(p) for p in self.game.players}):
+                cards.append(c)
+
         for c in self.treasure:
             if c.name == 'gold coins':
                 cards.append(c)
                 break
+                
         if not self.gone:      
             cards += self.unplayed  
             

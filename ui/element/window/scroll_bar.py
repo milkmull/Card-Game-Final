@@ -220,15 +220,3 @@ class Scroll_Bar(Slider):
             if mw:
                 if self.can_scroll():
                     self.scroll(-mw.y)
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        

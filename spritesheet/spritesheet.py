@@ -3,14 +3,12 @@ import os
 import pygame as pg
 
 from data.save import SAVE
-from data.constants import CONSTANTS, BASE_NAMES, SPRITESHEET_FILE, CUSTOMSHEET_FILE
+from data.constants import CONSTANTS, BASE_NAMES, SPRITESHEET_FILE, CUSTOMSHEET_FILE, IMG_PATH
 
 from . import spritesheet_base
 from builder.custom_card_base import Card
 
 class Spritesheet:
-    MINI_CACHE = {}
-    
     def __init__(self):
         CARD_WIDTH, CARD_HEIGHT = CONSTANTS['card_size']
         
@@ -29,12 +27,15 @@ class Spritesheet:
         
         self.extrasheet = {}
         
+        self.mini_cache = {}
+        
     def check_name(self, name):
         return self.spritesheet.check_name(name) or self.customsheet.check_name(name)
         
     def add_player(self, pid, color, info):
         info['type'] = 'player'
         info['color'] = color
+        info['image'] = IMG_PATH + 'user.png'
         img = Card(**info).get_card_image()
         name = f'player {pid}'
         self.extrasheet[name] = img
@@ -55,14 +56,14 @@ class Spritesheet:
     def add_mini(self, name):
         img = self.get_full_size(name)
         img = pg.transform.smoothscale(img, CONSTANTS['mini_card_size'])
-        Spritesheet.MINI_CACHE[name] = img
+        self.mini_cache[name] = img
         return img
     
     def get_image(self, name, mini=False, scale=None):
         img = None
         
         if mini:
-            img = Spritesheet.MINI_CACHE.get(name)
+            img = self.mini_cache.get(name)
             if not img:
                 img = self.add_mini(name)
         else:

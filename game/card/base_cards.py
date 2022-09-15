@@ -91,8 +91,11 @@ class Emily(card_base.Card):
         i = player.played.index(self)
         for j in range(i + 1, i + 3):
             added, c = self.check_index(player, j, tags=['human'])
-            if added:
-                player.gain(self, 5 * (j - i))
+            if c:
+                if added:
+                    player.gain(self, 5 * (j - i))
+            else:
+                break
                   
 class GamblingBoi(card_base.Card):
     name = 'gambling boi'
@@ -279,7 +282,7 @@ class Racoon(card_base.Card):
     weight = 2
     tags = ['animal', 'city', 'forest']  
     def get_selection(self, player):
-        return [c.copy() for c in self.game.shop]
+        return self.game.get_shop()
         
     def start(self, player):  
         player.add_request(self, 'select')
@@ -328,10 +331,13 @@ class Cow(card_base.Card):
         i = player.played.index(self)
         for i in range(i + 1, len(player.played)):
             added, c = self.check_index(player, i, tags=['plant'])
-            if added:
-                player.gain(self, 4)
-                if 'farm' in c.tags:
-                    player.draw_cards('treasure')
+            if c:
+                if added:
+                    player.gain(self, 4)
+                    if 'farm' in c.tags:
+                        player.draw_cards('treasure')
+            else:
+                break
             
 class Shark(card_base.Card):
     name = 'shark'
@@ -737,8 +743,11 @@ class LemonLord(card_base.Card):
         i = player.played.index(self)
         for i in range(i + 1, len(player.played)):
             added, c = self.check_index(player, i, tags=['plant'])
-            if added:
-                player.gain(self, 5)
+            if c:
+                if added:
+                    player.gain(self, 5)
+            else:
+                break
             
 class Wizard(card_base.Card):
     name = 'wizard'
@@ -1143,7 +1152,7 @@ class LastTurnPass(card_base.Card):
                 
     def start(self, player):
         if self.game.players[-1] != player:
-            self.game.shift_down(player)
+            #self.game.shift_down(player)
             player.use_item(self)
                 
 class SpeedBoostPotion(card_base.Card):
@@ -1155,7 +1164,7 @@ class SpeedBoostPotion(card_base.Card):
 
     def start(self, player):
         if self.game.players[0].pid != player.pid:
-            self.game.shift_up(player)
+            #self.game.shift_up(player)
             player.use_item(self)
         
 class Mirror(card_base.Card):
@@ -1231,9 +1240,11 @@ class Boomerang(card_base.Card):
     name = 'boomerang'
     type = 'item'
     weight = 4
+    def can_use(self, player):
+        return not any({c.name == self.name for c in player.equipped})
+        
     def start(self, player):
-        if not any({c.name == self.name for c in player.equipped}):
-            self.start_ongoing(player)
+        self.start_ongoing(player)
             
     def start_ongoing(self, player):
         if not self.game.is_event('negative zone'):

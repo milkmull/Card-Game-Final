@@ -36,7 +36,7 @@ class Player(player_base.Player_Base):
 
     def start(self):
         super().start()
-        self.max = 30 * len([p for p in self.game.players if not p.is_auto()]) * 2
+        self.max = 60 * (len([p for p in self.game.players if not p.is_auto()]) or 1)
  
 # card stuff 
                 
@@ -122,42 +122,42 @@ class Player(player_base.Player_Base):
     def select(self, uid):
         if self.selection:
             for c in self.selection:  
-                if c.get_id() == uid:
+                if c.id == uid:
                     self.selected.append(c)
                     return
 
         if not (self.gone or self.requests):
             for c in self.unplayed:
-                if c.get_id() == uid:   
+                if c.id == uid:   
                     self.play_card(c)
                     return
                     
         for c in self.requests:
-            if c.get_id() == uid:
+            if c.id == uid:
                 return
         
         if not self.game_over:
 
             for c in self.items: 
-                if c.get_id() == uid:
+                if c.id == uid:
                     if c.can_use(self):
                         c.start(self)
                     return
                     
             for c in self.spells:    
-                if c.get_id() == uid:
+                if c.id == uid:
                     c.wait = 'cast'
                     self.requests.append(c)
                     return
                     
             for c in self.treasure:
-                if c.get_id() == uid:  
+                if c.id == uid:  
                     if hasattr(c, 'start'):
                         c.start(self)     
                     return
                     
             for c in self.equipped:                   
-                if c.get_id() == uid:  
+                if c.id == uid:  
                     self.unequip(c)
                     return
 
@@ -178,7 +178,7 @@ class Player(player_base.Player_Base):
     def add_log(self, log):
         log['u'] = self.pid
         self.log.append(log)
-        self.game.log.append(log)
+        self.game.add_player_log(log)
         if not log.get('d'):
             self.og(log=log)
 
@@ -233,22 +233,7 @@ class Auto_Player(Player):
     def __init__(self, game, pid, player_info):
         super().__init__(game, pid, player_info)
 
-        self.decision = {}
-        self.tree = []
-        self.diff = 0
-        self.temp_tree = set()
-        self.stable_counter = 0
-        self.max_stable = 0
-        self.sim_timer = 0
         self.timer = 0
-        
-    def reset(self):
-        super().reset()
-        self.reset_brain()
-        
-    def start(self):
-        super().start()
-        self.set_difficulty(self.game.get_setting('diff'))
 
     def set_timer(self):
         self.timer = random.randrange(60, 120)
@@ -257,91 +242,26 @@ class Auto_Player(Player):
         super().start_turn()
         self.set_timer()
         
-    def new_choice(self, g):
-        p = g.get_player(self.pid)
-        choice = p.get_choice()
-        
-        if choice:
-            score = round(sum([p.score - o.score for o in g.players]) / (len(g.players) - 1))
-            for i, (d, info) in enumerate(self.tree.copy()):
-                if d == choice:
-                    count, ave = info
-                    info[0] += 1
-                    new_ave = ave + ((score - ave) / (count + 1))
-                    info[1] = round(new_ave, 2)
-                    break
-            else:
-                self.tree.append((choice, [1, score]))
-       
-        if self.diff < 4:
-            temp_tree = {info[0] for info in self.tree}
-        else:
-            self.tree.sort(key=lambda info: info[1][1], reverse=True)
-            temp_tree = [info[0] for info in self.tree][:3]
-        if temp_tree == self.temp_tree:
-            self.stable_counter += 1
-        else:
-            #print(self.temp_tree)
-            self.stable_counter = 0
-            self.temp_tree = temp_tree
-
-    def simulate(self):
-        g = self.game.copy()
-        t = time.time()
-        while not (g.done() or time.time() - t > self.sim_timer):
-            g.main()
-        self.new_choice(g)
-        
     def get_decision(self):
-        self.tree.sort(key=lambda info: info[1][1], reverse=True)
-        cards = self.get_selection()
+        choices = self.game.tree.get_scores(self.pid)
+        if not isinstance(choices, dict):
+            print('tree', self.game.tree.tree)
+            return
+        if not self.selection and self.gone:
+            choices['w'] = 0
+        choices = sorted(choices.items(), key=lambda c: c[1], reverse=True)
+        selection = {c.id: c for c in self.get_selection()}
+        
+        #print(self.pid, [(getattr(selection.get(uid), 'name', None), score) for uid, score in choices])
 
-        for info in self.tree:
-            d = info[0]
-            if d == 'w' and not self.selection:
-                return 
-            elif d in cards:
-                return d
-
-    def reset_brain(self):
-        self.stable_counter = 0 
-        self.decision = None
-        self.tree.clear()
-        self.set_timer()
-      
-    def is_stable(self):
-        return self.stable_counter > self.max_stable# // 4 or self.timer < -200
+        for uid, _ in choices:
+            if uid == 'w':
+                break
+            if c := selection.get(uid):
+                return c
 
     def timer_up(self):
         return self.timer <= 0
-
-    def set_difficulty(self, diff):
-        p = len(self.game.players)
-        self.diff = diff
-        
-        if diff == 0:
-            self.max_stable = 0
-        elif diff == 1:
-            self.max_stable = 5 // len(self.game.players)
-        elif diff == 2:
-            self.max_stable = 10 // len(self.game.players)
-        elif diff == 3:
-            self.max_stable = 50 // len(self.game.players)
-        elif diff == 4:
-            self.max_stable = 100 // len(self.game.players)
-            
-        #if diff:
-        self.sim_timer = self.get_sim_time()
-        #else:
-        #    self.sim_timer = 0
-        
-    def get_sim_time(self):
-        players = len([p for p in self.game.players if p.is_auto()])
-        if players <= 5:
-            total_update_time = 0.006
-            return round(max(((1 / 60) - total_update_time) / players, 0), 5)
-        else:
-            return 0 
 
     def start_request(self, c):
         sel = self.selection.copy()
@@ -353,60 +273,26 @@ class Auto_Player(Player):
         if self.selection:
             return self.selection.copy()
         return super().get_selection()
-     
-    def random_choice(self):
-        if self.selection:
-            return random.choice(self.selection)
-
-        cards = self.get_selection()
-        if cards:
-            if self.gone and random.choice(range(len(cards) + 1)) == 0:
-                return
-            else:
-                return random.choice(cards)
 
     def auto_select(self):
         s = None
         
         if self.game.done():
             return
-            
-        if self.sim_timer:
-                
-            if not self.is_stable():
-                self.simulate()
-                self.decision = None
-                
-            elif self.timer_up() and not (self.flipping or self.rolling):
-                s = self.get_decision()
-                if s:
-                    if not random.choice((0, 1)):
-                        s = None
-                        self.stable_counter = 0
-                else:
-                    self.reset_brain()
-                
-        elif self.timer_up() and not (self.flipping or self.rolling):
-            s = self.random_choice()
 
-        if s is not None:
-            if s == 'w':
-                s = None
-            else:
-                self.add_log({'t': 'select', 's': s})
-            self.reset_brain()
-        return s
-        
-    def start_request(self, c):
-        sel = self.selection.copy()
-        super().start_request(c)
-        if not self.selecting or (self.selecting and self.selection != sel):
+        if self.timer_up() and not (self.flipping or self.rolling):
+            s = self.get_decision()
             self.set_timer()
+            
+        if s:
+            self.add_log({'t': 'select', 's': s})
+
+        return s
 
     def update(self):
         s = self.auto_select()
         if s:
-            self.select(s.get_id())
+            self.select(s.id)
             
         if self.timer < 30:
             if self.coin == -1:
@@ -491,15 +377,15 @@ class Player_Copy(player_base.Player_Base):
             
         elif not self.requests:
             cards = self.get_selection()
-            
+
             if cards:
-                if not self.first_choice and random.choice(range(len(cards) + 1)) == 0:
-                    self.first_choice = 'w'
-                else:
-                    s = random.choice(cards) 
+                cards.append(None)
+                s = random.choice(cards) 
                     
-        if s and not self.first_choice:
-            self.first_choice = s
+        if s:
+            if not self.first_choice:
+                self.first_choice = s
+            self.add_log({'t': 'select', 's': s})
         
         return s
         

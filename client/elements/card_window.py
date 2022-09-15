@@ -29,14 +29,16 @@ class Card_Window(Live_Window):
     def __init__(self, *args, dir=None, **kwargs):
         super().__init__(*args, **kwargs)
         
-        if dir == 0:
-            self.orientation_cache.update(Card_Window.HORIZONTAL_ORIENTATION)
-        elif dir == 1:
-            self.orientation_cache.update(Card_Window.VERTICAL_ORIENTATION)
-        elif dir == 2:
-            self.orientation_cache.update(Card_Window.SPOT_ORIENTATION)
-        elif dir == 3:
-            self.orientation_cache.update(Card_Window.SELECT_ORIENTATION)
+        match dir:
+        
+            case 0:
+                self.orientation_cache.update(Card_Window.HORIZONTAL_ORIENTATION)
+            case 1:
+                self.orientation_cache.update(Card_Window.VERTICAL_ORIENTATION)
+            case 2:
+                self.orientation_cache.update(Card_Window.SPOT_ORIENTATION)
+            case 3:
+                self.orientation_cache.update(Card_Window.SELECT_ORIENTATION)
             
     def clear(self):
         if self.elements:
@@ -48,4 +50,7 @@ class Card_Window(Live_Window):
         for c in last_batch:
             if c not in self.elements:
                 c.parent = None
+                
+        if self.inf_height:
+            self.y_scroll_bar.go_to_bottom()
         

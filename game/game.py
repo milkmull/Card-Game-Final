@@ -1,7 +1,11 @@
+import random
+from datetime import datetime
+
 from data import save
 
 from .card import cards as card_manager
 from .player import Player, Auto_Player
+from simulator.tree import Tree
 
 from . import game_base
     
@@ -63,18 +67,20 @@ class Game(game_base.Game_Base):
             cards = card_manager.get_playable_card_data()
    
         super().__init__(mode, settings, cards)
-
-        self.pid = 0
-
-        self.log = []
-
-        self.turn = 0
+        
+        self.tree = Tree(self)
 
         self.new_status('waiting')
+        
+        self.seed = datetime.now().timestamp()
+        print(self.seed)
+        random.seed(self.seed)
 
         if self.mode == 'single':
-            self.add_player(0, Game.get_user_player_info())
-            self.add_cpus()
+            #self.add_player(0, Game.get_user_player_info())
+            self.add_cpus(num=2)
+            
+            #random.seed(3)
             
 # copy stuff
 
@@ -85,6 +91,7 @@ class Game(game_base.Game_Base):
 
     def new_game(self):
         self.clear_logs()
+        self.tree.reset()
         self.add_log({'t': 'res'})
 
         super().new_game()
@@ -93,6 +100,7 @@ class Game(game_base.Game_Base):
 
     def new_round(self):
         self.clear_logs()
+        self.tree.reset()
         self.add_log({'t': 'nr'})
         
         super().new_round()
@@ -212,6 +220,8 @@ class Game(game_base.Game_Base):
         
     def add_player_log(self, log):
         self.log.append(log)
+        if log['t'] == 'select':
+            self.tree.trim(log)
 
     def clear_logs(self):     
         self.log.clear()
@@ -238,9 +248,7 @@ class Game(game_base.Game_Base):
         
         for p in self.players:
             logs.append({'t': 'add', 'pid': p.pid, 'name': p.username, 'u': p.pid})
-            
-        logs.append({'t': 'ord', 'ord': [p.pid for p in self.players], 'u': 'g'})
-        
+
         for log in logs:
             log['exc'] = pid
 
@@ -248,9 +256,9 @@ class Game(game_base.Game_Base):
 
 # player stuff
 
-    def add_cpus(self):
-        self.pid = 1
-        for _ in range(self.get_setting('cpus')):  
+    def add_cpus(self, num=0):
+        self.pid = len(self.players)
+        for _ in range(num or self.get_setting('cpus')):  
             player_info = Game.blank_player_info(self.pid)
             p = Auto_Player(self, self.pid, player_info)
             self.players.append(p)      
@@ -315,6 +323,9 @@ class Game(game_base.Game_Base):
             for p in self.players:
                 p.update()
                 self.advance_turn()  
+                
+            if self.mode == 'single':
+                self.tree.simulate()
 
     def count_votes(self):
         v = 'keep'
@@ -381,18 +392,6 @@ class Game(game_base.Game_Base):
                 self.vote_card.start()
 
 # in game operations
-        
-    def shift_up(self, player):
-        super().shift_up(player)  
-        self.add_log({'t': 'ord', 'ord': [p.pid for p in self.players]})
-        
-    def shift_down(self, player):
-        super().shift_down(player)    
-        self.add_log({'t': 'ord', 'ord': [p.pid for p in self.players]})
-        
-    def shuffle_players(self):
-        super().shuffle_players()
-        self.add_log({'t': 'ord', 'ord': [p.pid for p in self.players]})
 
     def set_event(self):
         super().set_event()

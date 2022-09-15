@@ -43,6 +43,10 @@ class Card:
     def __hash__(self):
         return self.uid
         
+    @property
+    def id(self):
+        return self.uid
+        
     def copy(self): 
         T = type(self)
         if T.__name__ != 'Blank':

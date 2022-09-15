@@ -21,6 +21,26 @@ from ..elements.main_button import Main_Button
 from ..elements.points import Points
 from ..elements.moving_card import Moving_Card
 
+def get_label(window, text):
+    label = Textbox(
+        size=(window.rect.width, 30),
+        text=text,
+        centerx_aligned=True,
+        centery_aligned=True,
+        fill_color=window.fill_color,
+        text_outline_color=(0, 0, 0),
+        text_outline_width=2,
+        border_top_left_radius=5,
+        border_top_right_radius=5,
+        enabled=False
+    )
+    window.add_child(
+        label,
+        left_anchor='left',
+        bottom_anchor='top',
+        bottom_offset=-5
+    )
+
 def client_screen(menu):
     body = menu.body
     sep = Card_Window.SEP
@@ -62,7 +82,8 @@ def client_screen(menu):
     sequence = Card_Window(
         dir=3,
         size=((2 * CONSTANTS['cw']) + (3 * sep), (3 * CONSTANTS['ch']) + (4 * sep)), 
-        fill_color=(255, 0, 0)
+        outline_color=(255, 0, 0),
+        outline_width=2
     )
     sequence.rect.bottomleft = (20, body.height - 20)
     elements.append(sequence)
@@ -71,7 +92,8 @@ def client_screen(menu):
     selection = Card_Window(
         dir=3,
         size=((2 * CONSTANTS['cw']) + (3 * sep), (3 * CONSTANTS['ch']) + (4 * sep)), 
-        fill_color=(0, 0, 255)
+        outline_color=(0, 0, 255),
+        outline_width=2
     )
     selection.rect.bottomright = (body.width - 20, body.height - 20)
     elements.append(selection)
@@ -80,7 +102,8 @@ def client_screen(menu):
     active_card = Card_Window(
         dir=1,
         size=(CONSTANTS['cw'] + (2 * sep), CONSTANTS['ch'] + (2 * sep)),
-        fill_color=(255, 255, 255)
+        outline_color=(255, 255, 255),
+        outline_width=2
     )
     active_card.rect.bottomright = (selection.rect.left - 10, selection.rect.bottom)
     elements.append(active_card)
@@ -90,7 +113,8 @@ def client_screen(menu):
         dir=0,
         size=((CONSTANTS['cw'] * 3) + (sep * 4), CONSTANTS['ch'] + (sep * 2)),
         inf_height=False,
-        fill_color=(255, 255, 0)
+        outline_color=(255, 255, 0),
+        outline_width=2
     )   
     shop.rect.bottomright = (active_card.rect.left - 10, active_card.rect.bottom)
     elements.append(shop)
@@ -180,8 +204,8 @@ def client_screen(menu):
 class Client_Base(Menu): 
     COLORS = gen_colors(15)
     
-    def __init__(self, connection):
-        super().__init__(client_screen, fill_color=(32, 32, 40))
+    def __init__(self, connection, set_screen=client_screen):
+        super().__init__(set_screen, fill_color=(32, 32, 40))
         
         self.conn = connection
         self.sheet = Spritesheet()
@@ -248,7 +272,7 @@ class Client_Base(Menu):
         points = []
         for log in logs:
             
-            print(log)
+            #print(log)
             
             pid = log.get('u')
         

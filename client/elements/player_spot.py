@@ -4,6 +4,7 @@ from data.constants import CONSTANTS
 
 from ui.element.elements import Textbox, Static_Window
 from ui.element.utils.timer import Timer
+from ui.color.ops import color_text
 
 from ..elements.card_window import Card_Window
 from .visuals import COIN, DICE, SELECT, VOTE
@@ -72,6 +73,7 @@ class Player_Spot(Card_Window):
    
     def set_player(self, player):
         self.player = player
+        self.label.text_color = color_text(player.color)
         self.label.set_text(player.name)
         
         self.outline_color = player.color
@@ -127,17 +129,17 @@ class Player_Spot(Card_Window):
         
         if self.player.coin is not None:
             c = COIN[self.player.coin]
-            c.rect.center = self.active_card.elements[0].rect.center
+            c.rect.center = self.active_card.rect.center
             c.draw(surf)
             
         elif self.player.dice is not None:
             d = DICE[self.player.dice]
-            d.rect.center = self.active_card.elements[0].rect.center
+            d.rect.center = self.active_card.rect.center
             d.draw(surf)
             
         elif self.player.selecting:
             s = SELECT
-            s.rect.center = self.active_card.elements[0].rect.center
+            s.rect.center = self.active_card.rect.center
             s.draw(surf)
         
         
