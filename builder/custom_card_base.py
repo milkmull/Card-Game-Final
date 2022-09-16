@@ -130,7 +130,7 @@ class Card(Image_Element):
         desc = Input(
             size=(245, 160),
             text=description,
-            text_size=35,
+            text_size=25,
             max_length=300,
             max_lines=5,
             **text_kwargs,

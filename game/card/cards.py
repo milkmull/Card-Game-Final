@@ -21,6 +21,7 @@ def get_base_card_data():
         if cls.type not in data:
             data[cls.type] = {}
         data[cls.type][cls.name] = cls
+        
     return data
 
 def get_custom_card_data():

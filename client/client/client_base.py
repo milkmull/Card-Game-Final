@@ -15,31 +15,11 @@ from ui.color.ops import gen_colors
 
 from ..elements.player import Player
 from ..elements.card import Card
-from ..elements.player_spot import Player_Spot
 from ..elements.card_window import Card_Window
 from ..elements.main_button import Main_Button
 from ..elements.points import Points
 from ..elements.moving_card import Moving_Card
-
-def get_label(window, text):
-    label = Textbox(
-        size=(window.rect.width, 30),
-        text=text,
-        centerx_aligned=True,
-        centery_aligned=True,
-        fill_color=window.fill_color,
-        text_outline_color=(0, 0, 0),
-        text_outline_width=2,
-        border_top_left_radius=5,
-        border_top_right_radius=5,
-        enabled=False
-    )
-    window.add_child(
-        label,
-        left_anchor='left',
-        bottom_anchor='top',
-        bottom_offset=-5
-    )
+from ..elements.grid import Grid
 
 def client_screen(menu):
     body = menu.body
@@ -58,27 +38,7 @@ def client_screen(menu):
     main_button.set_parent(menu, centerx_anchor='centerx', bottom_anchor='bottom', bottom_offset=-10)
     elements.append(main_button)
     menu.main_button = main_button
-    
-    cancel_button = Button.Text_Button(
-        text=icons['X'],
-        font_name='icons.ttf',
-        text_color=(255, 0, 0),
-        func=lambda: menu.send('cancel')
-    )
-    
-    def cancel():
-        p = menu.main_p
-        cancel_button.set_visible(p.can_cancel)
-        cancel_button.set_enabled(p.can_cancel)
-        
-    cancel_button.add_event(
-        tag='update',
-        func=cancel
-    )
-    
-    cancel_button.set_parent(main_button, left_anchor='right', bottom_anchor='top')
-    elements.append(cancel_button)
-    
+
     sequence = Card_Window(
         dir=3,
         size=((2 * CONSTANTS['cw']) + (3 * sep), (3 * CONSTANTS['ch']) + (4 * sep)), 
@@ -88,74 +48,13 @@ def client_screen(menu):
     sequence.rect.bottomleft = (20, body.height - 20)
     elements.append(sequence)
     menu.sequence = sequence
-    
-    selection = Card_Window(
-        dir=3,
-        size=((2 * CONSTANTS['cw']) + (3 * sep), (3 * CONSTANTS['ch']) + (4 * sep)), 
-        outline_color=(0, 0, 255),
-        outline_width=2
-    )
-    selection.rect.bottomright = (body.width - 20, body.height - 20)
-    elements.append(selection)
-    menu.selection = selection
-    
-    active_card = Card_Window(
-        dir=1,
-        size=(CONSTANTS['cw'] + (2 * sep), CONSTANTS['ch'] + (2 * sep)),
-        outline_color=(255, 255, 255),
-        outline_width=2
-    )
-    active_card.rect.bottomright = (selection.rect.left - 10, selection.rect.bottom)
-    elements.append(active_card)
-    menu.active_card = active_card
 
-    shop = Card_Window(
-        dir=0,
-        size=((CONSTANTS['cw'] * 3) + (sep * 4), CONSTANTS['ch'] + (sep * 2)),
-        inf_height=False,
-        outline_color=(255, 255, 0),
-        outline_width=2
-    )   
-    shop.rect.bottomright = (active_card.rect.left - 10, active_card.rect.bottom)
-    elements.append(shop)
-    menu.shop = shop
-    
     options = Button.Text_Button(
         text='options'
     )
     options.rect.topright = (body.width - 30, 30)
     elements.append(options)
-    
-    round_text = Textbox(
-        text_color=(255, 255, 0),
-    )
-    round_text.rect.midtop = (options.rect.centerx, options.rect.bottom + 10)
-    round_text.set_parent(
-        menu,
-        centerx_anchor='centerx',
-        centerx_offset=round_text.rect.centerx - body.centerx,
-        centery_anchor='centery',
-        centery_offset=round_text.rect.centery - body.centery
-    )
-    elements.append(round_text)
-    menu.round_text = round_text
 
-    discard = Card_Window(
-        dir=1,
-        size=active_card.rect.size
-    )
-    discard.rect.midbottom = (selection.rect.centerx, selection.rect.top - 30) 
-    elements.append(discard)
-    menu.discard = discard
-    
-    event = Card_Window(
-        dir=1,
-        size=active_card.rect.size
-    )
-    event.rect.midtop = (active_card.rect.centerx, discard.rect.top)
-    elements.append(event)
-    menu.event = event
-    
     scores = Live_Window(
         size=(200, 100)
     )
@@ -163,41 +62,10 @@ def client_screen(menu):
     elements.append(scores)
     menu.scores = scores
     
-    items = Card_Window(
-        dir=0,
-        size=((CONSTANTS['cw'] * 6) + (7 * sep), CONSTANTS['ch'] + (2 * sep)),
-        inf_width=True,
-        inf_height=False
-    )
-    menu.items = items
-    
-    spells = Card_Window(
-        dir=0,
-        size=((CONSTANTS['cw'] * 6) + (7 * sep), CONSTANTS['ch'] + (2 * sep)),
-        inf_width=True,
-        inf_height=False,
-    )
-    menu.spells = spells
-    
-    treasure = Card_Window(
-        dir=0,
-        size=((CONSTANTS['cw'] * 6) + (7 * sep), CONSTANTS['ch'] + (2 * sep)),
-        inf_width=True,
-        inf_height=False,
-    )
-    menu.treasure = treasure
-    
-    extras = Popup.Live_Popup(
-        size=((CONSTANTS['cw'] * 6) + (7 * sep), items.rect.height * 3),
-        outline_color=(255, 255, 255),
-        outline_width=5
-    )
-    extras.join_elements(
-        [items, spells, treasure]
-    )
-    extras.rect.topleft = (sequence.rect.right + 10, body.height)
-    elements.append(extras)
-    menu.extras = extras
+    grid = Grid(menu, (4, 4))
+    grid.rect.center = body.center
+    elements.append(grid)
+    menu.grid = grid
 
     return elements
    
@@ -212,17 +80,14 @@ class Client_Base(Menu):
         self.pid = None
         
         self.status = ''
-        self.players = []
         self.settings = {}
-        
+        self.players = []
+
         self.cards = {}
-        self.moving_cards = {}
         
         self.logs = {}
         self.log_queue = []
-        
-        self.round = 1
-        
+
         self.view_rect = pg.Rect((0, 0), CONSTANTS['card_size'])
         self.view_rect.center = self.body.center
         self.view_card = None
@@ -232,6 +97,8 @@ class Client_Base(Menu):
         self.hover_image = None
         self.hover_matches = []
         
+        self.held_card = None
+        
 # start stuff
         
     def start(self):
@@ -239,11 +106,7 @@ class Client_Base(Menu):
         self.pid = self.send('pid')
         
     def reset(self):
-        self.round = 1
-        
-        self.shop.clear()
-        self.event.clear()
-        self.discard.clear()
+        pass
         
     def close(self):
         pass
@@ -259,8 +122,6 @@ class Client_Base(Menu):
             
     def get_info(self):
         logs = self.send('info')
-        #if logs:
-        #    print('logs:', logs)
         self.update_logs(logs)
         
     def update_logs(self, logs):
@@ -272,14 +133,14 @@ class Client_Base(Menu):
         points = []
         for log in logs:
             
-            #print(log)
+            print(log)
             
             pid = log.get('u')
         
             type = log.get('t')
             if 'c' in log:
                 try:
-                    name, uid = log.get('c')
+                    name, cid = log.get('c')
                 except (TypeError, ValueError):
                     pass
 
@@ -292,30 +153,21 @@ class Client_Base(Menu):
                         
                     case 'add':
                         self.add_player(log['pid'], log['name'])
-                    case 'ord':
-                        self.reorder(log.get('ord'))
                         
                     case 'ns':
                         self.main_button.update_status(log['stat'])
                         
                     case 'set':
                         self.settings = log['settings']
-                        
-                    case 'se':
-                        self.set_event(name, uid)
-                    case 'fill':
-                        self.fill_shop(log['cards'])
-                    case 'disc':
-                        if log['c']:
-                            self.discard.join_elements([self.get_card(name, uid)])
-                        else:
-                            self.discard.clear()
 
-                    case 'ur':
-                        self.round_text.set_text(log['s'])
                     case 'nt':
-                        for p in self.players:
-                            p.new_turn()
+                        self.get_player(log['p']).new_turn()
+                        
+                    case 'sc':
+                        if log.get('c'):
+                            self.grid.set_card(self.get_card(name, cid, player=self.get_player(log['o'])), log['p'])
+                        else:
+                            self.grid.clear_card(log['p'])
                     
             else:
                 
@@ -330,35 +182,6 @@ class Client_Base(Menu):
                         
                     case 'nd':
                         p.new_deck(log['deck'], log['cards'])
-                    case 'aac':
-                        p.set_active_card(
-                            self.get_card(name, uid, add=not p.is_main),
-                            wait=log.get('w'),
-                            can_cancel=log.get('cancel')
-                        )
-                    case 'rac':
-                        p.set_active_card(None)
-                        
-                    case 'cfs':
-                        p.start_flip()
-                    case 'cfe':
-                        p.end_flip(log['coin'])
-                    case 'drs':
-                        p.start_roll()
-                    case 'dre':
-                        p.end_roll(log['dice'])
-                        
-                    case 'play':
-                        p.play(uid, log.get('d'))
-                    case 'buy':
-                        p.buy(uid)
-                    case 'cast':
-                        p.cast(uid)
-                    case 'disc' | 'ui':
-                        p.discard(uid)
-                        
-                    case 'gp' | 'lp' | 'sp' | 'give':
-                        points.append((log, p))
                         
         for log, p in points:
             self.new_points(log, p)
@@ -378,77 +201,14 @@ class Client_Base(Menu):
 
     def add_player(self, pid, name):
         if not any({p.pid == pid for p in self.players}):
-            ps = Player_Spot()
-            self.elements.append(ps)
-            
-            p = Player(self, name, pid, Client_Base.COLORS[pid], ps)
+            p = Player(self, name, pid, Client_Base.COLORS[pid])
             self.players.append(p)
             self.sheet.add_player(pid, Client_Base.COLORS[pid], {'name': name})
-            
-            self.players.sort(key=lambda p: p.pid)
-            self.organize_spots()
 
             return p
-
-    def reorder(self, pids):
-        players = sorted(self.players, key=lambda p: pids.index(p.pid))
-        self.players = players
-        
-    def organize_spots(self):
-        rects = []
-        x = 0
-        y = 0
-        
-        for p in self.players:
-            p.spot.rect.topleft = (x, y)
-            rects.append(p.spot.rect)
-            
-            x += p.spot.total_rect.width + 40
-
-        br = rects[0].unionall(rects)
-        
-        dx = self.body.centerx - br.centerx
-        dy = self.body.centery - br.centery
-        
-        for r in rects:
-            r.move_ip(dx, dy)
-            
-    def new_turn(self):
-        for p in self.players: 
-            p.start_turn()
             
 # card stuff
 
-    @property
-    def visible_cards(self):
-        cards = (
-            self.sequence.elements +
-            self.selection.elements +
-            self.active_card.elements +
-            self.discard.elements + 
-            self.event.elements +
-            self.shop.elements
-        )
-        
-        if self.extras.is_open:
-            cards += (
-                self.items.elements + 
-                self.spells.elements +
-                self.treasure.elements
-            )
-            
-        for p in self.players:
-            cards += (
-                p.spot.elements +
-                p.spot.ongoing.elements + 
-                p.spot.active_card.elements
-            )
-            
-        return cards
-        
-    def find_matches(self, card):
-        return [c for c in self.visible_cards if c == card and c is not card]
-    
     def set_view_card(self, card):
         self.view_card = card
         self.view_image = card.get_image(mini=False)
@@ -466,66 +226,28 @@ class Client_Base(Menu):
                 CONSTANTS['card_height'] * 0.15
             )
         )
-        self.hover_matches = self.find_matches(card)
         
     def clear_hover_card(self):
         self.hover_card = None
         self.hover_image = None
         self.hover_matches.clear()
+        
+    def set_held_card(self, card):
+        card.set_visible(False)
+        self.held_card = card
+        
+    def clear_held_card(self):
+        self.held_card.set_visible(True)
+        self.held_card = None
 
-    def get_card(self, name, uid, add=True):
-        c = Card(self, name, uid)
+    def get_card(self, name, cid, player=None, add=True):
+        c = Card(self, name, cid, player=player)
         if add:
-            if cards := self.cards.get(uid):
+            if cards := self.cards.get(cid):
                 cards.append(c)
             else:
-                self.cards[uid] = [c]
+                self.cards[cid] = [c]
         return c
-        
-    def get_moving_card(self, player, type, card):
-        if not self.moving_cards.get(card.uid):
-            self.moving_cards[card.uid] = Moving_Card(self, player, type, card)
-
-    def del_moving_card(self, uid):
-        self.moving_cards.pop(uid)
-
-    def fill_shop(self, cards):
-        self.shop.join_elements(
-            [self.get_card(name, uid) for name, uid in cards]
-        )
-        
-    def set_event(self, name, uid):
-        self.event.join_elements(
-            [self.get_card(name, uid)]
-        )
-        
-# points stuff
-
-    def new_points(self, log, p):
-        if log.get('d'):
-            return
-
-        type = log['t']
-        target = self.get_player(log.get('target'))
-        
-        match type:
-            case 'gp':
-                points = log.get('gp')
-            case 'lp':
-                points = -log.get('lp')
-            case 'sp':
-                points = log.get('sp')
-            case 'give':
-                points = -log.get('gp')
-            
-        if not points:
-            return
-            
-        card = p.spot.find_card(log['c'][1])
-        if card:
-            self.elements.append(Points(self, p, type, points, card, target))
-        else:
-            p.spot.add_points(points)
 
 # running stuff
 
@@ -553,6 +275,11 @@ class Client_Base(Menu):
 
         if self.view_card:
             self.window.blit(self.view_image, self.view_rect)
+            
+        if self.held_card:
+            r = self.held_card.rect.copy()
+            r.center = pg.mouse.get_pos()
+            self.window.blit(self.held_card.get_image(), r)
 
         pg.display.flip()
         

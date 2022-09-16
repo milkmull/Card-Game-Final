@@ -5,98 +5,20 @@ from . import exceptions
 class Player_Base:
     type = 'player'
     tags = []
-    
-    type_to_deck_dict = {
-        'treasure': 'treasure',
-        'landscape': 'landscapes',
-        'item': 'items',
-        'spell': 'spells',
-        'play': 'unplayed'
-    }
-    
-    deck_strings = (
-        'played',
-        'unplayed',
-        'items',
-        'equipped',
-        'spells',
-        'active_spells',
-        'treasure',
-        'landscapes'
-    )
-    
-    @classmethod
-    def card_to_deck_string(cls, c):
-        return cls.type_to_deck_dict[c.type]
-        
-    @classmethod
-    def type_to_deck_string(cls, type):
-        return cls.type_to_deck_dict[type]
-            
-    @staticmethod
-    def sort_og_cards(c): 
-        match c.name:
-            case 'the void' | 'negative zone':
-                return 4
-            case 'item': 
-                return 1  
-            case 'spell':
-                return 2   
-            case 'landscape':  
-                return 3
-            case _:
-                return 0
-            
-    @staticmethod
-    def sort_request_cards(c): 
-        match c.type:
-            case 'item':
-                return 1
-            case 'spell':
-                return 2
-            case 'event':
-                return 3
-            case _:
-                return 0
             
     def __init__(self, game, pid):
         self.game = game
         self.pid = pid
 
         self.score = 0
-        self.vote = None
-        
-        self.selecting = True
-        self.gone = False
-        self.flipping = False
-        self.rolling = False
-        self.game_over = False
-        self.invincible = False
+        self.done_turn = True
 
-        self.coin = None
-        self.dice = None
-        
-        self.played = []
-        self.unplayed = []
-        
-        self.items = []
-        self.equipped = []
-        
-        self.spells = []
-        self.active_spells = []
-        
-        self.treasure = []
-        self.landscapes = []
-        
-        self.selection = []
-        self.selected = []
+        self.decks = {
+            'play': [],
+            'extra': [],
+            'treasure': []
+        }
 
-        self.ongoing = []
-        self.active_og = []
-        
-        self.requests = []
-        self.active_card = None
-        
         self.log = []
         
     @property
@@ -108,9 +30,7 @@ class Player_Base:
         return self.pid
         
     def __eq__(self, other):
-        if hasattr(other, 'get_id'):
-            return self.pid == other.get_id()
-        return False
+        return getattr(other, 'id', None) == self.pid
             
     def __hash__(self):
         return self.pid
@@ -120,15 +40,6 @@ class Player_Base:
         
     def __repr__(self):
         return self.name
-
-    def get_id(self):
-        return self.pid
-        
-    def get_name(self):
-        return self.name
-        
-    def get_choice(self):
-        return self.first_choice
         
     def is_auto(self):
         return True
@@ -136,601 +47,161 @@ class Player_Base:
 # starting stuff                
 
     def reset(self):
+        self.done_turn = True
+        
+        for deck in self.decks.values():
+            deck.clear()
+
         self.log.clear()
-
-        self.selecting = False
-        self.gone = False
-        self.flipping = False
-        self.rolling = False
-        self.game_over = False
-        self.invincible = False
-
-        self.coin = None
-        self.dice = None
         
-        self.active_card = None
-        self.active_og.clear()
-        
-        self.requests.clear()
-        self.played.clear()
-        self.unplayed.clear()
-        self.selection.clear()
-        self.selected.clear()
-        self.equipped.clear()
-        self.items.clear()
-        self.spells.clear()
-        self.active_spells.clear()
-        self.ongoing.clear()
-        self.treasure.clear()
-        self.landscapes.clear()
-
         self.update_score(0)
 
     def start(self):
         self.update_score(self.game.get_setting('ss'))
-        self.draw_cards('landscape')
         self.draw_cards('play', self.game.get_setting('cards'))
-        self.draw_cards('item', self.game.get_setting('items'))
-        self.draw_cards('spell', self.game.get_setting('spells'))
-        self.new_deck('treasure', [self.game.get_card('gold coins')])
-
-    def new_round(self):
-        self.unequip_all()
-        items = self.items.copy()
-        spells = self.spells.copy()
-        treasure = self.treasure.copy()
-        if not any({c.name == 'gold coins' for c in treasure}):
-            treasure.append(self.game.get_card('gold coins'))
         
-        score = self.score
-        self.reset()
-        self.update_score(score)
+    def copy(self, game):
+        p = Player_Base(game, self.pid)
+        p.score = self.score
+        p.done_turn = self.done_turn
         
-        self.new_deck('items', items)
-        self.new_deck('spells', spells)
-        self.new_deck('treasure', treasure)
+        for type, deck in self.decks.items():
+            p.decks[type] = [c.copy(game=game) for c in deck]
 
-        self.draw_cards('landscape')
-        self.draw_cards('play', self.game.get_setting('cards'))
-        self.draw_cards('item', max((self.game.get_setting('items') - len(self.items), 0)))
-        self.draw_cards('spell', max((self.game.get_setting('spells') - len(self.spells), 0)))
+        return p
 
-# card stuff 
-
-    def type_to_deck(self, type):
-        deck_string = Player_Base.type_to_deck_string(type)
-        deck = getattr(self, deck_string, None)
-        return deck.copy()
-        
-    def card_to_deck(self, c):
-        deck_string = Player_Base.card_to_deck_string(c)
-        deck = getattr(self, deck_string, None)
-        return deck.copy()
-        
-    def string_to_deck(self, deck_string):
-        deck = getattr(self, deck_string, None)
-        if deck is None:
-            raise exceptions.DeckNotFound(deck_string)
-        return deck.copy()
+# card stuff
                 
-    def find_card_deck_string(self, c):
-        for deck_string in Player_Base.deck_strings:
-            if c in self.string_to_deck(deck_string):
-                return deck_string
-                
-    def find_card_deck_string_and_deck(self, c):
-        for deck_string in Player_Base.deck_strings:
-            deck = self.string_to_deck(deck_string)
-            if c in deck:
-                return (deck_string, deck)
-                
-    def has_card(self, name, deck_string=None):
-        if deck_string:
-            return any({name == o.name for o in self.string_to_deck(deck_string)})
-            
-        for deck_string in Player_Base.deck_strings:
-            if any({name == o.name for o in self.string_to_deck(deck_string)}):
-                return deck_string
-
-    def draw_cards(self, type, num=1):
-        cards = self.game.draw_cards(type, num=num)
-        deck_string = Player_Base.type_to_deck_string(type)
-        nd = self.string_to_deck(deck_string) + cards
-        self.new_deck(deck_string, nd)
+    def new_deck(self, type, cards):
+        self.decks[type] = cards
         
-        if deck_string == 'landscapes': 
-            for c in cards:
-                c.start_ongoing(self)
-            
-        self.add_log({'t': 'draw', 'deck': deck_string, 'c': cards.copy()})
-                
-        return cards
-   
-    def add_card(self, c, deck_string=None, i=None):
-        if c is None:
-            raise Exception("Attempted to add 'None' value to card deck.")
-            
-        if c.type == 'play' and deck_string == 'items':
-            raise Exception(f'{c}')
-            
-        if deck_string is None:
-            deck_string = Player_Base.card_to_deck_string(c)
-        nd = self.string_to_deck(deck_string)
-        if nd is not None:
-            if i is None:
-                i = len(nd)
-            nd.insert(i, c)
-            self.new_deck(deck_string, nd)
-        
-            if deck_string == 'played' and hasattr(c, 'start_ongoing') and c not in self.ongoing:
-                c.start_ongoing(self)
-        
-    def remove_card(self, c, deck_string=None):
-        if deck_string is None:
-            deck_string = Player_Base.card_to_deck_string(c)
-        deck = self.string_to_deck(deck_string)
-        if c in deck:
-            nd = [o for o in deck if o != c]
-            self.new_deck(deck_string, nd)
-
-    def replace_card(self, c1, c2):
-        data = self.find_card_deck_string_and_deck(c1)
-        if data is not None:
-            deck_string, nd = data
-            i = nd.index(c1)
-            self.safe_discard(c1)
-            self.add_card(c2, deck_string=deck_string, i=i)
-        
-    def get_played_card(self, i):
-        c = None
-        try:
-            c = self.played[i]
-        except IndexError:
-            pass
-        finally:
-            return c
-   
-    def play_card(self, c, et=True):    
-        d = False
-        self.cancel_request()
-        if c in self.unplayed:
-            self.remove_card(c, deck_string='unplayed')
-        c.start(self)
-        if c not in self.played:
-            self.add_card(c, deck_string='played')
-        else:
-            et = False
-            d = True
-        if et:
-            self.gone = True
-        self.add_log({'t': 'play', 'c': c, 'd': d})
-                
-    def can_cancel(self):
-        c = self.active_card
-        return c.wait == 'cast' or (c.wait == 'select' and c in self.items) or c.name == 'gold coins'
-
-    def cancel(self):
-        if self.requests:   
-            c = self.requests[0]
-            if self.can_cancel():
-                self.requests.pop(0)
-                self.cancel_request()
-                
-    def new_deck(self, deck_string, cards):
-        setattr(self, deck_string, cards)
-        
-    def use_item(self, c):
-        self.discard_card(c)
-        self.add_log({'t': 'ui', 'c': c})
-        
-    def safe_discard(self, c):
-        self.discard_card(c, add_to_discard=False)
-
-    def discard_card(self, c, add_to_discard=True): 
-        self.end_og(c)
-        if c in self.equipped:
-            self.unequip(c)
-        for deck_string in Player_Base.deck_strings:
-            self.remove_card(c, deck_string=deck_string)
-        if add_to_discard:
-            self.game.add_discard(c)
-
-    def get_items(self):
-        return [c for c in self.items + self.equipped if c.wait is None]
-        
-    def give_card(self, c, target):
-        self.safe_discard(c)
-        deck_string = Player_Base.card_to_deck_string(c)
-        nd = target.string_to_deck(deck_string)
-        nd.append(c)
-        target.new_deck(deck_string, nd)
-
-    def steal_card(self, c, target):
-        self.safe_discard(c)
-        deck_string = Player_Base.card_to_deck_string(c)
-        target.add_card(c, deck_string=deck_string)
-        
-    def steal_random_card(self, type, target):
-        c = None
-        deck_string = Player_Base.type_to_deck_string(type)
-        deck = target.string_to_deck(deck_string)
-        if deck:  
-            c = random.choice(deck)
-            target.safe_discard(c)
-            self.add_card(c, deck_string=deck_string)
-        else:
-            if deck_string == 'treasure':
-                cards = self.draw_cards(deck_string)
-                c = cards[0]
-        return c
-
-# equipment stuff
-
-    def equip(self, c):
-        self.remove_card(c, deck_string='items')
-        self.add_card(c, deck_string='equipped')
-        
-    def unequip(self, c): 
-        self.remove_card(c, deck_string='equipped')
-        self.add_card(c, deck_string='items')
-        self.end_og(c)
-        
-    def unequip_all(self):
-        for c in self.equipped.copy():
-            self.unequip(c)
-            
-# spell stuff
-
-    def add_active_spell(self, c):
-        self.add_card(c, deck_string='active_spells')
-        if hasattr(c, 'start_ongoing'):
-            c.start_ongoing(self)
-
-    def cast(self, target, c):
-        if not c.can_cast(target):
-            return
-        self.safe_discard(c)
-        if c is not self.active_card:
-            self.end_request(c)
-        target.add_active_spell(c)
-        self.add_log({'t': 'cast', 'c': c, 'target': target, 'd': False})
-            
-# buying stuff
-
-    def can_buy(self):
-        return any({c.name == 'gold coins' for c in self.treasure}) and not self.game_over
-
-    def buy_card(self, uid, free=False):
-        c = self.game.buy(self, uid)
-        
-        if c and (self.can_buy() or free):
-            if not free:
-                self.remove_coins()
-            self.add_card(c)
-            self.add_log({'t': 'buy', 'c': c})
-        return c
-    
-    def remove_coins(self):
-        for c in self.treasure:
-            if c.name == 'gold coins':        
-                self.new_deck('treasure', [t for t in self.treasure if t != c])        
-                return
-
-# request stuff
-              
-    def set_vote(self, vote):
-        self.vote = vote
-              
-    def add_request(self, c, wait):
-        c = c.storage_copy()
-        c.wait = wait
-        self.requests.append(c)
-        return c
-        
-    def ready_coin(self):
-        self.coin = -1
-        
-    def ready_dice(self):
-        self.dice = -1
-        
-    def start_request(self, c):      
-        if c.wait == 'flip': 
-            self.ready_coin()
-        elif c.wait == 'roll':
-            self.ready_dice()
-        else:
-            cards = None
-            if c.wait == 'select':
-                cards = c.get_selection(self)
-            elif c.wait == 'cast': 
-                cards = [p for p in self.game.players if c.can_cast(p)]
-            if cards:
-                if cards != self.selection:
-                    self.new_deck('selection', cards)
-                    self.selecting = True     
+    def remove_card(self, c, type):
+        deck = self.decks[type]
+        found = False
+        new_deck = []
+        for o in deck:
+            if o == c:
+                found = True
             else:
-                c.wait = None
-                if self.active_card:
-                    self.requests.pop(0)
-                    self.cancel_request()
-                    
-    def set_active_card(self, c):
-        self.active_card = c
-        
-    def remove_active_card(self):
-        self.active_card = None
-  
-    def process_request(self):
-        self.requests.sort(key=Player_Base.sort_request_cards)
-        c = self.requests[0]
-        if c is not self.active_card:
-            self.cancel_request()
-            self.start_request(c)
-            self.set_active_card(c)
-  
-        confirm = False
-        
-        match c.wait:
-
-            case 'flip':
-                if self.coin is not None:
-                    c.wait = None
-                    c.flip(self, self.coin)
-                    confirm = True
-                    
-            case 'roll':
-                if self.dice is not None:  
-                    c.wait = None
-                    c.roll(self, self.dice)
-                    confirm = True
-
-            case 'select':
-                if self.selected:   
-                    c.wait = None
-                    c.select(self, len(self.selected))                
-                    confirm = True
-                
-            case 'cast': 
-                if self.selected:
-                    c.wait = None
-                    target = self.selected.pop(0)
-                    self.cast(target, c)
-                    confirm = True
-
-        if c.wait is None:
-            self.requests.pop(0)
-            self.cancel_request()
+                new_deck.append(o)
+        if found:
+            self.new_deck(type, new_deck)
             
-        elif confirm:
-            self.soft_cancel_request()
-            self.start_request(c)
-     
-    def soft_cancel_request(self):
-        self.flipping = False
-        self.coin = None
-        self.rolling = False
-        self.dice = None
-                    
-    def cancel_request(self):
-        if self.selecting:
-            self.new_deck('selection', [])
-            self.new_deck('selected', [])
-            self.selecting = False
-            
-        if self.flipping:
-            self.flipping = False
-            self.coin = None
-            
-        if self.rolling:
-            self.rolling = False
-            self.dice = None
+        return found
         
-        if self.active_card is not None:
-            self.active_card.mode = 0
-            self.remove_active_card()
-            
-    def end_request(self, c):
-        while c in self.requests:
-            self.requests.remove(c)
-
-    def select(self, c):
-        if c in self.selection:
-            self.selected.append(c)
-
-        elif not (self.gone or self.requests) and c in self.unplayed:
-            self.play_card(c)
-   
-        elif not self.game_over and c not in self.requests:
+    def draw_cards(self, type, num):
+        cards = self.game.draw_cards(type, num=num)
+        new_deck = self.decks[type] + cards
+        self.new_deck(type, cards)
+ 
+    def check_extra(self, spot):
+        pass
         
-            if c in self.items and c.can_use(self):
-                c.start(self)
-                
-            elif c in self.spells:
-                c.wait = 'cast'
-                self.requests.append(c)
-                
-            elif c in self.treasure:
-                if hasattr(c, 'start'):
-                    c.start(self)     
-                    
-            elif c in self.equipped:
-                self.unequip(c)
-
-    def flip(self):
-        self.coin = random.choice((1, 0))
-        self.add_log({'t': 'cfe', 'coin': self.coin, 'd': False})
-        self.flipping = False
-
-    def roll(self):
-        self.dice = random.randrange(0, 6) + 1
-        self.add_log({'t': 'dre', 'dice': self.dice, 'd': False}) 
-        self.rolling = False
-
-# ongoing stuff
-   
-    def add_og(self, c, types):
-        if types:
-            c = c.storage_copy()
-            c.set_log_types(types)
-            self.ongoing.append(c)
-            if c in self.items:
-                self.equip(c)
+    def play_card(self, card, spot):
+        if not self.remove_card(card, 'play'):
+            return
+           
+        self.check_extra(spot)
         
-    def end_og(self, c):
-        while c in self.ongoing:
-            self.ongoing.remove(c)
-   
-    def og(self, log={'t': 'cont'}):
-        self.ongoing.sort(key=Player_Base.sort_og_cards)
-
-        t = log['t']
+        self.add_log({
+            't': 'play',
+            'c': card,
+            'p': spot.pos
+        })
         
-        for c in self.ongoing.copy():
-        
-            if c not in self.ongoing:
-                continue
+        card.player = self
+        spot.set_card(card)
+        card.play()
 
-            if log.get('c') != c and not any({o is c for o in self.active_og}):
-                self.active_og.append(c)
-                if t in c.log_types:
-                    c.ongoing(self, log)
-                self.active_og.pop(-1)
-  
+        self.done_turn = True
+
 # log stuff
 
     def add_log(self, log):
         log['u'] = self.pid
         self.log.append(log)
-        self.game.log.append(log)
-        if not log.get('d'):
-            self.og(log=log)
+        self.game.add_player_log(log)
+        return log
 
 # turn stuff
 
     def start_turn(self):
-        self.gone = False  
-  
-    def done_with_turn(self):
-        return (self.gone or not (self.gone or self.unplayed)) and not self.requests
+        self.done_turn = False  
         
-    def done_with_round(self):
-        return not (self.unplayed or self.requests)
+    @property
+    def done_game(self):
+        return not self.decks['play']
         
-    def end_round(self, use_treasure):
-        if hasattr(self.game.event, 'end'):
-            self.game.event.end(self)
-
-        for c in self.treasure:
-            if hasattr(c, 'end'):
-                c.end(self)
-
-        self.game_over = True
-        
-    def finished_game(self):
-        return self.game_over and not self.requests
-        
-    def auto_select(self):
-        s = None
-        
-        if self.game.done():
-            return
+    def select_card(self):
+        if not self.decks['play']:
+            print(self.log, self.game.done)
             
-        if self.selection:
-            s = random.choice(self.selection)
-            
-        elif not self.requests:
-            cards = self.get_selection()
-            if cards:
-                s = random.choice(cards) 
+        card = random.choice(self.decks['play'])
+        
+        self.add_log({
+            't': 'sc',
+            'c': card
+        })
+        
+        return card
+        
+    def select_spot(self):
+        spots = [spot for spot in self.game.grid.spots if spot.is_open]
+        spot = random.choice(spots) 
 
-        return s
+        self.add_log({
+            't': 'ss',
+            's': spot.pos
+        })
+        
+        return spot
+        
+    def random_turn(self):
+        card = self.select_card()
+        spot = self.select_spot()
+        self.play_card(card, spot)
 
     def update(self):
-        s = self.auto_select()
-        if s:
-            self.select(s)
-
-        if self.coin is not None:
-            self.flipping = True
-            self.flip()
-                
-        if self.dice is not None:
-            self.rolling = True
-            self.roll()
-
-        if self.requests:
-            self.process_request()   
-        self.og()
-        
-# auto stuff
-
-    def get_selection(self):
-        cards = []
-
-        for c in self.items:
-            if c.can_use(self):
-                cards.append(c)
-        
-        for c in self.spells:
-            if any({c.can_cast(p) for p in self.game.players}):
-                cards.append(c)
-
-        for c in self.treasure:
-            if c.name == 'gold coins':
-                cards.append(c)
-                break
-                
-        if not self.gone:      
-            cards += self.unplayed  
-            
-        return cards
-
-# sim stuff
-
-    def sim_copy(self, game):
-        return game.get_player(self.pid)        
+        if not self.done_turn:
+            self.random_turn()
 
 # point stuff
- 
+
     def update_score(self, score):
         self.score = score
- 
-    def steal(self, c, sp, target, d=False):  
-        sp = target.get_robbed(c, sp, self, d)
-        if sp: 
-            self.update_score(self.score + sp)
-            self.add_log({'t': 'sp', 'c': c, 'target': target, 'sp': sp, 'd': d})
-        return sp
-            
-    def get_robbed(self, c, rp, robber, d=False):
-        rp = rp if self.score >= rp else self.score
-        if self.invincible:
-            self.add_log({'t': 'iv', 'c': c})
-            rp = 0
-        if rp:
-            self.update_score(self.score - rp)
-            self.add_log({'t': 'rp', 'c': c, 'robber': robber, 'rp': rp, 'd': d})
-        return rp
         
-    def gain(self, c, gp, d=False):
-        if gp:
-            self.update_score(self.score + gp)
-            self.add_log({'t': 'gp', 'c': c, 'gp': gp, 'd': d})
-        return gp
+    def rob(self, points):
+        if points > self.score:
+            points = self.score
+        if points:
+            self.update_score(self.score - points)
+        return points
+
+    def gain(self, gp, card):
+        if not gp:
+            return
+
+        self.update_score(self.score + gp)
+
+        self.add_log({
+            't': 'gp',
+            'gp': gp,
+            'c': card
+        })
         
-    def lose(self, c, lp, d=False):
-        lp = lp if self.score >= lp else self.score
-        if lp:
-            self.update_score(self.score - lp)
-            self.add_log({'t': 'lp', 'c': c, 'lp': lp, 'd': d})
-        return lp
+    def steal(self, sp, card, target):
+        sp = target.rob(sp)
+        if not sp:
+            return
+
+        self.update_score(self.score + sp)
         
-    def give(self, c, gp, target, d=False):
-        gp = gp if self.score >= gp else self.score
-        if gp:
-            self.update_score(self.score - gp)
-            target.update_score(target.score + gp)
-            self.add_log({'t': 'give', 'c': c, 'target': target, 'gp': -gp, 'd': d})
-        return gp
-        
-        
+        self.add_log({
+            't': 'sp',
+            'sp': sp,
+            'c': card,
+            'target': target
+        })
+
+
+

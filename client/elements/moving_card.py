@@ -43,7 +43,7 @@ class Moving_Card(Element):
                 if self.player.is_main:
                     self.add_animation([{
                         'attr': 'center',
-                        'start': self.client.cards[self.card.uid][-2].rect.center,
+                        'start': self.client.cards[self.card.cid][-2].rect.center,
                         'end': self.card.rect.center,
                         'frames': 20,
                         'method': 'ease_out_expo'
@@ -69,8 +69,8 @@ class Moving_Card(Element):
                 
                 self.add_animation([{
                     'attr': 'center',
-                    'start': self.client.cards[self.card.uid][-2 if self.player.is_main else 0].rect.center,
-                    'end': self.player.spot.label.rect.center if not self.player.is_main else self.client.cards[self.card.uid][-1].rect.center,
+                    'start': self.client.cards[self.card.cid][-2 if self.player.is_main else 0].rect.center,
+                    'end': self.player.spot.label.rect.center if not self.player.is_main else self.client.cards[self.card.cid][-1].rect.center,
                     'frames': 20,
                     'method': 'ease_out_expo'
                 }])
@@ -94,7 +94,7 @@ class Moving_Card(Element):
                 ])
                 self.add_animation([{
                     'attr': 'center',
-                    'start': self.client.cards[self.card.uid][-2].rect.center,
+                    'start': self.client.cards[self.card.cid][-2].rect.center,
                     'end': self.card.rect.center,
                     'frames': 20,
                     'delay': 20,
@@ -120,7 +120,7 @@ class Moving_Card(Element):
                 ])
                 self.add_animation([{
                     'attr': 'center',
-                    'start': self.player.spot.label.rect.center if not self.player.is_main else self.client.cards[self.card.uid][-2].rect.center,
+                    'start': self.player.spot.label.rect.center if not self.player.is_main else self.client.cards[self.card.cid][-2].rect.center,
                     'end': self.card.rect.center,
                     'frames': 20,
                     'delay': 20,
@@ -148,7 +148,7 @@ class Moving_Card(Element):
     def end(self):
         self.client.elements.remove(self)
         self.card.turn_on()
-        self.client.del_moving_card(self.card.uid)
+        self.client.del_moving_card(self.card.cid)
         
     def update(self):
         self.update_animations()

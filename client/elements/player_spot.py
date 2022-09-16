@@ -87,17 +87,17 @@ class Player_Spot(Card_Window):
         win.join_objects(cards)
         return win.get_visible()
         
-    def find_card(self, uid):
+    def find_card(self, cid):
         for c in self.elements:
-            if c.uid == uid:
+            if c.cid == cid:
                 return c
                 
         for c in self.ongoing.elements:
-            if c.uid == uid:
+            if c.cid == cid:
                 return c
                 
         for c in self.active_card.elements:
-            if c.uid == uid:
+            if c.cid == cid:
                 return c
                 
     def reset_points(self):

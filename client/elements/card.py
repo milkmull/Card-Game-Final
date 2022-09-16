@@ -4,50 +4,52 @@ from data.constants import CONSTANTS
 
 from ui.element.base.element import Element
 
-from ui.particals.get_particals import bubble
-
 class Card(Element):
-    def __init__(self, client, name, uid):
+    def __init__(self, client, name, cid, player=None):
         self.client = client
         self.name = name
-        self.uid = uid
-        
-        self.active = False
-        self.bubbles = []
-        
+        self.cid = cid
+        self.player = player
+
         super().__init__(
             size=CONSTANTS['mini_card_size']
         )
  
     def __eq__(self, other):
-        return self.uid == other.uid and self.name == other.name
+        return self.cid == other.cid and self.name == other.name
         
     def __repr__(self):
         return self.name
         
     def __hash__(self):
-        return self.uid
+        return self.cid
         
     def copy(self):
-        return Card(self.client, self.name, self.uid)
+        return Card(self.client, self.name, self.cid)
  
     def get_image(self, mini=True, scale=None):
         return self.client.sheet.get_image(self.name, mini=mini, scale=scale)
         
     def left_click(self):
-        self.client.send(str(self.uid))
+        self.client.set_held_card(self)
         
-    def update_info(self, name, uid):
+    def update_info(self, name, cid):
         self.name = name
-        self.uid = uid
+        self.cid = cid
         
     def right_click(self):
         self.client.set_view_card(self)
         
     def click_up(self, button):
-        if button == 3:
-            if self.client.view_card is self:
-                self.client.clear_view_card()
+        match button:
+            
+            case 1:
+                if self.client.held_card is self:
+                    self.client.clear_held_card()
+  
+            case 3:
+                if self.client.view_card is self:
+                    self.client.clear_view_card()
                 
     def events(self, events):
         super().events(events)
@@ -56,22 +58,9 @@ class Card(Element):
             self.client.set_hover_card(self)
         elif self.client.hover_card is self:
             self.client.clear_hover_card()
-            
-    def update(self):
-        super().update()
-        
-        if self.active:
-            self.bubbles += bubble((5 if not self.bubbles else 1), self.rect, (5, 10))
-            
-            for b in self.bubbles.copy():
-                b[0][1] -= 1
-                b[1] -= 1
-                if b[1] <= 0:
-                    self.bubbles.remove(b)
 
     def draw(self, surf): 
         surf.blit(self.get_image(), self.rect)
         
-        if self.active:
-            for p, r in self.bubbles:
-                pg.draw.circle(surf, (255, 0, 0), p, r)
+        if self.player:
+            pg.draw.rect(surf, self.player.color, self.rect, width=2)

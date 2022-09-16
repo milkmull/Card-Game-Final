@@ -1,108 +1,65 @@
 import random
+from datetime import datetime
 
 from . import exceptions
 
 from . import player_base
+from .grid import Grid
 
 class Game_Base:
-    @classmethod
-    def copy(cls, g):
-        self = cls('turbo', g.settings.copy(), g.cards)
-        
-        self.uid = g.uid
-        
-        self.status = g.status
-        self.current_turn = g.current_turn
-        self.round = g.round
-
-        self.players = [p.copy(self) for p in g.players]
-        for i in range(len(self.players)):
-            self.players[i].set_cards()
-
-        self.event = g.event.light_sim_copy(self) if g.event else None
-        self.shop = [c.light_sim_copy(self) for c in g.shop]
-        self.discard = [c.light_sim_copy(self) for c in g.discard[:3]]
-        
-        return self
-        
-    @classmethod
-    def simulator(cls, settings, cards):
-        self = cls('turbo', settings, cards)
-        self.add_cpus()
-        self.new_game()
-        return self
-        
-    def __init__(self, mode, settings, cards):
+    def __init__(self, mode, settings, cards, seed=None):    
         self.mode = mode
         self.settings = settings
         self.cards = cards
 
         self.pid = 0
-        self.uid = 0
+        self.cid = 0
         self.status = ''
+        self.turn = 0
         self.current_turn = 0
-        self.round = 0
         
         self.log = []
         self.players = [] 
-        self.shop = []
-        self.discard = []
+        self.grid = Grid(self, (4, 4))
         
-        self.event = None
-        self.vote_card = self.get_card('vote', uid=-1)
-
-        self.mem = []
-        self.counter = 0
-        self.turn = 0
+        #if seed is None:
+        #    seed = datetime.now().timestamp()
+        #self.seed = seed
+        #random.seed(self.seed)
         
+    @property
     def done(self):
-        return self.status == 'new game' or self.status == 'next round'
+        return self.status == 'new game'
+        
+    def copy(self):
+        g = Game_Base(self.mode, self.settings.copy(), self.cards.copy())
+        g.pid = self.pid
+        g.cid = self.cid
+        g.status = self.status
+        g.turn = self.turn
+        g.current_turn = self.current_turn
+
+        g.players = [p.copy(g) for p in self.players]
+        g.grid = self.grid.copy(g)
+        
+        return g
 
 # new game stuff
 
     def new_game(self):
+        self.log.clear()
         for p in self.players: 
             p.reset()
-        self.shuffle_players()
-        self.uid = len(self.players)
+        self.cid = len(self.players)
+        
         for p in self.players:
             p.start()
 
-        self.current_turn = 0
-        self.round = 1
-
-        self.discard.clear()
-        self.restock_shop()
-        self.set_event()
-        
-        self.mem.clear()
-        self.counter = 0
         self.turn = 0
-  
+        self.current_turn = random.choice([p.pid for p in self.players])
+
         self.new_turn()
-        self.new_status('playing')
-
-    def new_round(self):
-        self.shuffle_players() 
-        for p in self.players:
-            p.new_round()
-
-        self.current_turn = 0
-        self.round += 1
-
-        self.restock_shop()
-        self.set_event()
-
-        self.mem.clear()
-        self.counter = 0
-        self.turn = 0
-   
-        self.new_turn()
-        self.new_status('playing')
-
-    def reset(self):
-        for p in self.players: 
-            p.reset()   
+        self.new_status('playing')  
                 
     def add_cpus(self, num=0):
         self.pid = 0
@@ -110,6 +67,15 @@ class Game_Base:
             p = player_base.Player_Base(self, self.pid)
             self.players.append(p)      
             self.pid += 1
+            
+# log stuff
+
+    def add_log(self, log):
+        log['u'] = 'g'
+        self.log.append(log)
+        
+    def add_player_log(self, log):
+        self.log.append(log)
 
 # player stuff 
    
@@ -117,23 +83,6 @@ class Game_Base:
         for p in self.players:
             if p.pid == pid:
                 return p
-
-    def check_last(self, player):
-        return all({len(p.played) > len(player.played) for p in self.players if p is not player})
-        
-    def check_first(self, player):
-        return all({len(p.played) <= len(player.played) for p in self.players})
-        
-    def shift_up(self, player):
-        self.players.remove(player)
-        self.players.insert(0, player)    
-        
-    def shift_down(self, player):
-        self.players.remove(player)
-        self.players.append(player)     
-        
-    def shuffle_players(self):
-        random.shuffle(self.players)
 
 # card stuff
      
@@ -143,10 +92,10 @@ class Game_Base:
     def set_card_data(self, data):
         self.cards = data
      
-    def get_new_uid(self):
-        uid = self.uid
-        self.uid += 1
-        return uid
+    def get_new_cid(self):
+        cid = self.cid
+        self.cid += 1
+        return cid
      
     def draw_cards(self, type='play', num=1):
         deck = self.cards[type]
@@ -156,93 +105,19 @@ class Game_Base:
             cards[i] = self.get_card(name)
         return cards
  
-    def get_card(self, name, uid=None):
-        if uid is None:
-            uid = self.get_new_uid()
+    def get_card(self, name, cid=None):
+        if cid is None:
+            cid = self.get_new_cid()
         for type, deck in self.cards.items():
             cls = deck.get(name)
             if cls:
-                return cls(self, uid)
+                return cls(self, cid)
         raise exceptions.CardNotFound(name)
-            
-    def transform(self, c1, name):
-        c2 = self.get_card(name, uid=c1.uid)
-        owner = self.find_owner(c1)
-        if owner and c2:
-            owner.replace_card(c1, c2) 
-        return c2
-                   
-    def swap(self, c1, c2):
-        self.transform(c1, c2.name)
-        self.transform(c2, c1.name)
-
-    def find_owner(self, c):
-        p = None
-        for p in self.players:
-            if p.find_card_deck_string(c):
-                return p
-                
-    def add_discard(self, c):
-        self.discard.append(c)
-
-    def get_discard(self):
-        return self.discard.copy()
-        
-    def restore(self, c):
-        restored = False
-        while c in self.discard:
-            self.discard.remove(c)
-            restored = True
-        return restored  
-
-    def is_event(self, name):
-        if self.event:
-            return self.event.name == name 
-  
-# shop stuff
-        
-    def fill_shop(self, m=3):
-        num = max({m - len(self.shop), 0})
-        cards = [] 
-        decks = ('play', 'item', 'spell')
-        for _ in range(num):  
-            deck = random.choice(decks)
-            cards += self.draw_cards(deck)     
-        self.shop += cards
-
-    def restock_shop(self):
-        self.shop.clear()
-        self.fill_shop()
-            
-    def buy(self, player, uid):
-        for c in self.shop.copy():
-            if c.uid == uid:      
-                self.shop.remove(c)
-                self.fill_shop()
-                return c
-                
-    def get_shop(self):
-        return self.shop.copy()
 
 # update info stuff
             
     def new_status(self, stat):
         self.status = stat
-            
-    def check_loop(self):
-        up = []
-        for p in self.players:
-            up += p.played
-            
-        if up == self.mem:
-            self.counter += 1  
-        else:
-            self.mem = up
-            self.counter = 0
-        
-        if self.counter > 200:
-            #self.debug()
-            raise exceptions.InfiniteLoop
                      
 # settings stuff
 
@@ -253,109 +128,47 @@ class Game_Base:
         return self.settings.copy()
 
 # turn stuff
+
+    def new_status(self, stat):
+        self.status = stat
+            
+    def new_turn(self):
+        self.players[self.current_turn].start_turn()
+        
+    def card_update(self):
+        for spot in self.grid.spots:
+            if spot.card:
+                if spot.card.skip:
+                    spot.card.skip = False
+                else:
+                    spot.card.update()
    
     def main(self):
-        for p in self.players:
+        if self.status == 'playing':
+            p = self.players[self.current_turn]
             p.update()
-            self.advance_turn() 
-
-    def rotate_cards(self):
-        selections = []
-
-        for p in self.players:
-            selections.append(p.unplayed)  
-        selections.insert(0, selections.pop(-1))
-            
-        for p, s in zip(self.players, selections):
-            p.new_deck('unplayed', s)
-            
-    def shuffle_cards(self):
-        cards = [c for p in self.players for c in p.unplayed]
-        random.shuffle(cards)
-        self.shuffle_players()
-        
-        unplayed = [(p, []) for p in self.players]
-        i = 0
-        for c in cards:
-            unplayed[i][1].append(c)
-            i = (i + 1) % len(unplayed)
-        for p, deck in unplayed:
-            p.new_deck('unplayed', deck)
-            
-    def count_votes(self):
-        rotate = 0
-        keep = 0
-        
-        for p in self.players:
-            if p.vote == 'rotate':
-                rotate += 1
-            elif p.vote == 'keep':
-                keep += 1
-            p.set_vote(None)
-            
-        if rotate > keep:
-            self.rotate_cards()
-        elif rotate == keep:
-            self.shuffle_cards()
-
-    def new_turn(self):
-        for p in self.players:
-            if p.unplayed:
-                p.start_turn()
-            
+            if p.done_turn:
+                self.card_update()
+                self.advance_turn() 
+    
     def advance_turn(self):
         if self.status != 'playing':
             return 
-            
-        self.check_loop()
-        self.turn += 1
-            
-        finished_round = set()
-        finished_playing = set()
-        finished_turn = set()
-        voting = False
-        voted = set()
-        
-        for p in self.players:
-            finished_round.add(p.finished_game())
-            finished_playing.add(p.done_with_round())
-            finished_turn.add(p.done_with_turn())
-            if p.active_card == self.vote_card or p.vote:
-                voting = True
-            voted.add(p.vote)
 
-        if all(finished_round):
-            if not self.done():
-                
-                if self.round <= self.get_setting('rounds') - 1: 
-                    self.new_status('next round')   
-                else:
-                    self.new_status('new game')
-                
-        elif all(finished_playing): 
-            for p in self.players:
-                p.end_round(True)
-     
-        elif all(voted):
-            self.count_votes()
+        if all({p.done_game for p in self.players}) or self.grid.full:
+            self.end_game()
+            
+        else:
+            self.turn += 1
+            self.current_turn = (self.current_turn + 1) % len(self.players)
             self.new_turn()
-
-        elif all(finished_turn):
-            if not voting:
-                self.vote_card.start()
             
-    def set_event(self):
-        self.event = self.draw_cards('event', 1)[0]
-        self.event.start(self)
+    def end_game(self):
+        self.new_status('new game') 
             
 # ending stuff
 
     def get_winners(self):
         hs = max({p.score for p in self.players})
         return [p.pid for p in self.players if p.score == hs]
-
-    def debug(self):
-        for p in self.players:
-            print(p.requests, p.selection, p.get_selection(), p.unplayed, p.gone, p.vote)
-        print(self.status, self.done())
   

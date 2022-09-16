@@ -11,26 +11,30 @@ class Tree:
     def reset(self):
         self.tree.clear()
         
-    def trim(self, log):
+    def log_to_key(self, log):
         pid = log['u']
-        uid = log['s'].id
+        cid = log['c'].id
+        x, y = log['p']
+        return (pid, f'{cid}-{x}-{y}')
         
+    def trim(self, log):
+        key = self.log_to_key(log)
+
         for info in self.tree.copy():
-            if pid != info[0] or uid != info[1]:
+            if info != key:
                 self.tree.pop(info)
 
     def simulate(self, num=1, max_deapth=99):
         for _ in range(num):
         
             g = self.game.copy()
-            #g.shuffle_players()
             turn = 0
-            while not g.done() and turn < max_deapth:
+            while not g.done and turn < max_deapth:
                 g.main()
                 turn += 1
 
             scores = [p.score for p in sorted(g.players, key=lambda p: p.pid)]
-            logs = [log for log in g.log if log['t'] == 'select']
+            logs = [log for log in g.log if log['t'] == 'play']
 
             if logs:
                 self.update_tree(
@@ -49,9 +53,7 @@ class Tree:
             branch = {}
             
         log = logs[index]
-        pid = log['u']
-        uid = log['s'].id
-        key = (pid, uid)
+        key = self.log_to_key(log)
 
         if key not in branch:
             branch[key] = self.update_tree(scores, logs, index=index + 1)
@@ -65,14 +67,10 @@ class Tree:
             branch = self.tree
      
         scores = {}
-        for (id, choice), subbranch in branch.items():
+        for key, subbranch in branch.items():
         
             if top and id != pid:
-                if isinstance(subbranch, list):
-                    continue
-                s = self.get_scores(pid, branch=subbranch, top=True)
-                if isinstance(s, dict):
-                    scores.update(s)
+                return scores
 
             elif isinstance(subbranch, list):
                 scores[choice] = analyze(subbranch, pid)

@@ -42,19 +42,7 @@ class Main_Button(Button.Text_Button):
         text = ''
         color = None
 
-        if p.coin is not None:
-            text = COIN[p.coin].text
-            color = COIN[p.coin].text_color
-            
-        elif p.dice is not None:
-            text = DICE[p.dice].text
-            color = DICE[p.dice].text_color
-
-        elif p.selecting:
-            text = SELECT.text
-            color = SELECT.text_color
-            
-        elif not p.gone and p.decks['unplayed']:
+        if not p.done_turn and p.decks['play']:
             text = 'Play'
             color = (0, 255, 0)
 
