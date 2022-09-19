@@ -1,5 +1,6 @@
 
 class Card:
+    sid = -1
     name = 'base'
     type = 'base'
     weight = 0
@@ -16,7 +17,10 @@ class Card:
 
         self.cid = cid
         self.memory = set()
-        self.skip = True
+        self.multiplier = 1
+        self.direction = None
+        
+        self.can_move = False
 
     def __str__(self):
         return self.name
@@ -38,20 +42,32 @@ class Card:
     def pos(self):
         if self.spot:
             return self.spot.pos
+            
+    def set_owner(self, player):
+        self.player = player
         
 # copy stuff
 
-    def copy(self, game=None):
-        c = type(self)(
-            game or self.game,
-            self.cid
-        )
+    def copy(self):
+        return type(self)(self.game, self.game.get_new_cid())
+        
+    def player_copy(self):
+        c = self.copy()
+        c.player = self.player
+        return c
+        
+    def deepcopy(self, game):
+        c = type(self)(game, self.cid)
         c.memory = self.memory.copy()
-        c.skip = self.skip
+        c.multiplier = self.multiplier
+        c.direction = self.direction
+        
+        c.can_move = self.can_move
+        
         if self.player:
-            c.player = c.game.get_player(self.player.pid)
+            c.player = game.get_player(self.player.pid)
         if self.spot:
-            c.spot = c.game.grid.get_spot(self.spot.pos)
+            c.spot = game.grid.get_spot(self.spot.pos)
         
         return c
 
@@ -63,21 +79,37 @@ class Card:
             return True
         
     def move_to(self, pos):
-        self.spot.clear_card(remove=False)
+        self.spot.clear_card(kill=False)
         self.game.grid.set_at(pos, self)
+        
+    def clear(self):
+        self.multiplier = 1
+        
+    def swap_with(self, card):
+        s0 = card.spot
+        s0.clear_card(kill=False)
+        s1 = self.spot
+        self.move_to(s0.pos)
+        s1.set_card(card)
         
 # overwrite stuff
 
     def play(self):
         pass
         
+    def remove(self):
+        pass
+        
+    def move(self):
+        pass
+        
     def update(self):
         pass
-        
-    def uncover(self):
+
+    def kill(self):
         pass
         
-    def remove(self):
+    def select(self, card):
         pass
         
         
