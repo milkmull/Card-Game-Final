@@ -145,6 +145,54 @@ class Position(Base_Element):
     @height.setter
     def height(self, height):
         self.size = (self.rect.width, height)
+        
+    @property
+    def left_offset(self):
+        return self.anchors['left'][1]
+        
+    @left_offset.setter
+    def left_offset(self, left_offset):
+        self.anchors['left'] = (self.anchors['left'][0], left_offset)
+        
+    @property
+    def right_offset(self):
+        return self.anchors['right'][1]
+        
+    @right_offset.setter
+    def right_offset(self, right_offset):
+        self.anchors['right'] = (self.anchors['right'][0], right_offset)
+        
+    @property
+    def centerx_offset(self):
+        return self.anchors['centerx'][1]
+        
+    @centerx_offset.setter
+    def centerx_offset(self, centerx_offset):
+        self.anchors['centerx'] = (self.anchors['centerx'][0], centerx_offset)
+        
+    @property
+    def top_offset(self):
+        return self.anchors['top'][1]
+        
+    @top_offset.setter
+    def top_offset(self, top_offset):
+        self.anchors['top'] = (self.anchors['top'][0], top_offset)
+        
+    @property
+    def bottom_offset(self):
+        return self.anchors['bottom'][1]
+        
+    @bottom_offset.setter
+    def bottom_offset(self, bottom_offset):
+        self.anchors['bottom'] = (self.anchors['bottom'][0], bottom_offset)
+        
+    @property
+    def centery_offset(self):
+        return self.anchors['centery'][1]
+        
+    @centery_offset.setter
+    def centery_offset(self, centery_offset):
+        self.anchors['centery'] = (self.anchors['centery'][0], centery_offset)
 
     @property
     def first_born(self):

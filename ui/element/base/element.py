@@ -101,14 +101,15 @@ class Element(Style):
                 if r is not None:
                     return r
             
-    def add_animation(self, animations, tag='temp'):
+    def add_animation(self, animations, tag='temp', loop=False):
         for kwargs in animations:
             if 'element' not in kwargs:
                 kwargs['element'] = self
                 
         s = Sequence(
             [Animation(**kwargs) for kwargs in animations], 
-            tag=tag
+            tag=tag,
+            loop=loop
         )
         
         if tag == 'temp':

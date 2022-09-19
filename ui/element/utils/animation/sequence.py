@@ -1,13 +1,16 @@
+from .animation import Animation
 
 class Sequence:
     def __init__(
         self,
         sequence,
-        tag=''
+        tag='',
+        loop=False
     ):
 
         self.sequence = sequence
         self.tag = tag
+        self.loop = loop
         self.index = 0
 
         self.dir = 1
@@ -36,6 +39,15 @@ class Sequence:
             return self.current_frame <= 0
         return self.current_frame >= self.animation.total_time
         
+    @property
+    def delayed(self):
+        return self.current_frame <= self.animation.delay
+        
+    def add_animation(self, element, index=-1, **kwargs):
+        a = Animation(element, **kwargs)
+        self.sequence.insert(index, a)
+        return a
+        
     def start(self, reverse=False):
         f = self.finished
         self.dir = 1 if not reverse else -1
@@ -63,6 +75,10 @@ class Sequence:
         if not self.finished:
             self.t = 0 if not self.reverse else 1
             self.index += self.dir
+            self.start_next()
+        elif self.loop:
+            self.t = 0 if not self.reverse else 1
+            self.index = (self.index + self.dir) % len(self.sequence)
             self.start_next()
         else:
             self.t = 1 if not self.reverse else 0   

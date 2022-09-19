@@ -22,17 +22,17 @@ class Game_Base:
         self.players = [] 
         self.grid = Grid(self, (4, 4))
         
-        #if seed is None:
-        #    seed = datetime.now().timestamp()
-        #self.seed = seed
-        #random.seed(self.seed)
+        if seed is None:
+            seed = datetime.now().timestamp()
+        self.seed = seed
+        random.seed(self.seed)
         
     @property
     def done(self):
         return self.status == 'new game'
         
-    def copy(self):
-        g = Game_Base(self.mode, self.settings.copy(), self.cards.copy())
+    def copy(self, seed=None):
+        g = Game_Base(self.mode, self.settings.copy(), self.cards.copy(), seed=seed)
         g.pid = self.pid
         g.cid = self.cid
         g.status = self.status
@@ -40,8 +40,12 @@ class Game_Base:
         g.current_turn = self.current_turn
 
         g.players = [p.copy(g) for p in self.players]
-        g.grid = self.grid.copy(g)
+
+        self.grid.copy(g)
         
+        for p in self.players:
+            p.copy_cards(g)
+
         return g
 
 # new game stuff
@@ -133,15 +137,31 @@ class Game_Base:
         self.status = stat
             
     def new_turn(self):
+        current_turn = (self.current_turn + 1) % len(self.players)
+        for p in (self.players[current_turn:] + self.players[:current_turn]):
+            if p.decks['play']:
+                self.current_turn = self.players.index(p)
+                break
+        else:
+            raise Exception
+            
         self.players[self.current_turn].start_turn()
         
     def card_update(self):
         for spot in self.grid.spots:
             if spot.card:
-                if spot.card.skip:
-                    spot.card.skip = False
-                else:
-                    spot.card.update()
+                if not spot.card.spot:
+                    raise Exception
+                spot.card.remove()
+                
+        for spot in self.grid.spots:
+            if spot.card:
+                if spot.card.can_move:
+                    spot.card.move()
+                
+        for spot in self.grid.spots:
+            if spot.card:
+                spot.card.update()
    
     def main(self):
         if self.status == 'playing':
@@ -159,8 +179,6 @@ class Game_Base:
             self.end_game()
             
         else:
-            self.turn += 1
-            self.current_turn = (self.current_turn + 1) % len(self.players)
             self.new_turn()
             
     def end_game(self):

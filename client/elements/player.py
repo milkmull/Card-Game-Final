@@ -3,28 +3,20 @@ import random
 from ui.element.elements import Textbox
 
 class Player:
-    def __init__(self, client, name, pid, color):
+    def __init__(self, client, name, pid, color, spot):
         self.client = client
         self.name = name
         self.pid = pid
         self.color = color
+        self.spot = spot
+        self.spot.set_player(self)
 
         self.score = 0
-        self.done_turn = True
 
         self.decks = {
             'play': [],
-            'extra': [],
-            'treasure': []
+            'selection': []
         }
-
-        self.score_card = Textbox(
-            text=f'{self.name}: {self.score}',
-            size=(client.scores.rect.width, 25),
-            inf_width=False,
-            text_color=self.color
-        )
-        client.scores.add_element(self.score_card)
         
     def __repr__(self):
         return self.name
@@ -38,7 +30,7 @@ class Player:
 
     def update_score(self, score):
         self.score = score
-        self.score_card.set_text(f'{self.name}: {self.score}')
+        self.spot.points_spot.set_score(self.score)
         
     def new_deck(self, deck_name, cards):
         deck = self.decks.get(deck_name)
@@ -52,21 +44,24 @@ class Player:
                 if c.cid == cid:
                     break
             else:
-                c = self.client.get_card(name, cid)
+                c = self.client.get_card(name, cid, add=False)
             new_deck.append(c)
         
         self.decks[deck_name] = new_deck
         
         if self.is_main:
             
-            if deck_name == 'play':
-                self.client.sequence.join_elements(new_deck)
-                
-    def new_turn(self):
-        self.done_turn = False
+            match deck_name:
+                case 'play':
+                    self.client.sequence.join_elements(new_deck)
+                case 'selection':
+                    self.client.selection.join_elements(new_deck)
+            
+    def start_turn(self):
+        self.spot.start_turn()
 
-    def play(self, cid, d):
-        self.done_turn = True
+    def end_turn(self):
+        self.spot.end_turn()
 
     def update(self):
         pass

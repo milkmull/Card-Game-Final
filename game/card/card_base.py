@@ -51,6 +51,9 @@ class Card:
     def copy(self):
         return type(self)(self.game, self.game.get_new_cid())
         
+    def game_copy(self, game):
+        return type(self)(game, self.cid)
+        
     def player_copy(self):
         c = self.copy()
         c.player = self.player
@@ -91,7 +94,7 @@ class Card:
         s1 = self.spot
         self.move_to(s0.pos)
         s1.set_card(card)
-        
+
 # overwrite stuff
 
     def play(self):

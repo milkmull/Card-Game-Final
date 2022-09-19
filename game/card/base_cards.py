@@ -8,7 +8,7 @@ class Fish(card_base.Card):
     sid = 0
     name = 'fish'
     type = 'play'
-    weight = 2
+    weight = 1
     tags = ('water', 'animal')
     
     def play(self):

@@ -1,62 +1,94 @@
 
 def analyze(scores, pid):
     player_score = scores[pid]
-    return sum([player_score - score for score in scores]) / (len(scores) - 1)
+    score = sum([player_score - score for score in scores]) / (len(scores) - 1)
+    return score
 
 class Tree:
     def __init__(self, game):
         self.tree = {}
         self.game = game
         
+        self.sims = 0
+        
     def reset(self):
         self.tree.clear()
+        self.sims = 0
+        
+    def remap_to_string(self, branch=None):
+        if branch is None:
+            branch = self.tree
+        elif isinstance(branch, list):
+            return branch
+            
+        return {str(key): self.remap_to_string(branch=subbranch) for key, subbranch in branch.items()}
+        
+    def save_tree(self):
+        import json
+        
+        with open('other/tree.json', 'w') as f:
+            json.dump(self.remap_to_string(), f, indent=4)
         
     def log_to_key(self, log):
-        pid = log['u']
-        sid = log['c'].sid
-        x, y = log['p']
-        return (pid, sid, x, y)
+        match log['t']:
+            
+            case 'play':
+                pid = log['u']
+                sid = log['c'].sid
+                x, y = log['p']
+                return (pid, sid, x, y)
+            
+            case 's':
+                pid = log['u']
+                cid = log['c'].cid
+                return (pid, cid)
         
     def trim(self, log):
         key = self.log_to_key(log)
-        self.tree = self.tree.get(key, {})
+        new_tree = self.tree.get(key)
+        if isinstance(new_tree, list) or new_tree is None:
+            new_tree = {}
+        self.tree = new_tree
 
-    def simulate(self, num=1, max_deapth=20):
+    def simulate(self, num=5, max_deapth=5):
         for _ in range(num):
         
-            g = self.game.copy()
+            g = self.game.copy(seed=self.sims)
             turn = 0
             while not g.done and turn < max_deapth:
                 g.main()
                 turn += 1
 
             scores = [p.score for p in sorted(g.players, key=lambda p: p.pid)]
-            logs = [log for log in g.log if log['t'] == 'play']
+            logs = [log for log in g.log if log['t'] == 'play' or log['t'] == 's']
 
-            if logs:
-                self.update_tree(
-                    scores,
-                    logs,
-                    branch=self.tree
-                )
-        
-    def update_tree(self, scores, logs, index=0, branch=None):
+            self.update_tree(
+                scores,
+                logs,
+                branch=self.tree
+            )
+            
+            self.sims += 1
+                
+    def update_tree(self, scores, logs, branch=None):
+        if not logs:
+            return scores
+            
         if branch is None:
             branch = {}
-  
-        if index == len(logs):
-            return scores
-        if isinstance(branch, list):
-            branch = {}
             
-        log = logs[index]
+        log = logs.pop(0)
         key = self.log_to_key(log)
-
-        if key not in branch:
-            branch[key] = self.update_tree(scores, logs, index=index + 1)
-        else:
-            self.update_tree(scores, logs, index=index + 1, branch=branch[key])
         
+        if key not in branch:
+            branch[key] = self.update_tree(scores, logs)
+            
+        else:
+            if isinstance(branch[key], list) and logs:
+                branch[key] = {}
+                
+            self.update_tree(scores, logs, branch=branch[key])
+            
         return branch
     
     def get_scores(self, pid, branch=None, top=True, decider=None):
@@ -70,13 +102,14 @@ class Tree:
 
             if isinstance(subbranch, list):
                 scores[key] = analyze(subbranch, pid)
-
             else:
-                scores[key] = self.get_scores(pid, subbranch, top=False, decider=key[0])
+                scores[key] = self.get_scores(pid, branch=subbranch, top=False, decider=key[0])
             
         if top:
             return scores
-            
+        if not scores:
+            return 0
+
         if decider == pid:
             return max(scores.values())
         return min(scores.values())

@@ -58,6 +58,7 @@ class Game(game_base.Game_Base):
             cards = card_manager.get_base_card_data()
    
         super().__init__(mode, settings, cards)
+        print(self.seed)
         
         self.tree = Tree(self)
 
@@ -112,9 +113,9 @@ class Game(game_base.Game_Base):
                         self.new_game()
                 reply = 1
                 
-            case 'play':
+            case 'play' | 'select':
                 if self.status == 'playing':
-                    self.get_player(0).update(cmd='play', data=data)    
+                    self.get_player(0).update(cmd=cmd, data=data)    
                 reply = 1
 
         return reply
@@ -123,7 +124,7 @@ class Game(game_base.Game_Base):
     
     def add_player_log(self, log):
         self.log.append(log)
-        if log['t'] == 'play':
+        if log['t'] == 'play' or log['t'] == 's':
             self.tree.trim(log)
 
     def get_info(self, pid):

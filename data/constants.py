@@ -19,7 +19,9 @@ SPRITESHEET_FILE = 'data/img/spritesheet.png'
 CUSTOMSHEET_FILE = 'data/img/customsheet.png'
 
 BASE_NAMES = (
-    'cow', 'fish', 'michael', 'sunflower',
+    'big sand worm', 'cow', 'dom', 'dragon', 'fish', 'fox', 'ghost', 'michael', 'office fern',
+    'robber', 'sunflower', 'vines', 'wind gust',
+    
 )
 
 CONSTANTS = {

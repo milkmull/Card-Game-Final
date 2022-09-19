@@ -3,7 +3,7 @@ import pygame as pg
 from ui.element.base.element import Element
 
 class Moving_Card(Element):
-    def __init__(self, client, player, type, card):   
+    def __init__(self, client, player, type, card, **kwargs):   
         self.client = client
         self.player = player
         self.card = card
@@ -11,121 +11,54 @@ class Moving_Card(Element):
         
         self.base_image = self.card.get_image(mini=False)
         super().__init__(
-            size=self.base_image.get_size(),
-            enabled=False
+            size=self.base_image.get_size() if type != 'move' else self.card.rect.size,
+            enabled=False,
+            layer=2
         )
 
         self.rect.center = self.card.rect.center
-        self.client.elements.append(self)
         
-        inf_size = self.card.rect.inflate(4 * self.card.rect.width, 4 * self.card.rect.height).size
+        inf_size = self.card.rect.inflate(1.5 * self.card.rect.width, 1.5 * self.card.rect.height).size
 
         match type:
             
             case 'play':
-                self.animation = self.add_animation([
-                    {
-                        'attr': 'size',
-                        'start': (0, 0) if not self.player.is_main else self.card.rect.size,
-                        'end': inf_size,
-                        'frames': 20,
-                        'method': 'ease_out_expo'
-                    },
-                    {
-                        'attr': 'size',
-                        'start': inf_size,
-                        'end': self.card.rect.size,
-                        'frames': 20,
-                        'method': 'ease_in_expo'
-                    }
-                ])
-                
-                if self.player.is_main:
-                    self.add_animation([{
-                        'attr': 'center',
-                        'start': self.client.cards[self.card.cid][-2].rect.center,
-                        'end': self.card.rect.center,
-                        'frames': 20,
-                        'method': 'ease_out_expo'
-                    }])
-        
-            case 'buy':
-                self.animation = self.add_animation([
-                    {
-                        'attr': 'size',
-                        'start': self.card.rect.size,
-                        'end': inf_size,
-                        'frames': 20,
-                        'method': 'ease_out_expo'
-                    },
-                    {
-                        'attr': 'size',
-                        'start': inf_size,
-                        'end': (0, 0),
-                        'frames': 20,
-                        'method': 'ease_in_expo'
-                    }
-                ])
                 
                 self.add_animation([{
                     'attr': 'center',
-                    'start': self.client.cards[self.card.cid][-2 if self.player.is_main else 0].rect.center,
-                    'end': self.player.spot.label.rect.center if not self.player.is_main else self.client.cards[self.card.cid][-1].rect.center,
-                    'frames': 20,
+                    'start': self.player.spot.rect.center,
+                    'end': self.card.rect.center,
+                    'frames': 10,
                     'method': 'ease_out_expo'
                 }])
-                
-            case 'cast':
+
                 self.animation = self.add_animation([
                     {
                         'attr': 'size',
-                        'start': self.card.rect.size,
+                        'start': (0, 0),
                         'end': inf_size,
-                        'frames': 20,
+                        'frames': 10,
                         'method': 'ease_out_expo'
                     },
                     {
                         'attr': 'size',
-                        'start': inf_size,
                         'end': self.card.rect.size,
-                        'frames': 20,
+                        'frames': 10,
+                        'delay': 5,
                         'method': 'ease_in_expo'
                     }
                 ])
-                self.add_animation([{
+                
+            case 'move':
+                self.animation = self.add_animation([{
                     'attr': 'center',
-                    'start': self.client.cards[self.card.cid][-2].rect.center,
+                    'start': kwargs['start'],
                     'end': self.card.rect.center,
-                    'frames': 20,
-                    'delay': 20,
-                    'method': 'ease_in_expo'
+                    'frames': 10,
+                    'method': 'ease_in_out_expo'
                 }])
                 
-            case 'discard':
-                self.animation = self.add_animation([
-                    {
-                        'attr': 'size',
-                        'start': (0, 0) if not self.player.is_main else self.card.rect.size,
-                        'end': inf_size,
-                        'frames': 20,
-                        'method': 'ease_out_expo'
-                    },
-                    {
-                        'attr': 'size',
-                        'start': inf_size,
-                        'end': self.card.rect.size,
-                        'frames': 20,
-                        'method': 'ease_in_expo'
-                    }
-                ])
-                self.add_animation([{
-                    'attr': 'center',
-                    'start': self.player.spot.label.rect.center if not self.player.is_main else self.client.cards[self.card.cid][-2].rect.center,
-                    'end': self.card.rect.center,
-                    'frames': 20,
-                    'delay': 20,
-                    'method': 'ease_in_expo'
-                }])
+        self.client.elements.append(self)
                 
     @property
     def size(self):
@@ -148,7 +81,9 @@ class Moving_Card(Element):
     def end(self):
         self.client.elements.remove(self)
         self.card.turn_on()
-        self.client.del_moving_card(self.card.cid)
+        
+    def events(self, events):
+        pass
         
     def update(self):
         self.update_animations()

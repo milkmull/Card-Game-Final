@@ -30,8 +30,15 @@ class Card(Element):
     def get_image(self, mini=True, scale=None):
         return self.client.sheet.get_image(self.name, mini=mini, scale=scale)
         
+    @property
+    def is_select(self):
+        return self.parent is self.client.selection.bounding_box
+        
     def left_click(self):
-        self.client.set_held_card(self)
+        if not self.is_select:
+            self.client.set_held_card(self)
+        else:
+            self.client.send(f'select-{self.cid}')
         
     def update_info(self, name, cid):
         self.name = name

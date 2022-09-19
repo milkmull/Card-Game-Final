@@ -1,7 +1,5 @@
 from ui.element.standard.button import Button
 
-from ..elements.visuals import COIN, DICE, SELECT
-
 class Main_Button(Button.Text_Button):
     CLICKABLE_STATUS = (
         'play', 
@@ -41,10 +39,6 @@ class Main_Button(Button.Text_Button):
         p = self.client.main_p
         text = ''
         color = None
-
-        if not p.done_turn and p.decks['play']:
-            text = 'Play'
-            color = (0, 255, 0)
 
         if self.text != text:
             self.set_button(text, color)

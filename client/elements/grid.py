@@ -22,6 +22,10 @@ class Spot(Element):
                 self.client.send(f'play-{self.client.held_card.cid}-{self._pos[0]}-{self._pos[1]}')
         
     def events(self, events):
+        if self.children:
+            self.child_events(events)
+            return
+            
         if self.rect.collidepoint(pg.mouse.get_pos()):
             self.fill_color = (100, 100, 100)
             if mbu := events.get('mbu'):
