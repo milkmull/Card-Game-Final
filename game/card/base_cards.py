@@ -11,14 +11,16 @@ class Fish(card_base.Card):
     weight = 1
     tags = ('water', 'animal')
     
-    def play(self):
-        for c in self.spot.get_group('row'):
-            if c.name == self.name:
-                self.player.gain(3, self, extra=c)
+    def update(self):
+        for c in self.spot.get_card_group('row'):
+            if self.register(c):
+                if c.name == self.name:
+                    self.player.gain(1, self, extra=c)
                     
-        for c in self.spot.get_group('column'):
-            if c.name == self.name:
-                self.player.gain(3, self, extra=c)
+        for c in self.spot.get_card_group('column'):
+            if self.register(c):
+                if c.name == self.name:
+                    self.player.gain(1, self, extra=c)
                 
 class Michael(card_base.Card):
     sid = 1
@@ -28,7 +30,7 @@ class Michael(card_base.Card):
     tags = ('human',)
     
     def play(self):
-        for c in self.spot.get_group('border'):
+        for c in self.spot.get_card_group('border'):
             if c.player != self.player:
                 self.player.steal(2, self, c.player, extra=c)
 
@@ -40,8 +42,8 @@ class Sunflower(card_base.Card):
     tags = ('garden', 'plant')
     
     def update(self):
-        for c in self.spot.get_group('border'):
-            if self.check_new(c):
+        for c in self.spot.get_card_group('border'):
+            if self.register(c):
                 if c.name == self.name:
                     self.player.gain(5, self, extra=c)
                 else:
@@ -54,19 +56,26 @@ class Cow(card_base.Card):
     weight = 0.5
     tags = ('farm', 'animal')
     
+    def play(self):
+        cards = [c for c in self.spot.get_card_group('x') if 'plant' in c.tags]
+        self.player.start_select(self, cards)
+        
+    def select(self, card):
+        self.direction = self.spot.get_direction(card.spot)
+    
     def remove(self):
-        c = self.spot.get_at('left')
+        c = self.spot.get_card_at(self.direction)
         if c:
             if 'plant' in c.tags:
-                self.game.grid.clear_at(c.pos, kill=True)
+                c.spot.kill_card(self)
                 self.player.gain(5, self)
                 self.can_move = True
     
     def move(self):
-        s = self.spot.get_at('left', card=False)
+        s = self.spot.get_spot_at(self.direction)
         if s:
             if not s.card:
-                self.move_to(s.pos)
+                self.move_to(s)
         self.can_move = False
                 
 class Wind_Gust(card_base.Card):
@@ -77,8 +86,8 @@ class Wind_Gust(card_base.Card):
     tags = ('sky',)
     
     def play(self):
-        self.spot.grid.condense_row(self.spot.pos, 1)
-        self.spot.grid.condense_row(self.spot.pos, -1)
+        self.spot.grid.condense_row(self.spot, 1)
+        self.spot.grid.condense_row(self.spot, -1)
         
 class Dom(card_base.Card):
     sid = 5
@@ -88,9 +97,10 @@ class Dom(card_base.Card):
     tags = ('human',)
     
     def update(self):
-        for c in self.spot.get_group('corner'):
-            if self.check_new(c) and 'animal' in c.tags:
-                self.player.gain(3 if c.player is self.player else 1, self, extra=c)
+        for c in self.spot.get_card_group('corner'):
+            if self.register(c):
+                if 'animal' in c.tags:
+                    self.player.gain(3 if c.player is self.player else 1, self, extra=c)
             
 class Robber(card_base.Card):
     sid = 6
@@ -100,10 +110,10 @@ class Robber(card_base.Card):
     tags = ('human',)
     
     def play(self):
-        self.player.start_select(self, self.spot.get_group('border'))
+        self.player.start_select(self, self.spot.get_card_group('border'))
         
     def select(self, card):
-        card.spot.clear_card()
+        card.spot.kill_card(self)
         self.player.add_card(card.copy())
         
 class Ghost(card_base.Card):
@@ -114,10 +124,11 @@ class Ghost(card_base.Card):
     tags = ('monster',)
     
     def play(self):
-        for c in self.spot.get_group('border'):
-            if self.check_new(c) and 'human' in c.tags and c.player is not self.player:
-                self.player.gain_ownership(c)
-                self.player.gain(1, self, extra=c)
+        for c in self.spot.get_card_group('border'):
+            if self.register(c):
+                if 'human' in c.tags and c.player is not self.player:
+                    self.player.gain_ownership(c)
+                    self.player.gain(1, self, extra=c)
     
 class Vines(card_base.Card):
     sid = 8
@@ -125,9 +136,9 @@ class Vines(card_base.Card):
     type = 'play'
     weight = 0.5
     tags = ('garden', 'plant')
-    
+
     def move(self):
-        s = self.spot.get_at('top', card=False)
+        s = self.spot.get_spot_at('top')
         if s:
             if not s.card:
                 s.set_card(self.player_copy())
@@ -143,7 +154,7 @@ class Fox(card_base.Card):
     tags = ('city', 'animal')
     
     def play(self):
-        self.player.start_select(self, self.spot.get_group('border'))
+        self.player.start_select(self, self.spot.get_card_group('border'))
         
     def select(self, card):
         self.swap_with(card)
@@ -158,8 +169,8 @@ class OfficeFern(card_base.Card):
     def play(self):
         self.player.gain(-5, self)
         
-    def kill(self):
-        self.player.gain(15, self)
+    def kill(self, card):
+        self.player.gain(15 if card.player is self.player else -5, self)
         
 class Dragon(card_base.Card):
     sid = 11
@@ -169,10 +180,10 @@ class Dragon(card_base.Card):
     tags = ('sky', 'monster')
     
     def play(self):
-        self.player.start_select(self, self.spot.get_group('all'))
+        self.player.start_select(self, self.spot.get_card_group('all'))
         
     def select(self, card):
-        card.spot.clear_card()
+        card.spot.kill_card(self)
         if 'monster' in card.tags:
             self.player.gain(3, self)
             
@@ -184,14 +195,14 @@ class BigSandWorm(card_base.Card):
     tags = ('desert', 'animal', 'bug')
     
     def play(self):
-        self.player.start_select(self, self.spot.get_group('border'))
+        self.player.start_select(self, self.spot.get_card_group('border'))
         
     def select(self, card):
         self.direction = self.spot.get_direction(card.spot)
-        self.swap_with(card)
+        self.move()
         
     def move(self):
-        c = self.spot.get_at(self.direction)
+        c = self.spot.get_card_at(self.direction)
         if c:
             self.swap_with(c)
             

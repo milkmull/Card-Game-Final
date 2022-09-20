@@ -14,24 +14,11 @@ def load_json(file):
     return data
   
 class Save:
-    BASE_SETTINGS = {
-        'rounds': range(1, 6), 
-        'ss': range(5, 51), 
-        'cards': range(1, 11),
-        'items': range(0, 6), 
-        'spells': range(0, 4), 
-        'cpus': range(1, 15), 
-        'diff': range(0, 5)
-    }
-      
     @staticmethod
     def get_base_settings():
         settings = {
-            'rounds': 3, 
-            'ss': 20, 
+            'size': [5, 5],
             'cards': 5,
-            'items': 3,
-            'spells': 1,
             'cpus': 1,
             'diff': 4
         }
@@ -140,12 +127,6 @@ class Save:
         settings = self.get_data('settings')
         if not isinstance(settings, dict):
             self.reset_save()
-            
-        base_settings = Save.BASE_SETTINGS
-        if any({key not in settings for key in base_settings}):
-            self.set_data('settings', Save.get_base_settings()) 
-        elif any({settings.get(key) not in base_settings[key] for key in base_settings}):
-            self.set_data('settings', Save.get_base_settings())
             
         if len(self.get_data('cards')) == 0:
             cards = [Save.get_blank_card_data()]

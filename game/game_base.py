@@ -20,7 +20,7 @@ class Game_Base:
         
         self.log = []
         self.players = [] 
-        self.grid = Grid(self, (4, 4))
+        self.grid = Grid(self, self.get_setting('size'))
         
         if seed is None:
             seed = datetime.now().timestamp()
@@ -32,7 +32,7 @@ class Game_Base:
         return self.status == 'new game'
         
     def copy(self, seed=None):
-        g = Game_Base(self.mode, self.settings.copy(), self.cards.copy(), seed=seed)
+        g = Game_Base(self.mode, self.settings, self.cards, seed=seed)
         g.pid = self.pid
         g.cid = self.cid
         g.status = self.status
@@ -41,10 +41,10 @@ class Game_Base:
 
         g.players = [p.copy(g) for p in self.players]
 
-        self.grid.copy(g)
+        self.grid.copy_to(g)
         
         for p in self.players:
-            p.copy_cards(g)
+            p.copy_cards_to(g)
 
         return g
 
@@ -148,20 +148,20 @@ class Game_Base:
         self.players[self.current_turn].start_turn()
         
     def card_update(self):
-        for spot in self.grid.spots:
-            if spot.card:
-                if not spot.card.spot:
-                    raise Exception
-                spot.card.remove()
-                
-        for spot in self.grid.spots:
-            if spot.card:
-                if spot.card.can_move:
-                    spot.card.move()
-                
-        for spot in self.grid.spots:
-            if spot.card:
-                spot.card.update()
+        cards = self.grid.cards
+        
+        for card in cards:
+            if card.spot:
+                card.remove()
+            
+        for card in cards:
+            if card.spot:
+                if card.can_move:
+                    card.move()
+            
+        for card in cards:
+            if card.spot:
+                card.update()
    
     def main(self):
         if self.status == 'playing':

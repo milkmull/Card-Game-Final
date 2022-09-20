@@ -17,9 +17,7 @@ class Card:
 
         self.cid = cid
         self.memory = set()
-        self.multiplier = 1
         self.direction = None
-        
         self.can_move = False
 
     def __str__(self):
@@ -43,8 +41,12 @@ class Card:
         if self.spot:
             return self.spot.pos
             
-    def set_owner(self, player):
+    def set_player(self, player):
         self.player = player
+        
+    @property
+    def multiplier(self):
+        return 1
         
 # copy stuff
 
@@ -61,39 +63,28 @@ class Card:
         
     def deepcopy(self, game):
         c = type(self)(game, self.cid)
-        c.memory = self.memory.copy()
-        c.multiplier = self.multiplier
-        c.direction = self.direction
         
+        c.memory = self.memory.copy()
+        c.direction = self.direction
         c.can_move = self.can_move
         
         if self.player:
             c.player = game.get_player(self.player.pid)
         if self.spot:
-            c.spot = game.grid.get_spot(self.spot.pos)
+            c.spot = game.grid.grid[self.pos[1]][self.pos[0]]
         
         return c
+        
+# setup stuff
 
-# checking stuff
-   
-    def check_new(self, card):
-        if card.cid not in self.memory:
-            self.memory.add(card.cid)
-            return True
-        
-    def move_to(self, pos):
-        self.spot.clear_card(kill=False)
-        self.game.grid.set_at(pos, self)
-        
     def clear(self):
-        self.multiplier = 1
-        
-    def swap_with(self, card):
-        s0 = card.spot
-        s0.clear_card(kill=False)
-        s1 = self.spot
-        self.move_to(s0.pos)
-        s1.set_card(card)
+        self.spot = None
+
+    def register(self, card):
+        if card:
+            if card.cid not in self.memory:
+                self.memory.add(card.cid)
+                return True
 
 # overwrite stuff
 
@@ -109,11 +100,26 @@ class Card:
     def update(self):
         pass
 
-    def kill(self):
+    def kill(self, card):
         pass
         
     def select(self, card):
         pass
+        
+# other stuff
+        
+    def move_to(self, spot):
+        self.spot.clear_card()
+        if spot.is_open:
+            spot.set_card(self)
+   
+    def swap_with(self, card):
+        new_spot = card.spot
+        last_spot = self.spot
+        
+        new_spot.clear_card()
+        self.move_to(new_spot)
+        last_spot.set_card(card)
         
         
         

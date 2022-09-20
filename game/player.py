@@ -17,9 +17,6 @@ class Player(player_base.Player_Base):
     def username(self):
         return self.player_info['name']
 
-    def is_auto(self):
-        return isinstance(self, Auto_Player)
-
     def get_info(self):
         return self.player_info
 
@@ -65,6 +62,15 @@ class Player(player_base.Player_Base):
             return
             
         super().select_card(card)
+        
+    def gain_ownership(self, card):
+        card.set_player(self)
+        
+        self.add_log({
+            't': 'own',
+            'c': card,
+            'p': self
+        })
 
 # turn stuff
 
@@ -79,7 +85,10 @@ class Player(player_base.Player_Base):
  
     def update_score(self, score):
         self.score = score
-        self.add_log({'t': 'score', 'score': self.score})
+        self.add_log({
+            't': 'score',
+            'score': self.score
+        })
         
 class Auto_Player(Player):
     def __init__(self, game, pid, player_info):
@@ -88,7 +97,7 @@ class Auto_Player(Player):
         self.timer = 0
 
     def set_timer(self):
-        self.timer = random.randrange(150, 250)
+        self.timer = random.randrange(200, 250)
         
     def timer_up(self):
         return self.timer <= 0

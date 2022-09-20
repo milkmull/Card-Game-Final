@@ -68,7 +68,7 @@ def client_screen(menu):
     elements.append(options)
     menu.options = options
     
-    grid = Grid(menu, (4, 4))
+    grid = Grid(menu, (5, 5))
     grid.rect.center = body.center
     elements.append(grid)
     menu.grid = grid

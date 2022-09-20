@@ -45,33 +45,26 @@ class Player_Base:
     def __repr__(self):
         return self.name
         
-    def is_auto(self):
-        return True
-        
 # starting stuff                
 
     def reset(self):
         self.played = True
-        
         for deck in self.decks.values():
             deck.clear()
-
         self.log.clear()
-        
         self.update_score(0)
 
     def start(self):
-        self.update_score(self.game.get_setting('ss'))
+        self.update_score(20)
         self.draw_cards('play', self.game.get_setting('cards'))
         
     def copy(self, game):
         p = Player_Base(game, self.pid)
         p.score = self.score
         p.played = self.played
-
         return p
         
-    def copy_cards(self, game):
+    def copy_cards_to(self, game):
         p = game.get_player(self.pid)
         
         p.decks['play'] = [c.game_copy(game) for c in self.decks['play']]
@@ -101,6 +94,9 @@ class Player_Base:
     def new_deck(self, type, cards):
         self.decks[type] = cards
         
+    def add_card(self, card):
+        self.new_deck('play', self.decks['play'] + [card])
+        
     def remove_card(self, c, type):
         deck = self.decks[type]
         found = False
@@ -119,13 +115,12 @@ class Player_Base:
         cards = self.game.draw_cards(type, num=num)
         new_deck = self.decks[type] + cards
         self.new_deck(type, cards)
-
         
     def play_card(self, card, spot):
         if not self.remove_card(card, 'play'):
             return
 
-        card.set_owner(self)
+        card.set_player(self)
         spot.set_card(card)
         card.play()
         
@@ -136,18 +131,9 @@ class Player_Base:
             'c': card,
             'p': spot.pos
         })
-        
-    def add_card(self, card):
-        self.new_deck('play', self.decks['play'] + [card])
-        
+
     def gain_ownership(self, card):
-        card.set_owner(self)
-        
-        self.add_log({
-            't': 'own',
-            'c': card,
-            'p': self
-        })
+        card.set_player(self)
         
 # selection stuff
 
