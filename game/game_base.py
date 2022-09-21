@@ -20,6 +20,7 @@ class Game_Base:
         
         self.log = []
         self.players = [] 
+        self.community_deck = []
         self.grid = Grid(self, self.get_setting('size'))
         
         if seed is None:
@@ -42,9 +43,15 @@ class Game_Base:
         g.players = [p.copy(g) for p in self.players]
 
         self.grid.copy_to(g)
+        g.community_deck = [c.game_copy(g) for c in self.community_deck]
         
         for p in self.players:
             p.copy_cards_to(g)
+            
+        for i, c in enumerate(g.community_deck):
+            print(c, id(c))
+            for p in g.players:
+                print(p.decks['community'][i], id(p.decks['community'][i]))
 
         return g
 
@@ -55,6 +62,7 @@ class Game_Base:
         for p in self.players: 
             p.reset()
         self.cid = len(self.players)
+        self.community_deck.clear()
         
         for p in self.players:
             p.start()
@@ -64,6 +72,9 @@ class Game_Base:
 
         self.new_turn()
         self.new_status('playing')  
+        
+        c = self.draw_cards('play')[0]
+        self.add_community(c)
                 
     def add_cpus(self, num=0):
         self.pid = 0
@@ -117,6 +128,16 @@ class Game_Base:
             if cls:
                 return cls(self, cid)
         raise exceptions.CardNotFound(name)
+        
+    def remove_community(self, card):
+        self.community_deck.remove(card)
+        for p in self.players:
+            p.remove_card('community', card)
+        
+    def add_community(self, card):
+        self.community_deck.append(card)
+        for p in self.players:
+            p.add_card('community', card)
 
 # update info stuff
             

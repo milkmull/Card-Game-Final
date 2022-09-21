@@ -114,7 +114,7 @@ class Robber(card_base.Card):
         
     def select(self, card):
         card.spot.kill_card(self)
-        self.player.add_card(card.copy())
+        self.player.add_card('play', card.copy())
         
 class Ghost(card_base.Card):
     sid = 7

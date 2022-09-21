@@ -15,6 +15,7 @@ class Player_Base:
 
         self.decks = {
             'play': [],
+            'community': [],
             'selection': []
         }
         self.active_card = None
@@ -88,38 +89,30 @@ class Player_Base:
                 p.active_card = active_card
             else:
                 raise Exception
+                
+        p.decks['community'] = game.community_deck.copy()
 
 # card stuff
                 
-    def new_deck(self, type, cards):
-        self.decks[type] = cards
+    def new_deck(self, deck, cards):
+        self.decks[deck] = cards
         
-    def add_card(self, card):
-        self.new_deck('play', self.decks['play'] + [card])
+    def add_card(self, deck, card):
+        self.new_deck(deck, self.decks[deck] + [card])
         
-    def remove_card(self, c, type):
-        deck = self.decks[type]
-        found = False
-        new_deck = []
-        for o in deck:
-            if o == c:
-                found = True
-            else:
-                new_deck.append(o)
-        if found:
-            self.new_deck(type, new_deck)
-            
-        return found
+    def remove_card(self, deck, card):
+        new_deck = self.decks[deck].copy()
+        new_deck.remove(card)
+        self.new_deck(deck, new_deck)
         
-    def draw_cards(self, type, num):
-        cards = self.game.draw_cards(type, num=num)
-        new_deck = self.decks[type] + cards
-        self.new_deck(type, cards)
+    def draw_cards(self, deck, num):
+        cards = self.game.draw_cards(deck, num=num)
+        new_deck = self.decks[deck] + cards
+        self.new_deck(deck, new_deck)
         
     def play_card(self, card, spot):
-        if not self.remove_card(card, 'play'):
-            return
-
+        self.remove_card('play', card)
+        
         card.set_player(self)
         spot.set_card(card)
         card.play()
