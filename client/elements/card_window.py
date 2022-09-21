@@ -43,6 +43,12 @@ class Card_Window(Live_Window):
     def clear(self):
         if self.elements:
             self.join_elements([])
+            
+    def add_element(self, element):
+        self.join_elements(self.elements + [element])
+        
+    def remove_element(self, cid):
+        self.join_elements([c for c in self.elements if c.cid != cid])
         
     def join_elements(self, *args, **kwargs):
         last_batch = self.elements.copy()

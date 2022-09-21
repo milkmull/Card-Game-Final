@@ -14,9 +14,9 @@ class Player_Base:
         self.played = True
 
         self.decks = {
-            'play': [],
-            'community': [],
-            'selection': []
+            'play': {},
+            'community': game.community_deck,
+            'selection': {}
         }
         self.active_card = None
 
@@ -50,14 +50,14 @@ class Player_Base:
 
     def reset(self):
         self.played = True
-        for deck in self.decks.values():
-            deck.clear()
+        self.decks['play'].clear()
+        self.decks['selection'].clear()
         self.log.clear()
         self.update_score(0)
 
     def start(self):
         self.update_score(20)
-        self.draw_cards('play', self.game.get_setting('cards'))
+        self.draw_cards('play', 3)
         
     def copy(self, game):
         p = Player_Base(game, self.pid)
@@ -68,17 +68,17 @@ class Player_Base:
     def copy_cards_to(self, game):
         p = game.get_player(self.pid)
         
-        p.decks['play'] = [c.game_copy(game) for c in self.decks['play']]
+        p.decks['play'] = {cid: c.game_copy(game) for cid, c in self.decks['play'].items()}
         
         selection = p.decks['selection']
-        for c in self.decks['selection']:
+        for cid, c in self.decks['selection'].items():
             if not c.spot:
-                selection.append(c.game_copy(game))
+                selection[cid] = c.game_copy(game)
             else:
                 spot = game.grid.get_spot(c.spot.pos)
                 card = spot.card
                 if card:
-                    selection.append(card)
+                    selection[cid] = card
                 else:
                     raise Exception
 
@@ -89,29 +89,35 @@ class Player_Base:
                 p.active_card = active_card
             else:
                 raise Exception
-                
-        p.decks['community'] = game.community_deck.copy()
 
 # card stuff
-                
-    def new_deck(self, deck, cards):
-        self.decks[deck] = cards
         
     def add_card(self, deck, card):
-        self.new_deck(deck, self.decks[deck] + [card])
+        self.decks[deck][card.cid] = card
         
     def remove_card(self, deck, card):
-        new_deck = self.decks[deck].copy()
-        new_deck.remove(card)
-        self.new_deck(deck, new_deck)
+        self.decks[deck].pop(card.cid)
+        
+    def pop_card(self, deck, cid):
+        card = self.decks[deck].pop(cid)
+        self.draw_cards('play', 1)
+        return card
+        
+    def clear_deck(self, deck):
+        for cid in list(self.decks[deck]):
+            self.pop_card(deck, cid)
         
     def draw_cards(self, deck, num):
         cards = self.game.draw_cards(deck, num=num)
-        new_deck = self.decks[deck] + cards
-        self.new_deck(deck, new_deck)
+        for card in cards:
+           self.add_card(deck, card) 
         
-    def play_card(self, card, spot):
-        self.remove_card('play', card)
+    def play_card(self, deck, cid, spot):
+        match deck:
+            case 'play':
+                card = self.pop_card(deck, cid)
+            case 'community':
+                card = self.game.pop_community(cid)
         
         card.set_player(self)
         spot.set_card(card)
@@ -121,8 +127,8 @@ class Player_Base:
         
         self.add_log({
             't': 'play',
-            'c': card,
-            'p': spot.pos
+            'c': card.cid,
+            'pos': spot.pos
         })
 
     def gain_ownership(self, card):
@@ -135,29 +141,32 @@ class Player_Base:
             if len(selection) == 1:
                 card.select(selection[0])
             else:
-                self.new_deck('selection', selection)
+                for c in selection:
+                    self.add_card('selection', c)
                 self.active_card = card
             
     def end_select(self):
-        self.new_deck('selection', [])
+        self.clear_deck('selection')
         self.active_card = None
         
-    def select_card(self, card):
+    def select_card(self, cid):
+        card = self.decks['selection'][cid]
         self.active_card.select(card)
         self.end_select()
         
         self.add_log({
             't': 's',
-            'c': card,
-            'exc': self.pid
-        })
+            'c': card.cid
+        }, exc=True)
 
 # log stuff
 
-    def add_log(self, log):
+    def add_log(self, log, exc=False):
         log['u'] = self.pid
+        if exc:
+            log['exc'] = self.pid
         self.log.append(log)
-        self.game.add_player_log(log)
+        self.game.add_log(log)
         return log
 
 # turn stuff
@@ -173,29 +182,31 @@ class Player_Base:
     def done_game(self):
         return not self.decks['play'] and not self.active_card
         
-    def _select_card(self, deck):
-        card = random.choice(self.decks[deck])
-        return card
-        
-    def select_spot(self):
+    def choose_random_play(self):
+        choices = (
+            [('play', cid) for cid in self.decks['play']] +
+            [('community', cid) for cid in self.decks['community']]
+        )
+        return random.choice(choices)
+
+    def choose_random_spot(self):
         spots = [spot for spot in self.game.grid.spots if spot.is_open]
-        spot = random.choice(spots) 
-        return spot
+        return random.choice(spots) 
         
     def random_turn(self):
-        card = self._select_card('play')
-        spot = self.select_spot()
-        self.play_card(card, spot)
+        deck, cid = self.choose_random_play()
+        spot = self.choose_random_spot()
+        self.play_card(deck, cid, spot)
         
     def random_selection(self):
-        card = self._select_card('selection')
-        self.select_card(card)
+        cid = random.choice(list(self.decks['selection']))
+        self.select_card(cid)
 
     def update(self):
         if not self.played:
             self.random_turn()
                 
-        elif self.active_card:
+        if self.active_card:
             self.random_selection()
 
 # point stuff
@@ -220,8 +231,8 @@ class Player_Base:
         self.add_log({
             't': 'gp',
             'points': gp,
-            'c': card,
-            'e': extra
+            'c': card.cid,
+            'e': extra.cid if extra else None
         })
         
     def steal(self, sp, card, target, extra=None):
@@ -235,9 +246,9 @@ class Player_Base:
         self.add_log({
             't': 'sp',
             'points': sp,
-            'c': card,
-            'target': target,
-            'e': extra
+            'c': card.cid,
+            'target': target.pid,
+            'e': extra.cid if extra else None
         })
 
 

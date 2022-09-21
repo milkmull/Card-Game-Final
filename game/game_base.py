@@ -19,8 +19,8 @@ class Game_Base:
         self.current_turn = 0
         
         self.log = []
+        self.community_deck = {}
         self.players = [] 
-        self.community_deck = []
         self.grid = Grid(self, self.get_setting('size'))
         
         if seed is None:
@@ -39,19 +39,13 @@ class Game_Base:
         g.status = self.status
         g.turn = self.turn
         g.current_turn = self.current_turn
-
-        g.players = [p.copy(g) for p in self.players]
-
-        self.grid.copy_to(g)
-        g.community_deck = [c.game_copy(g) for c in self.community_deck]
         
+        g.community_deck = {cid: c.game_copy(g) for cid, c in self.community_deck.items()}
+        g.players = [p.copy(g) for p in self.players]
+        self.grid.copy_to(g)
+
         for p in self.players:
             p.copy_cards_to(g)
-            
-        for i, c in enumerate(g.community_deck):
-            print(c, id(c))
-            for p in g.players:
-                print(p.decks['community'][i], id(p.decks['community'][i]))
 
         return g
 
@@ -73,8 +67,8 @@ class Game_Base:
         self.new_turn()
         self.new_status('playing')  
         
-        c = self.draw_cards('play')[0]
-        self.add_community(c)
+        for c in self.draw_cards(num=9):
+            self.add_community(c)
                 
     def add_cpus(self, num=0):
         self.pid = 0
@@ -86,10 +80,6 @@ class Game_Base:
 # log stuff
 
     def add_log(self, log):
-        log['u'] = 'g'
-        self.log.append(log)
-        
-    def add_player_log(self, log):
         self.log.append(log)
 
 # player stuff 
@@ -128,16 +118,17 @@ class Game_Base:
             if cls:
                 return cls(self, cid)
         raise exceptions.CardNotFound(name)
+
+    def add_community(self, card):
+        self.community_deck[card.cid] = card
         
     def remove_community(self, card):
-        self.community_deck.remove(card)
-        for p in self.players:
-            p.remove_card('community', card)
-        
-    def add_community(self, card):
-        self.community_deck.append(card)
-        for p in self.players:
-            p.add_card('community', card)
+        self.community_deck.pop(card.cid)
+            
+    def pop_community(self, cid):
+        card = self.community_deck.pop(cid)
+        self.add_community(self.draw_cards()[0])
+        return card
 
 # update info stuff
             
@@ -158,13 +149,15 @@ class Game_Base:
         self.status = stat
             
     def new_turn(self):
-        current_turn = (self.current_turn + 1) % len(self.players)
-        for p in (self.players[current_turn:] + self.players[:current_turn]):
-            if p.decks['play']:
-                self.current_turn = self.players.index(p)
-                break
+        if self.community_deck:
+            self.current_turn = (self.current_turn + 1) % len(self.players)
+            
         else:
-            raise Exception
+            current_turn = (self.current_turn + 1) % len(self.players)
+            for p in (self.players[current_turn:] + self.players[:current_turn]):
+                if p.decks['play']:
+                    self.current_turn = self.players.index(p)
+                    break
             
         self.players[self.current_turn].start_turn()
         
@@ -196,7 +189,7 @@ class Game_Base:
         if self.status != 'playing':
             return 
 
-        if all({p.done_game for p in self.players}) or self.grid.full:
+        if self.grid.full or (not self.community_deck and all({not p.decks['play'] for p in self.players})):
             self.end_game()
             
         else:

@@ -20,36 +20,6 @@ class Game(game_base.Game_Base):
             'name': save.SAVE.get_data('cards')[0]['name'],
             'tags': ['player']
         }
-
-    @staticmethod
-    def pack_log(logs):
-        new_log = []
-    
-        for log in logs:
-            log = log.copy()
-            for key, val in log.items():
-
-                if isinstance(val, Player):
-                    log[key] = val.pid
-                    
-                elif hasattr(val, 'cid'):
-                    log[key] = (val.name, val.cid)
-                    
-                elif isinstance(val, list):
-                    new_list = []
-                    for i in val:  
-                        if hasattr(i, 'id'):
-                            new_list.append((i.name, i.id))   
-                        else:   
-                            new_list.append(i)       
-                    log[key] = new_list
-
-                else:
-                    log[key] = val
-                    
-            new_log.append(log)
-                    
-        return new_log
   
     def __init__(self, mode, *args, settings=None, cards=None, **kwargs):
         if settings is None:
@@ -122,7 +92,7 @@ class Game(game_base.Game_Base):
 
 # log stuff
     
-    def add_player_log(self, log):
+    def add_log(self, log):
         self.log.append(log)
         if log['t'] == 'play' or log['t'] == 's':
             self.tree.trim(log)
@@ -140,15 +110,25 @@ class Game(game_base.Game_Base):
                 if count == 5:
                     break
 
-        return Game.pack_log(logs)
+        return logs
         
     def get_startup_log(self, pid):
         logs = []
-        logs.append({'t': 'ns', 'stat': 'waiting', 'u': 'g'})
-        logs.append({'t': 'set', 'settings': self.get_settings(), 'u': 'g'})
+        logs.append({
+            't': 'ns',
+            'stat': 'waiting'
+        })
+        logs.append({
+            't': 'set',
+            'settings': self.get_settings()
+        })
         
         for p in self.players:
-            logs.append({'t': 'add', 'pid': p.pid, 'name': p.username, 'u': p.pid})
+            logs.append({
+                't': 'ap',
+                'p': p.pid,
+                'name': p.username,
+            })
 
         for log in logs:
             log['exc'] = pid
@@ -162,8 +142,14 @@ class Game(game_base.Game_Base):
         for _ in range(num or self.get_setting('cpus')):  
             player_info = Game.blank_player_info(self.pid)
             p = Auto_Player(self, self.pid, player_info)
-            self.players.append(p)      
-            self.add_log({'t': 'add', 'pid': p.pid, 'name': p.username})
+            self.players.append(p)   
+            
+            self.add_log({
+                't': 'ap',
+                'p': p.pid,
+                'name': p.username
+            })
+                
             self.pid += 1
         self.new_status('waiting')
             
@@ -172,21 +158,68 @@ class Game(game_base.Game_Base):
             p = Player(self, pid, player_info)
             self.players.append(p)  
             p.log_index = len(self.log)
+            
+            self.add_log({
+                't': 'ap',
+                'p': pid,
+                'name': p.username
+            })
+            
             self.pid += 1
-            self.add_log({'t': 'add', 'pid': pid, 'name': p.username})
             self.get_startup_log(p.pid)
             self.new_status('waiting')
             return p 
+            
+# card stuff
+
+    def add_community(self, card):
+        self.community_deck[card.cid] = card
+        
+        self.add_log({
+            't': 'ac',
+            'c': (card.cid, card.name),
+            'd': 'community'
+        })
+        
+    def remove_community(self, card):
+        self.community_deck.pop(card.cid)
+        
+        self.add_log({
+            't': 'rc',
+            'c': card.cid,
+            'd': 'community'
+        })
+            
+    def pop_community(self, cid):
+        card = self.community_deck.pop(cid)
+        
+        self.add_log({
+            't': 'rc',
+            'c': card.cid,
+            'd': 'community'
+        })
+        
+        self.add_community(self.draw_cards()[0])
+        
+        return card
    
 # main game logic
  
     def new_status(self, stat):
         super().new_status(stat)
-        self.add_log({'t': 'ns', 'stat': stat})
+        
+        self.add_log({
+            't': 'ns',
+            'stat': stat
+        })
         
     def new_turn(self):
         super().new_turn()
-        self.add_log({'t': 'nt', 'p': self.players[self.current_turn].pid})
+        
+        self.add_log({
+            't': 'nt',
+            'p': self.players[self.current_turn].pid
+        })
         
     def main(self):
         if self.status != 'waiting':
@@ -195,4 +228,8 @@ class Game(game_base.Game_Base):
             
     def end_game(self):
         super().end_game()
-        self.add_log({'t': 'fin', 'w': self.get_winners()})
+        
+        self.add_log({
+            't': 'fin',
+            'w': self.get_winners()
+        })

@@ -101,6 +101,9 @@ class Window_Base:
     def add_element(self, element):
         self.join_elements(self.elements + [element], use_last=True)
         
+    def remove_element(self, element):
+        self.join_elements([e for e in self.elements if e is not element], use_last=True)
+        
     def join_elements(
         self,
         elements, 

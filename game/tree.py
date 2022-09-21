@@ -34,13 +34,13 @@ class Tree:
             
             case 'play':
                 pid = log['u']
-                sid = log['c'].sid
-                x, y = log['p']
-                return (pid, sid, x, y)
+                cid = log['c']
+                x, y = log['pos']
+                return (pid, cid, x, y)
             
             case 's':
                 pid = log['u']
-                cid = log['c'].cid
+                cid = log['c']
                 return (pid, cid)
         
     def trim(self, log):
@@ -48,9 +48,10 @@ class Tree:
         new_tree = self.tree.get(key)
         if isinstance(new_tree, list) or new_tree is None:
             new_tree = {}
+        print(len(new_tree))
         self.tree = new_tree
 
-    def simulate(self, num=2, max_deapth=20):
+    def simulate(self, num=5, max_deapth=5):
         for _ in range(num):
         
             g = self.game.copy(seed=self.sims)
@@ -91,21 +92,23 @@ class Tree:
             
         return branch
     
-    def get_scores(self, pid, branch=None, top=True, decider=None):
+    def get_scores(self, pid, branch=None, deapth=0):
         if branch is None:
             branch = self.tree
-        if decider is None:
-            decider = pid
+
+        decider = pid
      
         scores = {}
         for key, subbranch in branch.items():
+            
+            decider = key[0]
 
             if isinstance(subbranch, list):
                 scores[key] = analyze(subbranch, pid)
             else:
-                scores[key] = self.get_scores(pid, branch=subbranch, top=False, decider=key[0])
-            
-        if top:
+                scores[key] = self.get_scores(pid, branch=subbranch, deapth=deapth + 1)
+   
+        if deapth == 0:
             return scores
         if not scores:
             return 0

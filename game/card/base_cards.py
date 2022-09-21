@@ -141,7 +141,9 @@ class Vines(card_base.Card):
         s = self.spot.get_spot_at('top')
         if s:
             if not s.card:
-                s.set_card(self.player_copy())
+                c = self.player_copy()
+                c.can_move = True
+                s.set_card(c)
                 
     def update(self):
         self.can_move = True

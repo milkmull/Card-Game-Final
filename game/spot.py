@@ -63,9 +63,9 @@ class Spot:
 
         self.grid.game.add_log({
             't': 'sc',
-            'c': card,
-            'o': card.player,
-            'p': self.pos
+            'c': (card.cid, card.name),
+            'p': card.player.pid,
+            'pos': self.pos
         })
         
     def kill_card(self, other):
@@ -80,8 +80,8 @@ class Spot:
 
         self.grid.game.add_log({
             't': 'cc',
-            'c': card,
-            'p': self.pos,
+            'c': card.cid,
+            'pos': self.pos,
             'k': kill
         })  
         

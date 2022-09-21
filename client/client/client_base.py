@@ -41,15 +41,25 @@ def client_screen(menu):
     elements.append(main_button)
     menu.main_button = main_button
 
-    sequence = Card_Window(
+    community = Card_Window(
         dir=3,
-        size=((3 * CONSTANTS['cw']) + (4 * sep), (4 * CONSTANTS['ch']) + (5 * sep)), 
+        size=((3 * CONSTANTS['cw']) + (4 * sep), (3 * CONSTANTS['ch']) + (4 * sep)), 
         outline_color=(255, 0, 0),
         outline_width=2
     )
-    sequence.rect.topleft = (20, 50)
-    elements.append(sequence)
-    menu.sequence = sequence
+    community.rect.topleft = (20, 50)
+    elements.append(community)
+    menu.community = community
+    
+    play = Card_Window(
+        dir =3,
+        size=((3 * CONSTANTS['cw']) + (4 * sep), (1 * CONSTANTS['ch']) + (2 * sep)), 
+        outline_color=(255, 255, 0),
+        outline_width=2
+    )
+    play.rect.topleft = (community.rect.left, community.rect.bottom + 20)
+    elements.append(play)
+    menu.play = play
     
     selection = Card_Window(
         dir=3,
@@ -57,7 +67,7 @@ def client_screen(menu):
         outline_color=(0, 0, 255),
         outline_width=2
     )
-    selection.rect.topleft = (sequence.rect.left, sequence.rect.bottom + 50)
+    selection.rect.topleft = (play.rect.left, play.rect.bottom + 20)
     elements.append(selection)
     menu.selection = selection
 
@@ -68,7 +78,7 @@ def client_screen(menu):
     elements.append(options)
     menu.options = options
     
-    grid = Grid(menu, (5, 5))
+    grid = Grid(menu, (4, 4))
     grid.rect.center = body.center
     elements.append(grid)
     menu.grid = grid
@@ -140,75 +150,59 @@ class Client_Base(Menu):
     def parse_logs(self, logs):
         points = []
         for log in logs:
-            
-            #print(log)
-            
-            pid = log.get('u')
-        
-            type = log.get('t')
-            if 'c' in log:
-                try:
-                    name, cid = log.get('c')
-                except (TypeError, ValueError):
-                    pass
 
-            if pid == 'g':
+            match log['t']:
             
-                match type:
-                
-                    case 'res':
-                        self.reset()
-                        
-                    case 'add':
-                        self.add_player(log['pid'], log['name'])
-                        
-                    case 'ns':
-                        self.main_button.update_status(log['stat'])
-                        
-                    case 'set':
-                        self.settings = log['settings']
-
-                    case 'nt':
-                        for p in self.players:
-                            p.end_turn()
-                        self.get_player(log['p']).start_turn()
-                        
-                    case 'sc':
-                        p = self.get_player(log['o'])
-                        start = None
-                        if (card := self.cards.get(cid)):
-                            start = card.rect.center
-                        else:
-                            card = self.get_card(name, cid, player=p)
-                        self.grid.set_card(card, log['p'])
-                        if start:
-                            Moving_Card(self, p, 'move', card, start=start)
-                    case 'cc':
-                        self.grid.clear_card(log['p'])
-                        if log['k']:
-                            self.kill_particles += explode_no_grav(100, self.cards[cid].rect, (-10, 10), (1, 5), (5, 20))
+                case 'res':
+                    self.reset()
                     
-            else:
-                
-                if isinstance(pid, str):
-                    pid = int(pid)
-                p = self.get_player(pid)
-                
-                match type:
+                case 'ap':
+                    self.add_player(log['p'], log['name'])
+                    
+                case 'ns':
+                    self.main_button.update_status(log['stat'])
+                    
+                case 'set':
+                    self.settings = log['settings']
 
-                    case 'nd':
-                        p.new_deck(log['deck'], log['cards'])
-                        
-                    case 'score':
-                        p.update_score(log['score'])
-                    case 'gp' | 'sp':
-                        points.append((log, p, cid))
-                        
-                    case 'play':
-                        if not p.is_main:
-                            Moving_Card(self, p, 'play', self.cards[cid])
-                    case 'own':
-                        self.cards[cid].player = p
+                case 'nt':
+                    for p in self.players:
+                        p.end_turn()
+                    self.get_player(log['p']).start_turn()
+                    
+                case 'sc':
+                    p = self.get_player(log['p'])
+                    start = None
+                    if (card := self.cards.get(log['c'][0])):
+                        start = card.rect.center
+                    else:
+                        card = self.get_card(log['c'][1], log['c'][0], player=p)
+                    self.grid.set_card(card, log['pos'])
+                    if start:
+                        Moving_Card(self, p, 'move', card, start=start)
+                case 'cc':
+                    self.grid.clear_card(log['pos'])
+                    if log['k']:
+                        self.kill_particles += explode_no_grav(100, self.cards[log['c']].rect, (-10, 10), (1, 5), (5, 20))
+
+                case 'ac':
+                    self.add_card(log['d'], *log['c'])
+                case 'rc':
+                    self.remove_card(log['d'], log['c'])
+                    
+                case 'score':
+                    p = self.get_player(log['u'])
+                    p.update_score(log['score'])
+                case 'gp' | 'sp':
+                    p = self.get_player(log['u'])
+                    points.append((log, p, log['c']))
+                    
+                case 'play':
+                    p = self.get_player(log['u'])
+                    if not p.is_main:
+                        Moving_Card(self, p, 'play', self.cards[log['c']])
+                case 'own':
+                    self.cards[log['c']].player = self.get_player(log['u'])
                         
         for log, p, cid in points:
             self.new_points(
@@ -216,7 +210,7 @@ class Client_Base(Menu):
                 p,
                 self.cards.get(cid),
                 log['points'],
-                extra=self.cards.get(log['e'][1]) if log['e'] else None,
+                extra=self.cards.get(log['e']) if log['e'] else None,
                 target=self.get_player(log.get('target'))
             )
                 
@@ -296,11 +290,33 @@ class Client_Base(Menu):
         self.held_card.set_visible(True)
         self.held_card = None
 
-    def get_card(self, name, cid, player=None, add=True):
-        c = Card(self, name, cid, player=player)
+    def get_card(self, name, cid, player=None, deck=None, add=True):
+        c = Card(self, name, cid, player=player, deck=deck)
         if add:
             self.cards[cid] = c
         return c
+        
+    def add_card(self, deck, cid, name):
+        card = self.get_card(name, cid, deck=deck, add=False)
+        
+        match deck:
+            
+            case 'play':
+                self.play.add_element(card)
+            case 'community':
+                self.community.add_element(card)
+            case 'selection':
+                self.selection.add_element(card)
+                
+    def remove_card(self, deck, cid):
+        match deck:
+            
+            case 'play':
+                self.play.remove_element(cid)
+            case 'community':
+                self.community.remove_element(cid)
+            case 'selection':
+                self.selection.remove_element(cid)
         
 # points stuff
 

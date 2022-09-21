@@ -28,48 +28,58 @@ class Player(player_base.Player_Base):
  
 # card stuff 
 
-    def new_deck(self, type, cards):
-        self.decks[type] = cards
+    def add_card(self, deck, card):
+        self.decks[deck][card.cid] = card
+        
         self.add_log({
-            't': 'nd',
-            'deck': type,
-            'cards': cards.copy(),
-            'exc': self.pid
-        })
+            't': 'ac',
+            'c': (card.cid, card.name),
+            'd': deck
+        }, exc=True)
+        
+    def remove_card(self, deck, card):
+        self.decks[deck].pop(card.cid)
+        
+        self.add_log({
+            't': 'rc',
+            'c': card.cid,
+            'd': deck
+        }, exc=True)
+        
+    def pop_card(self, deck, cid):
+        card = self.decks[deck].pop(cid)
+        
+        self.add_log({
+            't': 'rc',
+            'c': card.cid,
+            'd': deck
+        }, exc=True)
+        
+        if deck == 'play':
+            self.draw_cards('play', 1)
+
+        return card
         
     def play_card(self, data):
-        cid, x, y = data
+        deck, cid, x, y = data
         
         cid = int(cid)
-        for card in self.decks['play']:
-            if card.cid == cid:
-                break
-        else:
-            return
-
         x = int(x)
         y = int(y)
         spot = self.game.grid.get_spot((x, y))
         
-        super().play_card(card, spot)
+        super().play_card(deck, cid, spot)
         
     def select_card(self, data):
         cid = int(data[0])
-        for card in self.decks['selection']:
-            if card.cid == cid:
-                break
-        else:
-            return
-            
-        super().select_card(card)
+        super().select_card(cid)
         
     def gain_ownership(self, card):
         card.set_player(self)
         
         self.add_log({
             't': 'own',
-            'c': card,
-            'p': self
+            'c': card.cid
         })
 
 # turn stuff
@@ -85,6 +95,7 @@ class Player(player_base.Player_Base):
  
     def update_score(self, score):
         self.score = score
+        
         self.add_log({
             't': 'score',
             'score': self.score
@@ -97,7 +108,7 @@ class Auto_Player(Player):
         self.timer = 0
 
     def set_timer(self):
-        self.timer = random.randrange(200, 250)
+        self.timer = random.randrange(500, 501)
         
     def timer_up(self):
         return self.timer <= 0
@@ -112,20 +123,28 @@ class Auto_Player(Player):
             return
         choices = sorted(choices.items(), key=lambda c: c[1], reverse=True)
         
+        print(choices)
+        
         if not self.played:
-            cards = {c.sid: c for c in self.decks['play']}
+        
+            cards = {}
+            for cid, c in self.decks['play'].items():
+                cards[cid] = 'play'
+            for cid, c in self.decks['community'].items():
+                cards[cid] = 'community'
+
             spots = self.game.grid.get_open_spots()
 
-            for (pid, sid, x, y), score in choices:
-                if (card := cards.get(sid)) and (spot := spots.get((x, y))):
-                    return (card, spot)
+            for (pid, cid, x, y), score in choices:
+                if (deck := cards.get(cid)) and (spot := spots.get((x, y))):
+                    return (deck, cid, spot)
                     
         elif self.active_card:
-            cards = {c.cid: c for c in self.decks['selection']}
+            cards = {cid: c for cid, c in self.decks['selection'].items()}
 
             for (pid, cid), score in choices:
-                if (card := cards.get(cid)):
-                    return card
+                if cards.get(cid):
+                    return cid
 
     def update(self):
         if self.timer_up():

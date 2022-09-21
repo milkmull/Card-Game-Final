@@ -5,11 +5,12 @@ from data.constants import CONSTANTS
 from ui.element.base.element import Element
 
 class Card(Element):
-    def __init__(self, client, name, cid, player=None):
+    def __init__(self, client, name, cid, player=None, deck=None):
         self.client = client
         self.name = name
         self.cid = cid
         self.player = player
+        self.deck = deck
 
         super().__init__(
             size=CONSTANTS['mini_card_size']

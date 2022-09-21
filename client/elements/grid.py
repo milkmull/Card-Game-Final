@@ -19,7 +19,7 @@ class Spot(Element):
     def click_up(self, button):
         if button == 1:
             if self.client.held_card:
-                self.client.send(f'play-{self.client.held_card.cid}-{self._pos[0]}-{self._pos[1]}')
+                self.client.send(f'play-{self.client.held_card.deck}-{self.client.held_card.cid}-{self._pos[0]}-{self._pos[1]}')
         
     def events(self, events):
         if self.children:
