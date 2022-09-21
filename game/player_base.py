@@ -72,15 +72,12 @@ class Player_Base:
         
         selection = p.decks['selection']
         for cid, c in self.decks['selection'].items():
-            if not c.spot:
-                selection[cid] = c.game_copy(game)
+            spot = game.grid.get_spot(c.spot.pos)
+            card = spot.card
+            if card:
+                selection[cid] = card
             else:
-                spot = game.grid.get_spot(c.spot.pos)
-                card = spot.card
-                if card:
-                    selection[cid] = card
-                else:
-                    raise Exception
+                raise Exception
 
         if self.active_card:
             spot = game.grid.get_spot(self.active_card.spot.pos)
@@ -116,8 +113,13 @@ class Player_Base:
         match deck:
             case 'play':
                 card = self.pop_card(deck, cid)
+                deck = 1
             case 'community':
                 card = self.game.pop_community(cid)
+                deck = 0
+                
+        if not card:
+            return
         
         card.set_player(self)
         spot.set_card(card)
@@ -126,7 +128,8 @@ class Player_Base:
         self.played = True
         
         self.add_log({
-            't': 'play',
+            't': 'p',
+            'd': deck,
             'c': card.cid,
             'pos': spot.pos
         })

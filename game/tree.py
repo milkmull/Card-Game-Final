@@ -32,11 +32,12 @@ class Tree:
     def log_to_key(self, log):
         match log['t']:
             
-            case 'play':
+            case 'p':
                 pid = log['u']
+                deck = log['d']
                 cid = log['c']
                 x, y = log['pos']
-                return (pid, cid, x, y)
+                return (pid, deck, cid, x, y)
             
             case 's':
                 pid = log['u']
@@ -61,7 +62,7 @@ class Tree:
                 turn += 1
 
             scores = [p.score for p in sorted(g.players, key=lambda p: p.pid)]
-            logs = [log for log in g.log if log['t'] == 'play' or log['t'] == 's']
+            logs = [log for log in g.log if log['t'] == 'p' or log['t'] == 's']
 
             self.update_tree(
                 scores,

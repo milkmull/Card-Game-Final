@@ -46,7 +46,10 @@ class Card:
         
     @property
     def multiplier(self):
-        return 1
+        multiplier = 1
+        for c in self.game.multipliers.values():
+            multiplier *= c.multiply(self)
+        return multiplier
         
 # copy stuff
 
@@ -87,6 +90,9 @@ class Card:
                 return True
 
 # overwrite stuff
+
+    def multiply(self, card):
+        return 1
 
     def play(self):
         pass

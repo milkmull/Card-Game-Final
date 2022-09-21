@@ -248,7 +248,7 @@ def builder(menu):
         tag_select = Input_Dropdown(
             TAGS_DICT,
             selected=menu.card.tags[0] if menu.card.tags else None,
-            max_length=9,
+            max_length=10,
             max_lines=1,
             text_check=lambda text: text.isalpha(),
             centery_aligned=True,

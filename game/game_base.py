@@ -20,6 +20,7 @@ class Game_Base:
         
         self.log = []
         self.community_deck = {}
+        self.multipliers = {}
         self.players = [] 
         self.grid = Grid(self, self.get_setting('size'))
         
@@ -43,6 +44,8 @@ class Game_Base:
         g.community_deck = {cid: c.game_copy(g) for cid, c in self.community_deck.items()}
         g.players = [p.copy(g) for p in self.players]
         self.grid.copy_to(g)
+        
+        g.multipliers = {c.cid: g.grid.get_spot(c.spot.pos).card for cid, c in self.multipliers.items()}
 
         for p in self.players:
             p.copy_cards_to(g)
@@ -53,10 +56,12 @@ class Game_Base:
 
     def new_game(self):
         self.log.clear()
+        self.community_deck.clear()
+        self.multipliers.clear()
+        
         for p in self.players: 
             p.reset()
         self.cid = len(self.players)
-        self.community_deck.clear()
         
         for p in self.players:
             p.start()
@@ -129,6 +134,12 @@ class Game_Base:
         card = self.community_deck.pop(cid)
         self.add_community(self.draw_cards()[0])
         return card
+        
+    def add_multiplier(self, card):
+        self.multipliers[card.cid] = card
+        
+    def remove_multiplier(self, card):
+        self.multipliers.pop(card.cid)
 
 # update info stuff
             

@@ -197,7 +197,7 @@ class Client_Base(Menu):
                     p = self.get_player(log['u'])
                     points.append((log, p, log['c']))
                     
-                case 'play':
+                case 'p':
                     p = self.get_player(log['u'])
                     if not p.is_main:
                         Moving_Card(self, p, 'play', self.cards[log['c']])

@@ -211,7 +211,21 @@ class BigSandWorm(card_base.Card):
     def update(self):
         self.can_move = True
             
-            
+class NegativeZone(card_base.Card):
+    sid = 13
+    name = 'negative zone'
+    type = 'play'
+    weight = 0.125
+    tags = ('multiplier',)
+    
+    def play(self):
+        self.game.add_multiplier(self)
+        
+    def multiply(self, card):
+        return -1
+        
+    def kill(self, card):
+        self.game.remove_multiplier(self)
             
             
             

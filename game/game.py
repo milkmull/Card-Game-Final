@@ -94,7 +94,7 @@ class Game(game_base.Game_Base):
     
     def add_log(self, log):
         self.log.append(log)
-        if log['t'] == 'play' or log['t'] == 's':
+        if log['t'] == 'p' or log['t'] == 's':
             self.tree.trim(log)
 
     def get_info(self, pid):
@@ -191,15 +191,17 @@ class Game(game_base.Game_Base):
         })
             
     def pop_community(self, cid):
-        card = self.community_deck.pop(cid)
+        card = self.community_deck.pop(cid, None)
         
-        self.add_log({
-            't': 'rc',
-            'c': card.cid,
-            'd': 'community'
-        })
+        if card:
         
-        self.add_community(self.draw_cards()[0])
+            self.add_log({
+                't': 'rc',
+                'c': card.cid,
+                'd': 'community'
+            })
+            
+            self.add_community(self.draw_cards()[0])
         
         return card
    

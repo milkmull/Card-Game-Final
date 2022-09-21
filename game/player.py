@@ -122,29 +122,30 @@ class Auto_Player(Player):
         if not isinstance(choices, dict):
             return
         choices = sorted(choices.items(), key=lambda c: c[1], reverse=True)
-        
-        print(choices)
-        
+        decks = {
+            0: 'community',
+            1: 'play'
+        }
+
         if not self.played:
-        
-            cards = {}
-            for cid, c in self.decks['play'].items():
-                cards[cid] = 'play'
-            for cid, c in self.decks['community'].items():
-                cards[cid] = 'community'
 
             spots = self.game.grid.get_open_spots()
 
-            for (pid, cid, x, y), score in choices:
-                if (deck := cards.get(cid)) and (spot := spots.get((x, y))):
-                    return (deck, cid, spot)
+            for data in choices:
+                if len(data[0]) == 5:
+                    (pid, deck, cid, x, y), score = data
+                    deck = decks[deck]
+                    if self.decks[deck].get(cid) and (spot := spots.get((x, y))):
+                        return (deck, cid, spot)
                     
         elif self.active_card:
             cards = {cid: c for cid, c in self.decks['selection'].items()}
 
-            for (pid, cid), score in choices:
-                if cards.get(cid):
-                    return cid
+            for data in choices:
+                if len(data[0]) == 2:
+                    (pid, cid), score = data
+                    if cards.get(cid):
+                        return cid
 
     def update(self):
         if self.timer_up():
