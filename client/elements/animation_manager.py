@@ -6,7 +6,6 @@ class Pack:
         self.manager = manager
         
         self.queue = {}
-        self.phase = 0
         self.points = {}
         
     @property
@@ -43,17 +42,18 @@ class Pack:
         return parent_points
   
     def update(self, phase0):
-        for cid, c in list(self.queue[self.phase].items()):
-            if c.update():
-                self.queue[self.phase].pop(cid)   
-                if not c.child:
-                    self.manager.cards.pop(cid)
-                
-        if not phase0:
-            if not self.queue[self.phase]:
-                self.queue.pop(self.phase)
-                if self.queue:
-                    self.phase = min(self.queue, default=0)
+        if self.queue:
+        
+            phase, cards = min(self.queue.items(), key=lambda item: item[0])
+            for cid, c in list(cards.items()):
+                if c.update():
+                    cards.pop(cid)   
+                    if not c.child:
+                        self.manager.cards.pop(cid)
+                    
+            if not phase0:
+                if not cards:
+                    self.queue.pop(phase)
                     
     def draw(self, surf):   
         for phase, queue in sorted(self.queue.items(), key=lambda item: item[0], reverse=True):
@@ -68,7 +68,6 @@ class Animation_Manager:
         self.cards = {}
         self.queue = {}
         self.points = []
-        self.turn = 0
 
     def add_card(self, *args, **kwargs):
         if not (pack := self.queue.get(self.client.turn)):
@@ -92,6 +91,7 @@ class Animation_Manager:
         
     def update(self):
         if self.queue:
+        
             turn, pack = min(self.queue.items(), key=lambda item: item[0])
             if turn <= self.client.turn:
                 pack.update(turn == self.client.turn)

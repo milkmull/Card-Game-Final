@@ -49,7 +49,6 @@ class Tree:
         new_tree = self.tree.get(key)
         if isinstance(new_tree, list) or new_tree is None:
             new_tree = {}
-        print(len(new_tree))
         self.tree = new_tree
 
     def simulate(self, num=5, max_deapth=5):

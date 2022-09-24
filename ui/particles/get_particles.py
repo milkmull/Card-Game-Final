@@ -18,7 +18,7 @@ def bubble(num, rect, radii):
         ])
     return particles
     
-def explode_no_grav(num, rect, vel, radii, time):
+def explode_no_grav(num, rect, vel, radii, time, color=None):
     x0, y0 = rect.topleft
     x1, y1 = rect.bottomright
     v0, v1 = vel
@@ -38,6 +38,7 @@ def explode_no_grav(num, rect, vel, radii, time):
             [x0 + (RAND.random() * dx), y0 + (RAND.random() * dy)],
             [v0 + (RAND.random() * dv), v0 + (RAND.random() * dv)],
             r0 + (RAND.random() * dr),
-            t0 + (RAND.random() * dt)
+            t0 + (RAND.random() * dt),
+            color
         ])
     return particles

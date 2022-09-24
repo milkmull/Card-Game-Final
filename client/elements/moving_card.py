@@ -95,6 +95,9 @@ class Moving_Card(Base_Element):
         else:
             self.card.turn_on()
             
+            if self.type == 'kill':
+                self.pack.manager.client.get_kill_particles(self.card)
+            
     def update(self):
         for a in self.animations.copy():
             a.step()

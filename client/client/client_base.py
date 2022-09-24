@@ -176,6 +176,8 @@ class Client_Base(Menu):
 
                 case 'nt':
                     self.new_turn(log)
+                case 'fin':
+                    self.turn += 1
                     
                 case 'sc':
                     self.set_card(log)
@@ -256,15 +258,15 @@ class Client_Base(Menu):
     def play_card(self, log):
         p = self.get_player(log['u'])
         
-        #if not p.is_main:
+        if not p.is_main:
 
-        if not (card := self.cards.get(log['c'])):
-            card = self.grid.get_card(log['c'])
-            start = self.community.rect.center
-        else:
-            start = self.cards[log['c']].rect.center
+            if not (card := self.cards.get(log['c'])):
+                card = self.grid.get_card(log['c'])
+                start = self.community.rect.center
+            else:
+                start = self.cards[log['c']].rect.center
 
-        self.animation_manager.add_card(self.grid.cards[log['c']], 'play', start=start)
+            self.animation_manager.add_card(self.grid.cards[log['c']], 'play', start=start)
             
     def set_owner(self, log):
         self.grid.cards[log['c']].player = self.get_player(log['u'])
@@ -366,6 +368,9 @@ class Client_Base(Menu):
                 
 # particle stuff
 
+    def get_kill_particles(self, card):
+        self.kill_particles += explode_no_grav(100, card.rect, (-10, 10), (1, 5), (5, 20), color=card.player.color)
+
     def update_particles(self):
         i = 0
         while i in range(len(self.kill_particles)):
@@ -439,8 +444,8 @@ class Client_Base(Menu):
             r.center = pg.mouse.get_pos()
             self.window.blit(self.held_card.get_image(), r)
             
-        for p, _, r, _ in self.kill_particles:
-            pg.draw.circle(self.window, (255, 0, 0), p, r)
+        for p, _, r, _, color in self.kill_particles:
+            pg.draw.circle(self.window, color, p, r)
 
         pg.display.flip()
         

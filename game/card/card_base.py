@@ -43,6 +43,7 @@ class Card:
             
     def set_player(self, player):
         self.player = player
+        self.wipe_memory()
         
     @property
     def multiplier(self):
@@ -88,6 +89,9 @@ class Card:
             if card.cid not in self.memory:
                 self.memory.add(card.cid)
                 return True
+                
+    def wipe_memory(self):
+        self.memory.clear()
 
 # overwrite stuff
 

@@ -109,7 +109,7 @@ class Auto_Player(Player):
         self.timer = 0
 
     def set_timer(self):
-        self.timer = random.randrange(5, 10)
+        self.timer = random.randrange(200, 300)
         
     def timer_up(self):
         return self.timer <= 0

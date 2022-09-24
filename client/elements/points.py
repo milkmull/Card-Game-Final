@@ -22,8 +22,6 @@ class Points(Position, Text):
             layer=1,
             enabled=False
         )
-        
-        print('check', card, player, points)
 
         Text.__init__(
             self,
