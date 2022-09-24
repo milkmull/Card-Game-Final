@@ -47,20 +47,29 @@ class Grid(Element):
     SPACE = 2
     def __init__(
         self,
-        client,
-        size
+        client
     ):
         self.client = client
-        self.grid = {y: {x: Spot(client, (x, y)) for x in range(size[0])} for y in range(size[1])}
-        
+        self.grid_size = (0, 0)
+
         super().__init__(
-            size=(
-                (size[0] * CONSTANTS['cw']) + ((size[0] + 1) * Grid.SPACE),
-                (size[1] * CONSTANTS['ch']) + ((size[1] + 1) * Grid.SPACE)
-            ),
             outline_color=(255, 255, 255),
             outline_width=1,
             layer=1
+        )
+        
+        self.cards = {}
+                
+    def set_size(self, size):
+        if size == self.grid_size:
+            return
+            
+        self.clear_children()
+        self.grid = {y: {x: Spot(self.client, (x, y)) for x in range(size[0])} for y in range(size[1])}
+        c = self.rect.center
+        self.size = (
+            (size[0] * CONSTANTS['cw']) + ((size[0] + 1) * Grid.SPACE),
+            (size[1] * CONSTANTS['ch']) + ((size[1] + 1) * Grid.SPACE)
         )
         
         self.spots = []
@@ -72,8 +81,15 @@ class Grid(Element):
                     self.rect.top + (y * spot.rect.height) + ((y + 1) * Grid.SPACE)
                 )
                 self.add_child(spot, current_offset=True)
+            
+        self.grid_size = size
+        self.rect.center = c
+        
+    def get_card(self, cid):
+        return self.cards.get(cid)
                 
     def set_card(self, card, pos):
+        self.cards[card.cid] = card
         self.grid[pos[1]][pos[0]].set_card(card)
             
     def clear_card(self, pos):

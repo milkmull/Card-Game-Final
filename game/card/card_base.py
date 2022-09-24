@@ -112,6 +112,9 @@ class Card:
     def select(self, card):
         pass
         
+    def special(self):
+        pass
+        
 # other stuff
         
     def move_to(self, spot):

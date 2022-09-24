@@ -135,6 +135,15 @@ class Spot:
             case 'y':
                 return [spot for dir in Spot.Y_STRINGS if (spot := self.get_spot_at(dir))]
                 
+            case 'gcorner':
+                w, h = self.grid.size
+                return [
+                    self.grid.grid[0][0], 
+                    self.grid.grid[0][w - 1],
+                    self.grid.grid[h - 1][0],
+                    self.grid.grid[h - 1][w - 1]
+                ]
+                
     def get_card_group(self, group):
         return [spot.card for spot in self.get_spot_group(group) if spot.card is not None]
                 
@@ -163,3 +172,74 @@ class Spot:
                 return 'bottomleft'
             elif oy == sy - 1:
                 return 'topleft'
+                
+    def get_chunk(self, check=lambda c: True, include_self=False):
+        cards = []
+        
+        if include_self:
+            cards.append(self.card)
+            
+        for c in self.get_card_group('border'):
+            if check(c):
+                cards += c.spot.get_chunk(check=check, include_self=True)
+            
+        return cards
+        
+    def get_direction_chunk(self, dir, check=lambda c: True, include_self=False):
+        cards = []
+        
+        if include_self:
+            cards.append(self.card)
+            
+        next_card = self.get_card_at(dir)
+        if next_card:
+            if check(next_card):
+                cards += next_card.spot.get_direction_chunk(dir, check=check, include_self=True)
+            
+        return cards
+            
+    def get_all_name(self, name=None):
+        if name is None:
+            name = self.card.name
+            
+        cards = []
+        for spot in self.grid.spots:
+            if spot is not self:
+                if spot.card:
+                    if spot.card.name == name:
+                        cards.append(spot.card)
+                        
+        return cards
+                        
+    def get_all_tags(self, tags=None):
+        if tags is None:
+            tags = self.card.tags
+            
+        elif isinstance(tags, str):
+            tags = [tags]
+
+        cards = []
+        for spot in self.grid.spots:
+            if spot is not self:
+                if spot.card:
+                    if any({tag in tags for tag in spot.card.tags}):
+                        cards.append(spot.card)
+                        
+        return cards  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+            

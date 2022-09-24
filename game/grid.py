@@ -40,7 +40,7 @@ class Grid:
         
     def get_open_spots(self):
         return {spot.pos: spot for spot in self.spots if spot.is_open}
-        
+    
 # transforming operations
         
     def condense_row(self, spot, side):
@@ -78,8 +78,4 @@ class Grid:
                 spot.clear_card()
                 open_spots.pop(0).set_card(card)
                 open_spots.append(spot)
-            
-                
-                
-                
-                
+      

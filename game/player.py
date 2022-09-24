@@ -56,7 +56,8 @@ class Player(player_base.Player_Base):
         }, exc=True)
         
         if deck == 'play':
-            self.draw_cards('play', 1)
+            if len(self.decks['play']) < 3:
+                self.draw_cards('play', 1)
 
         return card
         
@@ -108,7 +109,7 @@ class Auto_Player(Player):
         self.timer = 0
 
     def set_timer(self):
-        self.timer = random.randrange(500, 501)
+        self.timer = random.randrange(5, 10)
         
     def timer_up(self):
         return self.timer <= 0
@@ -131,21 +132,17 @@ class Auto_Player(Player):
 
             spots = self.game.grid.get_open_spots()
 
-            for data in choices:
-                if len(data[0]) == 5:
-                    (pid, deck, cid, x, y), score = data
-                    deck = decks[deck]
-                    if self.decks[deck].get(cid) and (spot := spots.get((x, y))):
-                        return (deck, cid, spot)
+            for (pid, deck, cid, x, y), score in choices:
+                deck = decks[deck]
+                if self.decks[deck].get(cid) and (spot := spots.get((x, y))):
+                    return (deck, cid, spot)
                     
         elif self.active_card:
             cards = {cid: c for cid, c in self.decks['selection'].items()}
 
-            for data in choices:
-                if len(data[0]) == 2:
-                    (pid, cid), score = data
-                    if cards.get(cid):
-                        return cid
+            for (pid, cid), score in choices:
+                if cards.get(cid):
+                    return cid
 
     def update(self):
         if self.timer_up():

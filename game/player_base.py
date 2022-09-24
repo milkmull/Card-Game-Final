@@ -97,7 +97,6 @@ class Player_Base:
         
     def pop_card(self, deck, cid):
         card = self.decks[deck].pop(cid)
-        self.draw_cards('play', 1)
         return card
         
     def clear_deck(self, deck):
@@ -123,16 +122,17 @@ class Player_Base:
         
         card.set_player(self)
         spot.set_card(card)
-        card.play()
-        
-        self.played = True
         
         self.add_log({
             't': 'p',
             'd': deck,
             'c': card.cid,
+            'id': card.sid,
             'pos': spot.pos
         })
+        
+        card.play()
+        self.played = True
 
     def gain_ownership(self, card):
         card.set_player(self)

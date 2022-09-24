@@ -1,6 +1,9 @@
 import math
+import random
 
 class Bezier:
+    
+    RAND = random.Random()
     
     def linear(x):
         return x
@@ -166,6 +169,10 @@ class Bezier:
             return (1 - Bezier.ease_out_bounce(1 - 2 * x)) / 2
         return (1 + Bezier.ease_out_bounce(2 * x - 1)) / 2
         
-    
         
-    
+    def random_shake(x):
+        if Bezier.RAND.getrandbits(1):
+            return -Bezier.RAND.random()
+        return Bezier.RAND.random()
+        
+        

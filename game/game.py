@@ -36,7 +36,7 @@ class Game(game_base.Game_Base):
 
         if self.mode == 'single':
             self.add_player(0, Game.get_user_player_info())
-            self.add_cpus()#num=10)
+            self.add_cpus()
         
 # new game stuff
 

@@ -11,6 +11,14 @@ class Fish(card_base.Card):
     weight = 1
     tags = ('water', 'animal')
     
+    def special(self):
+        cards = self.spot.get_card_group('border')
+        if len(cards) == 4:
+            if all({c.name == self.name for c in cards}):
+                for c in cards:
+                    c.spot.kill_card(self)
+                    self.player.gain(3, self, extra=c)
+
     def update(self):
         for c in self.spot.get_card_group('row'):
             if self.register(c):
@@ -21,12 +29,14 @@ class Fish(card_base.Card):
             if self.register(c):
                 if c.name == self.name:
                     self.player.gain(1, self, extra=c)
+                    
+        self.special()
                 
 class Michael(card_base.Card):
     sid = 1
     name = 'michael'
     type = 'play'
-    weight = 1
+    weight = 0.5
     tags = ('human',)
     
     def play(self):
@@ -129,6 +139,8 @@ class Ghost(card_base.Card):
                 if 'human' in c.tags and c.player is not self.player:
                     self.player.gain_ownership(c)
                     self.player.gain(1, self, extra=c)
+                    
+# make special vine goes from bottom to top condition
     
 class Vines(card_base.Card):
     sid = 8
@@ -227,8 +239,47 @@ class NegativeZone(card_base.Card):
     def kill(self, card):
         self.game.remove_multiplier(self)
             
+class GamblingMan(card_base.Card):
+    sid = 14
+    name = 'gambling man'
+    type = 'play'
+    weight = 1
+    tags = ('city', 'human')
+
+    def play(self):
+        self.player.gain(4, self)
+        
+    def update(self):
+        for c in self.spot.get_card_group('border'):
+            if self.register(c):
+                if 'human' in c.tags:
+                    self.player.gain(-2, self, extra=c)
             
+class Parade(card_base.Card):
+    sid = 15
+    name = 'parade'
+    type = 'play'
+    weight = 0.25
+    tags = ('event',)
+
+    def play(self):
+        for c in self.spot.get_direction_chunk('left', check=lambda c: 'human' in c.tags):
+            self.player.gain(1, self, extra=c)
+        for c in self.spot.get_direction_chunk('right', check=lambda c: 'human' in c.tags):
+            self.player.gain(1, self, extra=c)
             
-            
+class FishingPole(card_base.Card):
+    sid = 16
+    name = 'fishing pole'
+    type = 'play'
+    weight = 0.5
+    tags = ('item',)
+
+    def play(self):
+        self.player.start_select(self, self.spot.get_all_name('fish'))
+        
+    def select(self, card):
+        self.player.gain_ownership(card)
+        self.swap_with(card)
                 
                 

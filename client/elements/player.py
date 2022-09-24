@@ -22,6 +22,10 @@ class Player:
     @property
     def is_main(self):
         return self.pid == self.client.pid
+        
+    @property
+    def is_turn(self):
+        return self.spot.turn_indicator.visible
 
     def update_score(self, score):
         self.score = score

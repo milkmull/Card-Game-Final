@@ -1,48 +1,48 @@
 import pygame as pg
 
-from ui.element.standard.textbox import Textbox
+from ui.element.base.text import Text
+from ui.element.base.position import Position
+from ui.element.utils.animation.animation import Animation
+from ui.element.utils.animation.sequence import Sequence
 
-class Points(Textbox):
+from .moving_card import Moving_Card
+
+class Points(Position, Text):
     def __init__(
         self, 
-        client, 
+        card,
         player, 
-        points, 
-        card, 
+        points,
         target=None, 
         parent=None
     ):
-
-        super().__init__(
-            text=str(points) if points < 0 else f'+{points}',
-            text_size=30,
-            text_color=player.color,
-            text_outline_color=(0, 0, 0),
-            text_outline_width=2,
+    
+        Position.__init__(
+            self,
             layer=1,
             enabled=False
         )
         
-        self.client = client
+        print('check', card, player, points)
+
+        Text.__init__(
+            self,
+            text=str(points) if points < 0 else f'+{points}',
+            text_size=30,
+            text_color=player.color,
+            text_outline_color=(0, 0, 0),
+            text_outline_width=2
+        )
+
         self.player = player
         self.points = points
         self.card = card
 
         self.rect.center = card.rect.center
         
-        delay = 60 if not parent else 10
-        end = player.spot.points_spot.rect.center if not parent else parent.rect.center
+        self.animations = []
+        self.set_animation(parent)
 
-        self.animation = self.add_animation([{
-            'attr': 'center',
-            'end': end,
-            'delay': delay,
-            'frames': 20,
-            'method': 'ease_in_quad'
-        }])
-        
-        self.client.elements.append(self)
-        
     @property
     def center(self):
         return self.rect.center
@@ -50,6 +50,17 @@ class Points(Textbox):
     @center.setter
     def center(self, center):
         self.rect.center = center
+        
+    def add_animation(self, animations, loop=False):
+        for kwargs in animations:
+            kwargs['element'] = self
+        s = Sequence(
+            [Animation(**kwargs) for kwargs in animations], 
+            tag='temp',
+            loop=loop
+        )
+        self.animations.append(s)
+        return s
         
     def add(self, points):
         self.points += points
@@ -63,27 +74,40 @@ class Points(Textbox):
         self.remove_child(child)
         
     def add_child_points(self, points, card, target=None):
-        self.add_child(Points(self.client, self.player, points, card, target=target, parent=self))
+        self.add_child(Points(card, self.player, points, target=target, parent=self))
    
     def end(self):
-        self.client.elements.remove(self)
         if self.parent:
             self.parent.merge(self)
-        else:
-            self.client.points.pop(self.card.cid, None)
+            self.parent.remove_child(self)
         
     def update(self):
         super().update()
 
-        if self.animation.finished:
-            self.end()
-            return
-            
+        for a in self.animations.copy():
+            a.step()
+            if a.finished:
+                self.animations.remove(a)
+                if not self.animations:
+                    self.end()
+                    return True
+
     def draw(self, surf):
         if not self.points:
             self.child_draw(surf)
         else:
             super().draw(surf)
+            self.draw_text(surf)
             
-    
+    def set_animation(self, parent):
+        delay = 60 if not parent else 10
+        end = self.player.spot.points_spot.rect.center if not parent else parent.rect.center
+
+        self.add_animation([{
+            'attr': 'center',
+            'end': end,
+            'delay': delay,
+            'frames': 10,
+            'method': 'ease_in_quad'
+        }])
         

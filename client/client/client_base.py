@@ -16,12 +16,11 @@ from ui.particles.get_particles import explode_no_grav
 
 from ..elements.player import Player
 from ..elements.card import Card
-from ..elements.moving_card import Moving_Card
+from ..elements.animation_manager import Animation_Manager
 from ..elements.card_window import Card_Window
 from ..elements.main_button import Main_Button
 from ..elements.grid import Grid
 from ..elements.player_spot import Player_Spot
-from ..elements.points import Points
 
 def client_screen(menu):
     body = menu.body
@@ -40,10 +39,16 @@ def client_screen(menu):
     main_button.set_parent(menu, centerx_anchor='centerx', bottom_anchor='bottom', bottom_offset=-10)
     elements.append(main_button)
     menu.main_button = main_button
+    
+    def get_size(w, h):
+        return (
+            (w * CONSTANTS['cw']) + ((w + 1) * sep),
+            (h * CONSTANTS['ch']) + ((h + 1) * sep)
+        )
 
     community = Card_Window(
-        dir=3,
-        size=((3 * CONSTANTS['cw']) + (4 * sep), (3 * CONSTANTS['ch']) + (4 * sep)), 
+        dir=0,
+        size=get_size(3, 3), 
         outline_color=(255, 0, 0),
         outline_width=2
     )
@@ -52,8 +57,10 @@ def client_screen(menu):
     menu.community = community
     
     play = Card_Window(
-        dir =3,
-        size=((3 * CONSTANTS['cw']) + (4 * sep), (1 * CONSTANTS['ch']) + (2 * sep)), 
+        dir=0,
+        size=get_size(3, 1), 
+        inf_width=True,
+        inf_height=False,
         outline_color=(255, 255, 0),
         outline_width=2
     )
@@ -62,8 +69,8 @@ def client_screen(menu):
     menu.play = play
     
     selection = Card_Window(
-        dir=3,
-        size=((3 * CONSTANTS['cw']) + (4 * sep), (2 * CONSTANTS['ch']) + (3 * sep)),
+        dir=0,
+        size=get_size(3, 2),
         outline_color=(0, 0, 255),
         outline_width=2
     )
@@ -78,7 +85,7 @@ def client_screen(menu):
     elements.append(options)
     menu.options = options
     
-    grid = Grid(menu, (4, 4))
+    grid = Grid(menu)
     grid.rect.center = body.center
     elements.append(grid)
     menu.grid = grid
@@ -98,9 +105,10 @@ class Client_Base(Menu):
         self.status = ''
         self.settings = {}
         self.players = []
+        self.turn = 0
 
+        self.animation_manager = Animation_Manager(self)
         self.cards = {}
-        self.points = {}
         self.kill_particles = []
         
         self.logs = {}
@@ -148,14 +156,15 @@ class Client_Base(Menu):
         self.log_queue = self.log_queue[5:]
 
     def parse_logs(self, logs):
-        points = []
         for log in logs:
+            
+            print(log)
 
             match log['t']:
             
                 case 'res':
                     self.reset()
-                    
+
                 case 'ap':
                     self.add_player(log['p'], log['name'])
                     
@@ -163,27 +172,15 @@ class Client_Base(Menu):
                     self.main_button.update_status(log['stat'])
                     
                 case 'set':
-                    self.settings = log['settings']
+                    self.update_settings(log)
 
                 case 'nt':
-                    for p in self.players:
-                        p.end_turn()
-                    self.get_player(log['p']).start_turn()
+                    self.new_turn(log)
                     
                 case 'sc':
-                    p = self.get_player(log['p'])
-                    start = None
-                    if (card := self.cards.get(log['c'][0])):
-                        start = card.rect.center
-                    else:
-                        card = self.get_card(log['c'][1], log['c'][0], player=p)
-                    self.grid.set_card(card, log['pos'])
-                    if start:
-                        Moving_Card(self, p, 'move', card, start=start)
+                    self.set_card(log)
                 case 'cc':
-                    self.grid.clear_card(log['pos'])
-                    if log['k']:
-                        self.kill_particles += explode_no_grav(100, self.cards[log['c']].rect, (-10, 10), (1, 5), (5, 20))
+                    self.clear_card(log)
 
                 case 'ac':
                     self.add_card(log['d'], *log['c'])
@@ -191,30 +188,87 @@ class Client_Base(Menu):
                     self.remove_card(log['d'], log['c'])
                     
                 case 'score':
-                    p = self.get_player(log['u'])
-                    p.update_score(log['score'])
+                    self.update_score(log)
                 case 'gp' | 'sp':
-                    p = self.get_player(log['u'])
-                    points.append((log, p, log['c']))
+                    self.add_points(log)
                     
                 case 'p':
-                    p = self.get_player(log['u'])
-                    if not p.is_main:
-                        Moving_Card(self, p, 'play', self.cards[log['c']])
+                    self.play_card(log)
                 case 'own':
-                    self.cards[log['c']].player = self.get_player(log['u'])
-                        
-        for log, p, cid in points:
-            self.new_points(
-                log['t'],
-                p,
-                self.cards.get(cid),
-                log['points'],
-                extra=self.cards.get(log['e']) if log['e'] else None,
-                target=self.get_player(log.get('target'))
-            )
-                
+                    self.set_owner(log)
             
+# log process stuff
+
+    def update_settings(self, log):
+        self.settings = log['settings']
+        self.grid.set_size(self.settings['size'])
+        
+    def new_turn(self, log):
+        for p in self.players:
+            p.end_turn()
+        self.get_player(log['p']).start_turn()
+        self.turn += 1
+        
+    def set_card(self, log):
+        p = self.get_player(log['p'])
+        start = None
+        
+        if (card := self.grid.get_card(log['c'][0])):
+            start = card.rect.center
+        else:
+            card = self.get_card(log['c'][1], log['c'][0], player=p, add=False)
+            
+        self.grid.set_card(card, log['pos'])
+        if start:
+            self.animation_manager.add_card(card, 'shift', start=start, delay=20 if p is not self.main_p else 0)
+            
+    def clear_card(self, log):
+        self.grid.clear_card(log['pos'])
+        if log['k']:
+            self.animation_manager.add_card(self.grid.cards[log['c']], 'kill')
+            
+    def add_card(self, deck, cid, name):
+        card = self.get_card(name, cid, deck=deck)
+        
+        match deck:
+            
+            case 'play':
+                self.play.add_element(card)
+            case 'community':
+                self.community.add_element(card)
+            case 'selection':
+                self.selection.add_element(card)
+                
+    def remove_card(self, deck, cid):
+        match deck:
+            
+            case 'play':
+                self.play.remove_element(cid)
+            case 'community':
+                self.community.remove_element(cid)
+            case 'selection':
+                self.selection.remove_element(cid)
+            
+    def update_score(self, log):
+        p = self.get_player(log['u'])
+        p.update_score(log['score'])
+        
+    def play_card(self, log):
+        p = self.get_player(log['u'])
+        
+        #if not p.is_main:
+
+        if not (card := self.cards.get(log['c'])):
+            card = self.grid.get_card(log['c'])
+            start = self.community.rect.center
+        else:
+            start = self.cards[log['c']].rect.center
+
+        self.animation_manager.add_card(self.grid.cards[log['c']], 'play', start=start)
+            
+    def set_owner(self, log):
+        self.grid.cards[log['c']].player = self.get_player(log['u'])
+
 # player stuff
 
     @property
@@ -251,11 +305,10 @@ class Client_Base(Menu):
             y += r.height + 10
         r = s.rect.unionall([o.total_rect for o in spots])
         x0, y0 = r.topleft
-        r.topright = (self.rect.right - 30, self.options.rect.bottom + 20)
+        r.topright = (self.rect.right - 40, self.options.rect.bottom + 20)
         x1, y1 = r.topleft
         for s in spots:
             s.rect.move_ip(x1 - x0, y1 - y0)
-            
             
 # card stuff
 
@@ -296,40 +349,20 @@ class Client_Base(Menu):
             self.cards[cid] = c
         return c
         
-    def add_card(self, deck, cid, name):
-        card = self.get_card(name, cid, deck=deck, add=False)
-        
-        match deck:
-            
-            case 'play':
-                self.play.add_element(card)
-            case 'community':
-                self.community.add_element(card)
-            case 'selection':
-                self.selection.add_element(card)
-                
-    def remove_card(self, deck, cid):
-        match deck:
-            
-            case 'play':
-                self.play.remove_element(cid)
-            case 'community':
-                self.community.remove_element(cid)
-            case 'selection':
-                self.selection.remove_element(cid)
+    def start_card_shifts(self):
+        pass
         
 # points stuff
 
-    def new_points(self, type, p, card, points, extra=None, target=None):    
-        if not (parent_points := self.points.get(card.cid)):
-            parent_points = Points(self, p, 0 if extra else points, card)
-            self.points[card.cid] = parent_points
-            
-        if extra:
-            parent_points.add_child_points(points, extra)
-            
-            if target:
-                self.new_points(type, target, extra, -points)
+    def add_points(self, log):
+        self.animation_manager.add_points(
+            log['t'],
+            self.get_player(log['u']),
+            self.grid.cards.get(log['c']),
+            log['points'],
+            extra=self.grid.cards.get(log['e']) if log['e'] else None,
+            target=self.get_player(log.get('target'))
+        )
                 
 # particle stuff
 
@@ -346,6 +379,25 @@ class Client_Base(Menu):
                 i += 1
 
 # running stuff
+    
+    def events(self):
+        events = super().events()   
+        
+        if self.held_card or self.view_card:
+        
+            if (mbu := events.get('mbu')):
+                match mbu.button:
+                    
+                    case 1:
+                        if self.held_card:
+                            self.clear_held_card()
+                    case 3:
+                        if self.view_card:
+                            self.clear_view_card()
+                
+        if self.hover_card:
+            if not self.hover_card.rect.collidepoint(pg.mouse.get_pos()):
+                self.clear_hover_card()
 
     def update(self):
         self.get_info()
@@ -359,9 +411,13 @@ class Client_Base(Menu):
                 self.clear_hover_card()
                 
         self.update_particles()
+        
+        self.animation_manager.update()
             
     def draw(self):
         self.start_draw()
+        
+        self.animation_manager.draw(self.window)
         
         if self.hover_card:
             if not self.hover_card.visible:
@@ -371,7 +427,7 @@ class Client_Base(Menu):
                 r.center = self.hover_card.rect.center
                 self.window.blit(self.hover_image, r)
                 
-                other = self.cards.get(self.hover_card.cid)
+                other = self.grid.cards.get(self.hover_card.cid)
                 if other and other is not self.hover_card:
                     pg.draw.line(self.window, other.player.color, self.hover_card.rect.center, other.rect.center, width=3)
 

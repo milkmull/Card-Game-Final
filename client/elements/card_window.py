@@ -2,43 +2,16 @@ from ui.element.window.live_window import Live_Window
 
 class Card_Window(Live_Window):
     SEP = 5
-    VERTICAL_ORIENTATION = {
-        'dir': 1,
-        'marginy': SEP,
-        'bordery': SEP,
-        'centerx_aligned': True
-    }
-    HORIZONTAL_ORIENTATION = {
-        'dir': 0,
-        'marginx': SEP,
-        'borderx': SEP,
-        'centery_aligned': True
-    }
-    SPOT_ORIENTATION = {
-        'dir': 1,
-        'marginy': SEP,
-        'centerx_aligned': True
-    }
-    SELECT_ORIENTATION = {
-        'dir': 0,
-        'marginx': SEP,
-        'marginy': SEP,
-        'borderx': SEP,
-        'bordery': SEP
-    }
     def __init__(self, *args, dir=None, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        match dir:
-        
-            case 0:
-                self.orientation_cache.update(Card_Window.HORIZONTAL_ORIENTATION)
-            case 1:
-                self.orientation_cache.update(Card_Window.VERTICAL_ORIENTATION)
-            case 2:
-                self.orientation_cache.update(Card_Window.SPOT_ORIENTATION)
-            case 3:
-                self.orientation_cache.update(Card_Window.SELECT_ORIENTATION)
+
+        self.orientation_cache.update({
+            'dir': dir,
+            'marginx': Card_Window.SEP,
+            'marginy': Card_Window.SEP,
+            'borderx': Card_Window.SEP,
+            'bordery': Card_Window.SEP
+        })
             
     def clear(self):
         if self.elements:

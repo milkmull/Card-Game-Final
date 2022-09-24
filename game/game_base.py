@@ -132,7 +132,6 @@ class Game_Base:
             
     def pop_community(self, cid):
         card = self.community_deck.pop(cid)
-        self.add_community(self.draw_cards()[0])
         return card
         
     def add_multiplier(self, card):

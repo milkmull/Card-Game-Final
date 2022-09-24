@@ -2,19 +2,17 @@ import pygame as pg
 
 from data.constants import CONSTANTS
 
-from ui.element.base.element import Element
+from ui.element.base.position import Position
 
-class Card(Element):
+class Card(Position):
     def __init__(self, client, name, cid, player=None, deck=None):
         self.client = client
         self.name = name
         self.cid = cid
         self.player = player
         self.deck = deck
-
-        super().__init__(
-            size=CONSTANTS['mini_card_size']
-        )
+        
+        super().__init__(size=CONSTANTS['mini_card_size'])
  
     def __eq__(self, other):
         return self.cid == other.cid and self.name == other.name
@@ -25,47 +23,37 @@ class Card(Element):
     def __hash__(self):
         return self.cid
         
-    def copy(self):
-        return Card(self.client, self.name, self.cid)
- 
-    def get_image(self, mini=True, scale=None):
-        return self.client.sheet.get_image(self.name, mini=mini, scale=scale)
-        
     @property
     def is_select(self):
         return self.parent is self.client.selection.bounding_box
-        
+
+    def get_image(self, mini=True, scale=None):
+        return self.client.sheet.get_image(self.name, mini=mini, scale=scale)
+  
     def left_click(self):
         if not self.is_select:
             self.client.set_held_card(self)
         else:
             self.client.send(f'select-{self.cid}')
         
-    def update_info(self, name, cid):
-        self.name = name
-        self.cid = cid
-        
     def right_click(self):
         self.client.set_view_card(self)
-        
-    def click_up(self, button):
-        match button:
-            
-            case 1:
-                if self.client.held_card is self:
-                    self.client.clear_held_card()
-  
-            case 3:
-                if self.client.view_card is self:
-                    self.client.clear_view_card()
                 
     def events(self, events):
-        super().events(events)
-        
-        if self.hit:
+        if self.rect.collidepoint(pg.mouse.get_pos()):
             self.client.set_hover_card(self)
-        elif self.client.hover_card is self:
-            self.client.clear_hover_card()
+            
+            if (mbd := events.pop('mbd', None)):
+                
+                match mbd.button:
+                    
+                    case 1:
+                        self.left_click()
+                    case 3:
+                        self.right_click()    
+
+    def update(self):
+        self.update_position()
 
     def draw(self, surf): 
         surf.blit(self.get_image(), self.rect)
