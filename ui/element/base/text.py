@@ -1,6 +1,10 @@
+import re
+import keyword
+
 import pygame as pg
 import pygame.freetype
 
+from ...color.ops import is_light
 from ..utils.container import Container
 from ...icons.icons import icons
 
@@ -20,6 +24,10 @@ class Character:
         self.rect = font.get_rect(character, size=size)
         self.bearing_x, self.bearing_y = self.rect.topleft
         self.font = font
+        
+    @property
+    def metrics(self):
+        return self.font.get_metrics(self.character, size=self.size)
 
     @property
     def horizontal_advance_x(self):
@@ -70,9 +78,15 @@ class Text:
         return cls.FONTS.get(name)
         
     @classmethod
-    def render_to(cls, *args, font=None, **kwargs):
-        if font is None:
-            font = Textbox.FONTS[Textbox.DEFAULT_FONT]
+    def render(cls, *args, font_name=None, **kwargs):
+        if not (font := cls.FONTS.get(font_name)):
+            font = cls.FONTS[cls.DEFAULT_FONT]
+        return font.render(*args, **kwargs)[0]
+        
+    @classmethod
+    def render_to(cls, *args, font_name=None, **kwargs):
+        if not (font := cls.FONTS.get(font_name)):
+            font = cls.FONTS[cls.DEFAULT_FONT]
         return font.render_to(*args, **kwargs)
         
     @classmethod
@@ -100,6 +114,37 @@ class Text:
             cls.OUTLINE_CACHE[r] = points
             
         return points
+        
+    @staticmethod
+    def color_text(c):
+        return (0, 0, 0) if not is_light(c) else (255, 255, 255)
+        
+    @staticmethod
+    def style_text(text):
+        style = {}
+        
+        number_style = {'fgcolor': (255, 205, 34)}
+        for match in re.finditer(r'(?<![a-zA-Z0-9^_])([0-9]+)', text):
+            style.update({i: number_style for i in range(match.start(), match.end())})
+            
+        keyword_style = {'fgcolor': (147, 199, 99), 'style': 1}
+        for word in keyword.kwlist:
+            for match in re.finditer(fr'(?<![a-zA-Z0-9^_])({word})(?![a-zA-Z0-9^_])', text):
+                style.update({i: keyword_style for i in range(match.start(), match.end())})
+       
+        string_style = {'fgcolor': (236, 118, 0)}
+        for match in re.finditer(r'(["\'])(.*?)\1', text):
+            style.update({i: string_style for i in range(match.start(), match.end())})
+            
+        class_style = {'fgcolor': (160, 130, 189), 'style': 1}
+        for match in re.finditer(r'(?<=class )([a-zA-Z0-9_]+)', text):
+            style.update({i: class_style for i in range(match.start(), match.end())})
+            
+        def_style = {'fgcolor': (103, 140, 177), 'style': 1}
+        for match in re.finditer(r'(?<=def )([a-zA-Z0-9_]+)', text):
+            style.update({i: def_style for i in range(match.start(), match.end())})
+            
+        return style
 
     def __init__(
         self,
@@ -118,6 +163,7 @@ class Text:
 
         right_aligned=False,
         bottom_aligned=False,
+        center_aligned=False,
         centerx_aligned=False,
         centery_aligned=False,
 
@@ -138,8 +184,7 @@ class Text:
         self.text_size = text_size
         self.line_spacing = line_spacing
 
-        self.text_color = text_color
-        self.last_text_color = text_color
+        self._text_color = text_color
         self.text_background_color = text_background_color
         self.text_style = text_style or {}
         
@@ -167,6 +212,9 @@ class Text:
 
         self.block = None
         self._characters = []
+        
+        if center_aligned:
+            centerx_aligned = centery_aligned = True
 
         self.set_text_alignment(
             left=not (right_aligned or centerx_aligned),
@@ -203,11 +251,41 @@ class Text:
         return self._characters
         
     @property
+    def lines(self):
+        characters = self.characters
+        if not characters:
+            return []
+        
+        lines = []
+        current_line = []
+        top = characters[0].rect.top
+        
+        for c in characters:
+            if c.rect.top == top:
+                current_line.append(c)
+            else:
+                lines.append(current_line)
+                current_line = [c]
+                top = c.rect.top
+        lines.append(current_line)
+        
+        return lines
+  
+    @property
     def default_style(self):
         return {
-            'fgcolor': self.text_color,
+            'fgcolor': self._text_color,
             'bgcolor': self.text_background_color
         }
+        
+    @property
+    def text_color(self):
+        return self._text_color
+        
+    @text_color.setter
+    def text_color(self, text_color):
+        self._text_color = text_color
+        self._render()
             
     def get_text(self):
         return self.text
@@ -420,7 +498,7 @@ class Text:
             self.rect = surf.get_rect()
             self.rect.topleft = tl
 
-    def render(self):
+    def _render(self):
         self.text_surf.fill((0, 0, 0, 0))
         self.block.pos = (0, 0)
         i = 0
@@ -428,7 +506,7 @@ class Text:
         
         if self.text_outline_color and self.text_outline_width:
             self.render_outline(self.text_surf, self.block)
-                
+
         for line in self.block:
             for word in line:
                 for character in word:
@@ -459,8 +537,5 @@ class Text:
                             )  
                     
     def draw_text(self, surf):
-        if self.text_color != self.last_text_color:
-            self.last_text_color = self.text_color
-            self.render()
         if self.text:
             surf.blit(self.text_surf, self.text_rect)

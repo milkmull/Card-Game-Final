@@ -1,11 +1,11 @@
-from ui.menu.menu import Menu
+from ui.scene.scene import Scene
 
 from ui.element.base.style import Style
 from ui.element.elements import Textbox, Button, Live_Window, Static_Window
 from ui.icons.icons import icons
 
-def full_error(menu, err):
-    body = menu.body
+def full_error(scene, err):
+    body = scene.body
 
     tb = Textbox(
         text=err,
@@ -36,11 +36,11 @@ def full_error(menu, err):
     return [window, exit_button]
     
 def run_full(err):
-    m = Menu(full_error, init_args=[err])
+    m = Scene(full_error, init_args=[err])
     m.run()
 
-def error_elements(menu, errors):
-    body = menu.body
+def error_elements(scene, errors):
+    body = scene.body
     elements = []
     
     buttons = []
@@ -110,5 +110,5 @@ def error_elements(menu, errors):
     return elements
     
 def run(errors):
-    m = Menu(error_elements, init_args=[errors])
+    m = Scene(error_elements, init_args=[errors])
     m.run()

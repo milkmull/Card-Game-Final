@@ -2,7 +2,7 @@ import pygame as pg
 
 from .base import Base_Loop
 
-class Menu(Base_Loop):
+class Scene(Base_Loop):
     @classmethod
     def build_and_run(cls, *args, **kwargs):
         m = cls(*args, **kwargs)
@@ -17,8 +17,7 @@ class Menu(Base_Loop):
         
         overlay=False,
         opacity=180,
-        get_status=False,
-        
+
         **kwargs
     ):
         
@@ -31,21 +30,12 @@ class Menu(Base_Loop):
         
         self.background = None
         if overlay:
-            surf = self.window.copy()
-            over = pg.Surface(surf.get_size()).convert_alpha()
-            over.fill((0, 0, 0, opacity))
-            surf.blit(over, (0, 0))
-            self.background = surf
+            self.background = self.get_background(opacity)
 
-        self.elements = []
-        self.elements_dict = {}
+        self.rect = self.body
         
     @property
     def body(self):
-        return self.window.get_rect()
-        
-    @property
-    def rect(self):
         return self.window.get_rect()
         
     @property
@@ -57,21 +47,31 @@ class Menu(Base_Loop):
                 elements |= e.all_children
         return elements
         
+    def get_background(self, opacity):
+        surf = self.window.copy()
+        over = pg.Surface(surf.get_size()).convert_alpha()
+        over.fill((0, 0, 0, opacity))
+        surf.blit(over, (0, 0))
+        return surf
+        
     def refresh(self):
         self.elements = self.init(self, *self.args, **self.kwargs)
         self.set_funcs()
+        for e in self.elements:
+            e.set_scene(self)
         
     def set_funcs(self):
         for e in self.all_elements:
-            if e.tag == 'exit':
-                e.add_event(tag='left_click', func=self.exit)
-            elif e.tag == 'return':
-                e.add_event(
-                    tag='left_click',
-                    func=lambda e=e: self.set_return(e.get_return('left_click'))
-                )
-            elif e.tag == 'refresh':
-                e.add_event(tag='left_click', func=self.refresh)
+            match e.tag:
+                case 'exit':
+                    e.add_event(tag='left_click', func=self.exit)
+                case 'return':
+                    e.add_event(
+                        tag='left_click',
+                        func=lambda e=e: self.set_return(e.get_return('left_click'))
+                    )
+                case 'refresh':
+                    e.add_event(tag='left_click', func=self.refresh)
 
     def set_return(self, value):
         self.return_value = value

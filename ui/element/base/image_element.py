@@ -21,8 +21,8 @@ class Image_Element(Element, Image):
             clip = surf.get_clip()
             surf.set_clip(self.padded_rect)
             self.draw_image(surf)
-            self.child_draw(surf)
             surf.set_clip(clip)
+            self.child_draw(surf)
         else:
             self.draw_image(surf)
             self.child_draw(surf)

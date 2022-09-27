@@ -25,6 +25,7 @@ class Window_Base:
         self.last_offset = (0, 0)
         self.bounding_box = Position(pos=self.pos, size=self.size)
         self.bounding_box.set_enabled(False)
+        self.bounding_box.set_visible(False)
         self.add_child(self.bounding_box, left_anchor='left', top_anchor='top')
 
         self.inf_width = inf_width

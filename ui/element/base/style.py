@@ -32,6 +32,7 @@ class Style(Position):
         super().__init__(**kwargs)
 
         self.fill_color = fill_color
+        self.original_fill_color = fill_color
         self.outline_color = outline_color
         self.outline_width = outline_width
         self.inner_outline_color = inner_outline_color
@@ -82,6 +83,54 @@ class Style(Position):
         self.pad['left'], self.pad['right'], self.pad['top'], self.pad['bottom'] = padding
         
     @property
+    def left_pad(self):
+        return self.pad['left']
+        
+    @left_pad.setter
+    def left_pad(self, left_pad):
+        self.pad['left'] = left_pad
+        
+    @property
+    def right_pad(self):
+        return self.pad['right']
+        
+    @right_pad.setter
+    def right_pad(self, right_pad):
+        self.pad['right'] = right_pad
+        
+    @property
+    def top_pad(self):
+        return self.pad['top']
+        
+    @top_pad.setter
+    def top_pad(self, top_pad):
+        self.pad['top'] = top_pad
+        
+    @property
+    def bottom_pad(self):
+        return self.pad['bottom']
+        
+    @bottom_pad.setter
+    def bottom_pad(self, bottom_pad):
+        self.pad['bottom'] = bottom_pad
+        
+    @property
+    def x_pad(self):
+        return self.pad['left']
+        
+    @x_pad.setter
+    def x_pad(self, x_pad):
+        self.pad['left'] = self.pad['right'] = x_pad
+        
+    @property
+    def y_pad(self):
+        return self.pad['top']
+        
+    @y_pad.setter
+    def y_pad(self, y_pad):
+        self.pad['top'] = self.pad['bottom'] = y_pad
+        
+    @property
     def border_kwargs(self):
         return {
             'border_radius': self.border_radius,
@@ -93,7 +142,7 @@ class Style(Position):
         
     @property
     def hit_mouse(self):
-        return self.rect.collidepoint(pg.mouse.get_pos())
+        return self.padded_rect.collidepoint(pg.mouse.get_pos())
 
     def set_padding(
         self,
@@ -109,6 +158,9 @@ class Style(Position):
         self.pad['right'] = right
         self.pad['top'] = top
         self.pad['bottom'] = bottom
+
+    def restore_fill(self):
+        self.fill_color = self.original_fill_color
 
     def draw_rect(self, surf):
         fill = self.fill_color and self.fill_color != self.key_color

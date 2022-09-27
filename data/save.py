@@ -18,9 +18,9 @@ class Save:
     def get_base_settings():
         settings = {
             'size': [5, 5],
-            'cards': 5,
+            'tt': 200,
             'cpus': 1,
-            'diff': 4
+            'diff': 3
         }
         return settings
 

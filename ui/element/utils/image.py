@@ -1,5 +1,8 @@
 import pygame as pg
 
+from ...icons.icons import icons
+from ..base.text import Text
+
 def get_surface(size, color=None, alpha=False):
     if not alpha:
         surf = pg.Surface(size).convert()
@@ -8,38 +11,46 @@ def get_surface(size, color=None, alpha=False):
     if color is not None:
         surf.fill(color)
     return surf
-
+    
 def get_arrow(
     dir,
     size,
-    padding=(0, 0),
+    pad=None,
     color=(255, 255, 255),
-    background_color=(0, 0, 0, 0)
+    background_color=None
 ):
     w, h = size
-    size = (
-        w if not w % 2 else w + 1,
-        h if not h % 2 else h + 1
-    )
-    surf = pg.Surface(size).convert_alpha()
-    surf.fill(background_color)
-    w, h = size
-    top = (w // 2, padding[1] // 2)
-    bottomleft = (padding[0] // 2, h - (padding[1] // 2))
-    bottomright = (w - (padding[0] // 2), h - (padding[1] // 2))
-    pg.draw.polygon(surf, color, (top, bottomleft, bottomright))
     
+    image = Text.render(
+        icons['play'],
+        font_name='icons.ttf',
+        fgcolor=color,
+        bgcolor=background_color,
+        size=h
+    )
+    image = pg.transform.scale(image, size)
+
     a = 0
-    if dir == 'v':
-        a = 180
-    elif dir == '<':
-        a = 90
-    elif dir == '>':
-        a = -90
+    match dir:
+        case 'v':
+            a = -90
+        case '<':
+            a = 180
+        case '^':
+            a = 90
     if a:
-        surf = pg.transform.rotate(surf, a)
-        
-    return surf
+        image = pg.transform.rotate(image, a)
+
+    if pad:
+        surf = pg.Surface((w + (2 * pad[0]), h + (2 * pad[1]))).convert_alpha()
+        if background_color:
+            surf.fill(background_color)
+        else:
+            surf.fill((0, 0, 0, 0))
+        surf.blit(image, image.get_rect().move(*pad))
+        image = surf
+    
+    return image
     
 def crop(img, x, y, w, h):
     surf = pg.Surface((w, h))
@@ -60,7 +71,7 @@ def gradient(colors, dir, size, angle=0):
         for x, color in enumerate(colors):
             surf.set_at((x, 0), color)
             
-    return pg.transform.roto_zoom(surf, angle, size)
+    return pg.transform.rotozoom(surf, 0, 100)
 
 
 

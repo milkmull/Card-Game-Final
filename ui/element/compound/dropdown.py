@@ -1,27 +1,21 @@
+import pygame as pg
+
 from ..standard.button import Button
 from ..standard.image import Image
 from ..window.live_window import Live_Window
+
 from ..utils.image import get_arrow, transform
 from ...ui import get_size
 
 class Dropdown(Button.Text_Button):
-    default_kwargs = {
-    
+    defaults = {
+        'centery_aligned': True
     }
     
-    default_arrow_kwargs = {
-        
-    }
-    
-    default_button_kwargs = {
+    button_defaults = {
         'centery_aligned': True,
-        'border_radius': 0,
-        'hover_color': (100, 100, 100),
+        'hover_color': (100, 100, 100)
     }
-    
-    default_window_kwargs = {
-
-    }   
     
     @staticmethod
     def to_dict(selection):
@@ -52,10 +46,9 @@ class Dropdown(Button.Text_Button):
         selection,
         selected=None,
         
-        max_buttons=20,
+        max_buttons=10,
         
         arrow_kwargs={},
-        arrow_button_kwargs={},
         button_kwargs={},
         window_kwargs={},
         
@@ -67,41 +60,42 @@ class Dropdown(Button.Text_Button):
             selection = Dropdown.to_dict(selection)
         if selected is None:
             selected = Dropdown.find_default(selection)
-        super().__init__(text=selected, func=self.flip, **(Dropdown.default_kwargs | kwargs))
+            
+        super().__init__(text=selected, func=self.flip, **(Dropdown.defaults | kwargs))
+        
         if self.auto_fit:
             self.auto_fit = False
             self.size = self.get_max_size(self.find_all_text(selection))
             self.width += self.pad['left']
                     
-        self.button_kwargs = Dropdown.default_button_kwargs | button_kwargs
-        self.arrow_button_kwargs = arrow_button_kwargs
-        self.window_kwargs = Dropdown.default_window_kwargs | window_kwargs
+        self.button_kwargs = Dropdown.button_defaults | button_kwargs
+        self.window_kwargs = window_kwargs.copy()
+        arrow_kwargs = arrow_kwargs.copy()
         
         self.selection = selection
         self.max_buttons = max_buttons
         self.windows = {}
         
         if 'size' not in arrow_kwargs:
-            arrow_kwargs['size'] = (self.height - 11, self.height - 11)
+            arrow_kwargs['size'] = (self.height - 5, self.height - 5)
         down_arrow = get_arrow(
             'v',
             color=self.text_color,
-            **(Dropdown.default_arrow_kwargs | arrow_kwargs)
+            **arrow_kwargs
         )
         self.right_arrow = get_arrow(
             '>',
             color=self.button_kwargs.get('text_color', (255, 255, 255)),
-            **(Dropdown.default_arrow_kwargs | arrow_kwargs)
+            **arrow_kwargs
         )
-        
-        if 'pad' not in arrow_button_kwargs:
-            arrow_button_kwargs['pad'] = 11
-        self.arrow = Button.Image_Button(
+
+        self.arrow = Image(
             image=down_arrow,
-            **arrow_button_kwargs
+            cursor=pg.SYSTEM_CURSOR_HAND,
+            pad=5
         )
-        self.arrow.set_enabled(False)
         self.add_child(self.arrow, left_anchor='right', centery_anchor='centery')
+        self.right_pad = self.arrow.rect.width + 3
         
         self.original_width = self.rect.width
     
@@ -130,12 +124,12 @@ class Dropdown(Button.Text_Button):
         
     def open(self):
         super().open()
-        self.arrow.transform('flip', False, True, overwrite=True)
+        self.arrow.image = pg.transform.flip(self.arrow.image, False, True)
         self.new_window(self.selection)
         
     def close(self):
         super().close()
-        self.arrow.transform('flip', False, True, overwrite=True)
+        self.arrow.image = pg.transform.flip(self.arrow.image, False, True)
         for w in self.windows:
             self.remove_child(w)
         self.windows.clear()
@@ -147,12 +141,12 @@ class Dropdown(Button.Text_Button):
             if info['level'] >= level:
                 self.remove_child(w)
                 self.windows.pop(w)
-                if info['parent']:
-                    info['parent'].freeze_animation(None)
-                    if not info['parent'].hit:
-                        info['parent'].run_animations('hover', reverse=True)
-                if info['parent'] is last:
-                    found = True
+                if (p := info['parent']):
+                    p.unfreeze_animation('hover')
+                    if not p.hit:
+                        p.run_animations('hover', reverse=True)
+                    if p is last:
+                        found = True
         
         if found:
             return
@@ -228,7 +222,7 @@ class Dropdown(Button.Text_Button):
     def events(self, events):
         super().events(events)
 
-        mbd = events.get('mbd_a')
+        mbd = events.get('mbd')
         if mbd and self.click_close:
             if mbd.button == 1 or mbd.button == 3:
                 if self.is_open:

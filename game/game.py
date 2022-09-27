@@ -1,3 +1,5 @@
+import json
+
 from data import save
 
 from .card import cards as card_manager
@@ -40,9 +42,10 @@ class Game(game_base.Game_Base):
         
 # new game stuff
 
-    def new_game(self):
+    def reset(self):
+        super().reset()
         self.tree.reset()
-        super().new_game()
+        self.log.insert(0, {'t': 'res'})
         
     def start(self, pid):
         if pid == 0:
@@ -71,16 +74,15 @@ class Game(game_base.Game_Base):
                 self.main()
                 reply = self.get_info(0)
                 
+            case 'settings':
+                self.set_settings(data)
+                
             case 'start':
                 self.start(0)
                 reply = 1
                 
             case 'continue':
-                match self.status:
-                    case 'next round':
-                        self.new_round()  
-                    case 'new game':
-                        self.new_game()
+                self.reset()
                 reply = 1
                 
             case 'play' | 'select':
@@ -89,6 +91,20 @@ class Game(game_base.Game_Base):
                 reply = 1
 
         return reply
+        
+# settings stuff
+
+    def set_settings(self, settings):
+        settings = json.loads(settings[0])
+        self.settings = settings
+        
+        self.add_log({
+            't': 'set',
+            'settings': settings
+        })
+        
+        self.grid.resize(settings['size'])
+        self.balance_cpus(settings['cpus'])
 
 # log stuff
     
@@ -137,6 +153,16 @@ class Game(game_base.Game_Base):
 
 # player stuff
 
+    def balance_cpus(self, count):
+        cpus = [p for p in sorted(self.players, key=lambda p: p.pid) if isinstance(p, Auto_Player)]
+        diff = count - len(cpus)
+
+        if diff > 0:
+            self.add_cpus(num=diff)
+        elif diff < 0:
+            for p in cpus[diff:]:  
+                self.remove_player(p.pid)
+
     def add_cpus(self, num=0):
         self.pid = len(self.players)
         for _ in range(num or self.get_setting('cpus')):  
@@ -169,6 +195,18 @@ class Game(game_base.Game_Base):
             self.get_startup_log(p.pid)
             self.new_status('waiting')
             return p 
+            
+    def remove_player(self, pid):
+        for p in self.players:
+            if p.pid == pid:
+                self.players.remove(p)
+            
+                self.add_log({
+                    't': 'rp',
+                    'p': pid
+                })
+                
+                break
             
 # card stuff
 

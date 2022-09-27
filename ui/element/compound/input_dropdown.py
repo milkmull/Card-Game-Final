@@ -12,6 +12,7 @@ class Input_Dropdown(Dropdown, Input):
             self,
             selection,
             cursor=self.cursor,
+            clip=True,
             **kwargs
         )
         
@@ -20,13 +21,15 @@ class Input_Dropdown(Dropdown, Input):
             tag='left_click',
             func=self.flip
         )
-        
-        self.listeners.pop(-1)
+
+        self._events['left_click'].pop(-1)
         
     @property
     def click_close(self):
         return not (self.hit or self.hit_any()) and self.is_open
+
+    def update(self):
+        Input.update(self)
         
     def draw(self, surf):
         Input.draw(self, surf)
-        self.child_draw(surf)

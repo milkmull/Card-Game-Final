@@ -57,7 +57,7 @@ class Spot:
         
 # setting card stuff
 
-    def set_card(self, card):
+    def set_card(self, card, parent=None):
         self.card = card
         card.spot = self
 
@@ -65,7 +65,8 @@ class Spot:
             't': 'sc',
             'c': (card.cid, card.name),
             'p': card.player.pid,
-            'pos': self.pos
+            'pos': self.pos,
+            'parent': parent.cid if parent else None
         })
         
     def kill_card(self, other):

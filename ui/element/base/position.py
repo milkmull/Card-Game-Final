@@ -87,7 +87,7 @@ class Position(Base_Element):
     @property
     def total_rect(self):
         self.update_position()
-        return self.rect.unionall([c.total_rect for c in self.children if c.visible])
+        return self.rect.unionall([c.total_rect for c in self.children if c.visible and isinstance(c, Position)])
         
     @property
     def all_children(self):
@@ -145,6 +145,14 @@ class Position(Base_Element):
     @height.setter
     def height(self, height):
         self.size = (self.rect.width, height)
+        
+    @property
+    def center(self):
+        return self.rect.center
+        
+    @center.setter
+    def center(self, center):
+        self.rect.center = center
         
     @property
     def left_offset(self):

@@ -20,7 +20,6 @@ cursors = (
 class Base_Loop:
     FPS = 30
     TIME_STEP = 1
-    LAST_EVENT_BATCH = []
     CTRL = False
     
     @classmethod
@@ -35,33 +34,40 @@ class Base_Loop:
         events = {}
         events['all'] = event_batch
         events['p'] = pg.mouse.get_pos()
+        
         for e in event_batch:
-            if e.type == pg.QUIT:
-                events['q'] = e
-            elif e.type == pg.MOUSEBUTTONDOWN:
-                events['mbd'] = e
-                events['mbd_a'] = e
-            elif e.type == pg.MOUSEBUTTONUP:
-                events['mbu'] = e
-            elif e.type == pg.MOUSEWHEEL:
-                events['mw'] = e
-            elif e.type == pg.MOUSEMOTION:
-                events['mm'] = e
-            elif e.type == pg.KEYDOWN:
-                events['kd'] = e
-                if e.key == pg.K_ESCAPE:
-                    events['e'] = e
-                elif e.key == pg.K_RCTRL or e.key == pg.K_LCTRL:
-                    cls.CTRL = True
-            elif e.type == pg.KEYUP:
-                events['ku'] = e
-                if e.key == pg.K_RCTRL or e.key == pg.K_LCTRL:
-                    cls.CTRL = False
-            elif e.type == pg.TEXTINPUT:
-                events['text'] = e
+        
+            match e.type:
+                
+                case pg.QUIT:
+                    events['q'] = e
+                    
+                case pg.MOUSEBUTTONDOWN:
+                    events['mbd'] = e
+                    events['mbd_a'] = e
+                case pg.MOUSEBUTTONUP:
+                    events['mbu'] = e
+                    
+                case pg.MOUSEWHEEL:
+                    events['mw'] = e
+                
+                case pg.KEYDOWN:
+                    events['kd'] = e
+                    if e.key == pg.K_ESCAPE:
+                        events['e'] = e
+                    elif e.key == pg.K_RCTRL or e.key == pg.K_LCTRL:
+                        cls.CTRL = True
+                case pg.KEYUP:
+                    events['ku'] = e
+                    if e.key == pg.K_RCTRL or e.key == pg.K_LCTRL:
+                        cls.CTRL = False
+                        
+                case pg.TEXTINPUT:
+                    events['text'] = e
 
         events['ctrl'] = cls.CTRL
-        cls.LAST_EVENT_BATCH = events.copy()
+        events['cursor_set'] = False
+        events['clicked'] = None
 
         return events
     
@@ -82,7 +88,6 @@ class Base_Loop:
         self.can_quit = can_quit
         self.elements = elements or []
         self.fill_color = fill_color
-        self.current_event_batch = {}
 
     def set_status(self, status):
         self.status = status
@@ -94,6 +99,7 @@ class Base_Loop:
     def remove_element(self, element):
         while element in self.elements:
             self.elements.remove(element)
+        element.set_scene(None)
             
     def get_events(self):
         return Base_Loop.get_event_batch()
@@ -109,9 +115,6 @@ class Base_Loop:
         pg.quit()
         sys.exit()
         
-    def get_current_events(self):
-        return self.current_event_batch
-        
     def sub_events(self, events):
         for e in sorted(self.elements, key=lambda e: e.layer, reverse=True):
             if e.enabled:
@@ -119,18 +122,17 @@ class Base_Loop:
                 
     def events(self):
         events = self.get_events()
-        self.current_event_batch = events
 
         if self.can_quit:
-            if events.get('q'):
+            if 'q' in events:
                 self.quit()
-            elif events.get('e'):
+            elif 'e' in events:
                 self.exit()
                 return {}
 
         self.sub_events(events)
         
-        if 'cursor_set' not in events:
+        if not events['cursor_set']:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
             
         return events

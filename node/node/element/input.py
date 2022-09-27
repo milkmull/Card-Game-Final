@@ -1,6 +1,5 @@
 from ui.element.base.text_element import Text_Element
 from ui.element.standard.input import Input
-from ui.color.ops import style_text
 
 class Logged_Input(Input):
     def __init__(
@@ -171,7 +170,7 @@ class Logged_Code_Input(Logged_Input):
         )
         
     def set_text(self, text):
-        self.text_style = style_text(text)
+        self.text_style = self.style_text(text)
         super().set_text(text)
         
 class Logged_Label_Input(Logged_Input):

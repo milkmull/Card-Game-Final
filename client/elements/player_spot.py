@@ -2,7 +2,6 @@ import pygame as pg
 
 from ui.element.elements import Textbox, Image
 from ui.element.utils.image import get_arrow
-from ui.color.ops import color_text
 from ui.icons.icons import icons
 
 from .points_spot import Points_Spot

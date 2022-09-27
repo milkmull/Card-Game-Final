@@ -15,10 +15,19 @@ class Text_Element(Element, Text):
         if tuple(self.size) != tuple(size):
             self.rect.size = size
             self.fit_text()
-        
+
+    def set_hover_text_color(self, hover_text_color):
+        self.add_animation(
+            [{
+                'attr': 'text_color',
+                'end': hover_text_color
+            }],
+            tag='hover'
+        )
+
     def set_text(self, text, force=False, style=None):
         super().set_text(text, force=force, style=style)
-        self.run_events('set')
+        self.run_events('set_text')
         
     def draw(self, surf):
         self.draw_rect(surf)
@@ -26,8 +35,8 @@ class Text_Element(Element, Text):
             clip = surf.get_clip()
             surf.set_clip(self.clip_rect)
             self.draw_text(surf)
-            self.child_draw(surf)
             surf.set_clip(clip)
+            self.child_draw(surf)
         else:
             self.draw_text(surf)
             self.child_draw(surf)

@@ -52,6 +52,7 @@ class Player_Base:
         self.played = True
         self.decks['play'].clear()
         self.decks['selection'].clear()
+        self.active_card = None
         self.log.clear()
         self.update_score(0)
 

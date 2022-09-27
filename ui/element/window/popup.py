@@ -1,20 +1,21 @@
+import pygame as pg
+
 from .static_window import Static_Window
 from .live_window import Live_Window
 from ..standard.button import Button
-from ..utils.image import transform, get_arrow
+from ..utils.image import get_arrow
 
 class Popup_Base:
-    default_animation_kwargs = {
+    animation_defaults = {
         'frames': 15
     }
     
-    default_arrow_kwargs = {
-        'size': (16, 16)
+    arrow_defaults = {
+        'size': (20, 20)
     }
 
-    default_button_kwargs = {
-        'hover_color': (100, 100, 100),
-        'pad': 4
+    button_defaults = {
+        'hover_color': (100, 100, 100)
     }
 
     def __init__(
@@ -29,23 +30,24 @@ class Popup_Base:
     ):
     
         self.dir = dir
-        self.animation_kwargs = (Popup_Base.default_animation_kwargs | animation_kwargs)
-            
-        arrow = get_arrow(dir, **(Popup_Base.default_arrow_kwargs | arrow_kwargs))
+        self.animation_kwargs = (Popup_Base.animation_defaults | animation_kwargs)
+
+        arrow = get_arrow(dir, **(Popup_Base.arrow_defaults | arrow_kwargs))
         self.button = Button.Image_Button(
             image=arrow,
             func=self.open_close,
-            **(Popup_Base.default_button_kwargs | button_kwargs)
+            **(Popup_Base.button_defaults | button_kwargs)
         )
         
-        if dir == '^':
-            self.button.rect.bottomright = (self.rect.right, self.rect.top - 15)
-        elif dir == 'v':
-            self.button.rect.topright = (self.rect.right, self.rect.bottom + 15)
-        elif dir == '>':
-            self.button.rect.topleft = (self.rect.right + 15, self.rect.bottom - self.button.size[1])
-        elif dir == '<':
-            self.button.rect.topright = (self.rect.left - 15, self.rect.bottom - self.button.size[1])  
+        match dir:
+            case '^':
+                self.button.rect.bottomright = (self.rect.right, self.rect.top - 15)
+            case 'v':
+                self.button.rect.topright = (self.rect.right, self.rect.bottom + 15)
+            case '>':
+                self.button.rect.topleft = (self.rect.right + 15, self.rect.bottom - self.button.size[1])
+            case '<':
+                self.button.rect.topright = (self.rect.left - 15, self.rect.bottom - self.button.size[1])  
             
         self.open_animation = self.add_animation(
             [{
@@ -80,11 +82,11 @@ class Popup_Base:
         self.open_animation.end_value = [end]
 
         super().open()
-        self.button.image = transform('rotate', self.button.image, 180)
+        self.button.image = pg.transform.flip(self.button.image, False, True)
         
     def close(self):
         super().close()
-        self.button.image = transform('rotate', self.button.image, 180)
+        self.button.image = pg.transform.flip(self.button.image, False, True)
 
     def events(self, events):
         if self.is_closed:

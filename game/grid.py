@@ -22,6 +22,15 @@ class Grid:
     @property
     def cards(self):
         return [spot.card for spot in self.spots if spot.card]
+        
+    def resize(self, size):
+        self.size = size
+        self.grid = {y: {x: Spot(self, (x, y)) for x in range(size[0])} for y in range(size[1])}
+        self.spots = [spot for y, row in self.grid.items() for x, spot in row.items()]
+        
+    def reset(self):
+        for spot in self.spots:
+            spot.card = None
     
     def copy_to(self, game):
         for y, row in self.grid.items():

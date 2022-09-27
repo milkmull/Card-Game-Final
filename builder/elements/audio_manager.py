@@ -6,15 +6,15 @@ import pygame as pg
 
 from ..media.audio_capture import Audio_Capture, get_sound_length
 
-from ui.menu.menu import Menu
-from ui.menu.templates.notice import Notice
+from ui.scene.scene import Scene
+from ui.scene.templates.notice import Notice
 
 from ui.element.base.position import Position
 from ui.element.elements import Textbox, Button, Slider, Live_Window, Label, Dropdown
 from ui.icons.icons import icons
 
-def select_device(menu, mic):
-    body = menu.body
+def select_device(scene, mic):
+    body = scene.body
     elements = []
     
     mic_select = Dropdown(
@@ -55,7 +55,7 @@ def select_device(menu, mic):
 
     def refresh():
         mic.refresh()
-        menu.refresh()
+        scene.refresh()
         
     exit_button = Button.Text_Button(
         text=icons['X'],
@@ -103,7 +103,7 @@ def select_device(menu, mic):
     
 def run_select_device(mic):
     if mic.devices:
-        Menu(select_device, init_args=[mic], overlay=True).run()
+        Scene(select_device, init_args=[mic], overlay=True).run()
     else:
         Notice(text_kwargs={'text': 'No audio recording devices could be found'}).run()
 

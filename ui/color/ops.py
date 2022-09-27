@@ -1,7 +1,5 @@
 import colorsys
 import math
-import re
-import keyword
 
 GOLDEN_RATIO = (1 + 5 ** 0.5) / 2
 
@@ -32,32 +30,3 @@ def is_light(c):
     
 def is_dark(c):
     return not is_light(c)
-    
-def color_text(c):
-    return (0, 0, 0) if not is_light(c) else (255, 255, 255)
-
-def style_text(text):
-    style = {}
-    
-    number_style = {'fgcolor': (255, 205, 34)}
-    for match in re.finditer(r'(?<![a-zA-Z0-9^_])([0-9]+)', text):
-        style.update({i: number_style for i in range(match.start(), match.end())})
-        
-    keyword_style = {'fgcolor': (147, 199, 99), 'style': 1}
-    for word in keyword.kwlist:
-        for match in re.finditer(fr'(?<![a-zA-Z0-9^_])({word})(?![a-zA-Z0-9^_])', text):
-            style.update({i: keyword_style for i in range(match.start(), match.end())})
-   
-    string_style = {'fgcolor': (236, 118, 0)}
-    for match in re.finditer(r'(["\'])(.*?)\1', text):
-        style.update({i: string_style for i in range(match.start(), match.end())})
-        
-    class_style = {'fgcolor': (160, 130, 189), 'style': 1}
-    for match in re.finditer(r'(?<=class )([a-zA-Z0-9_]+)', text):
-        style.update({i: class_style for i in range(match.start(), match.end())})
-        
-    def_style = {'fgcolor': (103, 140, 177), 'style': 1}
-    for match in re.finditer(r'(?<=def )([a-zA-Z0-9_]+)', text):
-        style.update({i: def_style for i in range(match.start(), match.end())})
-        
-    return style

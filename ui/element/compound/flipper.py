@@ -1,20 +1,18 @@
 import pygame as pg
 
 from ..base.text_element import Text_Element
-from ..base.image_element import Image_Element
 from ..standard.button import Button
 
 from ..utils.image import get_arrow
 
-class Flipper_Base:
-    default_arrow_kwargs = {
+class Flipper(Text_Element):
+    defaults = {
+        'center_aligned': True
+    }
     
-    }
-
-    default_button_kwargs = {
-        'hover_color': (100, 100, 100),
-        'border_radius': 10
-    }
+    @classmethod
+    def Counter(cls, range, *args, **kwargs):
+        return cls([str(i) for i in range], *args, **kwargs)
     
     def __init__(
         self,
@@ -31,18 +29,23 @@ class Flipper_Base:
         self.selection = selection
         self.index = index
         
+        super().__init__(text=self.selection[self.index], **(Flipper.defaults | kwargs))
+
+        if self.auto_fit:
+            self.auto_fit = False
+            self.size = self.get_max_size(self.selection)
+        
         if 'size' not in arrow_kwargs:
-            arrow_kwargs['size'] = (self.height - 11, self.height - 11)
+            arrow_kwargs = {'size': (self.rect.height - 5, self.rect.height - 5)} | arrow_kwargs
+            
         left_arrow = get_arrow(
             '<',
-            **(Flipper_Base.default_arrow_kwargs | arrow_kwargs)
+            **arrow_kwargs
         )
-        
-        if 'pad' not in button_kwargs:
-            button_kwargs['pad'] = 11
+
         left_button = Button.Image_Button(
             image=left_arrow,
-            **(Flipper_Base.default_button_kwargs | button_kwargs)
+            **button_kwargs
         )
         left_button.add_event(
             self.flip,
@@ -52,7 +55,7 @@ class Flipper_Base:
 
         right_button = Button.Image_Button(
             image=pg.transform.flip(left_arrow, True, False),
-            **(Flipper_Base.default_button_kwargs | button_kwargs)
+            **button_kwargs
         )
         right_button.add_event(
             self.flip,
@@ -60,8 +63,8 @@ class Flipper_Base:
             tag='left_click'
         )
         
-        self.add_child(left_button, left_anchor='left', left_offset=-20, centery_anchor='centery')
-        self.add_child(right_button, right_anchor='right', right_offset=20, centery_anchor='centery')
+        self.add_child(left_button, right_anchor='left', right_offset=-10, centery_anchor='centery')
+        self.add_child(right_button, left_anchor='right', left_offset=10, centery_anchor='centery')
         
     @property
     def current_value(self):
@@ -69,56 +72,11 @@ class Flipper_Base:
         
     def flip(self, dir):
         self.index = (self.index + dir) % len(self.selection)
+        self.set_text(self.current_value)
         
-class Flipper:
-
-    class Text_Flipper(Text_Element, Flipper_Base):
-        default_kwargs = {
-            'centerx_aligned': True,
-            'centery_aligned': True
-        }
+    def events(self, events):
+        super().events(events)
         
-        @classmethod
-        def Counter(cls, range, *args, **kwargs):
-            return cls([str(i) for i in range], *args, **kwargs)
-        
-        def __init__(
-            self,
-            *args,
-            **kwargs
-        ):
-            Text_Element.__init__(self, **(kwargs | Flipper.Text_Flipper.default_kwargs))
-            Flipper_Base.__init__(self, *args, **kwargs)
-            
-            if self.auto_fit:
-                self.auto_fit = False
-                self.size = self.get_max_size(self.selection)
-            
-            self.set_text(self.current_value)
-            
-        def flip(self, dir):
-            super().flip(dir)
-            self.set_text(self.current_value)
-
-    class Image_Flipper(Image_Element, Flipper_Base):
-        default_kwargs = {
-            'const_size': False
-        }
-        
-        def __init__(
-            self,
-            *args,
-            **kwargs
-        ):
-            Image_Element.__init__(self, **(kwargs | Flipper.Image_Flipper.default_kwargs))
-            Flipper_Base.__init__(self, *args, **kwargs)
-            
-            if self.auto_fit:
-                self.auto_fit = False
-                self.size = self.get_max_aspect(self.selection)
-            
-            self.set_image(self.current_value)
-            
-        def flip(self, dir):
-            super().flip(dir)
-            self.set_image(self.current_value)
+        if self.hit:
+            if (mw := events.get('mw')):
+                self.flip(mw.y)

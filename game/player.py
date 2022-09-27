@@ -8,6 +8,7 @@ class Player(player_base.Player_Base):
         
         self.player_info = player_info
         self.log_index = 0
+        self.turn_timer = 0
         
     @property
     def is_auto(self):
@@ -109,7 +110,7 @@ class Auto_Player(Player):
         self.timer = 0
 
     def set_timer(self):
-        self.timer = random.randrange(200, 300)
+        self.timer = random.randrange(200, 250)
         
     def timer_up(self):
         return self.timer <= 0

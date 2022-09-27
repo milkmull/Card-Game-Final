@@ -9,9 +9,9 @@ from .custom_card_base import Card
 from node.editor import Node_Editor
 from node.screens.info_sheet import run as run_info_sheet
 
-from ui.menu.menu import Menu
-from ui.menu.templates.notice import Notice
-from ui.menu.templates.yes_no import Yes_No
+from ui.scene.scene import Scene
+from ui.scene.templates.notice import Notice
+from ui.scene.templates.yes_no import Yes_No
 
 from .camera import run as run_camera
 
@@ -23,7 +23,7 @@ from ui.icons.icons import icons
 from .elements.rgb_slider import RGB_Slider
 from .elements.audio_manager import Audio_Manager
 
-def get_section(elements, label, menu):
+def get_section(elements, label, scene):
     r = elements[0].rect.unionall([e.padded_rect for e in elements]).inflate(20, 30)
     section = Element(
         size=r.size,
@@ -39,7 +39,7 @@ def get_section(elements, label, menu):
     label = Textbox(
         text=label,
         text_size=15,
-        fill_color=menu.fill_color,
+        fill_color=scene.fill_color,
         left_pad=5,
         right_pad=5,
         layer=-1
@@ -49,10 +49,10 @@ def get_section(elements, label, menu):
     
     return section
 
-def builder(menu):
-    body = menu.body
-    menu.card.rect.midleft = (15, body.centery)
-    elements = [menu.card]
+def builder(scene):
+    body = scene.body
+    scene.card.rect.midleft = (15, body.centery)
+    elements = [scene.card]
 
     button_kwargs = {
         'text_size': 15,
@@ -77,7 +77,7 @@ def builder(menu):
     
     save_button = Button.Text_Button(
         text='Save',
-        func=menu.save_card,
+        func=scene.save_card,
         **button_kwargs
     )
     save_button.rect.topleft = (x, y)
@@ -93,36 +93,36 @@ def builder(menu):
     
     y += save_button.rect.height + 3
     
-    if menu.card.id != 0:
+    if scene.card.id != 0:
     
         publish_button = Button.Text_Button(
             text='Publish',
-            func=menu.publish_card,
+            func=scene.publish_card,
             **button_kwargs
         )
         publish_button.rect.topleft = (x, y)
         save_elements.append(publish_button)
         
         publish_icon = Check_Box(
-            value=menu.card.published,
+            value=scene.card.published,
             outline_color=(0, 0, 0),
             outline_width=2
         )
         publish_button.add_child(publish_icon, right_anchor='right', right_offset=-3, centery_anchor='centery', centery_offset=-1)
         publish_icon.set_enabled(False) 
-        menu.elements_dict['published'] = publish_icon
+        scene.published = publish_icon
 
         publish_icon.add_event(
             tag='update',
             func=publish_icon.set_value,
-            args=[menu.card.get_published]
+            args=[scene.card.get_published]
         )
         
         y += publish_button.rect.height + 3
     
     export_button = Button.Text_Button(
         text='Export As Image',
-        func=menu.export_image,
+        func=scene.export_image,
         **button_kwargs
     )
     export_button.rect.topleft = (x, y)
@@ -136,23 +136,23 @@ def builder(menu):
     export_button.add_child(export_icon, right_anchor='right', centery_anchor='centery')
     export_icon.set_enabled(False) 
     
-    save_section = get_section(save_elements, 'Save:', menu)
-    save_section.rect.topleft = (menu.card.rect.right + 20, 20)
+    save_section = get_section(save_elements, 'Save:', scene)
+    save_section.rect.topleft = (scene.card.rect.right + 20, 20)
     elements.append(save_section)
     
 # weight section
 
-    if menu.card.id != 0:
+    if scene.card.id != 0:
 
-        weight_flipper = Flipper.Text_Flipper.Counter(
+        weight_flipper = Flipper.Counter(
             range(1, 5),
-            index=menu.card.weight - 1,
+            index=scene.card.weight - 1,
             button_kwargs={
                 'pad': 5,
                 'border_radius': 5
             }
         )
-        weight_section = get_section([weight_flipper], 'Rarity:', menu)
+        weight_section = get_section([weight_flipper], 'Rarity:', scene)
         weight_section.rect.inflate_ip(100, 0)
         weight_flipper.rect.center = weight_section.rect.center
         weight_flipper.set_stuck(True)
@@ -160,7 +160,7 @@ def builder(menu):
 
         weight_flipper.add_event(
             tag='set',
-            func=menu.card.set_weight,
+            func=scene.card.set_weight,
             args=[lambda: int(weight_flipper.get_text())]
         )
     
@@ -168,26 +168,25 @@ def builder(menu):
 
         type_select = Dropdown(
             TYPES_DICT,
-            selected=menu.card.type,
+            selected=scene.card.type,
             left_pad=5,
             right_pad=25,
             y_pad=2,
             hover_color=(100, 100, 100),
             window_kwargs = {
-                'fill_color': menu.fill_color,
+                'fill_color': scene.fill_color,
                 'outline_color': (255, 255, 255),
                 'outline_width': 3
             }
         )
-        type_select.arrow.set_anchors(left='right', left_offset=7, centery='centery')
-        
-        type_section = get_section([type_select], 'Type:', menu)
+
+        type_section = get_section([type_select], 'Type:', scene)
         type_section.layer = 2
         elements.append(type_section)
 
         type_select.add_event(
-            tag='set',
-            func=menu.card.set_type,
+            tag='set_text',
+            func=scene.card.set_type,
             args=[type_select.get_text]
         )
     
@@ -215,7 +214,7 @@ def builder(menu):
             tag.add_child(b, current_offset=True)
             
             def clear(tag=tag, b=b, tags=tags):
-                menu.card.remove_tag(tag.text)
+                scene.card.remove_tag(tag.text)
                 tag.clear()
                 current_tags = sorted([t.text for t in tags], key=lambda text: not text)
                 for tag, text in zip(tags, current_tags):
@@ -229,7 +228,7 @@ def builder(menu):
 
             y += tag.rect.height + 5
             
-        for tag, textbox in zip(menu.card.tags, tags):
+        for tag, textbox in zip(scene.card.tags, tags):
             textbox.set_text(tag)
             textbox.first_born.turn_on()
             
@@ -247,7 +246,7 @@ def builder(menu):
 
         tag_select = Input_Dropdown(
             TAGS_DICT,
-            selected=menu.card.tags[0] if menu.card.tags else None,
+            selected=scene.card.tags[0] if scene.card.tags else None,
             max_length=10,
             max_lines=1,
             text_check=lambda text: text.isalpha(),
@@ -257,9 +256,8 @@ def builder(menu):
             y_pad=2,
             fill_color=(255, 255, 255),
             text_color=(0, 0, 0),
-            clip=True,
             window_kwargs={
-                'fill_color': menu.fill_color,
+                'fill_color': scene.fill_color,
                 'outline_color': (255, 255, 255),
                 'outline_width': 3
             },
@@ -280,12 +278,12 @@ def builder(menu):
         )
         tag_elements.append(line)
         
-        tags_section = get_section(tag_elements, 'Tags:', menu)
+        tags_section = get_section(tag_elements, 'Tags:', scene)
         elements.append(tags_section)
 
         def add_tag():
             text = tag_select.text
-            if menu.card.add_tag(text):
+            if scene.card.add_tag(text):
                 for tag in tags:
                     if not tag.text:
                         tag.set_text(text)
@@ -311,7 +309,7 @@ def builder(menu):
     
     file_button = Button.Text_Button(
         text='Import Image',
-        func=menu.open_image,
+        func=scene.open_image,
         **button_kwargs
     )
     file_button.rect.topleft = (x, y)
@@ -330,7 +328,7 @@ def builder(menu):
     def take_picture():
         picture = run_camera()
         if picture:
-            menu.card.update_image(picture)
+            scene.card.update_image(picture)
             
     camera_button = Button.Text_Button(
         text='Use Camera',
@@ -351,7 +349,7 @@ def builder(menu):
 
     rotate_button = Button.Text_Button(
         text='Rotate Image',
-        func=menu.card.rotate_image,
+        func=scene.card.rotate_image,
         **button_kwargs
     )
     rotate_button.rect.topleft = (x, y)
@@ -376,7 +374,7 @@ def builder(menu):
     aspect_button.rect.topleft = (x, y)
     image_elements.append(aspect_button)
     
-    keep_aspect = menu.card.elements_dict['pic'].keep_aspect
+    keep_aspect = scene.card._pic.keep_aspect
     aspect_icon = Textbox(
         text=icons['check'] if keep_aspect else icons['X'],
         text_color=(0, 255, 0) if keep_aspect else (255, 0, 0),
@@ -386,8 +384,8 @@ def builder(menu):
     aspect_icon.set_enabled(False)
     
     def set_keep_aspect():
-        keep_aspect = menu.card.elements_dict['pic'].keep_aspect
-        menu.card.set_image_keep_aspect(not keep_aspect)
+        keep_aspect = scene.card._pic.keep_aspect
+        scene.card.set_image_keep_aspect(not keep_aspect)
         keep_aspect = not keep_aspect
         
         if keep_aspect:
@@ -408,7 +406,7 @@ def builder(menu):
     outline_button.rect.topleft = (x, y)
     image_elements.append(outline_button)
     
-    outline = bool(menu.card.elements_dict['pic'].outline_color)
+    outline = bool(scene.card._pic.outline_color)
     outline_icon = Textbox(
         text=icons['check'] if outline else icons['X'],
         text_color=(0, 255, 0) if outline else (255, 0, 0),
@@ -418,8 +416,8 @@ def builder(menu):
     outline_icon.set_enabled(False)
     
     def set_outline():
-        outline = bool(menu.card.elements_dict['pic'].outline_color)
-        menu.card.set_image_outline(not outline)
+        outline = bool(scene.card._pic.outline_color)
+        scene.card.set_image_outline(not outline)
         outline = not outline
         
         if outline:
@@ -441,7 +439,7 @@ def builder(menu):
     )
     image_elements.append(line)
 
-    image_section = get_section(image_elements, 'Image:', menu)
+    image_section = get_section(image_elements, 'Image:', scene)
     elements.append(image_section)
     
 # color section
@@ -459,25 +457,24 @@ def builder(menu):
             outline_color=(255, 255, 255),
             outline_width=1
         )
-        rgb_slider.set_state(menu.card.color[i])
+        rgb_slider.set_state(scene.card.color[i])
         rgb_slider.rect.topleft = (x, y)
         color_elements.append(rgb_slider)
-        menu.elements_dict[channel] = rgb_slider
-        
+
         y += rgb_slider.rect.height + 20
 
-    color_section = get_section(color_elements, 'Color:', menu)
+    color_section = get_section(color_elements, 'Color:', scene)
     elements.append(color_section)
 
     color_section.add_event(
         tag='update',
-        func=lambda: menu.card.set_color([e.get_state() for e in color_elements])
+        func=lambda: scene.card.set_color([e.get_state() for e in color_elements])
     )
  
 # audio section
 
-    am = Audio_Manager(menu.card)
-    audio_section = get_section([am], 'Audio:', menu)
+    am = Audio_Manager(scene.card)
+    audio_section = get_section([am], 'Audio:', scene)
     audio_section.rect.topleft = (color_section.rect.left, color_section.rect.bottom + 20)
     
     elements.append(audio_section)
@@ -506,11 +503,11 @@ def builder(menu):
     
     y += back_button.rect.height + 3
     
-    if menu.card.id != 0:
+    if scene.card.id != 0:
     
         node_button = Button.Text_Button(
             text='Node Editor',
-            func=menu.node_editor.run,
+            func=scene.node_editor.run,
             **button_kwargs
         )
         node_button.rect.topleft = (x, y)
@@ -542,13 +539,13 @@ def builder(menu):
         info_button.add_child(info_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
         info_icon.set_enabled(False) 
     
-    navigation_section = get_section(navigation_elements, 'Navigation:', menu)
+    navigation_section = get_section(navigation_elements, 'Navigation:', scene)
     navigation_section.rect.topleft = (save_section.rect.right + 20, 20)
     elements.append(navigation_section)
     
 # selection
     
-    if menu.card.id != 0:
+    if scene.card.id != 0:
         sections = {
             'type': type_section,
             'image': image_section,
@@ -571,16 +568,15 @@ def builder(menu):
             b = buttons[t]
             if t != tab:
                 section.turn_off()
-                b.freeze_animation(None)
+                b.unfreeze_animation('hover')
                 if not b.hit:
                     b.run_animations('hover', reverse=True)
             else:
                 section.turn_on()
                 section.rect.center = (
-                    (body.right + menu.card.rect.right) // 2,
+                    (body.right + scene.card.rect.right) // 2,
                     body.centery
                 )
-                b.run_animations('hover')
                 b.freeze_animation('hover')
     
     x = save_section.rect.left
@@ -610,34 +606,36 @@ def builder(menu):
         elements.append(b)
         y += b.padded_rect.height + 15
         
-    if menu.card.id != 0:
-
+    if scene.card.id != 0:
+        
+        buttons['type'].run_animations('hover')
         set_tab('type')
         
         b = Button.Text_Button(
-            size=menu.card.elements_dict['type'].rect.size,
+            size=scene.card._type.rect.size,
             func=set_tab,
             args=['type'],
             layer=1
         )
-        b.set_parent(menu.card.elements_dict['type'], left_anchor='left', top_anchor='top')
+        b.set_parent(scene.card._type, left_anchor='left', top_anchor='top')
         elements.append(b)
         
         b = Button.Text_Button(
-            size=menu.card.elements_dict['tags'].rect.size,
+            size=scene.card._tags.rect.size,
             func=set_tab,
             args=['tags'],
             layer=1
         )
-        b.set_parent(menu.card.elements_dict['tags'], left_anchor='left', top_anchor='top')
+        b.set_parent(scene.card._tags, left_anchor='left', top_anchor='top')
         elements.append(b)
         
     else:
         
+        buttons['image'].run_animations('hover')
         set_tab('image')
     
     b = Button.Text_Button(
-        size=menu.card.elements_dict['pic'].rect.size,
+        size=scene.card._pic.rect.size,
         func=set_tab,
         args=['image'],
         layer=1
@@ -646,7 +644,7 @@ def builder(menu):
     
     b.add_event(
         tag='update',
-        func=lambda: setattr(b, 'rect',  menu.card.elements_dict['pic'].image_rect.copy())
+        func=lambda: setattr(b, 'rect',  scene.card._pic.image_rect.copy())
     )
     
     return elements
@@ -655,7 +653,7 @@ def run(info):
     b = Builder(info)
     b.run()
   
-class Builder(Menu):
+class Builder(Scene):
     def __init__(self, card_info):
         self.card = Card(**card_info)
         self.node_editor = Node_Editor(self.card, self)

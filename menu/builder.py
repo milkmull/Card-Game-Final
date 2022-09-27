@@ -3,15 +3,15 @@ from data.constants import CONSTANTS
 from spritesheet.customsheet import CUSTOMSHEET
 from builder.builder import run as run_builder
 
-from ui.menu.menu import Menu
-from ui.menu.templates.yes_no import Yes_No
+from ui.scene.scene import Scene
+from ui.scene.templates.yes_no import Yes_No
 from ui.element.elements import Textbox, Image, Button, Live_Window, Label
 from ui.math.position import center_elements_y
 
 CARD_WIDTH, CARD_HEIGHT = CONSTANTS['card_size']
 
-def card_edit_menu(menu, card):
-    body = menu.body
+def card_edit_scene(scene, card):
+    body = scene.body
     elements = []
 
     t = Textbox(
@@ -39,7 +39,7 @@ def card_edit_menu(menu, card):
         m = Yes_No(text_kwargs={'text': 'Are you sure you want to delete this card?'})
         if m.run():
             SAVE.del_card(data)
-            menu.exit()
+            scene.exit()
     
     if card['id'] != 0:
         b = Button.Text_Button(
@@ -64,11 +64,11 @@ def card_edit_menu(menu, card):
     return elements
     
 def run_card_edit(card):
-    m = Menu(card_edit_menu, init_args=[card])
+    m = Scene(card_edit_scene, init_args=[card])
     m.run()
 
-def builder_menu(menu):
-    body = menu.body
+def builder_scene(scene):
+    body = scene.body
     elements = []
     
     w = Live_Window(
@@ -123,7 +123,7 @@ def builder_menu(menu):
     return elements
     
 def run():
-    m = Menu(builder_menu)
+    m = Scene(builder_scene)
     m.run()
 
 

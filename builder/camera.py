@@ -2,18 +2,18 @@ import pygame as pg
 
 from .media.video_capture import Video_Capture
 
-from ui.menu.menu import Menu
-from ui.menu.templates.notice import Notice
+from ui.scene.scene import Scene
+from ui.scene.templates.notice import Notice
 
 from ui.element.base.element import Element
 from ui.element.elements import Textbox, Image, Button
 from ui.icons.icons import icons
 
-def camera(menu):
-    body = menu.body
+def camera(scene):
+    body = scene.body
     elements = []
     
-    image = menu.camera.get_frame()
+    image = scene.camera.get_frame()
     w, h = image.get_size()
     current_frame = Image(
         image=image,
@@ -23,7 +23,7 @@ def camera(menu):
     current_frame.rect.center = (body.centerx, body.centery - 20)
     
     def update_frame():
-        frame = menu.camera.get_frame()
+        frame = scene.camera.get_frame()
         if frame:
             current_frame.set_image(frame, overwrite=False)
     
@@ -113,7 +113,7 @@ def camera(menu):
     elements.append(retake_button)
     
     def start_camera():
-        menu.camera.start()
+        scene.camera.start()
         
         camera_button.set_enabled(True)
         
@@ -137,7 +137,7 @@ def camera(menu):
         if current_frame.moving:
             return
             
-        menu.camera.stop()
+        scene.camera.stop()
         
         camera_button.cancel_animation('hover')
         camera_button.set_enabled(False)
@@ -178,7 +178,7 @@ def camera(menu):
 
     return elements
     
-class Camera_Menu(Menu):
+class Camera_Scene(Scene):
     def __init__(self, **kwargs):
         super().__init__(camera, fill_color=(32, 32, 40), **kwargs)
         self.camera = Video_Capture()
@@ -188,7 +188,7 @@ class Camera_Menu(Menu):
         self.camera.close()
         
 def run():
-    m = Camera_Menu()
+    m = Camera_Scene()
     if m.camera.exists:
         return m.run()
     m = Notice(text_kwargs={'text': 'No video capture devices could be found.'})

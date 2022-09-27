@@ -1,11 +1,11 @@
-from ui.menu.menu import Menu
+from ui.scene.scene import Scene
 from ui.element.elements import Textbox, Button
 from ui.math.position import center_elements_y
 
 from .select_host import run as run_select_host
 
-def wireless_play_menu(menu):
-    body = menu.body
+def wireless_play_scene(scene):
+    body = scene.body
     elements = []
     
     button_kwargs = {
@@ -48,7 +48,7 @@ def wireless_play_menu(menu):
     return elements
     
 def run():
-    m = Menu(wireless_play_menu)
+    m = Scene(wireless_play_scene)
     m.run()
 
 

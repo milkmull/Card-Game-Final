@@ -53,20 +53,28 @@ class Game_Base:
         return g
 
 # new game stuff
-
-    def new_game(self):
+    
+    def reset(self):
         self.log.clear()
         self.community_deck.clear()
         self.multipliers.clear()
+        self.grid.reset()
         
         for p in self.players: 
             p.reset()
         self.cid = len(self.players)
         
+        self.turn = 0
+        self.current_turn = 0
+        
+        self.new_status('waiting')  
+
+    def new_game(self):
+        self.reset()
+        
         for p in self.players:
             p.start()
 
-        self.turn = 0
         self.current_turn = random.choice([p.pid for p in self.players])
 
         self.new_turn()

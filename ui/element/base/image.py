@@ -107,8 +107,8 @@ class Image:
     def fit_image(self):
         if self.image:
             
-            if self.rotation:
-                self.image = pg.transform.rotate(self.original_image, self.rotation)
+            if self._rotation:
+                self.image = pg.transform.rotate(self.original_image, self._rotation)
         
             if self.auto_fit:
                 self.rect.size = self.image_size

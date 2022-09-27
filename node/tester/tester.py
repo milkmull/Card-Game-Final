@@ -9,7 +9,7 @@ from game.game import game_base
 
 from .errors_screen import run as run_errors
 
-from ui.menu.templates.loading import Loading
+from ui.scene.templates.loading import Loading
 
 def step_test(t):
     t.step_sim()

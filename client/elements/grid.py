@@ -3,22 +3,22 @@ import pygame as pg
 from data.constants import CONSTANTS
 
 from ui.element.base.element import Element
+from ui.element.base.position import Position
 
-class Spot(Element):
+class Spot(Position):
     def __init__(self, client, pos):
         self.client = client
         self._pos = pos
         self.card = None
+        self.hover = False
         
         super().__init__(
-            size=CONSTANTS['mini_card_size'],
-            outline_color=(255, 255, 255),
-            outline_width=1
+            size=CONSTANTS['mini_card_size']
         )
         
     def click_up(self, button):
         if button == 1:
-            if self.client.held_card:
+            if self.client.held_card and not self.client.held_card.player:
                 self.client.send(f'play-{self.client.held_card.deck}-{self.client.held_card.cid}-{self._pos[0]}-{self._pos[1]}')
         
     def events(self, events):
@@ -27,11 +27,11 @@ class Spot(Element):
             return
             
         if self.rect.collidepoint(pg.mouse.get_pos()):
-            self.fill_color = (100, 100, 100)
+            self.hover = True
             if mbu := events.get('mbu'):
                 self.click_up(mbu.button)
         else:
-            self.fill_color = None
+            self.hover = False
         
     def set_card(self, card):
         self.card = card
@@ -42,8 +42,14 @@ class Spot(Element):
         if self.card:
             self.remove_child(self.card)
             self.card = None
+            
+    def draw(self, surf):
+        if self.hover and not self.card:
+            pg.draw.rect(surf, (100, 100, 100), self.rect)
+        super().draw(surf)
+        pg.draw.rect(surf, (255, 255, 255), self.rect, width=1)
 
-class Grid(Element):
+class Grid(Position):
     SPACE = 2
     def __init__(
         self,
@@ -59,7 +65,14 @@ class Grid(Element):
         )
         
         self.cards = {}
-                
+        self.spots = []
+        
+    def reset(self):
+        self.cards.clear()
+        
+        for spot in self.spots:
+            spot.clear_card()
+   
     def set_size(self, size):
         if size == self.grid_size:
             return
@@ -72,7 +85,7 @@ class Grid(Element):
             (size[1] * CONSTANTS['ch']) + ((size[1] + 1) * Grid.SPACE)
         )
         
-        self.spots = []
+        self.spots.clear()
         for y, row in self.grid.items():
             for x, spot in row.items():
                 self.spots.append(spot)
@@ -94,5 +107,9 @@ class Grid(Element):
             
     def clear_card(self, pos):
         self.grid[pos[1]][pos[0]].clear_card()
+        
+    def draw(self, surf):
+        super().draw(surf)
+        pg.draw.rect(surf, (255, 255, 255), self.rect, width=1)
             
                 

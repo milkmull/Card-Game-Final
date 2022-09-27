@@ -110,6 +110,8 @@ class Moving_Card(Base_Element):
     def draw(self, surf):
         if self.rect.size == self.card.rect.size:
             surf.blit(self.card.get_image(), self.rect)
+            if self.card.player:
+                pg.draw.rect(surf, self.card.player.color, self.rect, width=4)
         else:
             surf.blit(pg.transform.smoothscale(self.base_image, self.rect.size), self.rect)
         

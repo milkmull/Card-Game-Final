@@ -10,7 +10,7 @@ from node.node.node_base import pack
 from node.compiler import Compiler
 from node.tester import tester
 
-from ui.menu.templates.notice import Notice
+from ui.scene.templates.notice import Notice
 
 from ui.element.base.image_element import Image_Element
 from ui.element.base.style import Style
@@ -75,15 +75,13 @@ class Card(Image_Element):
         card_image.fill((50, 50, 50))
         super().__init__(image=card_image)
 
-        self.elements_dict = {}
-
         bg = Style(
             size=self.rect.inflate(-30, -30).size,
             fill_color=color,
         )
         bg.rect.center = self.rect.center
         self.add_child(bg, current_offset=True)
-        self.elements_dict['bg'] = bg
+        self.bg = bg
         
         style_kwargs = {
             'outline_width': 2,
@@ -112,7 +110,7 @@ class Card(Image_Element):
         name.rect.centerx = bg.rect.centerx
         name.rect.y = 35
         self.add_child(name, current_offset=True)
-        self.elements_dict['name'] = name
+        self._name = name
 
         pic = Fitted_Image(
             image=(pg.image.load(image) if image else pg.Surface(IMAGE_SIZE)).convert_alpha(),
@@ -124,7 +122,7 @@ class Card(Image_Element):
         )
         pic.rect.centerx = bg.rect.centerx
         pic.rect.y = name.rect.bottom + 15
-        self.elements_dict['pic'] = pic
+        self._pic = pic
         self.add_child(pic, current_offset=True)
 
         desc = Input(
@@ -139,7 +137,7 @@ class Card(Image_Element):
         desc.rect.centerx = bg.rect.centerx
         desc.rect.y += 305
         self.add_child(desc, current_offset=True)
-        self.elements_dict['desc'] = desc
+        self._desc = desc
         
         text_kwargs['pad'] = 1
 
@@ -153,7 +151,7 @@ class Card(Image_Element):
         type.rect.x = pic.rect.x + 5
         type.rect.y += 480
         self.add_child(type, current_offset=True)
-        self.elements_dict['type'] = type
+        self._type = type
 
         tags = Textbox(
             size=(pic.rect.width - type.rect.width - 20, 20),
@@ -165,7 +163,7 @@ class Card(Image_Element):
         tags.rect.right = pic.rect.right - 5
         tags.rect.y += 480
         self.add_child(tags, current_offset=True)
-        self.elements_dict['tags'] = tags
+        self._tags = tags
 
     @property
     def id(self):
@@ -173,19 +171,19 @@ class Card(Image_Element):
       
     @property
     def name(self):
-        return self.elements_dict['name'].text.strip()
+        return self._name.text.strip()
         
     @property
     def type(self):
-        return self.elements_dict['type'].text
+        return self._type.text
         
     @property
     def description(self):
-        return self.elements_dict['desc'].text.strip()
+        return self._desc.text.strip()
         
     @property
     def tags(self):
-        return [tag for tag in self.elements_dict['tags'].text.strip('[]').split(', ') if tag]
+        return [tag for tag in self._tags.text.strip('[]').split(', ') if tag]
         
     @property
     def classname(self):
@@ -201,11 +199,11 @@ class Card(Image_Element):
         
     @property
     def color(self):
-        return list(self.elements_dict['bg'].fill_color)
+        return list(self.bg.fill_color)
         
     @property
     def pic(self):
-        return self.elements_dict['pic'].original_image
+        return self._pic.original_image
         
     @property
     def image_path(self):
@@ -223,9 +221,9 @@ class Card(Image_Element):
             'tags': self.tags, 
             'color': self.color, 
             'image': self.image_path,
-            'keep_aspect': self.elements_dict['pic'].keep_aspect,
-            'rotation': self.elements_dict['pic'].rotation,
-            'outline': bool(self.elements_dict['pic'].outline_color),
+            'keep_aspect': self._pic.keep_aspect,
+            'rotation': self._pic.rotation,
+            'outline': bool(self._pic.outline_color),
             'sound': self.sound,
             'id': self.cid,
             'weight': self.weight, 
@@ -242,24 +240,23 @@ class Card(Image_Element):
         return self.cid == 0
         
     def set_color(self, color):
-        self.elements_dict['bg'].fill_color = color
+        self.bg.fill_color = color
             
     def update_image(self, img):
-        self.elements_dict['pic'].set_image(img, overwrite=True)
+        self._pic.set_image(img, overwrite=True)
         
     def clear_image(self):
-        self.elements_dict['pic'].fill(self.color)
+        self._pic.fill(self.color)
         
     def set_image_keep_aspect(self, keep_aspect):
-        pic = self.elements_dict['pic']
-        pic.keep_aspect = keep_aspect
-        pic.reset_image()
+        self._pic.keep_aspect = keep_aspect
+        self._pic.reset_image()
         
     def rotate_image(self):
-        self.elements_dict['pic'].rotation += 90
+        self._pic.rotation += 90
         
     def set_image_outline(self, outline):
-        self.elements_dict['pic'].outline_color = None if not outline else (0, 0, 0)
+        self._pic.outline_color = None if not outline else (0, 0, 0)
         
     def get_card_image(self):
         img = self.image.copy()
@@ -270,24 +267,21 @@ class Card(Image_Element):
         pg.image.save(self.get_card_image(), filename)
         
     def set_type(self, type):
-        tb = self.elements_dict['type']
-        tb.set_text(type)
+        self._type.set_text(type)
 
     def add_tag(self, tag):
         tag = tag.strip()
         tags = self.tags
         if tag and tag not in tags and len(tags) < 3:
             tags.append(tag)
-            tb = self.elements_dict['tags']
-            tb.set_text(str(tags).replace("'", ''))
+            self._tags.set_text(str(tags).replace("'", ''))
             return 1
         
     def remove_tag(self, tag):
         tags = self.tags
         if tag in tags:
             tags.remove(tag)
-            tb = self.elements_dict['tags']
-            tb.set_text(str(tags).replace("'", '') if tags else '')
+            self._tags.set_text(str(tags).replace("'", '') if tags else '')
             
     def set_weight(self, weight):
         self.weight = weight
@@ -391,10 +385,10 @@ class Card(Image_Element):
         saved = CUSTOMSHEET.save_card(self)
         if not suppress:
             if not saved:
-                menu = Notice(text_kwargs={'text': 'A card with that name already exists.'}, overlay=True)
-                menu.run()
+                scene = Notice(text_kwargs={'text': 'A card with that name already exists.'}, overlay=True)
+                scene.run()
                 return
             else:
-                menu = Notice(text_kwargs={'text': 'Card saved successfully!'}, overlay=True)
-                menu.run()
+                scene = Notice(text_kwargs={'text': 'Card saved successfully!'}, overlay=True)
+                scene.run()
         return saved

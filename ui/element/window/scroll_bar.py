@@ -6,23 +6,21 @@ from ..standard.button import Button
 from ..utils.image import get_arrow
 
 class Scroll_Bar(Slider):
-    default_kwargs = {
+    defaults = {
         'fill_color': (255, 255, 255)
     }
     
-    default_handel_kwargs = {
+    handel_defaults = {
         'fill_color': (100, 100, 100),
         'outline_color': None
     }
     
-    default_arrow_kwargs = {
-        'size': (16, 16),
-        'padding': (6, 6),
+    arrow_defaults = {
         'color': (100, 100, 100),
         'background_color': (255, 255, 255)
     }
 
-    default_button_kwargs = {
+    button_defaults = {
         'fill_color': (255, 255, 255),
         'hover_color': (100, 100, 100),
         'layer': -1
@@ -58,8 +56,8 @@ class Scroll_Bar(Slider):
         super().__init__(
             size=(width, height),
             dir=dir,
-            handel_kwargs=(Scroll_Bar.default_handel_kwargs | handel_kwargs),
-            **(kwargs | Scroll_Bar.default_kwargs)
+            handel_kwargs=(Scroll_Bar.handel_defaults | handel_kwargs),
+            **(kwargs | Scroll_Bar.defaults)
         )
         
         self.no_wheel = no_wheel
@@ -70,18 +68,19 @@ class Scroll_Bar(Slider):
             
             arrow = get_arrow(
                 '^',
-                **(Scroll_Bar.default_arrow_kwargs | arrow_kwargs)
+                size=(self.rect.width, self.rect.width),
+                **(Scroll_Bar.arrow_defaults | arrow_kwargs)
             )
 
             self.up_button = Button.Image_Button(
                 image=arrow,
-                **(Scroll_Bar.default_button_kwargs | button_kwargs)
+                **(Scroll_Bar.button_defaults | button_kwargs)
             )
             self.up_button.add_event(self.scroll, args=[-1], tag='left_click')
 
             self.down_button = Button.Image_Button(
                 image=pg.transform.flip(arrow, False, True),
-                **(Scroll_Bar.default_button_kwargs | button_kwargs)
+                **(Scroll_Bar.button_defaults | button_kwargs)
             )
             self.down_button.add_event(self.scroll, args=[1], tag='left_click')
 
@@ -102,18 +101,19 @@ class Scroll_Bar(Slider):
             
             arrow = get_arrow(
                 '<',
-                **(Scroll_Bar.default_arrow_kwargs | arrow_kwargs)
+                size=(self.rect.height, self.rect.height),
+                **(Scroll_Bar.arrow_defaults | arrow_kwargs)
             )
             
             self.left_button = Button.Image_Button(
                 image=arrow,
-                **(Scroll_Bar.default_button_kwargs | button_kwargs)
+                **(Scroll_Bar.button_defaults | button_kwargs)
             )
             self.left_button.add_event(self.scroll, args=[-1], tag='left_click')
             
             self.right_button = Button.Image_Button(
                 image=pg.transform.flip(arrow, True, False),
-                **(Scroll_Bar.default_button_kwargs | button_kwargs)
+                **(Scroll_Bar.button_defaults | button_kwargs)
             )
             self.right_button.add_event(self.scroll, args=[1], tag='left_click')
             
@@ -216,7 +216,6 @@ class Scroll_Bar(Slider):
         super().events(events)
         
         if not self.no_wheel:
-            mw = events.get('mw')
-            if mw:
+            if (mw := events.get('mw')):
                 if self.can_scroll():
                     self.scroll(-mw.y)

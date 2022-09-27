@@ -17,7 +17,5 @@ class Image(Image_Element):
         **kwargs
     ):
         super().__init__(image=image, **kwargs)
-
-        self.fit_to_image()
         
 

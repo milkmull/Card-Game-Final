@@ -1,4 +1,3 @@
-
 class Event:
     def __init__(
         self,
@@ -7,16 +6,14 @@ class Event:
         args=None,
         kwargs=None,
         
-        no_call=False,
-        tag=''
+        no_call=False
     ):
         self.func = func
-        self.args = args if args is not None else []
-        self.kwargs = kwargs if kwargs is not None else {}
+        self.args = args or []
+        self.kwargs = kwargs or {}
         self.return_value = None
         
         self.no_call = no_call
-        self.tag = tag
         
     def __call__(self):
         if self.func is not None:
@@ -41,5 +38,3 @@ class Event:
         r = self.return_value
         self.return_value = None
         return r
-        
-    

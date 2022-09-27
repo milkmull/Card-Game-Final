@@ -9,14 +9,14 @@ from ..node.node_base import Node
 
 from .info_sheet import run as run_info_sheet
 
-from ui.menu.menu import Menu
+from ui.scene.scene import Scene
 
 from ui.element.base.base import Base_Element
+from ui.element.base.text import Text
 from ui.element.elements import Textbox, Button
 from ui.element.utils.image import get_arrow
-from ui.color.ops import color_text
 
-def set_text(menu, parent, text):
+def set_text(scene, parent, text):
     node_refs = {}
     sheet_refs = {}
     
@@ -41,8 +41,8 @@ def set_text(menu, parent, text):
     for (s, e), subtext in node_refs.items():
 
         def refresh(subtext=subtext):
-            menu.args = [subtext.strip("'").replace(' ', '_')]
-            menu.refresh()
+            scene.args = [subtext.strip("'").replace(' ', '_')]
+            scene.refresh()
 
         lines = []
         line = []
@@ -94,11 +94,11 @@ def set_text(menu, parent, text):
             parent.add_child(b, current_offset=True)
 
 def run(node):
-    m = Menu(info_menu, init_args=[node], fill_color=(32, 32, 40))
+    m = Scene(info_scene, init_args=[node], fill_color=(32, 32, 40))
     m.run()
     
-def info_menu(menu, name):
-    body = menu.body
+def info_scene(scene, name):
+    body = scene.body
     elements = []
 
     node = Node.from_name(name, id=0)
@@ -126,7 +126,7 @@ def info_menu(menu, name):
         inf_height=True,
         pad=5
     )
-    set_text(menu, node_info, data.get('info') or '')
+    set_text(scene, node_info, data.get('info') or '')
     node_info.rect.width = 400
     elements.append(node_info)
     
@@ -148,7 +148,7 @@ def info_menu(menu, name):
             else:
                 label.set_text('Info:')
                 text = data.get('info')
-            set_text(menu, node_info, text or '')
+            set_text(scene, node_info, text or '')
             node_info.rect.width = 400
         
         swap_button = Button.Image_Button(
@@ -184,7 +184,7 @@ def info_menu(menu, name):
             inf_height=False,
             pad=pad
         )
-        set_text(menu, port_text, port_data[port])
+        set_text(scene, port_text, port_data[port])
         port_text.rect.topleft = (550, 50)
         elements.append(port_text)
         
@@ -195,7 +195,7 @@ def info_menu(menu, name):
             x_pad=2 * pad,
             top_pad=pad,
             fill_color=color,
-            text_color=color_text(color)
+            text_color=Text.color_text(color)
         )
         port_label.rect.bottomleft = (port_text.rect.left, port_text.rect.top - (2 * pad))
         port_text.add_child(
@@ -233,8 +233,8 @@ def info_menu(menu, name):
             color = node.get_port(int(port)).color
             
             port_text.outline_color = color
-            set_text(menu, port_text, port_data[port])
-            port_label.text_color = color_text(color)
+            set_text(scene, port_text, port_data[port])
+            port_label.text_color = Text.color_text(color)
             port_label.fill_color = color
             port_label.set_text(f'Port {port}:')
             
@@ -297,8 +297,8 @@ def info_menu(menu, name):
         
     else:
         node.rect.center = (
-            (node_info.rect.right + menu.body.right) // 2,
-            menu.body.centery
+            (node_info.rect.right + scene.body.right) // 2,
+            scene.body.centery
         )
         
     back_button = Button.Text_Button(

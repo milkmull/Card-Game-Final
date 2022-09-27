@@ -46,7 +46,6 @@ class Card(Position):
             if (mbd := events.pop('mbd', None)):
                 
                 match mbd.button:
-                    
                     case 1:
                         self.left_click()
                     case 3:
@@ -59,4 +58,4 @@ class Card(Position):
         surf.blit(self.get_image(), self.rect)
         
         if self.player:
-            pg.draw.rect(surf, self.player.color, self.rect, width=2)
+            pg.draw.rect(surf, self.player.color, self.rect, width=4)

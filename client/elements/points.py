@@ -13,8 +13,7 @@ class Points(Position, Text):
         card,
         player, 
         points,
-        target=None, 
-        parent=None
+        target=None
     ):
     
         Position.__init__(
@@ -35,11 +34,9 @@ class Points(Position, Text):
         self.player = player
         self.points = points
         self.card = card
+        self.rect.center = self.card.rect.center
 
-        self.rect.center = card.rect.center
-        
         self.animations = []
-        self.set_animation(parent)
 
     @property
     def center(self):
@@ -72,12 +69,16 @@ class Points(Position, Text):
         self.remove_child(child)
         
     def add_child_points(self, points, card, target=None):
-        self.add_child(Points(card, self.player, points, target=target, parent=self))
+        self.add_child(Points(card, self.player, points, target=target))
+        
+    def start(self):
+        self.set_animation()
+        for c in self.children:
+            c.start()
    
     def end(self):
         if self.parent:
             self.parent.merge(self)
-            self.parent.remove_child(self)
         
     def update(self):
         super().update()
@@ -94,12 +95,16 @@ class Points(Position, Text):
         if not self.points:
             self.child_draw(surf)
         else:
-            super().draw(surf)
+            self.child_draw(surf)
             self.draw_text(surf)
             
-    def set_animation(self, parent):
-        delay = 60 if not parent else 10
-        end = self.player.spot.points_spot.rect.center if not parent else parent.rect.center
+    def set_animation(self):
+        if self.parent:
+            delay = 10
+            end = self.parent.rect.center
+        else:
+            delay = 60
+            end = self.player.spot.points_spot.rect.center
 
         self.add_animation([{
             'attr': 'center',

@@ -1,15 +1,15 @@
 from data.save import SAVE
 from network.net_base import get_public_ip, get_local_ip
 
-from ui.menu.menu import Menu
-from ui.menu.templates.yes_no import Yes_No
+from ui.scene.scene import Scene
+from ui.scene.templates.yes_no import Yes_No
 from ui.element.base.style import Style
 from ui.element.elements import Textbox, Label, Button, Input, Live_Window
 from ui.math.position import center_elements_y
 from ui.icons.icons import icons
 
-def new_entry(menu):
-    body = menu.body
+def new_entry(scene):
+    body = scene.body
     elements = []
     
     input_kwargs = {
@@ -85,11 +85,11 @@ def new_entry(menu):
     return elements
     
 def run_new_entry():
-    m = Menu(new_entry, overlay=True)
+    m = Scene(new_entry, overlay=True)
     m.run()
 
-def select_host(menu):
-    body = menu.body
+def select_host(scene):
+    body = scene.body
     elements = []
     
     w = Live_Window(size=(300, 400), fill_color=(100, 0, 0))
@@ -133,11 +133,11 @@ def select_host(menu):
     return elements
     
 def run():
-    m = Menu(select_host)
+    m = Scene(select_host)
     m.run()
 
-def join_game(menu, name, ip):
-    body = menu.body
+def join_game(scene, name, ip):
+    body = scene.body
     elements = []
     
     s = Style(
@@ -237,11 +237,11 @@ def join_game(menu, name, ip):
     return elements
     
 def run_join_game(name, ip):
-    m = Menu(join_game, init_args=[name, ip])
+    m = Scene(join_game, init_args=[name, ip])
     m.run()
     
-def view_ip(menu):
-    body = menu.body
+def view_ip(scene):
+    body = scene.body
     elements = []
     
     public_ip = get_public_ip()
@@ -314,7 +314,7 @@ def view_ip(menu):
     return elements
     
 def run_view_ip():
-    m = Menu(view_ip)
+    m = Scene(view_ip)
     m.run()
     
 def add_new_entry(name_input, ip_input):
@@ -324,8 +324,8 @@ def add_new_entry(name_input, ip_input):
     })
     
 def del_entry(entry):
-    menu = Yes_No(text_kwargs={'text': 'Delete this entry?'}, overlay=True)
-    if menu.run():
+    scene = Yes_No(text_kwargs={'text': 'Delete this entry?'}, overlay=True)
+    if scene.run():
         SAVE.del_ips(entry)
 
 

@@ -27,6 +27,7 @@ class Base_Element:
         self._id = Base_Element.new_id()
         self.tag = tag
         self.layer = layer
+        self.scene = None
         
         if events:
             self.events = MethodType(events, self)
@@ -56,6 +57,9 @@ class Base_Element:
     def set_leftover_attr(self):
         for name, value in self.leftover_kwargs.items():
             setattr(self, name, value)
+            
+    def set_scene(self, scene):
+        self.scene = scene
             
     def set_tag(self, tag):
         self.tag = tag

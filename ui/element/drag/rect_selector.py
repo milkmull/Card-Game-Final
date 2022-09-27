@@ -18,7 +18,7 @@ class Rect_Selector(Base_Element):
     ):
         super().__init__(layer=layer, **kwargs)
         
-        self.selection = selection if selection is not None else Dragger.DRAGGERS
+        self.selection = selection or Dragger.DRAGGERS
         self.anchor = None
         self.rect = pg.Rect(0, 0, 0, 0)
         
@@ -36,21 +36,18 @@ class Rect_Selector(Base_Element):
         
     def events(self, events):
         if events['ctrl']:
-            kd = events.get('kd')
-            if kd:
+            if (kd := events.get('kd')):
                 if kd.key == pg.K_a:
                     Dragger.select_all()
                     events.pop('kd')
                     
         else:
-            mbd = events.get('mbd')
-            if mbd:
+            if not events['clicked'] and (mbd := events.get('mbd')):
                 if mbd.button == 1:
                     self.anchor = mbd.pos
-                    events.pop('mbd')
+                    events['clicked'] = self
 
-            mbu = events.get('mbu')
-            if mbu:
+            if (mbu := events.get('mbu')):
                 if mbu.button == 1:
                     self.select()
                     self.anchor = None

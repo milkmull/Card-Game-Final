@@ -1,4 +1,4 @@
-from ui.menu.menu import Menu
+from ui.scene.scene import Scene
 from ui.element.elements import Textbox, Button
 from ui.icons.icons import icons
 
@@ -7,8 +7,8 @@ from .wireless_play import run as run_wireless_play
 from .builder import run as run_builder
 from .client import run_client_single
 
-def main_menu(menu):
-    body = menu.body
+def main_scene(scene):
+    body = scene.body
     elements = []
 
     button_kwargs = {
@@ -126,7 +126,7 @@ def main_menu(menu):
     return elements
     
 def run():
-    m = Menu(main_menu)
+    m = Scene(main_scene)
     m.run()
 
 

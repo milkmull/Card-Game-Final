@@ -5,18 +5,18 @@ from data.constants import INFO_SHEET_FILE
 from ..node.node_base import Node
 from ..compiler import Compiler
 
-from ui.menu.menu import Menu
+from ui.scene.scene import Scene
 from ui.element.elements import Textbox, Image, Button, Live_Window
 from ui.element.utils.image import get_arrow
 from ui.icons.icons import icons
 
-def run_flow_menu(type, nodes):
-    m = Menu(flow_menu, init_args=[type, nodes], overlay=True, opacity=220)
+def run_flow_scene(type, nodes):
+    m = Scene(flow_scene, init_args=[type, nodes], overlay=True, opacity=220)
     m.run()
     
-def flow_menu(menu, type, nodes):
+def flow_scene(scene, type, nodes):
     elements = []
-    body = menu.body
+    body = scene.body
     
     window = Live_Window(
         size=(0, 200),
@@ -75,13 +75,13 @@ def flow_menu(menu, type, nodes):
     
     return elements
 
-def run_key_menu(type, data):
-    m = Menu(key_menu, init_args=[type, data], overlay=True, opacity=220)
+def run_key_scene(type, data):
+    m = Scene(key_scene, init_args=[type, data], overlay=True, opacity=220)
     m.run()
 
-def key_menu(menu, type, data):
+def key_scene(scene, type, data):
     elements = []
-    body = menu.body
+    body = scene.body
     
     window = Live_Window(
         size=(450, 0),
@@ -146,12 +146,12 @@ def key_menu(menu, type, data):
     return elements
 
 def run(sheet='types'):
-    m = Menu(info_sheet, init_args=[sheet], fill_color=(32, 32, 40))
+    m = Scene(info_sheet, init_args=[sheet], fill_color=(32, 32, 40))
     m.run()
 
-def info_sheet(menu, sheet):
+def info_sheet(scene, sheet):
     elements = []
-    body = menu.body
+    body = scene.body
     
     with open(INFO_SHEET_FILE, 'r') as f:
         data = json.load(f)
@@ -213,7 +213,7 @@ def info_sheet(menu, sheet):
                     hover_color=(100, 100, 100),
                     right_pad=window.rect.width * 3 // 4,
                     y_pad=5,
-                    func=run_flow_menu,
+                    func=run_flow_scene,
                     args=[type, Compiler.REQUIRED.get(type, ())]
                 )
                 texts.append(type_tb)
@@ -232,7 +232,7 @@ def info_sheet(menu, sheet):
                     hover_color=(100, 100, 100),
                     right_pad=window.rect.width * 3 // 4,
                     y_pad=5,
-                    func=run_key_menu,
+                    func=run_key_scene,
                     args=[type, d['data']]
                 )
                 texts.append(type_tb)

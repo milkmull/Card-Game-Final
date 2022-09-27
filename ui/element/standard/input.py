@@ -2,16 +2,16 @@ import pygame as pg
 
 import pyperclip
 
-from ...math.line import distance
-
-from ..utils.timer import Timer
 from ..base.text import Text
 from ..base.text_element import Text_Element
+
+from ...math.line import distance
+from ..utils.timer import Timer
 
 class Input(Text_Element):
     BLINK_TIMER_MAX = 20
     
-    default_kwargs = {
+    defaults = {
         'size': (200, 20),
         'left_pad': 2,
         'right_pad': 2,
@@ -47,7 +47,7 @@ class Input(Text_Element):
         
         highlight_color=(0, 100, 255),
         highlight_text_color=(0, 0, 0),
-        cursor_color=(0, 0, 0),
+        cursor_color=None,
         cursor_width=2,
 
         text_check=lambda text: True,
@@ -59,7 +59,7 @@ class Input(Text_Element):
 
         if not kwargs.get('text'):
             kwargs['text'] = default
-        super().__init__(**(Input.default_kwargs | kwargs))
+        super().__init__(**(Input.defaults | kwargs))
 
         self.default = default or self.text
 
@@ -71,7 +71,7 @@ class Input(Text_Element):
         
         self.highlight_color = highlight_color
         self.highlight_text_color = highlight_text_color
-        self.cursor_color = cursor_color
+        self.cursor_color = cursor_color or self.text_color
         self.cursor_width = cursor_width
         
         self.text_check = text_check
@@ -102,11 +102,15 @@ class Input(Text_Element):
     def text_rect(self):
         r = super().text_rect
         if self.is_open:
-
+            
             if self.can_scroll_x:
                 r.left = self.rect.left - self.scroll_offset[0]
-                self.block.pos = r.topleft
-                c = self._characters[self.index]
+            if self.can_scroll_y:
+                r.top = self.rect.top - self.scroll_offset[1]
+            self.block.pos = r.topleft
+            c = self._characters[self.index]
+
+            if self.can_scroll_x:
                 if not self.rect.collidepoint(c.rect.midleft):
                     if c.rect.left < self.rect.left:
                         r.x += self.rect.left - c.rect.left
@@ -117,6 +121,18 @@ class Input(Text_Element):
                 if r.left > self.rect.left:
                     r.left = self.rect.left
                 self.scroll_offset[0] = self.rect.left - r.left
+                
+            if self.can_scroll_y:
+                if not self.rect.collidepoint(c.rect.midtop):
+                    if c.rect.top < self.rect.top:
+                        r.y += self.rect.top - c.rect.top
+                    else:
+                        r.y += self.rect.bottom - c.rect.top - c.rect.height
+                if r.bottom <= self.rect.bottom and r.top < self.rect.top:
+                    r.bottom = self.rect.bottom
+                if r.top > self.rect.top:
+                    r.top = self.rect.top
+                self.scroll_offset[1] = self.rect.top - r.top
 
         return r
                 
@@ -137,14 +153,14 @@ class Input(Text_Element):
         return ''.join([c.character for c in self.selected_characters])
         
     def open(self):
-        super().open()
+        self.is_open = True
         self.blink_timer.reset()
         self.index = len(self.text)
         
     def close(self):
         if not self.text:
             self.set_text(self.default)
-        super().close()
+        self.is_open = False
         self.selecting = False
         self.scroll_offset = [0, 0]
         self.index = 0
@@ -171,13 +187,33 @@ class Input(Text_Element):
             
     def shift_index_y(self, dir):
         c = self.characters[self.index]
-        p = (c.rect.x, c.rect.y - (dir * c.size))
+        
+        lines = self.lines
+        if not lines:
+            return
+        
+        for i, line in enumerate(lines):
+            if c in line:
+                break
+
+        i += dir
+        if not -1 < i < len(lines):
+            return
+        
+        line = lines[i]
+        r = line[0].rect.unionall([o.rect for o in line])
+        p = [c.rect.x, c.rect.centery + (dir * c.rect.height)]
+        if p[0] < r.left:
+            p[0] = r.left
+        elif p[0] > r.right:
+            p[0] = r.right
+
         self.set_index(self.get_closest_index(p))
 
     def get_closest_index(self, p):
         i = min(
             range(len(self.characters) - 1),
-            key=lambda i: distance(self.characters[i].rect.midtop, p),
+            key=lambda i: distance(self.characters[i].rect.center, p),
             default=0
         )
         r = self.characters[i].rect
@@ -221,6 +257,8 @@ class Input(Text_Element):
             self.set_index(self.end_index)
         else:
             self.end_index = self.index
+            
+        self.selecting = False
         
     def cut(self):
         Input.copy(self.selected_text)
@@ -256,14 +294,11 @@ class Input(Text_Element):
     def events(self, events):  
         super().events(events)
         
-        if events.get('mbd_a') and self.click_close:
+        if 'mbd' in events and self.click_close:
             self.close()
 
         if self.is_open:
-            if self.selecting:
-                if any({e.type == pg.WINDOWLEAVE for e in events['all']}):
-                    self.selecting = False
-            
+
             if events.get('text'):
                 self.add_text(events['text'].text)
                 self.held_key = None
@@ -276,48 +311,52 @@ class Input(Text_Element):
                     self.key_timer.reset()
 
                 if events['ctrl']:
-                    if kd.key == pg.K_a:
-                        self.highlight_section('')
-                    elif kd.key == pg.K_c:
-                        Input.copy(self.selected_text)
-                    elif kd.key == pg.K_x:
-                        self.cut()
-                    elif kd.key == pg.K_v:
-                        self.remove_selected()
-                        self.add_text(Input.paste())
-                    events.pop('kd', None)
-                                
-                elif kd.key == pg.K_RIGHT:
-                    self.shift_index_x(1)
-                elif kd.key == pg.K_LEFT:
-                    self.shift_index_x(-1)
-                elif kd.key == pg.K_UP:
-                    self.shift_index_y(1)
-                elif kd.key == pg.K_DOWN:
-                    self.shift_index_y(-1)
+                    match kd.key:
+                        case pg.K_a:
+                            self.highlight_section('')
+                        case pg.K_c:
+                            Input.copy(self.selected_text)
+                        case pg.K_x:
+                            self.cut()
+                        case pg.K_v:
+                            self.remove_selected()
+                            self.add_text(Input.paste())
                     
-                elif kd.key == pg.K_HOME:
-                    self.set_index(0)
-                elif kd.key == pg.K_END:
-                    self.set_index(len(self.text))
-            
-                elif kd.key == pg.K_BACKSPACE:
-                    self.backspace()
-                elif kd.key == pg.K_DELETE:
-                    self.delete()
+                else:
+                    
+                    match kd.key:
+                                
+                        case pg.K_RIGHT:
+                            self.shift_index_x(1)
+                        case pg.K_LEFT:
+                            self.shift_index_x(-1)
+                        case pg.K_UP:
+                            self.shift_index_y(-1)
+                        case pg.K_DOWN:
+                            self.shift_index_y(1)
+                            
+                        case pg.K_HOME:
+                            self.set_index(0)
+                        case pg.K_END:
+                            self.set_index(len(self.text))
+                    
+                        case pg.K_BACKSPACE:
+                            self.backspace()
+                        case pg.K_DELETE:
+                            self.delete()
 
-                elif kd.key == pg.K_RETURN:
-                    if self.max_lines > 1:
-                        self.add_text('\n')
-                    else:
-                        self.run_events('enter')
-                        self.close()
-                elif kd.key == pg.K_TAB:
-                    self.add_text('    ')
+                        case pg.K_RETURN:
+                            if self.max_lines > 1:
+                                self.add_text('\n')
+                            else:
+                                self.run_events('enter')
+                                self.close()
+                        case pg.K_TAB:
+                            self.add_text('    ')
                     
                 events.pop('kd', None)
 
-            if events.get('ku') and self.held_key:
+            if 'ku' in events and self.held_key:
                 self.held_key = None
                     
             if self.selecting:
@@ -337,11 +376,14 @@ class Input(Text_Element):
         if self.is_open:
             
             clip = surf.get_clip()
-            if self.clip:
-                surf.set_clip(self.rect)
+            surf.set_clip(self.rect)
 
             for c in self.selected_characters:
-                pg.draw.rect(surf, self.highlight_color, c.rect.inflate(2 * self.text_outline_width, 2 * self.text_outline_width))
+                pg.draw.rect(
+                    surf,
+                    self.highlight_color,
+                    c.rect.inflate(2 * self.text_outline_width, 2 * self.text_outline_width)
+                )
                 s = self.font.render(
                     c.character,
                     size=c.size,

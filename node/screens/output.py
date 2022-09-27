@@ -2,21 +2,20 @@ import pygame as pg
 
 from ..compiler import Compiler
 
-from ui.menu.menu import Menu
+from ui.scene.scene import Scene
 
 from ui.element.base.base import Base_Element
 from ui.element.elements import Textbox, Button, Check_Box, Live_Window
 from ui.element.utils.image import get_arrow
-from ui.color.ops import color_text, style_text
 
 def run(node):
-    m = Menu(info_menu, init_args=[node], fill_color=(32, 32, 40))
+    m = Scene(info_scene, init_args=[node], fill_color=(32, 32, 40))
     m.run()
     for n in node.manager.nodes:
         n.mark = False
     
-def info_menu(menu, node, show_full_out=False, last_port=None):
-    body = menu.body
+def info_scene(scene, node, show_full_out=False, last_port=None):
+    body = scene.body
     elements = []
     
     original_node = node
@@ -116,12 +115,12 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
     
     def refresh():
         port = wire.port.true_port
-        menu.args = [original_node.get_port(port).connection]
-        menu.kwargs = {
+        scene.args = [original_node.get_port(port).connection]
+        scene.kwargs = {
             'show_full_out': full_output.value,
             'last_port': original_node.get_port(port).connection_port.true_port
         }
-        menu.refresh()
+        scene.refresh()
 
     navigation_button = Button.Text_Button(
         text='Go To',
@@ -198,7 +197,7 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
             else:
                 i.rect.midright = (navigation_button.rect.left - 10, navigation_button.rect.centery)
             
-        text_style = style_text(Compiler.unmark(full_text))
+        text_style = out_text.style_text(Compiler.unmark(full_text))
         ranges = Compiler.get_ranges(
             full_text,
             node.id,
@@ -206,7 +205,7 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
         )
         style = {
             'bgcolor': visible_port.color,
-            'fgcolor': color_text(visible_port.color)
+            'fgcolor': Text.color_text(visible_port.color)
         }
         for s, e in ranges:
             text_style.update({i: style for i in range(s, e)})
@@ -215,7 +214,7 @@ def info_menu(menu, node, show_full_out=False, last_port=None):
         text_window.join_elements([out_text], border=5)
         text_window.outline_color = visible_port.color
 
-        text_label.text_color = color_text(visible_port.color)
+        text_label.text_color = Text.color_text(visible_port.color)
         text_label.fill_color = visible_port.color
         text_label.set_text(f"Port {visible_port.port} {'Input' if visible_port.port > 0 else 'Output'}:")
         

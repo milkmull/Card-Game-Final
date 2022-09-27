@@ -1,8 +1,8 @@
 from data.save import SAVE
 
-from ui.menu.menu import Menu
-from ui.menu.templates.yes_no import Yes_No
-from ui.menu.templates.notice import Notice
+from ui.scene.scene import Scene
+from ui.scene.templates.yes_no import Yes_No
+from ui.scene.templates.notice import Notice
 from ui.element.elements import Textbox, Button, Input
 from ui.element.base.style import Style
 from ui.math.position import center_elements_y
@@ -28,8 +28,8 @@ def reset_save_data():
     if m.run():
         SAVE.reset_save()
 
-def settings(menu):
-    body = menu.body
+def settings(scene):
+    body = scene.body
     elements = []
     
     input_kwargs = {
@@ -93,7 +93,7 @@ def settings(menu):
     return elements
     
 def run():
-    m = Menu(settings)
+    m = Scene(settings)
     m.run()
 
 

@@ -50,6 +50,8 @@ class Pack:
                     cards.pop(cid)   
                     if not c.child:
                         self.manager.cards.pop(cid)
+                    if (points := self.points.get(cid)):
+                        points.rect.center = c.rect.center
                     
             if not phase0:
                 if not cards:
@@ -68,6 +70,15 @@ class Animation_Manager:
         self.cards = {}
         self.queue = {}
         self.points = []
+        
+    @property
+    def finished(self):
+        return not self.queue and not self.points
+        
+    def reset(self):
+        self.cards.clear()
+        self.queue.clear()
+        self.points.clear()
 
     def add_card(self, *args, **kwargs):
         if not (pack := self.queue.get(self.client.turn)):
@@ -89,15 +100,20 @@ class Animation_Manager:
             
         return pack.add_points(*args, **kwargs)
         
+    def merge_points(self, points):
+        for p in points:
+            p.start()
+            self.points.append(p)
+        
     def update(self):
-        if self.queue:
+        if self.queue and not self.points:
         
             turn, pack = min(self.queue.items(), key=lambda item: item[0])
             if turn <= self.client.turn:
                 pack.update(turn == self.client.turn)
                 if turn < self.client.turn and pack.finished:
                     self.queue.pop(turn)
-                    self.points.extend(pack.points.values())
+                    self.merge_points(pack.points.values())
                    
         i = 0
         while i < len(self.points):

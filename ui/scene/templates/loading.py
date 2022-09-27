@@ -1,17 +1,16 @@
 import pygame as pg
 
-from ..menu import Menu
+from ..scene import Scene
 from ...element.base.base import Base_Element
 from ...element.base.style import Style
-from ...element.elements import Textbox, Button, Progress_Bar
+from ...element.elements import Textbox, Progress_Bar
 from ...element.utils.event import Event
 
 def loading(
-    menu,
+    scene,
     window_kwargs,
     lower_kwargs,
     text_kwargs,
-    button_kwargs,
     bar_kwargs,
     func_kwargs,
 ):
@@ -23,13 +22,6 @@ def loading(
     
     tb = Textbox(**text_kwargs)
     window.add_child(tb, current_offset=True)
-    
-    ok_button = Button.Text_Button(
-        text='ok',
-        tag='exit',
-        **button_kwargs
-    )
-    #s.add_child(ok_button, center=True)
 
     progress_bar = Progress_Bar(**bar_kwargs)
     progress_bar.set_enabled(False)
@@ -42,19 +34,19 @@ def loading(
         r = e()
         progress_bar.set_state(r)
         if r >= 1:
-            menu.set_return(1)
+            scene.set_return(1)
     
     progress_bar.add_event(
         tag='update',
         func=update
     )
 
-    window.rect.center = menu.rect.center
+    window.rect.center = scene.rect.center
     
     return [window]
 
-class Loading(Menu):
-    default_window_kwargs = {
+class Loading(Scene):
+    window_defaults = {
         'size': (300, 150),
         'fill_color': (100, 100, 100),
         'outline_color': (255, 255, 255),
@@ -62,28 +54,20 @@ class Loading(Menu):
         'border_radius': 10
     }
     
-    default_lower_kwargs = {
+    lower_defaults = {
         'size': (300, 50),
         'fill_color': (50, 50, 50),
         'border_bottom_left_radius': 10,
         'border_bottom_right_radius': 10
     }
     
-    default_text_kwargs = {
+    text_defaults = {
         'size': (300, 100),
         'centerx_aligned': True,
         'centery_aligned': True
     }
     
-    default_button_kwargs = {
-        'size': (100, 30),
-        'centerx_aligned': True,
-        'centery_aligned': True,
-        'key_color': (0, 0, 0),
-        'hover_color': (0, 100, 0),
-    }
-    
-    default_bar_kwargs = {
+    bar_defaults = {
         'size': (200, 10),
         'fill_color': (255, 255, 255),
         'outline_color': (0, 0, 0),
@@ -98,7 +82,6 @@ class Loading(Menu):
         window_kwargs={},
         lower_kwargs={},
         text_kwargs={},
-        button_kwargs={},
         bar_kwargs={},
         func_kwargs={},
         
@@ -107,11 +90,10 @@ class Loading(Menu):
         super().__init__(
             loading,
             init_kwargs={
-                'window_kwargs': Loading.default_window_kwargs | window_kwargs,
-                'lower_kwargs': Loading.default_lower_kwargs | lower_kwargs,
-                'text_kwargs': Loading.default_text_kwargs | text_kwargs,
-                'button_kwargs': Loading.default_button_kwargs | button_kwargs,
-                'bar_kwargs': Loading.default_bar_kwargs | bar_kwargs,
+                'window_kwargs': Loading.window_defaults | window_kwargs,
+                'lower_kwargs': Loading.lower_defaults | lower_kwargs,
+                'text_kwargs': Loading.text_defaults | text_kwargs,
+                'bar_kwargs': Loading.bar_defaults | bar_kwargs,
                 'func_kwargs': func_kwargs
             },
             **kwargs

@@ -155,7 +155,7 @@ class Vines(card_base.Card):
             if not s.card:
                 c = self.player_copy()
                 c.can_move = True
-                s.set_card(c)
+                s.set_card(c, parent=self)
                 
     def update(self):
         self.can_move = True

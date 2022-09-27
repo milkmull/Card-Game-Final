@@ -7,28 +7,30 @@ from .exceptions import CommunicationError
 
 from spritesheet.spritesheet import Spritesheet
 
-from ui.menu.menu import Menu
+from ui.scene.scene import Scene
 
 from ui.element.elements import Textbox, Button, Popup, Live_Window
 from ui.icons.icons import icons
 from ui.color.ops import gen_colors
 from ui.particles.get_particles import explode_no_grav
 
-from ..elements.player import Player
-from ..elements.card import Card
-from ..elements.animation_manager import Animation_Manager
-from ..elements.card_window import Card_Window
-from ..elements.main_button import Main_Button
-from ..elements.grid import Grid
-from ..elements.player_spot import Player_Spot
+from .settings import run_settings
 
-def client_screen(menu):
-    body = menu.body
+from .elements.player import Player
+from .elements.card import Card
+from .elements.animation_manager import Animation_Manager
+from .elements.card_window import Card_Window
+from .elements.main_button import Main_Button
+from .elements.grid import Grid
+from .elements.player_spot import Player_Spot
+
+def client_screen(scene):
+    body = scene.body
     sep = Card_Window.SEP
     elements = []
     
     main_button = Main_Button(
-        menu,
+        scene,
         text_size=50, 
         pad=5,
         centerx_aligned=True,
@@ -36,9 +38,9 @@ def client_screen(menu):
         hover_color=(100, 100, 100),
         enabled=False
     )
-    main_button.set_parent(menu, centerx_anchor='centerx', bottom_anchor='bottom', bottom_offset=-10)
+    main_button.set_parent(scene, centerx_anchor='centerx', bottom_anchor='bottom', bottom_offset=-10)
     elements.append(main_button)
-    menu.main_button = main_button
+    scene.main_button = main_button
     
     def get_size(w, h):
         return (
@@ -54,7 +56,7 @@ def client_screen(menu):
     )
     community.rect.topleft = (20, 50)
     elements.append(community)
-    menu.community = community
+    scene.community = community
     
     play = Card_Window(
         dir=0,
@@ -66,7 +68,7 @@ def client_screen(menu):
     )
     play.rect.topleft = (community.rect.left, community.rect.bottom + 20)
     elements.append(play)
-    menu.play = play
+    scene.play = play
     
     selection = Card_Window(
         dir=0,
@@ -76,23 +78,25 @@ def client_screen(menu):
     )
     selection.rect.topleft = (play.rect.left, play.rect.bottom + 20)
     elements.append(selection)
-    menu.selection = selection
+    scene.selection = selection
 
     options = Button.Text_Button(
-        text='options'
+        text='Settings',
+        func=run_settings,
+        args=[scene, scene.get_settings]
     )
     options.rect.topright = (body.width - 30, 30)
     elements.append(options)
-    menu.options = options
+    scene.options = options
     
-    grid = Grid(menu)
+    grid = Grid(scene)
     grid.rect.center = body.center
     elements.append(grid)
-    menu.grid = grid
+    scene.grid = grid
 
     return elements
    
-class Client_Base(Menu): 
+class Client_Base(Scene): 
     COLORS = gen_colors(15)
     
     def __init__(self, connection, set_screen=client_screen):
@@ -110,8 +114,7 @@ class Client_Base(Menu):
         self.animation_manager = Animation_Manager(self)
         self.cards = {}
         self.kill_particles = []
-        
-        self.logs = {}
+
         self.log_queue = []
 
         self.view_rect = pg.Rect((0, 0), CONSTANTS['card_size'])
@@ -132,10 +135,26 @@ class Client_Base(Menu):
         self.pid = self.send('pid')
         
     def reset(self):
-        pass
+        self.cards.clear()
+        self.kill_particles.clear()
+        
+        self.log_queue.clear()
+        
+        self.clear_view_card()
+        self.clear_held_card()
+        self.clear_held_card()
+        
+        self.community.clear()
+        self.play.clear()
+        self.selection.clear()
+        self.grid.reset()
+        self.animation_manager.reset()
         
     def close(self):
         pass
+        
+    def get_settings(self):
+        return self.settings
         
 # communication stuff
         
@@ -167,6 +186,8 @@ class Client_Base(Menu):
 
                 case 'ap':
                     self.add_player(log['p'], log['name'])
+                case 'rp':
+                    self.remove_player(log['p'])
                     
                 case 'ns':
                     self.main_button.update_status(log['stat'])
@@ -219,6 +240,9 @@ class Client_Base(Menu):
             start = card.rect.center
         else:
             card = self.get_card(log['c'][1], log['c'][0], player=p, add=False)
+            
+        if (parent := log['parent']):
+            start = self.grid.get_card(parent).rect.center
             
         self.grid.set_card(card, log['pos'])
         if start:
@@ -285,17 +309,23 @@ class Client_Base(Menu):
                 return p
 
     def add_player(self, pid, name):
-        if not any({p.pid == pid for p in self.players}):
+        if not self.get_player(pid):
             ps = Player_Spot()
-            self.elements.append(ps)
+            self.add_element(ps)
             
             p = Player(self, name, pid, Client_Base.COLORS[pid], ps)
             self.players.append(p)
-            self.sheet.add_player(pid, Client_Base.COLORS[pid], {'name': name})
-            
+
             self.organize_screen()
 
             return p
+            
+    def remove_player(self, pid):
+        if (p := self.get_player(pid)):
+            self.remove_element(p.spot)
+            self.players.remove(p)
+            
+            self.organize_screen()
             
     def organize_screen(self):
         spots = [p.spot for p in self.players]
@@ -342,8 +372,9 @@ class Client_Base(Menu):
         self.held_card = card
         
     def clear_held_card(self):
-        self.held_card.set_visible(True)
-        self.held_card = None
+        if self.held_card:
+            self.held_card.set_visible(True)
+            self.held_card = None
 
     def get_card(self, name, cid, player=None, deck=None, add=True):
         c = Card(self, name, cid, player=player, deck=deck)

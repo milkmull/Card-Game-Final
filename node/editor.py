@@ -4,7 +4,7 @@ from .node.node_base import pack, unpack, Port, Node, Group_Node
 from .node import mapping
 from .compiler import Compiler
 
-from ui.menu.menu import Menu
+from ui.scene.scene import Scene
 
 from .screens.info_sheet import run as run_info_sheet
 
@@ -38,12 +38,12 @@ def save_group_node(_nodes):
         
     print('saved')
 
-def get_section(elements, label, menu):
+def get_section(elements, label, scene):
     r = elements[0].rect.unionall([e.padded_rect for e in elements]).inflate(20, 30)
     section = Style(
         size=r.size,
         pos=r.topleft,
-        fill_color=menu.fill_color,
+        fill_color=scene.fill_color,
         outline_color=(255, 255, 255),
         outline_width=1,
         layer=-1
@@ -56,7 +56,7 @@ def get_section(elements, label, menu):
         label = Textbox(
             text=label,
             text_size=15,
-            fill_color=menu.fill_color,
+            fill_color=scene.fill_color,
             left_pad=5,
             right_pad=5
         )
@@ -65,18 +65,18 @@ def get_section(elements, label, menu):
     
     return section
     
-def get_elements(menu):
-    body = menu.body
+def get_elements(scene):
+    body = scene.body
     elements = []
     
     rect_selector = Rect_Selector()
     elements.append(rect_selector)
 
-    search_bar = Search_Bar(menu)
+    search_bar = Search_Bar(scene)
     elements.append(search_bar)
     
-    node_menu = Node_Menu(menu)
-    elements.append(node_menu)
+    node_scene = Node_Menu(scene)
+    elements.append(node_scene)
     
     button_kwargs = {
         'text_size': 15,
@@ -101,7 +101,7 @@ def get_elements(menu):
     
     save_button = Button.Text_Button(
         text='Save',
-        func=menu.builder.save_card,
+        func=scene.builder.save_card,
         **button_kwargs
     )
     save_button.rect.topleft = (x, y)
@@ -119,14 +119,14 @@ def get_elements(menu):
     
     publish_button = Button.Text_Button(
         text='Publish',
-        func=menu.builder.publish_card,
+        func=scene.builder.publish_card,
         **button_kwargs
     )
     publish_button.rect.topleft = (x, y)
     save_elements.append(publish_button)
     
     publish_icon = Check_Box(
-        value=menu.card.published,
+        value=scene.card.published,
         outline_color=(0, 0, 0),
         outline_width=2
     )
@@ -136,10 +136,10 @@ def get_elements(menu):
     publish_icon.add_event(
         tag='update',
         func=publish_icon.set_value,
-        args=[menu.card.get_published]
+        args=[scene.card.get_published]
     )
     
-    save_section = get_section(save_elements, 'Save:', menu)
+    save_section = get_section(save_elements, 'Save:', scene)
     save_section.rect.topleft = (20, 20)
     elements.append(save_section)
     
@@ -183,7 +183,7 @@ def get_elements(menu):
     info_button.add_child(info_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
     info_icon.set_enabled(False) 
     
-    back_section = get_section(back_elements, 'Navigation:', menu)
+    back_section = get_section(back_elements, 'Navigation:', scene)
     back_section.rect.topleft = (save_section.rect.right + 20, 20)
     elements.append(back_section)
     
@@ -195,7 +195,7 @@ def get_elements(menu):
     
     home_button = Button.Text_Button(
         text='Home',
-        func=menu.go_home,
+        func=scene.go_home,
         **button_kwargs
     )
     home_button.rect.topleft = (x, y)
@@ -212,7 +212,7 @@ def get_elements(menu):
     
     undo_button = Button.Text_Button(
         text='Undo',
-        func=menu.undo_log,
+        func=scene.undo_log,
         **button_kwargs
     )
     undo_button.rect.topleft = (x, y)
@@ -229,7 +229,7 @@ def get_elements(menu):
     
     redo_button = Button.Text_Button(
         text='Redo',
-        func=menu.redo_log,
+        func=scene.redo_log,
         **button_kwargs
     )
     redo_button.rect.topleft = (x, y)
@@ -242,13 +242,13 @@ def get_elements(menu):
     redo_button.add_child(redo_icon, right_anchor='right', centery_anchor='centery')
     redo_icon.set_enabled(False)
     
-    do_section = get_section(do_elements, 'Actions:', menu)
+    do_section = get_section(do_elements, 'Actions:', scene)
     do_section.rect.topleft = (back_section.rect.right + 20, 20)
     elements.append(do_section)
 
     return elements[::-1]
     
-class Node_Editor(Menu):        
+class Node_Editor(Scene):        
     def __init__(self, card, builder):
         self.card = card
         self.builder = builder

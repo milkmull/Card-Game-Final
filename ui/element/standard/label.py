@@ -1,7 +1,7 @@
 from ..base.text_element import Text_Element
 
 class Label(Text_Element):
-    default_kwargs = {
+    defaults = {
         'centerx_aligned': True,
         'centery_aligned': True,
         'border_top_left_radius': 10,
@@ -12,7 +12,7 @@ class Label(Text_Element):
         parent,
         **kwargs
     ):
-        super().__init__(**(Label.default_kwargs | kwargs))
+        super().__init__(**(Label.defaults | kwargs))
         self.set_parent(parent)
         
     def update(self):

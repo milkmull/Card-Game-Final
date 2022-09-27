@@ -2,7 +2,6 @@ import pygame as pg
 
 from ui.element.standard.slider import Slider
 from ui.element.standard.textbox import Textbox
-from ui.color.ops import color_text
 
 class RGB_Slider(Slider):
     CHANNELS = ('r', 'g', 'b')
@@ -58,7 +57,7 @@ class RGB_Slider(Slider):
         if self.textbox.visible:
             color = self.get_color()
             self.textbox.text_color = color
-            self.textbox.fill_color = color_text(color)
+            self.textbox.fill_color = Textbox.color_text(color)
             self.textbox.set_text(str(self.get_state()))
         
     def update(self):

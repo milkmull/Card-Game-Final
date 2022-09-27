@@ -1,4 +1,4 @@
-from client.client.client_base import Client_Base
+from client.client_base import Client_Base
 from game.game import Game
 
 def run_client_single():
