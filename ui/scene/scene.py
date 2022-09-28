@@ -112,6 +112,7 @@ class Scene(Base_Loop):
     def run(self):
         self.refresh()
         self.running = True
+
         while self.running:
             self.clock.tick(self.fps)
             self.events()
@@ -119,6 +120,7 @@ class Scene(Base_Loop):
                 break
             self.update()
             self.draw()
+            
         self.close()
         return self.return_value
         

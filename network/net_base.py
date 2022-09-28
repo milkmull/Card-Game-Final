@@ -3,6 +3,13 @@ import json
 import urllib.request
 import traceback
 import base64
+import re
+import subprocess
+
+def list_connections():
+    out = subprocess.check_output(['arp', '-a']).decode()
+    ips = re.findall(r'[0-9]+(?:\.[0-9]+){3}', out)
+    return ips
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -59,7 +66,9 @@ class Network_Base:
         self.connected = False
         self.listening = False
         
+        self.timeout = timeout
         self.sock = self.get_sock(timeout=timeout)
+        self.buffer = b''
         
         self.exceptions = []
         
@@ -70,34 +79,27 @@ class Network_Base:
     def add_exception(self, err):
         info = (err, traceback.format_exc())
         self.exceptions.append(info)
-        
-    def pop_exception(self):
-        if self.exceptions:
-            return self.exceptions.pop(-1)
-            
-    def get_exception(self, e):
-        return e
-            
+
     def raise_exception(self, e):
         self.close()
-        e = self.get_exception(e)
-        if e is not None:
-            raise e
+        raise e
         
     def raise_last(self):
-        info = self.pop_exception()
-        if info:
+        if self.exceptions:
+            info = self.exceptions.pop(0)
             self.raise_exception(info[0])
         
     def close(self):
         for address, conn in self.connections.copy().items():
             self.close_connection(conn, address)
-        self.sock.close()
+        if hasattr(self, 'sock'):
+            self.sock.close()
         self.connected = False
         self.listening = False
+        self.buffer = b''
         
-    def check_close(self):
-        return self.exceptions
+    def __del__(self):
+        self.close()
 
     def start_server(self):
         self.connected = False
@@ -119,12 +121,28 @@ class Network_Base:
             
     def add_connection(self, conn, address):
         self.connections[address] = conn
+        conn.settimeout(self.timeout)
         
     def close_connection(self, conn, address):
         conn.close()
         self.connections.pop(address)
         
+    def check_close(self):
+        return bool(self.exceptions)
+        
     def listen(self):
+        self.listening = True
+        self.sock.listen()
+
+        try:
+            conn, address = self.sock.accept()
+            self.add_connection(conn, address)
+        except socket.timeout:
+            self.close()
+        except Exception as e:
+            self.raise_exception(e)
+
+    def listen_while(self):
         self.listening = True
         self.sock.listen()
         while self.listening:
@@ -136,73 +154,55 @@ class Network_Base:
             except Exception as e:
                 self.raise_exception(e)
             if self.check_close():
-                self.close()
-                break
-        self.listening = False
+                break      
+        self.close()
         
-    def _send(self, conn, data):
-        conn.sendall(data)
+    def trim(self, data, size):
+        self.buffer += data[size:]
+        return data[:size]
         
-    def _recv(self, conn, chunk_size):
-        return conn.recv(chunk_size).decode()
-    
-    def send(self, data, conn=None, raw=False):
-        if conn is None:
-            conn = self.sock
-        if not raw:
-            data = bytes(data, encoding='utf-8')
-        conn.sendall(data)
-        
-    def recv(self, conn=None, raw=False, chunk_size=4096):
-        if conn is None:
-            conn = self.sock
-        data = conn.recv(chunk_size)
-        if not raw and data is not None:
-            data = data.decode()
+    def read_buffer(self, size=None):
+        if self.buffer:
+            print(self.buffer)
+        if size is None:
+            size = len(self.buffer)
+        data = self.buffer[:size]
+        self.buffer = self.buffer[size:]
         return data
         
-    def send_and_recv(self, data, conn=None, raw=False):
-        if conn is None:
-            conn = self.sock
-        self.send(data, conn=conn, raw=raw)
-        return self.recv(conn=conn, raw=raw)
-        
-    def send_large_raw(self, data, conn=None, chunk_size=4096):
+    def send(self, data, conn=None):
         if conn is None:
             conn = self.sock
             
-        info = {
-            'length': len(data),
-            'chunk_size': chunk_size
-        }
-        self.send(self.dump_json(info), conn=conn)
-        self.recv(conn=conn, raw=True)
-            
-        while data:
-            d = data[:chunk_size]
-            self.send(d, conn=conn, raw=True)
-            data = data[chunk_size:]
+        if not isinstance(data, (bytes, bytearray)):
+            data = bytes(data, encoding='utf-8')
+        size = len(data).to_bytes(32, byteorder='big')
         
-        reply = b''
-        while b'done' not in reply:
-            reply = self.recv(conn=conn, raw=True)
+        conn.sendall(size + data) 
         
-    def recv_large_raw(self, conn=None):
+    def recv(self, conn=None, raw=True):
         if conn is None:
             conn = self.sock
             
-        info = json.loads(self.recv(conn=conn))
-        length = info['length']
-        chunk_size = info['chunk_size']
-        data = b''
-        
-        self.send(b'next', conn=conn, raw=True)
-        
-        while len(data) < length:
-            d = self.recv(conn=conn, raw=True)
-            data += d
-            self.send(b'next', conn=conn, raw=True)
+        size = self.read_buffer(size=32)
+        while len(size) < 32:
+            d = conn.recv(32 - len(size))
+            if not d:
+                return
+            size += d
+            
+        size = self.trim(size, 32)
+        size = int.from_bytes(size, byteorder='big')
 
-        self.send(b'done', conn=conn, raw=True)
+        data = self.read_buffer(size=size)
+        while len(data) < size:
+            d = conn.recv(size - len(data))
+            if not d:
+                return
+            data += d
+            
+        data = self.trim(data, size)  
+        if not raw:
+            data = data.decode()
         
         return data

@@ -209,7 +209,7 @@ def join_game(scene, name, ip):
     elements.append(b)
     
     b = Button.Text_Button(
-        text=icons['trash'],
+        text=icons['bin'],
         font_name='icons.ttf',
         pad=5,
         hover_color=(128, 0, 0),
@@ -223,7 +223,7 @@ def join_game(scene, name, ip):
     elements.append(b)
     
     b = Button.Text_Button(
-        text=icons['x'],
+        text=icons['X'],
         font_name='icons.ttf',
         pad=5,
         hover_color=(128, 0, 0),
@@ -267,7 +267,7 @@ def view_ip(scene):
     
     if public_ip is not None:
         b = Button.Text_Button(
-            text=icons['copy'],
+            text=icons['files-empty'],
             font_name='icons.ttf',
             hover_color=(255, 255, 0),
             centerx_aligned=True,
@@ -287,7 +287,7 @@ def view_ip(scene):
     elements.append(t)
     
     b = Button.Text_Button(
-        text=icons['copy'],
+        text=icons['files-empty'],
         font_name='icons.ttf',
         hover_color=(255, 255, 0),
         centerx_aligned=True,
@@ -300,7 +300,7 @@ def view_ip(scene):
     elements.append(b)
 
     b = Button.Text_Button(
-        text=icons['x'],
+        text=icons['X'],
         font_name='icons.ttf',
         pad=5,
         hover_color=(128, 0, 0),

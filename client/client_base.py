@@ -161,8 +161,6 @@ class Client_Base(Scene):
     def send(self, data):
         if self.running:
             reply = self.conn.send_and_recv(data)  
-            if reply is None:
-                raise CommunicationError
             return reply
             
     def get_info(self):

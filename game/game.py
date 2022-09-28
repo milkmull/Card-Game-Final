@@ -57,37 +57,37 @@ class Game(game_base.Game_Base):
     def get_pid(self):
         return 0
          
-    def send_and_recv(self, data):
-        if not data:        
-            return
-
-        reply = ''
+    def update_game(self, data, pid=0):
         data = data.split('-')
         cmd = data.pop(0)
         
         match cmd:
             
-            case 'pid':
-                reply = 0
+            case 'ppid':
+                reply = pid
                 
             case 'info':
                 self.main()
-                reply = self.get_info(0)
+                reply = self.get_info(pid)
                 
             case 'settings':
-                self.set_settings(data)
+                if pid == 0:
+                    self.set_settings(data)
+                reply = 1
                 
             case 'start':
-                self.start(0)
+                if pid == 0:
+                    self.start(0)
                 reply = 1
                 
             case 'continue':
-                self.reset()
+                if pid == 0:
+                    self.reset()
                 reply = 1
                 
             case 'play' | 'select':
                 if self.status == 'playing':
-                    self.get_player(0).update(cmd=cmd, data=data)    
+                    self.get_player(pid).update(cmd=cmd, data=data)    
                 reply = 1
 
         return reply
