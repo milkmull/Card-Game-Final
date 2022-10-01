@@ -259,9 +259,12 @@ class Position(Base_Element):
             
     def clear_children(self):
         self.children.clear()
+        
+    def get_children(self):
+        return self.children
             
     def move_children(self):
-        for c in self.children:
+        for c in self.get_children():
             c.update_position()
             c.move_children()
             
@@ -494,7 +497,7 @@ class Position(Base_Element):
             self.update_limits()
 
         if all:
-            for c in self.children:
+            for c in self.get_children():
                 c.update_position(all=True)
                 
     def set_cursor(self):

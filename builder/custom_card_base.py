@@ -115,6 +115,7 @@ class Card(Image_Element):
         pic = Fitted_Image(
             image=(pg.image.load(image) if image else pg.Surface(IMAGE_SIZE)).convert_alpha(),
             size=IMAGE_SIZE,
+            auto_fit=False,
             keep_aspect=keep_aspect,
             rotation=rotation,
             outline_color=(0, 0, 0) if outline else None,

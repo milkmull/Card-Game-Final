@@ -33,7 +33,10 @@ def run_client_online():
         
     else:
         c = Client(n)
-        c.run()
+        try:
+            c.run()
+        except OSError:
+            pass
             
     if text:
         m = Notice(text_kwargs={'text': text})
@@ -52,6 +55,8 @@ def join_game():
         c = Client(n)
         try:
             c.run()
+        except OSError:
+            pass
         except HostLeft:
             text = 'The host closed the game.'
             

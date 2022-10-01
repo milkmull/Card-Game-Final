@@ -31,6 +31,7 @@ def select_device(scene, mic):
             'outline_width': 3
         }
     )
+    mic_select.rect.width = max(200, mic_select.rect.width)
     mic_select.rect.center = (body.centerx, body.centery - 50)
     elements.append(mic_select)
         
@@ -121,6 +122,7 @@ def audio_manager(manager):
         }
     )
     slider.set_enabled(False)
+    manager.slider = slider
     elements.append(slider)
     
     def draw_slider(surf):
@@ -368,4 +370,11 @@ class Audio_Manager(Position):
             self.bar.set_state_as_ratio(s)
             if s >= 1:
                 self.stop_sound()
+                
+    def draw(self, surf):
+        super().draw(surf)
+        
+        w = self.slider.handel.rect.centerx - self.slider.rect.left
+        h = self.slider.rect.height
+        pg.draw.rect(surf, (255, 0, 0), pg.Rect(self.slider.rect.topleft, (w, h)))
   

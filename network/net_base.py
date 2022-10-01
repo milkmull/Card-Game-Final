@@ -86,6 +86,11 @@ class Network_Base:
         
     def raise_last(self):
         if self.exceptions:
+            info = self.exceptions.pop(-1)
+            self.raise_exception(info[0])
+            
+    def raise_first(self):
+        if self.exceptions:
             info = self.exceptions.pop(0)
             self.raise_exception(info[0])
         

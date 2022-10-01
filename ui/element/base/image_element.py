@@ -3,6 +3,8 @@ from .image import Image
 
 class Image_Element(Element, Image):
     def __init__(self, **kwargs):
+        if 'size' in kwargs and 'auto_fit' not in kwargs:
+            kwargs['auto_fit'] = False
         Element.__init__(self, **kwargs)
         Image.__init__(self, **kwargs)
         

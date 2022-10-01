@@ -63,10 +63,11 @@ def client_screen(scene):
                     
     main_button.add_event(func=click_main, tag='left_click')
     
-    chat = Chat(scene)
-    chat.rect.midbottom = (main_button.rect.centerx, main_button.rect.top - 20)
-    elements.append(chat)
-    scene.chat = chat
+    if not scene.is_single:
+        chat = Chat(scene)
+        chat.rect.midbottom = (main_button.rect.centerx, main_button.rect.top - 20)
+        elements.append(chat)
+        scene.chat = chat
 
     def get_size(w, h):
         return (
@@ -193,6 +194,10 @@ class Client_Base(Scene):
         self.hover_matches = []
         
         self.held_card = None
+        
+    @property
+    def is_single(self):
+        return type(self) == Client_Base
         
 # start stuff
         

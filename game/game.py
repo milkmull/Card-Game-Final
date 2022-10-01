@@ -164,9 +164,10 @@ class Game(game_base.Game_Base):
         recipients = {pid}
 
         for word in text.split(' '):
-            if word[0] == '@':
-                if (p := self.get_player_by_name(word[1:])):
-                    recipients.add(p.pid)
+            if word:
+                if word[0] == '@':
+                    if (p := self.get_player_by_name(word[1:])):
+                        recipients.add(p.pid)
                     
         if len(recipients) > 1:
             for exc in recipients:

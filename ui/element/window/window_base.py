@@ -76,6 +76,9 @@ class Window_Base:
     def all_children(self):
         return super().all_children | set(self.elements)
         
+    def get_children(self):
+        return self.children + self.elements
+        
     def compare_elements(self, elements):
         return all({e0 == e1 for e0, e1 in zip(self.elements, elements)})
         

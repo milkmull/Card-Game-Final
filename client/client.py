@@ -24,6 +24,7 @@ class Client(Client_Base):
     def remove_player(self, pid):
         super().remove_player(pid)
         if pid == 0:
+            print(True)
             raise HostLeft
         
     def close(self):
@@ -39,6 +40,7 @@ class Client(Client_Base):
         try:
             super().run()
         except Exception as e:
+            self.conn.add_exception(e)
             self.close()
-            raise e
+        self.conn.raise_last()
         

@@ -18,7 +18,7 @@ class Image:
         
         image=None,
 
-        auto_fit=False,
+        auto_fit=True,
         keep_aspect=True,
         
         rotation=0,
@@ -29,8 +29,6 @@ class Image:
         self.original_image = image
         self.image = image.copy() if image else None
 
-        if self.size == (0, 0):
-            auto_fit = True
         self.auto_fit = auto_fit
         self.keep_aspect = keep_aspect
         
@@ -95,7 +93,7 @@ class Image:
         )
             
     def get_scaled(self, size):
-        return pg.transform.smoothscale(self.image, size)
+        return pg.transform.smoothscale(self.original_image, size)
         
     def scale(self, size):
         w, h = size
@@ -112,26 +110,19 @@ class Image:
 
     def fit_image(self):
         if self.image:
-            
-            if self._rotation:
-                self.image = pg.transform.rotate(self.original_image, self._rotation)
+
+            self.image = pg.transform.rotate(self.original_image, self._rotation)
         
             if self.auto_fit:
-                self.rect.size = self.image_size
+                self.rect.size = self.image.get_size()
 
             if self.keep_aspect:
-                w, h = self.image.get_size()
-                if w and h:
-                    factor = min({
-                        self.rect.width / w,
-                        self.rect.height / h
-                    })
-                    self.scale_by_factor(factor)
-                else:
-                    self.scale((0, 0))
+                r = self.image.get_rect()
+                fitted = r.fit(self.rect)
+                self.image = pg.transform.smoothscale(self.image, fitted.size)
                     
             elif not self.auto_fit:
-                self.scale(self.size)
+                self.image = pg.transform.smoothscale(self.image, self.rect.size)
         
     def fit_to_image(self, width=False, height=False):
         w, h = self.image_size
