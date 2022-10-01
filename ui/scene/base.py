@@ -39,6 +39,9 @@ class Base_Loop:
         
             match e.type:
                 
+                case pg.VIDEORESIZE:
+                    events['vr'] = e
+                
                 case pg.QUIT:
                     events['q'] = e
                     
@@ -88,6 +91,14 @@ class Base_Loop:
         self.can_quit = can_quit
         self.elements = elements or []
         self.fill_color = fill_color
+        
+    @property
+    def framerate(self):
+        return self.clock.get_fps()
+        
+    def resize(self, w, h):
+        pg.display.set_mode((w, h), flags=self.window.get_flags())
+        self.window = pg.display.get_surface()
 
     def set_status(self, status):
         self.status = status
@@ -129,6 +140,9 @@ class Base_Loop:
             elif 'e' in events:
                 self.exit()
                 return {}
+                
+        #if (vr := events.get('vr')):
+        #    self.resize(vr.w, vr.h)
 
         self.sub_events(events)
         

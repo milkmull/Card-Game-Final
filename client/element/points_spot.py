@@ -5,6 +5,7 @@ class Points_Spot(Textbox):
         self.player_spot = player_spot
         
         super().__init__(
+            text='0',
             text_outline_color=(0, 0, 0),
             text_outline_width=2
         )

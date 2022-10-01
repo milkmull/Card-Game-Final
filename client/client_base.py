@@ -16,49 +16,86 @@ from ui.particles.get_particles import explode_no_grav
 
 from .settings import run_settings
 
-from .elements.player import Player
-from .elements.card import Card
-from .elements.animation_manager import Animation_Manager
-from .elements.card_window import Card_Window
-from .elements.main_button import Main_Button
-from .elements.grid import Grid
-from .elements.player_spot import Player_Spot
+from .element.player import Player
+from .element.card import Card
+from .element.animation_manager import Animation_Manager
+from .element.card_window import Card_Window
+from .element.grid import Grid
+from .element.player_spot import Player_Spot
+from .element.turn_timer import Timer
+from .element.win_screen import Winner_Text
+from .element.chat import Chat
 
 def client_screen(scene):
     body = scene.body
     sep = Card_Window.SEP
     elements = []
     
-    main_button = Main_Button(
-        scene,
-        text_size=50, 
+    grid = Grid(scene)
+    grid.rect.center = body.center
+    elements.append(grid)
+    scene.grid = grid
+    
+    main_button = Button.Text_Button(
+        text='Start',
+        size=(100, 30),
+        text_size=30, 
         pad=5,
-        centerx_aligned=True,
-        centery_aligned=True,
-        hover_color=(100, 100, 100),
-        enabled=False
+        center_aligned=True,
+        outline_color=(255, 255, 255),
+        outline_width=2,
+        border_radius=5,
+        hover_color=(0, 255, 0),
+        hover_text_color=(0, 0, 0)
     )
-    main_button.set_parent(scene, centerx_anchor='centerx', bottom_anchor='bottom', bottom_offset=-10)
+    main_button.rect.bottomright = (scene.rect.right - 40, scene.rect.bottom - 40)
+    main_button.set_parent(scene, centerx_anchor='right', centerx_offset=-110, centery_anchor='bottom', centery_offset=-50)
     elements.append(main_button)
     scene.main_button = main_button
     
+    def click_main():
+        if scene.pid == 0:
+            match main_button.text:
+                case 'Reset':
+                    scene.send('reset')
+                case 'Start':
+                    scene.send('start')
+                    
+    main_button.add_event(func=click_main, tag='left_click')
+    
+    chat = Chat(scene)
+    chat.rect.midbottom = (main_button.rect.centerx, main_button.rect.top - 20)
+    elements.append(chat)
+    scene.chat = chat
+
     def get_size(w, h):
         return (
             (w * CONSTANTS['cw']) + ((w + 1) * sep),
             (h * CONSTANTS['ch']) + ((h + 1) * sep)
         )
 
-    community = Card_Window(
+    public = Card_Window(
         dir=0,
         size=get_size(3, 3), 
         outline_color=(255, 0, 0),
         outline_width=2
     )
-    community.rect.topleft = (20, 50)
-    elements.append(community)
-    scene.community = community
+    public.rect.topleft = (25, 40)
+    elements.append(public)
+    scene.public = public
     
-    play = Card_Window(
+    public_label = Textbox(
+        text='Public:',
+        text_size=15,
+        #fill_color=scene.fill_color,
+        text_color=(255, 0, 0),
+        text_outline_color=(0, 0, 0),
+        text_outline_width=2
+    )
+    public_label.rect.midleft = (public.rect.left + 3, public.rect.top - 10)
+    public.add_child(public_label, current_offset=True)
+    
+    private = Card_Window(
         dir=0,
         size=get_size(3, 1), 
         inf_width=True,
@@ -66,33 +103,63 @@ def client_screen(scene):
         outline_color=(255, 255, 0),
         outline_width=2
     )
-    play.rect.topleft = (community.rect.left, community.rect.bottom + 20)
-    elements.append(play)
-    scene.play = play
+    private.rect.topleft = (public.rect.left, public.rect.bottom + 35)
+    elements.append(private)
+    scene.private = private
+    
+    private_label = Textbox(
+        text='Private:',
+        text_size=15,
+        text_color=(255, 255, 0),
+        text_outline_color=(0, 0, 0),
+        text_outline_width=2
+    )
+    private_label.rect.midleft = (private.rect.left + 3, private.rect.top - 10)
+    private.add_child(private_label, current_offset=True)
     
     selection = Card_Window(
         dir=0,
         size=get_size(3, 2),
-        outline_color=(0, 0, 255),
+        outline_color=(100, 150, 255),
         outline_width=2
     )
-    selection.rect.topleft = (play.rect.left, play.rect.bottom + 20)
+    selection.rect.topleft = (private.rect.left, private.rect.bottom + 45)
     elements.append(selection)
     scene.selection = selection
-
-    options = Button.Text_Button(
-        text='Settings',
-        func=run_settings,
-        args=[scene, scene.get_settings]
-    )
-    options.rect.topright = (body.width - 30, 30)
-    elements.append(options)
-    scene.options = options
     
-    grid = Grid(scene)
-    grid.rect.center = body.center
-    elements.append(grid)
-    scene.grid = grid
+    selection_label = Textbox(
+        text='Selection:',
+        text_size=15,
+        text_color=(100, 150, 255),
+        text_outline_color=(0, 0, 0),
+        text_outline_width=2
+    )
+    selection_label.rect.midleft = (selection.rect.left + 3, selection.rect.top - 10)
+    selection.add_child(selection_label, current_offset=True)
+
+    settings_button = Button.Text_Button(
+        text=icons['cog'],
+        font_name='icons.ttf',
+        text_size=30,
+        center_aligned=True,
+        func=run_settings,
+        args=[scene],
+        hover_color=(100, 100, 100),
+        pad=5,
+        border_radius=5
+    )
+    settings_button.rect.topright = (scene.rect.width - 20, 20)
+    elements.append(settings_button)
+    scene.settings_button = settings_button
+    
+    turn_timer = Timer(scene)
+    turn_timer.set_parent(scene, centerx_anchor='right', centerx_offset=-100, top_anchor='top', top_offset=30)
+    elements.append(turn_timer)
+    scene.turn_timer = turn_timer
+    
+    wt = Winner_Text(scene)
+    scene.win_screen = wt
+    elements.append(wt)
 
     return elements
    
@@ -105,8 +172,7 @@ class Client_Base(Scene):
         self.conn = connection
         self.sheet = Spritesheet()
         self.pid = None
-        
-        self.status = ''
+
         self.settings = {}
         self.players = []
         self.turn = 0
@@ -132,23 +198,29 @@ class Client_Base(Scene):
         
     def start(self):
         self.running = True
-        self.pid = self.send('pid')
         
     def reset(self):
         self.cards.clear()
-        self.kill_particles.clear()
-        
-        self.log_queue.clear()
-        
+
         self.clear_view_card()
         self.clear_held_card()
         self.clear_held_card()
         
-        self.community.clear()
-        self.play.clear()
+        self.public.clear()
+        self.private.clear()
         self.selection.clear()
         self.grid.reset()
         self.animation_manager.reset()
+        self.turn = 0
+
+        for p in self.players:
+            p.end_turn()
+            
+        self.main_button.set_text('Start')
+        self.main_button.hover_color = (0, 255, 0)
+            
+        self.turn_timer.reset()
+        self.win_screen.reset()
         
     def close(self):
         pass
@@ -160,7 +232,7 @@ class Client_Base(Scene):
         
     def send(self, data):
         if self.running:
-            reply = self.conn.send_and_recv(data)  
+            reply = self.conn.update_game(data)  
             return reply
             
     def get_info(self):
@@ -169,8 +241,8 @@ class Client_Base(Scene):
         
     def update_logs(self, logs):
         self.log_queue += logs
-        self.parse_logs(self.log_queue[:5])
-        self.log_queue = self.log_queue[5:]
+        self.parse_logs(self.log_queue[:10])
+        self.log_queue = self.log_queue[10:]
 
     def parse_logs(self, logs):
         for log in logs:
@@ -178,26 +250,24 @@ class Client_Base(Scene):
             print(log)
 
             match log['t']:
+                
+                case 'pid':
+                    self.pid = log['pid']
             
                 case 'res':
                     self.reset()
 
                 case 'ap':
-                    self.add_player(log['p'], log['name'])
+                    self.add_player(log)
                 case 'rp':
                     self.remove_player(log['p'])
-                    
-                case 'ns':
-                    self.main_button.update_status(log['stat'])
                     
                 case 'set':
                     self.update_settings(log)
 
                 case 'nt':
                     self.new_turn(log)
-                case 'fin':
-                    self.turn += 1
-                    
+ 
                 case 'sc':
                     self.set_card(log)
                 case 'cc':
@@ -217,18 +287,32 @@ class Client_Base(Scene):
                     self.play_card(log)
                 case 'own':
                     self.set_owner(log)
+                    
+                case 'fin':
+                    self.end_game(log)
+                    
+                case 'msg':
+                    self.chat.add_message(log)
             
 # log process stuff
 
     def update_settings(self, log):
         self.settings = log['settings']
         self.grid.set_size(self.settings['size'])
+        for p in self.players:
+            p.spot.update_name()
         
     def new_turn(self, log):
         for p in self.players:
             p.end_turn()
         self.get_player(log['p']).start_turn()
+        
+        if not self.turn:
+            self.main_button.set_text('Reset')
+            self.main_button.hover_color = (255, 0, 0)
+        
         self.turn += 1
+        self.turn_timer.start(log['st'])
         
     def set_card(self, log):
         p = self.get_player(log['p'])
@@ -256,20 +340,20 @@ class Client_Base(Scene):
         
         match deck:
             
-            case 'play':
-                self.play.add_element(card)
-            case 'community':
-                self.community.add_element(card)
+            case 'private':
+                self.private.add_element(card)
+            case 'public':
+                self.public.add_element(card)
             case 'selection':
                 self.selection.add_element(card)
                 
     def remove_card(self, deck, cid):
         match deck:
             
-            case 'play':
-                self.play.remove_element(cid)
-            case 'community':
-                self.community.remove_element(cid)
+            case 'private':
+                self.private.remove_element(cid)
+            case 'public':
+                self.public.remove_element(cid)
             case 'selection':
                 self.selection.remove_element(cid)
             
@@ -284,7 +368,7 @@ class Client_Base(Scene):
 
             if not (card := self.cards.get(log['c'])):
                 card = self.grid.get_card(log['c'])
-                start = self.community.rect.center
+                start = self.public.rect.center
             else:
                 start = self.cards[log['c']].rect.center
 
@@ -292,6 +376,15 @@ class Client_Base(Scene):
             
     def set_owner(self, log):
         self.grid.cards[log['c']].player = self.get_player(log['u'])
+        self.animation_manager.add_card(self.grid.cards[log['c']], 'own')
+        
+    def end_game(self, log):
+        self.turn += 1
+        self.turn_timer.reset()
+        self.win_screen.start()
+
+        for p in self.players:
+            p.end_turn()
 
 # player stuff
 
@@ -300,18 +393,24 @@ class Client_Base(Scene):
         for p in self.players:
             if p.pid == self.pid:
                 return p
+                
+    def get_current_turn(self):
+        for p in self.players:
+            if p.is_turn:
+                return p
     
     def get_player(self, pid):
         for p in self.players:
             if p.pid == pid:
                 return p
 
-    def add_player(self, pid, name):
+    def add_player(self, log):
+        pid = log['p']
         if not self.get_player(pid):
             ps = Player_Spot()
             self.add_element(ps)
             
-            p = Player(self, name, pid, Client_Base.COLORS[pid], ps)
+            p = Player(self, log['name'], pid, Client_Base.COLORS[pid], ps, log['cpu'])
             self.players.append(p)
 
             self.organize_screen()
@@ -329,13 +428,13 @@ class Client_Base(Scene):
         spots = [p.spot for p in self.players]
         x = y = 0
         for s in spots:
-            r = s.total_rect
+            r = s.rect
             sx, sy = r.topright
             s.rect.move_ip(x - sx, y - sy)
             y += r.height + 10
         r = s.rect.unionall([o.total_rect for o in spots])
         x0, y0 = r.topleft
-        r.topright = (self.rect.right - 40, self.options.rect.bottom + 20)
+        r.topright = (self.rect.right - 45, 80)
         x1, y1 = r.topleft
         for s in spots:
             s.rect.move_ip(x1 - x0, y1 - y0)
@@ -397,8 +496,10 @@ class Client_Base(Scene):
                 
 # particle stuff
 
-    def get_kill_particles(self, card):
-        self.kill_particles += explode_no_grav(100, card.rect, (-10, 10), (1, 5), (5, 20), color=card.player.color)
+    def get_kill_particles(self, r, color):
+        if isinstance(r, tuple):
+            r = pg.Rect(r, (1, 1))
+        self.kill_particles += explode_no_grav(100, r, (-10, 10), (1, 5), (5, 20), color=color)
 
     def update_particles(self):
         i = 0
@@ -413,6 +514,10 @@ class Client_Base(Scene):
                 i += 1
 
 # running stuff
+    
+    def run(self):
+        self.start()
+        super().run()
     
     def events(self):
         events = super().events()   
@@ -437,6 +542,8 @@ class Client_Base(Scene):
         self.get_info()
         super().update()
         
+        self.animation_manager.update()
+        
         for p in self.players:
             p.update()
             
@@ -445,9 +552,7 @@ class Client_Base(Scene):
                 self.clear_hover_card()
                 
         self.update_particles()
-        
-        self.animation_manager.update()
-            
+   
     def draw(self):
         self.start_draw()
         

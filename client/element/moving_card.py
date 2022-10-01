@@ -63,6 +63,16 @@ class Moving_Card(Base_Element):
     @y.setter
     def y(self, y):
         self.rect.y = y
+        
+    @property
+    def w(self):
+        return self.rect.width
+        
+    @w.setter
+    def w(self, w):
+        c = self.rect.center
+        self.rect.width = w
+        self.rect.center = c
 
     @property
     def phase(self):
@@ -96,7 +106,7 @@ class Moving_Card(Base_Element):
             self.card.turn_on()
             
             if self.type == 'kill':
-                self.pack.manager.client.get_kill_particles(self.card)
+                self.pack.manager.client.get_kill_particles(self.card.rect, self.card.player.color)
             
     def update(self):
         for a in self.animations.copy():
@@ -175,4 +185,43 @@ class Moving_Card(Base_Element):
                     'frames': 20,
                     'method': 'random_shake'
                 }])
+                
+            case 'own':
+                
+                self.add_animation([
+                    {
+                        'attr': 'w',
+                        'end': 0,
+                        'frames': 10,
+                        'method': 'ease_in_expo'
+                    },
+                    {
+                        'attr': 'w',
+                        'end': self.card.rect.width,
+                        'frames': 10,
+                        'method': 'ease_out_expo'
+                    }
+                ])
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         

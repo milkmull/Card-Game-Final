@@ -19,7 +19,7 @@ class Game_Base:
         self.current_turn = 0
         
         self.log = []
-        self.community_deck = {}
+        self.public_deck = {}
         self.multipliers = {}
         self.players = [] 
         self.grid = Grid(self, self.get_setting('size'))
@@ -41,7 +41,7 @@ class Game_Base:
         g.turn = self.turn
         g.current_turn = self.current_turn
         
-        g.community_deck = {cid: c.game_copy(g) for cid, c in self.community_deck.items()}
+        g.public_deck = {cid: c.game_copy(g) for cid, c in self.public_deck.items()}
         g.players = [p.copy(g) for p in self.players]
         self.grid.copy_to(g)
         
@@ -56,7 +56,7 @@ class Game_Base:
     
     def reset(self):
         self.log.clear()
-        self.community_deck.clear()
+        self.public_deck.clear()
         self.multipliers.clear()
         self.grid.reset()
         
@@ -81,7 +81,7 @@ class Game_Base:
         self.new_status('playing')  
         
         for c in self.draw_cards(num=9):
-            self.add_community(c)
+            self.add_public(c)
                 
     def add_cpus(self, num=0):
         self.pid = 0
@@ -132,14 +132,14 @@ class Game_Base:
                 return cls(self, cid)
         raise exceptions.CardNotFound(name)
 
-    def add_community(self, card):
-        self.community_deck[card.cid] = card
+    def add_public(self, card):
+        self.public_deck[card.cid] = card
         
-    def remove_community(self, card):
-        self.community_deck.pop(card.cid)
+    def remove_public(self, card):
+        self.public_deck.pop(card.cid)
             
-    def pop_community(self, cid):
-        card = self.community_deck.pop(cid)
+    def pop_public(self, cid):
+        card = self.public_deck.pop(cid)
         return card
         
     def add_multiplier(self, card):
@@ -167,13 +167,13 @@ class Game_Base:
         self.status = stat
             
     def new_turn(self):
-        if self.community_deck:
+        if self.public_deck:
             self.current_turn = (self.current_turn + 1) % len(self.players)
             
         else:
             current_turn = (self.current_turn + 1) % len(self.players)
             for p in (self.players[current_turn:] + self.players[:current_turn]):
-                if p.decks['play']:
+                if p.decks['private']:
                     self.current_turn = self.players.index(p)
                     break
             
@@ -207,7 +207,7 @@ class Game_Base:
         if self.status != 'playing':
             return 
 
-        if self.grid.full or (not self.community_deck and all({not p.decks['play'] for p in self.players})):
+        if self.grid.full or (not self.public_deck and all({not p.decks['private'] for p in self.players})):
             self.end_game()
             
         else:

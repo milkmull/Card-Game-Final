@@ -300,7 +300,7 @@ class Text:
     def set_value(self, text):
         self.set_text(text)
 
-    def clear_text(self):
+    def clear(self):
         self.set_text('')
 
     def set_text_alignment(
@@ -335,6 +335,11 @@ class Text:
         if not height:
             h = self.rect.height
         self.size = (w, h)
+        
+    def get_text_rect(self, text=None):
+        if text is None:
+            text = self.text
+        return self.font.get_rect(text, size=self.text_size)
 
     def get_max_size(self, texts):
         mw = 0
@@ -349,6 +354,29 @@ class Text:
 
     def can_render(self, text):
         return all({self.font.get_metrics(c, size=1)[0] or c == '\n' for c in text})
+        
+    def chop_to_width(self, width=0):
+        width = width or self.max_line_width
+        
+        new_text = ''
+        words = self.text.split(' ')
+        for word in words:
+            r = self.get_text_rect(word)
+            if r.width <= width:
+                new_text += ' ' + word
+                continue
+                
+            current_word = ''
+            for char in word:
+                r = self.get_text_rect(current_word + char + '-')
+                if r.width > width:
+                    new_text += ' ' + current_word + '-'
+                    current_word = ''
+                current_word += char
+                
+            new_text += ' ' + current_word
+
+        self.set_text(new_text[1:])
 
     def fit_text(self):
         lines = [line.split(' ') for line in self.text.splitlines()]

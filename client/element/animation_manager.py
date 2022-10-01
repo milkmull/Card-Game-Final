@@ -105,9 +105,9 @@ class Animation_Manager:
             p.start()
             self.points.append(p)
         
-    def update(self):
+    def update(self):         
         if self.queue and not self.points:
-        
+
             turn, pack = min(self.queue.items(), key=lambda item: item[0])
             if turn <= self.client.turn:
                 pack.update(turn == self.client.turn)

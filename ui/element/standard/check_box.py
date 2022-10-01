@@ -43,7 +43,7 @@ class Check_Box(Text_Element):
         if value:
             self.set_text(icons['check'])
         else:
-            self.clear_text()
+            self.clear()
         
     def flip_value(self):
         self.set_value(not self.value)

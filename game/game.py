@@ -1,4 +1,5 @@
 import json
+import time
 
 from data import save
 
@@ -43,9 +44,9 @@ class Game(game_base.Game_Base):
 # new game stuff
 
     def reset(self):
+        self.add_log({'t': 'res'})
         super().reset()
         self.tree.reset()
-        self.log.insert(0, {'t': 'res'})
         
     def start(self, pid):
         if pid == 0:
@@ -63,7 +64,7 @@ class Game(game_base.Game_Base):
         
         match cmd:
             
-            case 'ppid':
+            case 'pid':
                 reply = pid
                 
             case 'info':
@@ -80,16 +81,20 @@ class Game(game_base.Game_Base):
                     self.start(0)
                 reply = 1
                 
-            case 'continue':
+            case 'reset':
                 if pid == 0:
                     self.reset()
                 reply = 1
                 
-            case 'play' | 'select':
+            case 'play' | 'select' | 'rand':
                 if self.status == 'playing':
                     self.get_player(pid).update(cmd=cmd, data=data)    
                 reply = 1
-
+                
+            case 'msg':
+                self.add_message(pid, data)
+                reply = 1
+                    
         return reply
         
 # settings stuff
@@ -98,38 +103,39 @@ class Game(game_base.Game_Base):
         settings = json.loads(settings[0])
         self.settings = settings
         
+        self.reset()
+        
         self.add_log({
             't': 'set',
             'settings': settings
         })
-        
+
         self.grid.resize(settings['size'])
         self.balance_cpus(settings['cpus'])
-
+        
 # log stuff
     
     def add_log(self, log):
         self.log.append(log)
         if log['t'] == 'p' or log['t'] == 's':
             self.tree.trim(log)
+     
+        for p in self.players:
+            if not p.is_cpu and log.get('exc', p.pid) == p.pid:
+                p.log_queue.append(log)
 
     def get_info(self, pid):
         p = self.get_player(pid)
-        logs = []
-        count = 0
-        
-        for log in self.log[p.log_index:]:
-            p.log_index += 1
-            if log.get('exc', pid) == pid:
-                logs.append(log)
-                count += 1
-                if count == 5:
-                    break
-
+        logs = p.log_queue.copy()
+        p.log_queue.clear()
         return logs
         
     def get_startup_log(self, pid):
         logs = []
+        logs.append({
+            't': 'pid',
+            'pid': pid
+        })
         logs.append({
             't': 'ns',
             'stat': 'waiting'
@@ -144,17 +150,49 @@ class Game(game_base.Game_Base):
                 't': 'ap',
                 'p': p.pid,
                 'name': p.username,
+                'cpu': p.is_cpu
             })
 
         for log in logs:
             log['exc'] = pid
 
-        self.log += logs
+        for log in logs:
+            self.add_log(log)
+            
+    def add_message(self, pid, data):
+        text = '-'.join(data)
+        recipients = {pid}
+
+        for word in text.split(' '):
+            if word[0] == '@':
+                if (p := self.get_player_by_name(word[1:])):
+                    recipients.add(p.pid)
+                    
+        if len(recipients) > 1:
+            for exc in recipients:
+                self.add_log({
+                    't': 'msg',
+                    'p': pid,
+                    'text': text,
+                    'exc': exc
+                })
+                
+        else:
+            self.add_log({
+                't': 'msg',
+                'p': pid,
+                'text': text
+            })
 
 # player stuff
+    
+    def get_player_by_name(self, name):
+        for p in self.players:
+            if p.username == name:
+                return p
 
     def balance_cpus(self, count):
-        cpus = [p for p in sorted(self.players, key=lambda p: p.pid) if isinstance(p, Auto_Player)]
+        cpus = [p for p in sorted(self.players, key=lambda p: p.pid) if p.is_cpu]
         diff = count - len(cpus)
 
         if diff > 0:
@@ -173,7 +211,8 @@ class Game(game_base.Game_Base):
             self.add_log({
                 't': 'ap',
                 'p': p.pid,
-                'name': p.username
+                'name': p.username,
+                'cpu': True
             })
                 
             self.pid += 1
@@ -183,12 +222,12 @@ class Game(game_base.Game_Base):
         if self.status == 'waiting':
             p = Player(self, pid, player_info)
             self.players.append(p)  
-            p.log_index = len(self.log)
             
             self.add_log({
                 't': 'ap',
                 'p': pid,
-                'name': p.username
+                'name': p.username,
+                'cpu': False
             })
             
             self.pid += 1
@@ -210,36 +249,36 @@ class Game(game_base.Game_Base):
             
 # card stuff
 
-    def add_community(self, card):
-        self.community_deck[card.cid] = card
+    def add_public(self, card):
+        self.public_deck[card.cid] = card
         
         self.add_log({
             't': 'ac',
             'c': (card.cid, card.name),
-            'd': 'community'
+            'd': 'public'
         })
         
-    def remove_community(self, card):
-        self.community_deck.pop(card.cid)
+    def remove_public(self, card):
+        self.public_deck.pop(card.cid)
         
         self.add_log({
             't': 'rc',
             'c': card.cid,
-            'd': 'community'
+            'd': 'public'
         })
             
-    def pop_community(self, cid):
-        card = self.community_deck.pop(cid, None)
+    def pop_public(self, cid):
+        card = self.public_deck.pop(cid, None)
         
         if card:
         
             self.add_log({
                 't': 'rc',
                 'c': card.cid,
-                'd': 'community'
+                'd': 'public'
             })
             
-            self.add_community(self.draw_cards()[0])
+            self.add_public(self.draw_cards()[0])
         
         return card
    
@@ -258,11 +297,12 @@ class Game(game_base.Game_Base):
         
         self.add_log({
             't': 'nt',
-            'p': self.players[self.current_turn].pid
+            'p': self.players[self.current_turn].pid,
+            'st': time.time()
         })
         
     def main(self):
-        if self.status != 'waiting':
+        if self.status == 'playing':
             self.tree.simulate()
             super().main()
             

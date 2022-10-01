@@ -3,13 +3,14 @@ import random
 from ui.element.elements import Textbox
 
 class Player:
-    def __init__(self, client, name, pid, color, spot):
+    def __init__(self, client, name, pid, color, spot, cpu):
         self.client = client
         self.name = name
         self.pid = pid
         self.color = color
         self.spot = spot
         self.spot.set_player(self)
+        self.is_cpu = cpu
 
         self.score = 0
         

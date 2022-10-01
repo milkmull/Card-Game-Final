@@ -14,8 +14,8 @@ class Player_Base:
         self.played = True
 
         self.decks = {
-            'play': {},
-            'community': game.community_deck,
+            'private': {},
+            'public': game.public_deck,
             'selection': {}
         }
         self.active_card = None
@@ -50,7 +50,7 @@ class Player_Base:
 
     def reset(self):
         self.played = True
-        self.decks['play'].clear()
+        self.decks['private'].clear()
         self.decks['selection'].clear()
         self.active_card = None
         self.log.clear()
@@ -58,7 +58,7 @@ class Player_Base:
 
     def start(self):
         self.update_score(20)
-        self.draw_cards('play', 3)
+        self.draw_cards('private', 3)
         
     def copy(self, game):
         p = Player_Base(game, self.pid)
@@ -69,7 +69,7 @@ class Player_Base:
     def copy_cards_to(self, game):
         p = game.get_player(self.pid)
         
-        p.decks['play'] = {cid: c.game_copy(game) for cid, c in self.decks['play'].items()}
+        p.decks['private'] = {cid: c.game_copy(game) for cid, c in self.decks['private'].items()}
         
         selection = p.decks['selection']
         for cid, c in self.decks['selection'].items():
@@ -105,17 +105,17 @@ class Player_Base:
             self.pop_card(deck, cid)
         
     def draw_cards(self, deck, num):
-        cards = self.game.draw_cards(deck, num=num)
+        cards = self.game.draw_cards(num=num)
         for card in cards:
            self.add_card(deck, card) 
         
     def play_card(self, deck, cid, spot):
         match deck:
-            case 'play':
+            case 'private':
                 card = self.pop_card(deck, cid)
                 deck = 1
-            case 'community':
-                card = self.game.pop_community(cid)
+            case 'public':
+                card = self.game.pop_public(cid)
                 deck = 0
                 
         if not card:
@@ -184,12 +184,12 @@ class Player_Base:
         
     @property
     def done_game(self):
-        return not self.decks['play'] and not self.active_card
+        return not self.decks['private'] and not self.active_card
         
     def choose_random_play(self):
         choices = (
-            [('play', cid) for cid in self.decks['play']] +
-            [('community', cid) for cid in self.decks['community']]
+            [('private', cid) for cid in self.decks['private']] +
+            [('public', cid) for cid in self.decks['public']]
         )
         return random.choice(choices)
 
@@ -200,11 +200,11 @@ class Player_Base:
     def random_turn(self):
         deck, cid = self.choose_random_play()
         spot = self.choose_random_spot()
-        self.play_card(deck, cid, spot)
+        Player_Base.play_card(self, deck, cid, spot)
         
     def random_selection(self):
         cid = random.choice(list(self.decks['selection']))
-        self.select_card(cid)
+        Player_Base.select_card(self, cid)
 
     def update(self):
         if not self.played:

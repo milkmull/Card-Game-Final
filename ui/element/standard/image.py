@@ -9,13 +9,6 @@ class Image(Image_Element):
             image = pg.image.load(path).convert_alpha()
         else:
             image = pg.image.load(path).convert()
-        return cls(image, **kwargs)
-        
-    def __init__(
-        self,
-        image,
-        **kwargs
-    ):
-        super().__init__(image=image, **kwargs)
+        return cls(image=image, **kwargs)
         
 

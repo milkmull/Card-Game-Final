@@ -9,7 +9,10 @@ class Network(Network_Base):
         
         self.thread = None
         self.send_queue = []
-        self.recv_queue = []
+        self.update = None
+        
+    def set_update(self, update):
+        self.update = update
         
     def close(self):
         super().close()
@@ -22,11 +25,19 @@ class Network(Network_Base):
             self.send_queue.append(data)
         return self.connected
         
-    def pop_queue(self, num):
-        data = self.recv_queue[:num]
-        self.recv_queue = self.recv_queue[num:]
-        return data
+    def request(self, send_data):
+        while self.connected:
+            if not self.send_queue:
             
+                self.send(send_data)
+                recv_data = self.recv()
+                if recv_data is None:
+                    break
+                    
+                return recv_data.decode()
+                
+        self.connected = False
+
     def connect(self):
         if super().connect():
             t = threading.Thread(target=self.threaded_server)
@@ -39,16 +50,29 @@ class Network(Network_Base):
         try:
 
             while self.connected:
-
+            
                 if self.send_queue:
-                    send_data = self.send_queue.pop(0)
+                
+                    send_data = self.send_queue[0]
                     self.send(send_data)
-
+                    
                     recv_data = self.recv()
                     if recv_data is None:
                         break
                     recv_data = self.load_json(recv_data.decode())
-                    self.recv_queue.append(recv_data)
+                    self.send_queue.pop(0)
+                    
+                elif self.update:
+
+                    self.send('info')
+                    
+                    recv_data = self.recv()
+                    if recv_data is None:
+                        break
+                    recv_data = self.load_json(recv_data.decode())
+                    self.update(recv_data)
 
         except Exception as e:
             self.add_exception(e)
+            
+        self.connected = False

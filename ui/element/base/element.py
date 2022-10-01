@@ -35,13 +35,7 @@ class Element(Style, Event, Animation):
         self.click_timer = Timer()
         
         if hover_color:
-            self.add_animation(
-                [{
-                    'attr': 'fill_color',
-                    'end': hover_color
-                }],
-                tag='hover'
-            )
+            self.hover_color = hover_color
         
     @property
     def total_rect(self):
@@ -51,7 +45,33 @@ class Element(Style, Event, Animation):
     @property
     def clip_rect(self):
         return self.rect
-   
+        
+    @property
+    def hover_color(self):
+        a = self.get_animation_by_name('hover_color')
+        if a:
+            return a.sequence[0].end
+            
+    @hover_color.setter
+    def hover_color(self, hover_color):
+        if hover_color:
+            a = self.get_animation_by_name('hover_color')
+            if a:
+                a.sequence[0].end_value = hover_color
+                if self.hit:
+                    a.sequence[0].update(1)
+            else:
+                self.add_animation(
+                    [{
+                        'attr': 'fill_color',
+                        'end': hover_color
+                    }],
+                    tag='hover',
+                    name='hover_color'
+                )
+        else:
+            self.remove_animation('hover_color')
+
     def open(self):
         self.is_open = True
         self.run_animations('open')

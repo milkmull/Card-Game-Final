@@ -51,7 +51,7 @@ class Tree:
             new_tree = {}
         self.tree = new_tree
 
-    def simulate(self, num=5, max_deapth=5):
+    def simulate(self, num=5, max_deapth=10):
         for _ in range(num):
         
             g = self.game.copy(seed=self.sims)

@@ -12,8 +12,7 @@ from ui.scene.templates.notice import Notice
 def run_client_single():
     g = Game('single')
     c = Client_Base(g)
- 
-    c.start()
+
     c.run()
     
 def run_client_online():

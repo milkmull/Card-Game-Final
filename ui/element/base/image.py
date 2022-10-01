@@ -46,9 +46,11 @@ class Image:
         
     @property
     def image_rect(self):
-        r = self.image.get_rect()
-        r.center = self.rect.center
-        return r
+        if self.image:
+            r = self.image.get_rect()
+            r.center = self.rect.center
+            return r
+        return pg.Rect(0, 0, 0, 0)
         
     @property
     def alpha(self):
@@ -81,6 +83,10 @@ class Image:
         if overwrite:
             self.original_image = image.copy()
         self.fit_image()
+        
+    def clear_image(self, overwrite=True):
+        self.image = None
+        self.original_image = None
             
     def transform(self, mode, *args, overwrite=False, **kwargs):
         self.set_image(
@@ -136,5 +142,6 @@ class Image:
         self.size = (w, h)
         
     def draw_image(self, surf):
-        surf.blit(self.image, self.image_rect)
+        if self.image:
+            surf.blit(self.image, self.image_rect)
         

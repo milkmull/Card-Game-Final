@@ -11,7 +11,13 @@ class Animation:
     def moving(self):
         return any({a.attr in ('x', 'y', 'pos') for s in self.active_animations for a in s.sequence})
         
-    def add_animation(self, animations, tag='temp', loop=False):
+    def get_animation_by_name(self, name):
+        for tag, animations in self.animations.items():
+            for a in animations:
+                if a.name == name:
+                    return a
+        
+    def add_animation(self, animations, tag='temp', **kw):
         for kwargs in animations:
             if 'element' not in kwargs:
                 kwargs['element'] = self
@@ -19,7 +25,7 @@ class Animation:
         a = Sequence(
             [_Animation(**kwargs) for kwargs in animations], 
             tag=tag,
-            loop=loop
+            **kw
         )
 
         if tag == 'temp':
@@ -31,6 +37,16 @@ class Animation:
             
         return a
         
+    def remove_animation(self, animation=None, name=None):
+        if name:
+            animation = self.get_animation_by_name(name)
+            
+        if animation:
+            tag = animation.tag
+            if tag in self.animations:
+                if animation in self.animations[tag]:
+                    self.animations[tag].remove(animation)
+
     def run_animations(self, tag, reverse=False):
         if tag in self.frozen_tags:
             return
@@ -65,6 +81,8 @@ class Animation:
             a.step()
             if a.finished:
                 self.active_animations.pop(i)
+                if a.end_func:
+                    a.end_func()
             else:
                 i += 1
          

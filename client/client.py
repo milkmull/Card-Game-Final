@@ -4,20 +4,23 @@ class HostLeft(Exception):
     pass
 
 class Client(Client_Base):
-
+    def start(self):
+        super().start()
+        self.conn.set_update(self.update_logs)
+        
     def send(self, data):
         if not self.conn.queue(data):
             raise Exception
             
+    def request(self, data):
+        reply = self.conn.request(data)
+        if data is None:
+            raise Exception
+        return data
+            
     def get_info(self):
-        self.send('info')
-        data = self.conn.pop_queue(5)
-        logs = []
-        for d in data:
-            if isinstance(d, list):
-                logs += d
-        self.update_logs(logs)
-        
+        pass
+
     def remove_player(self, pid):
         super().remove_player(pid)
         if pid == 0:
@@ -26,6 +29,11 @@ class Client(Client_Base):
     def close(self):
         self.conn.close()
         super().close()
+        
+    def update(self):
+        super().update()
+        if not self.conn.connected:
+            self.running = False
         
     def run(self):
         try:

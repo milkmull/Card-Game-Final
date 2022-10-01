@@ -28,7 +28,6 @@ CONSTANTS = {
     'width': 1024,
     'height': 576,
     'screen_size': (1024, 576),
-    'center': (1024 // 2, 576 // 2),
     'cw': 375 // 8,
     'ch': 525 // 8,
     'mini_card_size': (375 // 8, 525 // 8),

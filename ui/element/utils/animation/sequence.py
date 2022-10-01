@@ -5,12 +5,16 @@ class Sequence:
         self,
         sequence,
         tag='',
-        loop=False
+        loop=False,
+        name=None,
+        end_func=None
     ):
 
         self.sequence = sequence
         self.tag = tag
         self.loop = loop
+        self.name = name
+        self.end_func=end_func
         self.index = 0
 
         self.dir = 1

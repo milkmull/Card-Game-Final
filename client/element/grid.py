@@ -6,15 +6,23 @@ from ui.element.base.element import Element
 from ui.element.base.position import Position
 
 class Spot(Position):
-    def __init__(self, client, pos):
+    def __init__(self, client, grid, pos):
         self.client = client
+        self.grid = grid
         self._pos = pos
         self.card = None
+        self.last_state = 0
         self.hover = False
         
         super().__init__(
             size=CONSTANTS['mini_card_size']
         )
+        
+    @property
+    def state(self):
+        if self.card:
+            return 2 if self.card.visible else 0
+        return 1 if self.hover else 0
         
     def click_up(self, button):
         if button == 1:
@@ -28,7 +36,7 @@ class Spot(Position):
             
         if self.rect.collidepoint(pg.mouse.get_pos()):
             self.hover = True
-            if mbu := events.get('mbu'):
+            if (mbu := events.get('mbu')):
                 self.click_up(mbu.button)
         else:
             self.hover = False
@@ -43,11 +51,22 @@ class Spot(Position):
             self.remove_child(self.card)
             self.card = None
             
-    def draw(self, surf):
-        if self.hover and not self.card:
-            pg.draw.rect(surf, (100, 100, 100), self.rect)
-        super().draw(surf)
+    def _draw(self, surf):
+        match self.last_state:
+            case 0:
+                pg.draw.rect(surf, self.client.fill_color, self.rect)
+            case 1:
+                pg.draw.rect(surf, (100, 100, 100), self.rect)
+            case 2:
+                super().draw(surf)
+
         pg.draw.rect(surf, (255, 255, 255), self.rect, width=1)
+        
+    def draw(self, surf):
+        state = self.state
+        if state != self.last_state:
+            self.last_state = state
+            self.draw_on(surf, self.grid.rect, method=self._draw)
 
 class Grid(Position):
     SPACE = 2
@@ -64,6 +83,8 @@ class Grid(Position):
             layer=1
         )
         
+        self.image = None
+        
         self.cards = {}
         self.spots = []
         
@@ -78,7 +99,7 @@ class Grid(Position):
             return
             
         self.clear_children()
-        self.grid = {y: {x: Spot(self.client, (x, y)) for x in range(size[0])} for y in range(size[1])}
+        self.grid = {y: {x: Spot(self.client, self, (x, y)) for x in range(size[0])} for y in range(size[1])}
         c = self.rect.center
         self.size = (
             (size[0] * CONSTANTS['cw']) + ((size[0] + 1) * Grid.SPACE),
@@ -98,6 +119,11 @@ class Grid(Position):
         self.grid_size = size
         self.rect.center = c
         
+        self.image = pg.Surface(self.size).convert()
+        self.image.fill(self.client.fill_color)
+        for c in self.children:
+            c.draw_on(self.image, self.rect, method=c._draw)
+        
     def get_card(self, cid):
         return self.cards.get(cid)
                 
@@ -109,7 +135,11 @@ class Grid(Position):
         self.grid[pos[1]][pos[0]].clear_card()
         
     def draw(self, surf):
-        super().draw(surf)
+        if self.image:
+            self.child_draw(self.image)
+            surf.blit(self.image, self.rect)
+            
         pg.draw.rect(surf, (255, 255, 255), self.rect, width=1)
+            
             
                 

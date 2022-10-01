@@ -1,4 +1,5 @@
 import random
+import time
 
 from . import player_base
 
@@ -7,25 +8,42 @@ class Player(player_base.Player_Base):
         super().__init__(game, pid)
         
         self.player_info = player_info
-        self.log_index = 0
-        self.turn_timer = 0
+        self.log_queue = []
+        
+        self.timer = 0
+        self.start_time = 0
         
     @property
     def is_auto(self):
         return False
         
     @property
+    def is_cpu(self):
+        return isinstance(self, Auto_Player)
+        
+    @property
     def username(self):
-        return self.player_info['name']
+        return self.player_info['name'].replace(' ', '_')
 
     def get_info(self):
         return self.player_info
+        
+# timer stuff
 
-# starting stuff                
-
-    def reset(self):
-        super().reset()
-        self.log_index = 0
+    @property
+    def max_time(self):
+        return self.game.get_setting('tt')
+        
+    @property
+    def current_time(self):
+        return self.max_time - (time.time() - self.start_time)
+        
+    @property
+    def timer_up(self):
+        return self.current_time <= 0
+        
+    def set_timer(self):
+        self.start_time = time.time()
  
 # card stuff 
 
@@ -56,9 +74,9 @@ class Player(player_base.Player_Base):
             'd': deck
         }, exc=True)
         
-        if deck == 'play':
-            if len(self.decks['play']) < 3:
-                self.draw_cards('play', 1)
+        if deck == 'private':
+            if len(self.decks['private']) < 3:
+                self.draw_cards('private', 1)
 
         return card
         
@@ -85,6 +103,10 @@ class Player(player_base.Player_Base):
         })
 
 # turn stuff
+    
+    def start_turn(self):
+        super().start_turn()
+        self.set_timer()
 
     def update(self, cmd='', data=[]):
         if cmd == 'play' and not self.played:
@@ -92,6 +114,9 @@ class Player(player_base.Player_Base):
         
         elif cmd == 'select' and self.active_card:
             self.select_card(data)
+            
+        if (not self.played or self.active_card) and self.timer_up:
+            super().update()
 
 # point stuff
  
@@ -103,21 +128,12 @@ class Player(player_base.Player_Base):
             'score': self.score
         })
         
-class Auto_Player(Player):
-    def __init__(self, game, pid, player_info):
-        super().__init__(game, pid, player_info)
-
-        self.timer = 0
-
+class Auto_Player(Player):   
     def set_timer(self):
-        self.timer = random.randrange(200, 250)
-        
-    def timer_up(self):
-        return self.timer <= 0
-        
-    def start_turn(self):
-        super().start_turn()
-        self.set_timer()
+        self.start_time = time.time()
+        tmin = 9
+        tmax = min(self.max_time, 30)
+        self.timer = random.randrange(tmin, tmax)
         
     def get_decision(self):
         choices = self.game.tree.get_scores(self.pid)
@@ -125,9 +141,20 @@ class Auto_Player(Player):
             return
         choices = sorted(choices.items(), key=lambda c: c[1], reverse=True)
         decks = {
-            0: 'community',
-            1: 'play'
+            0: 'public',
+            1: 'private'
         }
+        
+        match self.game.get_setting('diff'):
+            case 1:
+                choices = choices[:15]
+                random.shuffle(choices)
+            case 2:
+                choices = choices[:10]
+                random.shuffle(choices)
+            case 3:
+                choices = choices[:5]
+                random.shuffle(choices)
 
         if not self.played:
 
@@ -139,6 +166,7 @@ class Auto_Player(Player):
                     return (deck, cid, spot)
                     
         elif self.active_card:
+        
             cards = {cid: c for cid, c in self.decks['selection'].items()}
 
             for (pid, cid), score in choices:
@@ -146,16 +174,14 @@ class Auto_Player(Player):
                     return cid
 
     def update(self):
-        if self.timer_up():
+        ct = self.current_time
         
+        if not self.played and ct <= self.timer / 2:
             choice = self.get_decision()
             if choice:
-            
-                if not self.played:
-                    player_base.Player_Base.play_card(self, *choice)
-                elif self.active_card:
-                    player_base.Player_Base.select_card(self, choice)
-                    
-                self.set_timer()
-        
-        self.timer -= 1
+                player_base.Player_Base.play_card(self, *choice)
+                
+        elif self.active_card and ct <= 0:
+            choice = self.get_decision()
+            if choice:
+                player_base.Player_Base.select_card(self, choice)

@@ -32,5 +32,7 @@ icons = {
     'minus': u'\uea0b',
     'make-group': u'\uea58',
     'ungroup': u'\uea59',
-    'file-text': u'\ue922'
+    'file-text': u'\ue922',
+    'bubble': u'\ue96b',
+    'bubble2': u'\ue96e'
 }

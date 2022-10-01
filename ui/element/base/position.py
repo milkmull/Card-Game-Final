@@ -147,6 +147,22 @@ class Position(Base_Element):
         self.size = (self.rect.width, height)
         
     @property
+    def centerx(self):
+        return self.rect.centerx
+        
+    @centerx.setter
+    def centerx(self, centerx):
+        self.rect.centerx = centerx
+        
+    @property
+    def centery(self):
+        return self.rect.centery
+        
+    @centery.setter
+    def centery(self, centery):
+        self.rect.centery = centery
+        
+    @property
     def center(self):
         return self.rect.center
         
@@ -512,11 +528,16 @@ class Position(Base_Element):
     def draw(self, surf):
         self.child_draw(surf)
         
-    def draw_on(self, surf, rect):
+    def draw_on(self, surf, rect, method=None):
+        if method is None:
+            method = self.draw
+            
+        self.update_position(all=True)
+            
         dx, dy = rect.topleft
         self.rect.move_ip(-dx, -dy)
         self.move_children()
-        self.draw(surf)
+        method(surf)
         self.rect.move_ip(dx, dy)
         self.move_children()
      

@@ -70,14 +70,16 @@ class Popup_Base:
             self.close()
         
     def open(self):
-        if self.dir == '^':
-            end = self.rect.top - self.rect.height
-        elif self.dir == 'v':
-            end = self.rect.bottom
-        elif self.dir == '>':
-            end = self.rect.right
-        elif self.dir == '<':
-            end = self.rect.left - self.rect.width
+        match self.dir:
+            case '^':
+                end = self.rect.top - self.rect.height
+            case 'v':
+                end = self.rect.bottom
+            case '>':
+                end = self.rect.right
+            case '<':
+                end = self.rect.left - self.rect.width
+                
         self.open_animation.start_value = [self.rect.y]
         self.open_animation.end_value = [end]
 
