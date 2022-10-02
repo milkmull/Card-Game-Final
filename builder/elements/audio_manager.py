@@ -31,7 +31,7 @@ def select_device(scene, mic):
             'outline_width': 3
         }
     )
-    mic_select.rect.width = max(200, mic_select.rect.width)
+    mic_select.rect.width = max(300, mic_select.rect.width)
     mic_select.rect.center = (body.centerx, body.centery - 50)
     elements.append(mic_select)
         

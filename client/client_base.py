@@ -431,18 +431,11 @@ class Client_Base(Scene):
             
     def organize_screen(self):
         spots = [p.spot for p in self.players]
-        x = y = 0
+        x = self.rect.right - 60
+        y = 80
         for s in spots:
-            r = s.rect
-            sx, sy = r.topright
-            s.rect.move_ip(x - sx, y - sy)
-            y += r.height + 10
-        r = s.rect.unionall([o.total_rect for o in spots])
-        x0, y0 = r.topleft
-        r.topright = (self.rect.right - 45, 80)
-        x1, y1 = r.topleft
-        for s in spots:
-            s.rect.move_ip(x1 - x0, y1 - y0)
+            s.rect.topright = (x, y)
+            y += s.rect.height + 10
             
 # card stuff
 
