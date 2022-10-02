@@ -4,8 +4,8 @@ class HostLeft(Exception):
     pass
 
 class Client(Client_Base):
-    def start(self):
-        super().start()
+    def refresh(self):
+        super().refresh()
         self.conn.set_update(self.update_logs)
         
     def send(self, data):
