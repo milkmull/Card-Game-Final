@@ -33,7 +33,7 @@ def scan_connections(port):
         connected = True
         try:
             sock.connect((host, port))
-        except socket.timeout:
+        except socket.error:
             connected = False
         finally:
             sock.close()
