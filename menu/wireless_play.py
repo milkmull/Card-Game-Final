@@ -3,7 +3,7 @@ from ui.element.elements import Textbox, Button
 from ui.math.position import center_elements_y
 
 from .select_host import run as run_select_host
-from .client import run_client_online, join_game
+from .client import run_client_online, find_local_game
 
 def wireless_play_scene(scene):
     body = scene.body
@@ -18,21 +18,22 @@ def wireless_play_scene(scene):
     }
     
     b = Button.Text_Button(
-        text='host game',
+        text='Host Game',
         func=run_client_online,
         **button_kwargs
     )
     elements.append(b)
     
     b = Button.Text_Button(
-        text='find local game',
+        text='Local Game',
+        func=find_local_game,
         **button_kwargs
     )
     elements.append(b)
     
     b = Button.Text_Button(
-        text='join online game',
-        func=join_game,
+        text='Online Game',
+        func=run_select_host,
         **button_kwargs
     )
     elements.append(b)

@@ -1,13 +1,55 @@
 import sys
 import subprocess
+import threading
 
 from client.client_base import Client_Base
 from game.game import Game
 from client.client import Client, HostLeft
 from network.network import Network
-from network.net_base import get_local_ip
+from network.net_base import get_local_ip, scan_connections, PortNotAvailable
 
 from ui.scene.templates.notice import Notice
+from .searching import Searching
+from .select_local import run_select_local
+
+def scan():
+    m = Searching('Searching for games...')
+
+    def _scan():
+        results = scan_connections(5555)
+        m.set_return(results)
+
+    t = threading.Thread(target=_scan)
+    t.start()
+    results = m.run()
+    t.join()
+    
+    return results
+    
+def start_server():
+    m = Searching('Starting game...')
+
+    def _start_server():
+        err = b''
+        try:
+            pipe = subprocess.Popen(
+                [sys.executable, 'server.py'],
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE
+            )
+            out, err = pipe.communicate(timeout=3)
+        except subprocess.TimeoutExpired:
+            pass
+        
+        err = err.decode()
+        m.set_return(err)
+            
+    t = threading.Thread(target=_start_server)
+    t.start()
+    err = m.run()
+    t.join()
+    
+    return err
 
 def run_client_single():
     g = Game('single')
@@ -16,53 +58,61 @@ def run_client_single():
     c.run()
     
 def run_client_online():
-    text = ''
-    
-    pipe = subprocess.Popen([sys.executable, 'server.py'], stderr=sys.stderr, stdout=sys.stdout)
-    
-    try:
-        _, error = pipe.communicate(timeout=1)
-    except subprocess.TimeoutExpired:
-        pass
+    err = start_server()
+
+    if 'PortNotAvailable' in err:
+        text = 'The specified port is currently in use.'
+        m = Notice(text_kwargs={'text': text})
+        m.run()
+        return
 
     n = Network(get_local_ip(), 5555)
     n.connect()
     
     if not n.connected:
         text = 'Game could not be started.'
-        
-    else:
-        c = Client(n)
-        try:
-            c.run()
-        except OSError:
-            pass
-            
-    if text:
         m = Notice(text_kwargs={'text': text})
         m.run()
+        return
+
+    c = Client(n)
+    try:
+        c.run()
+    except OSError:
+        pass
         
-def join_game():
+def find_local_game():
     text = ''
     
-    n = Network(get_local_ip(), 5555)
+    results = scan()
+    if not results:
+        m = Notice(text_kwargs={'text': 'No games could be found'})
+        m.run()  
+        return
+
+    host = run_select_local(results)
+    if host is None:
+        return
+
+    n = Network(host, 5555)
     n.connect()
-    
+
     if not n.connected:
-        text = 'No games could be found.'
-        
-    else:
-        c = Client(n)
-        try:
-            c.run()
-        except OSError:
-            pass
-        except HostLeft:
-            text = 'The host closed the game.'
-            
-    if text:
+        text = 'Failed to connect to game.'
+        m = Notice(text_kwargs={'text': text})
+        m.run()
+        return
+
+    c = Client(n)
+    try:
+        c.run()
+    except OSError:
+        pass
+    except HostLeft:
+        text = 'The host closed the game.'
         m = Notice(text_kwargs={'text': text})
         m.run()   
+        return
             
             
             

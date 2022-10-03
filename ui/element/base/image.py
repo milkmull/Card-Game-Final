@@ -110,6 +110,8 @@ class Image:
 
     def fit_image(self):
         if self.image:
+            
+            c = self.rect.center
 
             self.image = pg.transform.rotate(self.original_image, self._rotation)
         
@@ -123,6 +125,8 @@ class Image:
                     
             elif not self.auto_fit:
                 self.image = pg.transform.smoothscale(self.image, self.rect.size)
+                
+            self.rect.center = c
         
     def fit_to_image(self, width=False, height=False):
         w, h = self.image_size

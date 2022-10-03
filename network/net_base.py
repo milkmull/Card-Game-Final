@@ -5,11 +5,10 @@ import traceback
 import base64
 import re
 import subprocess
+import threading
 
-def list_connections():
-    out = subprocess.check_output(['arp', '-a']).decode()
-    ips = re.findall(r'[0-9]+(?:\.[0-9]+){3}', out)
-    return ips
+class PortNotAvailable(Exception):
+    pass
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -25,7 +24,47 @@ def get_public_ip():
     except urllib.error.URLError:
         pass
     return ip
+
+def scan_connections(port):
+    results = {}
+
+    def verify_connection(host):
+        sock = Network_Base.get_sock(timeout=1)
+        connected = True
+        try:
+            sock.connect((host, port))
+        except socket.timeout:
+            connected = False
+        finally:
+            sock.close()
+        results[host] = connected
         
+    threads = []
+    hosts = [f'192.168.1.{end}' for end in range(255)]
+  
+    for host in hosts:
+        t = threading.Thread(target=verify_connection, args=(host,))
+        t.start()
+        threads.append(t)
+        
+    while any({t.is_alive() for t in threads}):
+        continue
+        
+    available = []
+    for host, connected in results.items():
+        if connected:
+            name = socket.gethostbyaddr(host)[0]
+            available.append((name, host))
+            
+    return available
+    
+def port_in_use(host, port):
+    sock = Network_Base.get_sock()
+    result = sock.connect_ex((host, port))
+    sock.close()
+    print(result)
+    return result == 0
+   
 class Network_Base:
     @staticmethod
     def load_json(data):
@@ -50,7 +89,7 @@ class Network_Base:
     @staticmethod
     def decode(data):
         return data.decode()
-        
+  
     @staticmethod
     def get_sock(timeout=3):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -58,8 +97,8 @@ class Network_Base:
         sock.settimeout(timeout)
         return sock
         
-    def __init__(self, server, port, timeout=3):
-        self.server = server
+    def __init__(self, host, port, sock=None, timeout=3):
+        self.host = host
         self.port = port
 
         self.connections = {}
@@ -67,14 +106,14 @@ class Network_Base:
         self.listening = False
         
         self.timeout = timeout
-        self.sock = self.get_sock(timeout=timeout)
+        self.sock = sock or self.get_sock(timeout=timeout)
         self.buffer = b''
         
         self.exceptions = []
         
     @property
     def address(self):
-        return (self.server, self.port)
+        return (self.host, self.port)
         
     def add_exception(self, err):
         info = (err, traceback.format_exc())
@@ -106,13 +145,18 @@ class Network_Base:
     def __del__(self):
         self.close()
 
-    def start_server(self):
+    def start_host(self):
         self.connected = False
+        
+        if port_in_use(self.host, self.port):
+            raise PortNotAvailable
+            
         try: 
             self.sock.bind(self.address)
             self.connected = True
         except Exception as e:
             self.add_exception(e)
+            
         return self.connected
         
     def connect(self):

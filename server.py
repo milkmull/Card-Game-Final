@@ -9,6 +9,7 @@ class Server(Network_Base):
         super().__init__(get_local_ip(), 5555)
         
         self.id = 0
+        self.host_connected = True
         self.threads = []
         self.game = Game('online')
         
@@ -29,6 +30,10 @@ class Server(Network_Base):
         print('server closed')
         
     def add_connection(self, conn, address):
+        if not self.host_connected:
+            conn.close()
+            return
+            
         super().add_connection(conn, address)
         t = threading.Thread(target=self.threaded_client, args=(address, conn, self.id))
         t.start()
@@ -38,38 +43,53 @@ class Server(Network_Base):
         print('connected to', address)
         
     def run(self):
-        self.start_server()
+        self.start_host()
         if not self.connected: 
             self.raise_last()
         self.listen_while()
         
-    def threaded_client(self, address, conn, id):
-        connected = self.game.add_player(id, self.game.blank_player_info(id))
-        
+    def verify_connection(self, conn):
+        data = None
         try:
+            data = self.recv(conn=conn)
+        except socke.timeout:
+            pass
 
-            while connected and self.connected:
-            
+        return data
+        
+    def threaded_client(self, address, conn, connection_id):
+        connected = self.verify_connection(conn)
+        
+        if connected:
+            pid = self.game.add_player()
+            if pid is not None:
+
                 try:
-                    data = self.recv(conn=conn)
-                except socket.timeout:
-                    continue
-
-                if data is None:
-                    break
+                    while self.connected:
                     
-                data = data.decode()
-                reply = self.game.update_game(data, pid=id)
-                self.send(self.dump_json(reply), conn=conn)
+                        try:
+                            data = self.recv(conn=conn)
+                        except socket.timeout:
+                            continue
 
-        except Exception as e:
-            self.add_exception(e)
+                        if data is None:
+                            break
+                            
+                        data = data.decode()
+                        reply = self.game.update_game(data, pid=pid)
+                        self.send(self.dump_json(reply), conn=conn)
+
+                except Exception as e:
+                    self.add_exception(e)
                 
         print('lost connection to', address)
             
         self.id -= 1
-        self.game.remove_player(id)
+        self.game.remove_player(connection_id)
         self.close_connection(conn, address)
+        
+        if not self.id:
+            self.host_connected = False
         
 s = Server()
 s.run()   

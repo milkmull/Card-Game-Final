@@ -169,7 +169,7 @@ class Chat(Button.Text_Button):
             max_line_width=self.window.rect.width - 20,
             text_style=style
         )
-        tb.chop_to_width()
+        tb.wrap_to_width()
         self.window.add_element(tb)
         self.window.y_scroll_bar.go_to_bottom()
         

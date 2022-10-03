@@ -355,11 +355,12 @@ class Text:
     def can_render(self, text):
         return all({self.font.get_metrics(c, size=1)[0] or c == '\n' for c in text})
         
-    def chop_to_width(self, width=0):
+    def wrap_to_width(self, text=None, width=0, end='-'):
+        text = text or self.text
         width = width or self.max_line_width
         
         new_text = ''
-        words = self.text.split(' ')
+        words = text.split(' ')
         for word in words:
             r = self.get_text_rect(word)
             if r.width <= width:
@@ -368,15 +369,34 @@ class Text:
                 
             current_word = ''
             for char in word:
-                r = self.get_text_rect(current_word + char + '-')
+                r = self.get_text_rect(current_word + char + end)
                 if r.width > width:
-                    new_text += ' ' + current_word + '-'
+                    new_text += ' ' + current_word + end
                     current_word = ''
                 current_word += char
                 
             new_text += ' ' + current_word
 
         self.set_text(new_text[1:])
+        
+    def chop_to_width(self, text=None, width=0, end='...'):
+        text = text or self.text
+        width = width or self.max_line_width
+        
+        w = self.get_text_rect(text).width
+        if w < width:
+            return
+
+        while True:
+            w = self.get_text_rect(text + end).width
+            if w >= width:
+                text = text[:-1]
+                if not text:
+                    break
+            else:
+                break
+
+        self.set_text(text + end if text else '')
 
     def fit_text(self):
         lines = [line.split(' ') for line in self.text.splitlines()]

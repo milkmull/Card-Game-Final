@@ -38,7 +38,7 @@ class Game(game_base.Game_Base):
         self.new_status('waiting')
 
         if self.mode == 'single':
-            self.add_player(0, Game.get_user_player_info())
+            self.add_player()
             self.add_cpus()
         
 # new game stuff
@@ -205,7 +205,8 @@ class Game(game_base.Game_Base):
     def add_cpus(self, num=0):
         self.pid = len(self.players)
         for _ in range(num or self.get_setting('cpus')):  
-            player_info = Game.blank_player_info(self.pid)
+        
+            player_info = self.blank_player_info(self.pid)
             p = Auto_Player(self, self.pid, player_info)
             self.players.append(p)   
             
@@ -217,11 +218,14 @@ class Game(game_base.Game_Base):
             })
                 
             self.pid += 1
+            
         self.new_status('waiting')
             
-    def add_player(self, pid, player_info):
+    def add_player(self):
         if self.status == 'waiting':
-            p = Player(self, pid, player_info)
+        
+            pid = self.pid
+            p = Player(self, pid, self.blank_player_info(pid))
             self.players.append(p)  
             
             self.add_log({
@@ -230,11 +234,12 @@ class Game(game_base.Game_Base):
                 'name': p.username,
                 'cpu': False
             })
+            self.get_startup_log(p.pid)
             
             self.pid += 1
-            self.get_startup_log(p.pid)
             self.new_status('waiting')
-            return p 
+            
+            return pid
             
     def remove_player(self, pid):
         for p in self.players:

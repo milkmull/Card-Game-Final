@@ -1,11 +1,11 @@
 import socket
 import threading
 
-from .net_base import Network_Base, list_connections
+from .net_base import Network_Base
 
 class Network(Network_Base):
-    def __init__(self, server, port):
-        super().__init__(server, port, timeout=10)
+    def __init__(self, host, port):
+        super().__init__(host, port, timeout=10)
         
         self.thread = None
         self.send_queue = []
@@ -19,7 +19,7 @@ class Network(Network_Base):
         if self.thread:
             self.thread.join()
             self.thread = None
-        
+
     def queue(self, data):
         if data not in self.send_queue:
             self.send_queue.append(data)
@@ -40,13 +40,14 @@ class Network(Network_Base):
 
     def connect(self):
         if super().connect():
-            t = threading.Thread(target=self.threaded_server)
+            self.send(bin(1))
+            t = threading.Thread(target=self.threaded_host)
             t.start()
             self.thread = t
             
         return self.connected
         
-    def threaded_server(self):
+    def threaded_host(self):
         try:
 
             while self.connected:
