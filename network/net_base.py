@@ -62,7 +62,6 @@ def port_in_use(host, port):
     sock = Network_Base.get_sock()
     result = sock.connect_ex((host, port))
     sock.close()
-    print(result)
     return result == 0
    
 class Network_Base:

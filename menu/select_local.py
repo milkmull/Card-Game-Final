@@ -1,6 +1,6 @@
 from ui.scene.scene import Scene
 from ui.element.base.style import Style
-from ui.element.elements import Textbox, Button, Image
+from ui.element.elements import Textbox, Button
 from ui.element.utils.image import get_arrow
 
 def join_game(scene, games):
@@ -81,6 +81,7 @@ def join_game(scene, games):
         center_aligned=True,
         size=(200, 80),
         fill_color=(0, 200, 0),
+        text_color=(0, 0, 0),
         border_radius=10,
         func=return_host
     )

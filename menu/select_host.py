@@ -188,10 +188,10 @@ def join_game(scene, name, ip):
         text_size=35,
         inf_width=False,
         inf_height=False,
-        centerx_aligned=True,
-        centery_aligned=True,
+        center_aligned=True,
         size=(200, 80),
         fill_color=(0, 200, 0),
+        text_color=(0, 0, 0),
         border_radius=10,
     )
     b.rect.top = elements[2].rect.bottom + 15

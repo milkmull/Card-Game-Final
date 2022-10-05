@@ -74,6 +74,7 @@ class Card(Image_Element):
         card_image = pg.Surface(CARD_SIZE).convert_alpha()
         card_image.fill((50, 50, 50))
         super().__init__(image=card_image)
+        self.rect.topleft = (0, 0)
 
         bg = Style(
             size=self.rect.inflate(-30, -30).size,
@@ -107,8 +108,7 @@ class Card(Image_Element):
             **text_kwargs,
             **style_kwargs
         )
-        name.rect.centerx = bg.rect.centerx
-        name.rect.y = 35
+        name.rect.midtop = (self.rect.centerx, self.rect.top + 35)
         self.add_child(name, current_offset=True)
         self._name = name
 
@@ -121,8 +121,7 @@ class Card(Image_Element):
             outline_color=(0, 0, 0) if outline else None,
             outline_width=2
         )
-        pic.rect.centerx = bg.rect.centerx
-        pic.rect.y = name.rect.bottom + 15
+        pic.rect.midtop = (self.rect.centerx, name.rect.bottom + 15)
         self._pic = pic
         self.add_child(pic, current_offset=True)
 
@@ -135,8 +134,7 @@ class Card(Image_Element):
             **text_kwargs,
             **style_kwargs
         )
-        desc.rect.centerx = bg.rect.centerx
-        desc.rect.y += 305
+        desc.rect.midtop = (self.rect.centerx, self.rect.top + 305)
         self.add_child(desc, current_offset=True)
         self._desc = desc
         
@@ -149,8 +147,7 @@ class Card(Image_Element):
             **text_kwargs,
             **style_kwargs
         )
-        type.rect.x = pic.rect.x + 5
-        type.rect.y += 480
+        type.rect.topleft = (pic.rect.left + 5, self.rect.top + 480)
         self.add_child(type, current_offset=True)
         self._type = type
 
@@ -161,8 +158,7 @@ class Card(Image_Element):
             **text_kwargs,
             **style_kwargs
         )
-        tags.rect.right = pic.rect.right - 5
-        tags.rect.y += 480
+        tags.rect.topright = (pic.rect.right - 5, self.rect.top + 480)
         self.add_child(tags, current_offset=True)
         self._tags = tags
 

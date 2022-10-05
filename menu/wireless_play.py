@@ -4,6 +4,7 @@ from ui.math.position import center_elements_y
 
 from .select_host import run as run_select_host
 from .client import run_client_online, find_local_game
+from .select_global import run_select_global
 
 def wireless_play_scene(scene):
     body = scene.body
@@ -33,7 +34,7 @@ def wireless_play_scene(scene):
     
     b = Button.Text_Button(
         text='Online Game',
-        func=run_select_host,
+        func=run_select_global,
         **button_kwargs
     )
     elements.append(b)
