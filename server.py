@@ -49,6 +49,9 @@ class Server(Network_Base):
             data = self.recv(conn=conn).decode()
         except socket.timeout:
             pass
+            
+        if data is None:
+            return
 
         return data == CONFIRMATION_CODE
         
