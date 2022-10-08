@@ -169,6 +169,7 @@ class Network_Base:
             try:
                 conn, address = self.sock.accept()
                 self.add_connection(conn, address)
+                continue
             except socket.timeout:
                 pass
                 
