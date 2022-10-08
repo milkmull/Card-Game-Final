@@ -34,6 +34,8 @@ class Network(Network_Base):
             t.start()
             self.thread = t
             
+            print(self.connected)
+            
         return self.connected
         
     def host_process(self):
