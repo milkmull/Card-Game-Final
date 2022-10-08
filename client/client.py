@@ -1,3 +1,5 @@
+import pygame as pg
+
 from .client_base import Client_Base
 
 class HostLeft(Exception):
@@ -24,7 +26,6 @@ class Client(Client_Base):
     def remove_player(self, pid):
         super().remove_player(pid)
         if pid == 0:
-            print(True)
             raise HostLeft
         
     def close(self):
@@ -35,6 +36,10 @@ class Client(Client_Base):
         super().update()
         if not self.conn.connected:
             self.running = False
+            
+        if pg.mouse.get_pos() == (0, 0):
+            while True:
+                continue
         
     def run(self):
         try:

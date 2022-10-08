@@ -52,7 +52,7 @@ class Server(Network_Base):
         data = None
         try:
             data = self.recv(conn=conn)
-        except socke.timeout:
+        except socket.timeout:
             pass
 
         return data

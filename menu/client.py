@@ -35,14 +35,15 @@ def start_server():
             pipe = subprocess.Popen(
                 [sys.executable, 'server.py'],
                 stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE
+                stdout=sys.stdout#subprocess.PIPE
             )
             out, err = pipe.communicate(timeout=3)
         except subprocess.TimeoutExpired:
             pass
-        
-        err = err.decode()
-        m.set_return(err)
+
+        if err is not None:
+            err = err.decode()
+            m.set_return(err)
             
     t = threading.Thread(target=_start_server)
     t.start()

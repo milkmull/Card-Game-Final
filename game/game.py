@@ -61,12 +61,10 @@ class Game(game_base.Game_Base):
     def update_game(self, data, pid=0):
         data = data.split('-')
         cmd = data.pop(0)
+        reply = 0
         
         match cmd:
-            
-            case 'pid':
-                reply = pid
-                
+
             case 'info':
                 self.main()
                 reply = self.get_info(pid)
@@ -74,26 +72,21 @@ class Game(game_base.Game_Base):
             case 'settings':
                 if pid == 0:
                     self.set_settings(data)
-                reply = 1
                 
             case 'start':
                 if pid == 0:
                     self.start(0)
-                reply = 1
                 
             case 'reset':
                 if pid == 0:
                     self.reset()
-                reply = 1
                 
             case 'play' | 'select' | 'rand':
                 if self.status == 'playing':
                     self.get_player(pid).update(cmd=cmd, data=data)    
-                reply = 1
                 
             case 'msg':
                 self.add_message(pid, data)
-                reply = 1
                     
         return reply
         
@@ -245,6 +238,7 @@ class Game(game_base.Game_Base):
         for p in self.players:
             if p.pid == pid:
                 self.players.remove(p)
+                self.pid -= 1
             
                 self.add_log({
                     't': 'rp',
