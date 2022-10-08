@@ -42,9 +42,13 @@ def join_game(scene, games):
         current_index[0] = (current_index[0] + dir) % len(games)
         
         _name, _ip = games[current_index[0]]
-        name.set_text(_name)
-        name.chop_to_width(width=s.rect.width - 15)
-        ip.set_text(_ip)
+        if _name != _ip:
+            name.set_text(_name)
+            name.chop_to_width(width=s.rect.width - 15)
+            ip.set_text(_ip)
+        else:
+            name.set_text(_ip)
+            ip.clear()
         
         if index:
             index.set_text(str(current_index[0] + 1))

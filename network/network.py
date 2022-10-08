@@ -1,5 +1,6 @@
 import socket
 import threading
+import json
 
 from .net_base import Network_Base
 
@@ -25,13 +26,26 @@ class Network(Network_Base):
     def queue(self, data):
         if data not in self.send_queue:
             self.send_queue.append(data)
+            
+    def verify_connection(self):
+        self.send(CONFIRMATION_CODE)
+        
+        reply = None
+        try:
+            reply = self.recv()
+        except socket.timeout:
+            pass
+        
+        return reply.decode() == CONFIRMATION_CODE
 
     def connect(self):
         if super().connect():
-            self.send(CONFIRMATION_CODE)
-            t = threading.Thread(target=self.host_process)
-            t.start()
-            self.thread = t
+            if self.verify_connection():
+                t = threading.Thread(target=self.host_process)
+                t.start()
+                self.thread = t
+            else:
+                self.close()
             
         return self.connected
         
@@ -47,15 +61,8 @@ class Network(Network_Base):
         
             if self.send_queue:
             
-                data = self.send_queue[0]
+                data = self.send_queue.pop(0)
                 self.send(data)
-                
-                reply = self.recv()
-                if reply is None:
-                    break
-                reply = self.load_json(reply.decode())
-                
-                self.send_queue.pop(0)
                 
             elif self.update:
 
@@ -64,5 +71,9 @@ class Network(Network_Base):
                 reply = self.recv()
                 if reply is None:
                     break
-                reply = self.load_json(reply.decode())
+                    
+                try:
+                    reply = json.loads(reply.decode())
+                except ValueError:
+                    reply = []
                 self.update(reply)

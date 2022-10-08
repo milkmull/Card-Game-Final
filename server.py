@@ -31,7 +31,6 @@ class Server(Network_Base):
                 return
 
         super().add_connection(conn, address)
-        
         print('connected to', address)
 
         t = threading.Thread(target=self.threaded_client, args=(address, conn))
@@ -43,6 +42,8 @@ class Server(Network_Base):
             self.listen_while()
         
     def verify_connection(self, conn):
+        self.send(CONFIRMATION_CODE, conn=conn)
+
         data = None
         try:
             data = self.recv(conn=conn).decode()

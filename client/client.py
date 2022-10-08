@@ -14,19 +14,13 @@ class Client(Client_Base):
         if self.conn.connected:
             self.conn.queue(data)
             
-    def request(self, data):
-        reply = self.conn.request(data)
-        if data is None:
-            raise Exception
-        return data
-            
     def get_info(self):
         pass
 
     def remove_player(self, pid):
         super().remove_player(pid)
         if pid == 0:
-            raise HostLeft
+            raise OSError
         
     def close(self):
         self.conn.close()

@@ -6,7 +6,7 @@ from client.client_base import Client_Base
 from game.game import Game
 from client.client import Client, HostLeft
 from network.network import Network
-from network.net_base import get_local_ip, scan_connections, PortNotAvailable
+from network.net_base import get_local_ip, get_lan, get_host_range, scan_connections
 
 from ui.scene.templates.notice import Notice
 from .searching import Searching
@@ -16,7 +16,7 @@ def scan():
     m = Searching('Searching for games...')
 
     def _scan():
-        results = scan_connections(5555)
+        results = scan_connections(get_lan(), 5555)
         m.set_return(results)
 
     t = threading.Thread(target=_scan)
@@ -37,7 +37,7 @@ def start_server():
                 stderr=subprocess.PIPE,
                 stdout=sys.stdout
             )
-            out, err = pipe.communicate(timeout=3)
+            out, err = pipe.communicate(timeout=0.2)
         except subprocess.TimeoutExpired:
             pass
 

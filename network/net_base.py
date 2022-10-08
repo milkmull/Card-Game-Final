@@ -1,14 +1,25 @@
 import socket
 import json
 import urllib.request
-import traceback
 import base64
 import re
 import subprocess
 import threading
+import ipaddress
+import struct
 
 class PortNotAvailable(Exception):
     pass
+    
+def get_lan():
+    out = subprocess.check_output(['arp', '-a']).decode()
+    hosts = re.findall(r'[0-9]+(?:\.[0-9]+){3}', out)
+    return hosts
+    
+def get_host_range(start, end):
+    start = struct.unpack('>I', socket.inet_aton(start))[0]
+    end = struct.unpack('>I', socket.inet_aton(end))[0]
+    return [socket.inet_ntoa(struct.pack('>I', i)) for i in range(start, end)]
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -25,7 +36,7 @@ def get_public_ip():
         pass
     return ip
 
-def scan_connections(port):
+def scan_connections(hosts, port):
     results = {}
 
     def verify_connection(host):
@@ -40,8 +51,7 @@ def scan_connections(port):
         results[host] = connected
         
     threads = []
-    hosts = [f'192.168.1.{end}' for end in range(255)]
-  
+
     for host in hosts:
         t = threading.Thread(target=verify_connection, args=(host,))
         t.start()
@@ -53,7 +63,7 @@ def scan_connections(port):
     available = []
     for host, connected in results.items():
         if connected:
-            name = socket.gethostbyaddr(host)[0]
+            name = socket.getfqdn(host)
             available.append((name, host))
             
     return available
