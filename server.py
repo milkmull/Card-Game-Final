@@ -46,14 +46,14 @@ class Server(Network_Base):
 
         data = None
         try:
-            data = self.recv(conn=conn).decode()
+            data = self.recv(conn=conn)
         except socket.timeout:
             pass
             
         if data is None:
             return
 
-        return data == CONFIRMATION_CODE
+        return data.decode() == CONFIRMATION_CODE
         
     def threaded_client(self, address, conn):
         try:

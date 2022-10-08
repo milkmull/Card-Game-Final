@@ -30,13 +30,16 @@ class Network(Network_Base):
     def verify_connection(self):
         self.send(CONFIRMATION_CODE)
         
-        reply = b''
+        data = None
         try:
-            reply = self.recv()
+            data = self.recv()
         except socket.timeout:
             pass
+            
+        if data is None:
+            return
         
-        return reply.decode() == CONFIRMATION_CODE
+        return data.decode() == CONFIRMATION_CODE
 
     def connect(self):
         if super().connect():
