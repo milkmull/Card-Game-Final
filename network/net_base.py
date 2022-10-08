@@ -76,30 +76,6 @@ def port_in_use(host, port):
    
 class Network_Base:
     @staticmethod
-    def load_json(data):
-        return json.loads(data) 
-        
-    @staticmethod
-    def dump_json(data):
-        return json.dumps(data)
-        
-    @staticmethod
-    def b64encode(data):
-        return base64.b64encode(data).decode('utf-8')
-        
-    @staticmethod
-    def b64decode(data):
-        return base64.b64decode(data)
-        
-    @staticmethod
-    def encode(data):
-        return bytes(data, encoding='utf-8')
-        
-    @staticmethod
-    def decode(data):
-        return data.decode()
-  
-    @staticmethod
     def get_sock(timeout=3):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

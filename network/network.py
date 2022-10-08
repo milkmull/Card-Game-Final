@@ -26,36 +26,20 @@ class Network(Network_Base):
     def queue(self, data):
         if data not in self.send_queue:
             self.send_queue.append(data)
-            
-    def verify_connection(self):
-        self.send(CONFIRMATION_CODE)
-        
-        data = None
-        try:
-            data = self.recv()
-        except socket.timeout:
-            pass
-            
-        if data is None:
-            return
-        
-        return data.decode() == CONFIRMATION_CODE
 
     def connect(self):
         if super().connect():
-            if self.verify_connection():
-                t = threading.Thread(target=self.host_process)
-                t.start()
-                self.thread = t
-            else:
-                self.close()
+            self.send(CONFIRMATION_CODE)
+            t = threading.Thread(target=self.host_process)
+            t.start()
+            self.thread = t
             
         return self.connected
         
     def host_process(self):
         try:
             self.host_game_process()
-        except Exception as e:
+        except:
             pass
         self.connected = False
         
@@ -63,15 +47,17 @@ class Network(Network_Base):
         while self.connected:
         
             if self.send_queue:
-            
                 data = self.send_queue.pop(0)
                 self.send(data)
                 
             elif self.update:
-
                 self.send('info')
                 
-                reply = self.recv()
+                try:
+                    reply = self.recv()
+                except socket.timeout:
+                    continue
+                    
                 if reply is None:
                     break
                     

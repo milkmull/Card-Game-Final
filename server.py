@@ -1,5 +1,6 @@
 import socket
 import threading
+import json
 
 from network.net_base import Network_Base, get_local_ip
 from game.game import Game
@@ -31,6 +32,7 @@ class Server(Network_Base):
                 return
 
         super().add_connection(conn, address)
+        
         print('connected to', address)
 
         t = threading.Thread(target=self.threaded_client, args=(address, conn))
@@ -42,8 +44,6 @@ class Server(Network_Base):
             self.listen_while()
         
     def verify_connection(self, conn):
-        self.send(CONFIRMATION_CODE, conn=conn)
-
         data = None
         try:
             data = self.recv(conn=conn)
@@ -52,8 +52,9 @@ class Server(Network_Base):
             
         if data is None:
             return
+        data = data.decode()
 
-        return data.decode() == CONFIRMATION_CODE
+        return data == CONFIRMATION_CODE
         
     def threaded_client(self, address, conn):
         try:
@@ -95,7 +96,7 @@ class Server(Network_Base):
             data = data.decode()
             
             reply = self.game.update_game(data, pid=pid)
-            self.send(self.dump_json(reply), conn=conn)
+            self.send(json.dumps(reply), conn=conn)
     
 s = Server()
 s.run()   

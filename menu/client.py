@@ -37,7 +37,7 @@ def start_server():
                 stderr=subprocess.PIPE,
                 stdout=sys.stdout
             )
-            out, err = pipe.communicate(timeout=0.2)
+            out, err = pipe.communicate(timeout=3)
         except subprocess.TimeoutExpired:
             pass
 
