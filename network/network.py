@@ -30,7 +30,7 @@ class Network(Network_Base):
     def verify_connection(self):
         self.send(CONFIRMATION_CODE)
         
-        reply = None
+        reply = b''
         try:
             reply = self.recv()
         except socket.timeout:
