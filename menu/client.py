@@ -35,7 +35,7 @@ def start_server():
             pipe = subprocess.Popen(
                 [sys.executable, 'server.py'],
                 stderr=subprocess.PIPE,
-                stdout=sys.stdout#subprocess.PIPE
+                stdout=sys.stdout
             )
             out, err = pipe.communicate(timeout=3)
         except subprocess.TimeoutExpired:
@@ -108,9 +108,7 @@ def find_local_game():
     try:
         c.run()
     except OSError:
-        pass
-    except HostLeft:
-        text = 'The host closed the game.'
+        text = 'The game has been closed.'
         m = Notice(text_kwargs={'text': text})
         m.run()   
         return

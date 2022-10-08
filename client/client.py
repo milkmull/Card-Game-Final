@@ -11,8 +11,8 @@ class Client(Client_Base):
         self.conn.set_update(self.update_logs)
         
     def send(self, data):
-        if not self.conn.queue(data):
-            raise Exception
+        if self.conn.connected:
+            self.conn.queue(data)
             
     def request(self, data):
         reply = self.conn.request(data)
@@ -33,19 +33,15 @@ class Client(Client_Base):
         super().close()
         
     def update(self):
-        super().update()
         if not self.conn.connected:
-            self.running = False
+            raise OSError
             
-        if pg.mouse.get_pos() == (0, 0):
-            while True:
-                continue
+        super().update()
         
     def run(self):
         try:
             super().run()
         except Exception as e:
-            self.conn.add_exception(e)
             self.close()
-        self.conn.raise_last()
+            raise e
         

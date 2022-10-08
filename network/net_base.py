@@ -108,29 +108,9 @@ class Network_Base:
         self.sock = sock or self.get_sock(timeout=timeout)
         self.buffer = b''
         
-        self.exceptions = []
-        
     @property
     def address(self):
         return (self.host, self.port)
-        
-    def add_exception(self, err):
-        info = (err, traceback.format_exc())
-        self.exceptions.append(info)
-
-    def raise_exception(self, e):
-        self.close()
-        raise e
-        
-    def raise_last(self):
-        if self.exceptions:
-            info = self.exceptions.pop(-1)
-            self.raise_exception(info[0])
-            
-    def raise_first(self):
-        if self.exceptions:
-            info = self.exceptions.pop(0)
-            self.raise_exception(info[0])
         
     def close(self):
         for address, conn in self.connections.copy().items():
@@ -153,8 +133,8 @@ class Network_Base:
         try: 
             self.sock.bind(self.address)
             self.connected = True
-        except Exception as e:
-            self.add_exception(e)
+        except socket.error:
+            pass
             
         return self.connected
         
@@ -163,8 +143,8 @@ class Network_Base:
         try:
             self.sock.connect(self.address)
             self.connected = True
-        except Exception as e:
-            self.add_exception(e)
+        except socket.error:
+            pass
         return self.connected
             
     def add_connection(self, conn, address):
@@ -175,8 +155,12 @@ class Network_Base:
         conn.close()
         self.connections.pop(address)
         
-    def check_close(self):
-        return bool(self.exceptions)
+    def check_close_host(self):
+        pass
+        
+    def stop_listen(self):
+        self.sock.close()
+        self.listening = False
         
     def listen(self):
         self.listening = True
@@ -186,32 +170,35 @@ class Network_Base:
             conn, address = self.sock.accept()
             self.add_connection(conn, address)
         except socket.timeout:
-            self.close()
-        except Exception as e:
-            self.raise_exception(e)
+            pass
+            
+        self.close()
 
     def listen_while(self):
         self.listening = True
         self.sock.listen()
-        while self.listening:
+        
+        while self.connected:    
+
             try:
                 conn, address = self.sock.accept()
                 self.add_connection(conn, address)
             except socket.timeout:
                 pass
-            except Exception as e:
-                self.raise_exception(e)
-            if self.check_close():
-                break      
+                
+            if self.check_close_host():
+                break  
+                
         self.close()
+        
+    def verify_connection(self, conn):
+        return True
         
     def trim(self, data, size):
         self.buffer += data[size:]
         return data[:size]
         
     def read_buffer(self, size=None):
-        if self.buffer:
-            print(self.buffer)
         if size is None:
             size = len(self.buffer)
         data = self.buffer[:size]
@@ -226,7 +213,11 @@ class Network_Base:
             data = bytes(data, encoding='utf-8')
         size = len(data).to_bytes(32, byteorder='big')
         
-        conn.sendall(size + data) 
+        try:
+            conn.sendall(size + data) 
+            return True
+        except socket.error:
+            pass
         
     def recv(self, conn=None, raw=True):
         if conn is None:
