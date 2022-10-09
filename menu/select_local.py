@@ -71,8 +71,7 @@ def join_game(scene, games):
         elements.append(left_arrow)
         
     def return_host():
-        host = host.get_text()
-        scene.set_return(host)
+        scene.set_return(host.text)
 
     b = Button.Text_Button(
         text='Join Game!',

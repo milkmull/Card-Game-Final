@@ -61,7 +61,7 @@ class Network(Network_Base):
         try:
             self.host_game_process()
         except OSError:
-            print(True)
+            pass
         self.connected = False
         
     def host_game_process(self):
