@@ -11,7 +11,6 @@ class Server(Network_Base):
     def __init__(self):
         super().__init__(get_local_ip(), 5555)
 
-        self.threads = []
         self.game = Game('online')
         
     def check_close_host(self):
@@ -19,10 +18,6 @@ class Server(Network_Base):
         
     def close(self):
         super().close()
-        for t in self.threads:
-            t.join()
-        self.threads.clear()
-
         print('server closed')
         
     def add_connection(self, conn, address):     
@@ -40,7 +35,8 @@ class Server(Network_Base):
         self.threads.append(t)
 
     def run(self):
-        if self.start_host():
+        if self.bind():
+            self.start_scan()
             self.listen_while()
         
     def verify_connection(self, conn):
@@ -76,7 +72,7 @@ class Server(Network_Base):
 
         try:
             self.client_game_process(pid, conn)    
-        except:
+        except OSError:
             pass
             
         self.game.remove_player(pid)
@@ -97,6 +93,30 @@ class Server(Network_Base):
             
             reply = self.game.update_game(data, pid=pid)
             self.send(json.dumps(reply), conn=conn)
+            
+    def start_scan(self):
+        t = threading.Thread(target=self.scan_broadcast)
+        t.start()
+        self.threads.append(t)
+            
+    def scan_broadcast(self):
+        while self.connected:
+            
+            data = None
+            try:
+                data = Network_Base.recvfrom(5555, raw=False, timeout=0.5)
+            except socket.timeout:
+                continue
+                
+            if data is None:
+                break
+                
+            data, address = data
+            if data != CONFIRMATION_CODE:
+                continue
+                
+            reply = CONFIRMATION_CODE
+            Network_Base.sendto(reply, address[0], 5555)
     
 s = Server()
 s.run()   

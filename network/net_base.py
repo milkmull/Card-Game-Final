@@ -1,15 +1,11 @@
 import socket
 import json
 import urllib.request
-import base64
 import re
 import subprocess
 import threading
 import ipaddress
 import struct
-
-class PortNotAvailable(Exception):
-    pass
     
 def get_lan():
     out = subprocess.check_output(['arp', '-a']).decode()
@@ -22,11 +18,10 @@ def get_host_range(start, end):
     return [socket.inet_ntoa(struct.pack('>I', i)) for i in range(start, end)]
 
 def get_local_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(('8.8.8.8', 80))
-    ip = s.getsockname()[0]
-    s.close()
-    return ip
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.connect(('8.8.8.8', 80))
+        ip = sock.getsockname()[0]
+        return ip
     
 def get_public_ip():
     ip = None
@@ -40,7 +35,7 @@ def scan_connections(hosts, port):
     results = {}
 
     def verify_connection(host):
-        sock = Network_Base.get_sock(timeout=1)
+        sock = Network_Base.TCP(timeout=1)
         connected = True
         try:
             sock.connect((host, port))
@@ -67,31 +62,79 @@ def scan_connections(hosts, port):
             available.append((name, host))
             
     return available
-    
-def port_in_use(host, port):
-    sock = Network_Base.get_sock()
-    result = sock.connect_ex((host, port))
-    sock.close()
-    return result == 0
+  
+def port_in_use(port, host=None):
+    if host is None:
+        host = get_local_ip()
+        
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        result = sock.connect_ex((host, port))
+        return result == 0
    
 class Network_Base:
     @staticmethod
-    def get_sock(timeout=3):
+    def pack_data(data):
+        if not isinstance(data, (bytes, bytearray)):
+            data = bytes(data, encoding='utf-8')
+        size = len(data).to_bytes(32, byteorder='big')
+        return size + data
+        
+    @staticmethod
+    def sendto(data, host, port, broadcast=False):
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if broadcast:
+                host = '<broadcast>'
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+
+            data = Network_Base.pack_data(data)[32:]
+            sent = False
+            
+            try:
+                sock.sendto(data, (host, port))
+                sent = True
+            except socket.error:
+                pass
+
+            return sent
+    
+    @staticmethod
+    def recvfrom(port, size=4096, timeout=1, raw=True): 
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.settimeout(timeout)
+            
+            try:
+                sock.bind(('', port))
+            except socket.error:
+                return
+
+            data, address = sock.recvfrom(size) 
+            if not raw:
+                data = data.decode()
+            
+            return (data, address)
+            
+    @staticmethod
+    def TCP(timeout=3):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.settimeout(timeout)
         return sock
-        
-    def __init__(self, host, port, sock=None, timeout=3):
+ 
+    def __init__(self, host, port, timeout=3):
         self.host = host
         self.port = port
 
         self.connections = {}
         self.connected = False
         self.listening = False
+        self.threads = []
         
         self.timeout = timeout
-        self.sock = sock or self.get_sock(timeout=timeout)
+        self.sock = Network_Base.TCP(timeout=self.timeout)
         self.buffer = b''
         
     @property
@@ -107,14 +150,18 @@ class Network_Base:
         self.listening = False
         self.buffer = b''
         
+        for t in self.threads:
+            t.join()
+        self.threads.clear()
+        
     def __del__(self):
         self.close()
 
-    def start_host(self):
+    def bind(self):
         self.connected = False
         
-        if port_in_use(self.host, self.port):
-            raise PortNotAvailable
+        if port_in_use(self.port):
+            raise Exception('PortNotAvailable')
             
         try: 
             self.sock.bind(self.address)
@@ -139,7 +186,7 @@ class Network_Base:
         
     def close_connection(self, conn, address):
         conn.close()
-        self.connections.pop(address)
+        self.connections.pop(address, None)
         
     def check_close_host(self):
         pass
@@ -155,7 +202,7 @@ class Network_Base:
         try:
             conn, address = self.sock.accept()
             self.add_connection(conn, address)
-        except socket.timeout:
+        except (OSError, socket.timeout):
             pass
             
         self.close()
@@ -172,6 +219,8 @@ class Network_Base:
                 continue
             except socket.timeout:
                 pass
+            except OSError:
+                break
                 
             if self.check_close_host():
                 break  
@@ -191,17 +240,15 @@ class Network_Base:
         data = self.buffer[:size]
         self.buffer = self.buffer[size:]
         return data
-        
+
     def send(self, data, conn=None):
         if conn is None:
             conn = self.sock
-            
-        if not isinstance(data, (bytes, bytearray)):
-            data = bytes(data, encoding='utf-8')
-        size = len(data).to_bytes(32, byteorder='big')
-        
+ 
+        data = Network_Base.pack_data(data)
+
         try:
-            conn.sendall(size + data) 
+            conn.sendall(data) 
             return True
         except socket.error:
             pass
@@ -226,7 +273,7 @@ class Network_Base:
             if not d:
                 return
             data += d
-            
+
         data = self.trim(data, size)  
         if not raw:
             data = data.decode()
