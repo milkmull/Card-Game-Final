@@ -12,6 +12,7 @@ from network.net_base import get_local_ip, port_in_use
 from ui.scene.templates.notice import Notice
 from .searching import Searching
 from .select_local import run_select_local
+from .find_online import run_find_online
 
 def scan():
     m = Searching('Searching for games...')
@@ -41,7 +42,7 @@ def start_server():
             stdout=sys.stdout
         )
 
-        time.sleep(3)
+        time.sleep(1)
         m.set_return(1)
             
     t = threading.Thread(target=_start_server)
@@ -50,11 +51,22 @@ def start_server():
     t.join()
     
     return r
+    
+def connect(n):
+    m = Searching('Searching for game...')
+    
+    def _connect():
+        n.connect()
+        m.set_return(1)
+        
+    t = threading.Thread(target=_connect)
+    t.start()
+    m.run()
+    t.join()
 
 def run_client_single():
     g = Game('single')
     c = Client_Base(g)
-
     c.run()
     
 def run_client_online():  
@@ -81,8 +93,6 @@ def run_client_online():
         pass
         
 def find_local_game():
-    text = ''
-    
     results = scan()
     if not results:
         m = Notice(text_kwargs={'text': 'No games could be found'})
@@ -111,10 +121,30 @@ def find_local_game():
         m.run()   
         return
             
+def find_global_game():
+    result = run_find_online()
+    if result is None:
+        return
+        
+    host, port = result
+    
+    n = Network(host, port)
+    connect(n)
+    
+    if not n.connected:
+        text = 'No game could be found.'
+        m = Notice(text_kwargs={'text': text})
+        m.run()
+        return    
             
-            
-            
-            
+    c = Client(n)
+    try:
+        c.run()
+    except OSError:
+        text = 'The game has been closed.'
+        m = Notice(text_kwargs={'text': text})
+        m.run()   
+        return      
             
             
             

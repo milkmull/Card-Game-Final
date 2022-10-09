@@ -17,7 +17,7 @@ def scan_connections():
     
         data = None
         try:
-            data = Network_Base.recvfrom(5555, raw=False)
+            data = Network_Base.recvfrom(5555, raw=False, timeout=0.5)
         except socket.timeout:
             break
             

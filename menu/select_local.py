@@ -21,10 +21,10 @@ def join_game(scene, games):
     name.rect.topleft = (s.rect.left + 10, s.rect.top + 10)
     elements.append(name)
     
-    ip = Textbox(centery_aligned=True)
-    ip.rect.topleft = name.rect.bottomleft
-    ip.rect.y += 5
-    elements.append(ip)
+    host = Textbox(centery_aligned=True)
+    host.rect.topleft = name.rect.bottomleft
+    host.rect.y += 5
+    elements.append(host)
     
     index = None
     if len(games) > 1:
@@ -41,11 +41,11 @@ def join_game(scene, games):
     def swap(dir):
         current_index[0] = (current_index[0] + dir) % len(games)
         
-        _name, _ip = games[current_index[0]]
+        _name, _host = games[current_index[0]]
         name.set_text(_name)
         name.chop_to_width(width=s.rect.width - 15)
-        ip.set_text(_ip)
-        ip.set_visible(_name != _ip)
+        host.set_text(_host)
+        host.set_visible(_name != _host)
         
         if index:
             index.set_text(str(current_index[0] + 1))
@@ -71,7 +71,7 @@ def join_game(scene, games):
         elements.append(left_arrow)
         
     def return_host():
-        host = ip.get_text()
+        host = host.get_text()
         scene.set_return(host)
 
     b = Button.Text_Button(
@@ -84,9 +84,11 @@ def join_game(scene, games):
         fill_color=(0, 200, 0),
         text_color=(0, 0, 0),
         border_radius=10,
-        func=return_host
+        func=return_host,
+        outline_color=(0, 0, 0),
+        outline_width=3
     )
-    b.rect.top = ip.rect.bottom + 15
+    b.rect.top = host.rect.bottom + 15
     b.set_parent(
         s,
         left_anchor='left',

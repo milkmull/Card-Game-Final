@@ -18,6 +18,7 @@ class Input(Text_Element):
         'top_pad': 2,
         'bottom_pad': 2,
         'inf_width': True,
+        'centery_aligned': True,
         'fill_color': (255, 255, 255),
         'text_color': (0, 0, 0),
         'cursor': pg.SYSTEM_CURSOR_IBEAM,
