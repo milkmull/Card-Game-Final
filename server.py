@@ -55,8 +55,8 @@ class Server(Network_Base):
     def threaded_client(self, address, conn):
         try:
             self.client_process(conn)
-        except:
-            pass
+        except Exception as e:
+            print(e)
                 
         print('lost connection to', address)
         self.close_connection(conn, address)

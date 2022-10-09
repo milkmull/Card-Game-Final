@@ -245,6 +245,9 @@ class Game(game_base.Game_Base):
                     'p': pid
                 })
                 
+                if self.status == 'playing':
+                    self.reset()
+                
                 break
             
 # card stuff
