@@ -7,6 +7,7 @@ from ui.icons.icons import icons
 
 from .select_host import run as run_select_host
 from .client import host_game, find_local_game, find_global_game
+from .view_ips import run_view_ips
 
 def change_port(scene):
     elements = []
@@ -79,7 +80,7 @@ def wireless_play_scene(scene):
         hover_color=(100, 100, 100),
         border_radius=5,
         pad=5,
-        func=run_change_port
+        func=run_view_ips
     )
     b.rect.topright = (scene.rect.right - 20, scene.rect.top + 20)
     elements.append(b)

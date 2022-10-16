@@ -76,7 +76,7 @@ def host_game(scene):
         size=(100, 30),
         center_aligned=True,
         hover_color=(255, 0, 0),
-        text_hover_color=(0, 0, 0),
+        hover_text_color=(0, 0, 0),
         outline_color=(255, 255, 255),
         outline_width=2,
         border_radius=5,
