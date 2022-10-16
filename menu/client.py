@@ -52,11 +52,12 @@ def start_server(port):
     
     return r
     
-def connect(n, attempts=1):
+def connect(n, timeout=5):
     m = Searching('Connecting to game...')
     
     def _connect():
-        for _ in range(attempts):
+        t = time.time()
+        while time.time() - t < timeout:
             n.connect()
             if n.connected:
                 break
@@ -85,7 +86,7 @@ def host_game():
         return
     
     n = Network(get_local_ip(), port)
-    connect(n, attempts=3)
+    connect(n)
     
     if not n.connected:
         text = 'Game could not be started.'
