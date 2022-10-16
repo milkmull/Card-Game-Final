@@ -22,7 +22,8 @@ class Input(Text_Element):
         'fill_color': (255, 255, 255),
         'text_color': (0, 0, 0),
         'cursor': pg.SYSTEM_CURSOR_IBEAM,
-        'clip': True
+        'clip': True,
+        'max_lines': 1
     }
 
     @classmethod

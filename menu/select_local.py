@@ -41,7 +41,7 @@ def join_game(scene, games):
     def swap(dir):
         current_index[0] = (current_index[0] + dir) % len(games)
         
-        _name, _host = games[current_index[0]]
+        _name, _host = games[current_index[0]][:2]
         name.set_text(_name)
         name.chop_to_width(width=s.rect.width - 15)
         host.set_text(_host)
@@ -71,7 +71,8 @@ def join_game(scene, games):
         elements.append(left_arrow)
         
     def return_host():
-        scene.set_return(host.text)
+        r = (host.text, games[current_index[0]][2])
+        scene.set_return(r)
 
     b = Button.Text_Button(
         text='Join Game!',

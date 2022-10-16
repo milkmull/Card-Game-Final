@@ -1,6 +1,7 @@
 import socket
 import threading
 import json
+import sys
 
 from network.net_base import Network_Base, get_local_ip
 from game.game import Game
@@ -9,7 +10,8 @@ from data.constants import CONFIRMATION_CODE
 
 class Server(Network_Base):
     def __init__(self):
-        super().__init__(get_local_ip(), 5555)
+        port = int(sys.argv[1])
+        super().__init__(get_local_ip(), port)
 
         self.game = Game('online')
         
@@ -65,6 +67,7 @@ class Server(Network_Base):
         connected = self.verify_connection(conn)
         if not connected:
             return
+        self.send(CONFIRMATION_CODE, conn=conn)
 
         pid = self.game.add_player()
         if pid is None:
@@ -115,8 +118,8 @@ class Server(Network_Base):
             if data != CONFIRMATION_CODE:
                 continue
                 
-            reply = CONFIRMATION_CODE
-            Network_Base.sendto(reply, address[0], 5555)
+            reply = f'{CONFIRMATION_CODE}-{self.port}'
+            Network_Base.sendto(reply, address[0], 5556)
     
 s = Server()
 s.run()   

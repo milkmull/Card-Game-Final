@@ -76,7 +76,7 @@ class Network_Base:
     def pack_data(data):
         if not isinstance(data, (bytes, bytearray)):
             data = bytes(data, encoding='utf-8')
-        size = len(data).to_bytes(32, byteorder='big')
+        size = len(data).to_bytes(4, byteorder='big')
         return size + data
         
     @staticmethod
@@ -88,7 +88,7 @@ class Network_Base:
                 host = '<broadcast>'
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-            data = Network_Base.pack_data(data)[32:]
+            data = Network_Base.pack_data(data)[4:]
             sent = False
             
             try:
@@ -257,14 +257,14 @@ class Network_Base:
         if conn is None:
             conn = self.sock
             
-        size = self.read_buffer(size=32)
-        while len(size) < 32:
-            d = conn.recv(32 - len(size))
+        size = self.read_buffer(size=4)
+        while len(size) < 4:
+            d = conn.recv(4 - len(size))
             if not d:
                 return
             size += d
             
-        size = self.trim(size, 32)
+        size = self.trim(size, 4)
         size = int.from_bytes(size, byteorder='big')
 
         data = self.read_buffer(size=size)

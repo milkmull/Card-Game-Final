@@ -13,6 +13,7 @@ from ui.scene.templates.notice import Notice
 from .searching import Searching
 from .select_local import run_select_local
 from .find_online import run_find_online
+from .host_game import run_host_game
 
 def scan():
     m = Searching('Searching for games...')
@@ -28,16 +29,16 @@ def scan():
     
     return results
     
-def start_server():
+def start_server(port):
     m = Searching('Starting game...')
 
     def _start_server(): 
-        if port_in_use(5555):
+        if port_in_use(port):
             m.set_return(0)
             return
             
         subprocess.Popen(
-            [sys.executable, 'server.py'],
+            [sys.executable, 'server.py', str(port)],
             stderr=sys.stderr,
             stdout=sys.stdout
         )
@@ -53,7 +54,7 @@ def start_server():
     return r
     
 def connect(n):
-    m = Searching('Searching for game...')
+    m = Searching('Connecting to game...')
     
     def _connect():
         n.connect()
@@ -70,15 +71,19 @@ def run_client_single():
     c.run()
     
 def run_client_online():  
-    r = start_server()
+    port = run_host_game()
+    if port is None:
+        return
+
+    r = start_server(port)
     if not r:
         text = 'The specified port is currently in use.'
         m = Notice(text_kwargs={'text': text})
         m.run()
         return
     
-    n = Network(get_local_ip(), 5555)
-    n.connect()
+    n = Network(get_local_ip(), port)
+    connect(n)
     
     if not n.connected:
         text = 'Game could not be started.'
@@ -95,16 +100,18 @@ def run_client_online():
 def find_local_game():
     results = scan()
     if not results:
-        m = Notice(text_kwargs={'text': 'No games could be found'})
+        m = Notice(text_kwargs={'text': 'No games could be found.'})
         m.run()  
         return
 
-    host = run_select_local(results)
-    if host is None:
+    choice = run_select_local(results)
+    if choice is None:
         return
+        
+    host, port = choice
 
-    n = Network(host, 5555)
-    n.connect()
+    n = Network(host, port)
+    connect(n)
 
     if not n.connected:
         text = 'Failed to connect to game.'

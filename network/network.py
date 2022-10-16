@@ -17,7 +17,7 @@ def scan_connections():
     
         data = None
         try:
-            data = Network_Base.recvfrom(5555, raw=False, timeout=0.5)
+            data = Network_Base.recvfrom(5556, raw=False, timeout=0.5)
         except socket.timeout:
             break
             
@@ -25,12 +25,15 @@ def scan_connections():
             break
             
         data, address = data
-        if data != CONFIRMATION_CODE:
+        data = data.split('-')
+        
+        if len(data) <= 1 or data.pop(0) != CONFIRMATION_CODE:
             continue
         
         host = address[0]
         name = socket.getfqdn(host)
-        connections.append((name, host))
+        port = int(data[0])
+        connections.append((name, host, port))
         
     return connections
 
@@ -47,10 +50,28 @@ class Network(Network_Base):
     def queue(self, data):
         if data not in self.send_queue:
             self.send_queue.append(data)
+            
+    def verify_connection(self):
+        data = None
+        try:
+            data = self.recv()
+        except socket.timeout:
+            pass
+            
+        if data is None:
+            return
+        data = data.decode()
+
+        return data == CONFIRMATION_CODE
 
     def connect(self):
         if super().connect():
+        
             self.send(CONFIRMATION_CODE)
+            if not self.verify_connection():
+                self.close()
+                return False
+
             t = threading.Thread(target=self.host_process)
             t.start()
             self.threads.append(t)
