@@ -43,7 +43,6 @@ def start_server(port):
             stderr=sys.stderr
         )
 
-        time.sleep(1)
         m.set_return(1)
             
     t = threading.Thread(target=_start_server)
@@ -53,11 +52,14 @@ def start_server(port):
     
     return r
     
-def connect(n):
+def connect(n, attempts=1):
     m = Searching('Connecting to game...')
     
     def _connect():
-        n.connect()
+        for _ in range(attempts):
+            n.connect()
+            if n.connected:
+                break
         m.set_return(1)
         
     t = threading.Thread(target=_connect)
@@ -83,7 +85,7 @@ def host_game():
         return
     
     n = Network(get_local_ip(), port)
-    connect(n)
+    connect(n, attempts=3)
     
     if not n.connected:
         text = 'Game could not be started.'
