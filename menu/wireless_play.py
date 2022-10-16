@@ -5,7 +5,6 @@ from ui.element.elements import Textbox, Button, Input
 from ui.math.position import center_elements_y
 from ui.icons.icons import icons
 
-from .select_host import run as run_select_host
 from .client import host_game, find_local_game, find_global_game
 from .view_ips import run_view_ips
 
