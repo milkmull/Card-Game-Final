@@ -8,7 +8,7 @@ class HostLeft(Exception):
 class Client(Client_Base):
     def refresh(self):
         super().refresh()
-        self.conn.set_update(self.update_logs)
+        self.conn.client = self
         
     def send(self, data):
         if self.conn.connected:

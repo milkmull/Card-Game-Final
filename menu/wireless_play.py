@@ -6,7 +6,7 @@ from ui.math.position import center_elements_y
 from ui.icons.icons import icons
 
 from .select_host import run as run_select_host
-from .client import run_client_online, find_local_game, find_global_game
+from .client import host_game, find_local_game, find_global_game
 
 def change_port(scene):
     elements = []
@@ -42,7 +42,7 @@ def wireless_play_scene(scene):
     
     b = Button.Text_Button(
         text='Host Game',
-        func=run_client_online,
+        func=host_game,
         **button_kwargs
     )
     elements.append(b)

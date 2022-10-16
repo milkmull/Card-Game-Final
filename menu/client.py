@@ -37,10 +37,10 @@ def start_server(port):
             m.set_return(0)
             return
             
-        subprocess.Popen(
+        proc = subprocess.Popen(
             [sys.executable, 'server.py', str(port)],
-            stderr=sys.stderr,
-            stdout=sys.stdout
+            stdout=sys.stdout,
+            stderr=sys.stderr
         )
 
         time.sleep(1)
@@ -70,7 +70,7 @@ def run_client_single():
     c = Client_Base(g)
     c.run()
     
-def run_client_online():  
+def host_game():  
     port = run_host_game()
     if port is None:
         return

@@ -1,6 +1,7 @@
 import socket
 import threading
 import json
+import time
 
 from .net_base import Network_Base
 
@@ -42,10 +43,8 @@ class Network(Network_Base):
         super().__init__(host, port, timeout=10)
 
         self.send_queue = []
-        self.update = None
-        
-    def set_update(self, update):
-        self.update = update
+        self.recv_queue = []
+        self.client = None
 
     def queue(self, data):
         if data not in self.send_queue:
@@ -86,13 +85,17 @@ class Network(Network_Base):
         self.connected = False
         
     def host_game_process(self):
+        last_ping = 0
+        
         while self.connected:
         
             if self.send_queue:
                 data = self.send_queue.pop(0)
                 self.send(data)
+ 
+            elif (time.time() - last_ping) >= 1:
+                last_ping = time.time()
                 
-            elif self.update:
                 self.send('info')
                 
                 try:
@@ -110,4 +113,9 @@ class Network(Network_Base):
                 except ValueError:
                     continue
                     
-                self.update(reply)
+                self.recv_queue += reply
+                    
+            if self.client:
+                if self.recv_queue or self.client.log_queue:
+                    self.client.update_logs(self.recv_queue)
+                    self.recv_queue.clear()

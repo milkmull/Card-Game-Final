@@ -191,13 +191,16 @@ class Network_Base:
     def check_close_host(self):
         pass
         
+    def confirm_start(self):
+        pass
+        
     def stop_listen(self):
         self.sock.close()
         self.listening = False
         
     def listen(self):
-        self.listening = True
         self.sock.listen()
+        self.listening = True
 
         try:
             conn, address = self.sock.accept()
@@ -208,8 +211,9 @@ class Network_Base:
         self.close()
 
     def listen_while(self):
-        self.listening = True
         self.sock.listen()
+        self.listening = True
+        self.confirm_start()
         
         while self.connected:    
 
