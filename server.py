@@ -17,10 +17,7 @@ class Server(Network_Base):
         
     def check_close_host(self):
         return not self.connections
-        
-    def confirm_start(self):
-        print(1)
-        
+
     def close(self):
         super().close()
         print('server closed')
