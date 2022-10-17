@@ -93,7 +93,7 @@ class Network(Network_Base):
                 data = self.send_queue.pop(0)
                 self.send(data)
  
-            elif (time.time() - last_ping) >= 1:
+            else:
                 last_ping = time.time()
                 
                 self.send('info')
