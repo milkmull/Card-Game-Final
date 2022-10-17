@@ -40,7 +40,8 @@ def start_server(port):
         proc = subprocess.Popen(
             [sys.executable, 'server.py', str(port)],
             stdout=sys.stdout,
-            stderr=sys.stderr
+            stderr=sys.stderr,
+            start_new_session=True
         )
 
         m.set_return(1)
@@ -99,6 +100,11 @@ def host_game():
         c.run()
     except OSError:
         pass
+    except Exception:
+        text = 'An error occurred.'
+        m = Notice(text_kwargs={'text': text})
+        m.run()   
+        return
         
 def find_local_game():
     results = scan()
@@ -130,6 +136,11 @@ def find_local_game():
         m = Notice(text_kwargs={'text': text})
         m.run()   
         return
+    except Exception:
+        text = 'An error occurred.'
+        m = Notice(text_kwargs={'text': text})
+        m.run()   
+        return
             
 def find_global_game():
     result = run_find_online()
@@ -154,7 +165,12 @@ def find_global_game():
         text = 'The game has been closed.'
         m = Notice(text_kwargs={'text': text})
         m.run()   
-        return      
+        return  
+    except Exception:
+        text = 'An error occurred.'
+        m = Notice(text_kwargs={'text': text})
+        m.run()   
+        return
             
             
             

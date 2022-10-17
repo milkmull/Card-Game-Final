@@ -210,20 +210,25 @@ class Network_Base:
     def listen_while(self):
         self.sock.listen()
         self.listening = True
+        
+        try:
 
-        while self.connected:    
+            while self.connected:    
 
-            try:
-                conn, address = self.sock.accept()
-                self.add_connection(conn, address)
-                continue
-            except socket.timeout:
-                pass
-            except OSError:
-                break
-                
-            if self.check_close_host():
-                break  
+                try:
+                    conn, address = self.sock.accept()
+                    self.add_connection(conn, address)
+                    continue
+                except socket.timeout:
+                    pass
+                except OSError:
+                    break
+                    
+                if self.check_close_host():
+                    break  
+                    
+        except Exception:
+            pass
                 
         self.close()
         

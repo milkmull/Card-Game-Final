@@ -80,7 +80,7 @@ class Network(Network_Base):
     def host_process(self):
         try:
             self.host_game_process()
-        except OSError:
+        except (OSError, KeyboardInterrupt):
             pass
         self.connected = False
         

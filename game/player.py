@@ -174,8 +174,10 @@ class Auto_Player(Player):
                     return cid
 
     def update(self):
-        ct = self.current_time
+        ct = self.timer - (time.time() - self.start_time)
         
+        print(self.timer, ct)
+
         if not self.played and ct <= self.timer / 2:
             choice = self.get_decision()
             if choice:
