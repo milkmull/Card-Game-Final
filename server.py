@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import sys
+import traceback
 
 from network.net_base import Network_Base, get_local_ip
 from game.game import Game
@@ -59,6 +60,7 @@ class Server(Network_Base):
             self.client_process(conn)
         except Exception as e:
             print(e)
+            print(traceback.format_exc())
                 
         print('lost connection to', address)
         self.close_connection(conn, address)
