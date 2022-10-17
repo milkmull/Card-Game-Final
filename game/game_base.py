@@ -167,16 +167,7 @@ class Game_Base:
         self.status = stat
             
     def new_turn(self):
-        if self.public_deck:
-            self.current_turn = (self.current_turn + 1) % len(self.players)
-            
-        else:
-            current_turn = (self.current_turn + 1) % len(self.players)
-            for p in (self.players[current_turn:] + self.players[:current_turn]):
-                if p.decks['private']:
-                    self.current_turn = self.players.index(p)
-                    break
-            
+        self.current_turn = (self.current_turn + 1) % len(self.players)
         self.players[self.current_turn].start_turn()
         
     def card_update(self):

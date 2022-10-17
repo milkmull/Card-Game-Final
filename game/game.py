@@ -34,6 +34,7 @@ class Game(game_base.Game_Base):
         print(self.seed)
         
         self.tree = Tree(self)
+        self.running_main = False
 
         self.new_status('waiting')
 
@@ -47,6 +48,7 @@ class Game(game_base.Game_Base):
         self.add_log({'t': 'res'})
         super().reset()
         self.tree.reset()
+        self.running_main = False
         
     def start(self, pid):
         if pid == 0:
@@ -66,7 +68,8 @@ class Game(game_base.Game_Base):
         match cmd:
 
             case 'info':
-                self.main()
+                if not self.running_main:
+                    self.main()
                 reply = self.get_info(pid)
                 
             case 'settings':
@@ -232,6 +235,8 @@ class Game(game_base.Game_Base):
             self.pid += 1
             self.new_status('waiting')
             
+            print(self.players)
+            
             return pid
             
     def remove_player(self, pid):
@@ -305,9 +310,11 @@ class Game(game_base.Game_Base):
         })
         
     def main(self):
+        self.running_main = True
         if self.status == 'playing':
             self.tree.simulate()
             super().main()
+        self.running_main = False
             
     def end_game(self):
         super().end_game()
