@@ -73,9 +73,14 @@ def settings_scene(scene, client):
     tb = Textbox(text='CPU Players:')
     tb.rect.topleft = (x0, y)
     elements.append(tb)
+    
+    cpu_count = len([p for p in client.players if p.is_cpu])
+    non_cpu_count = len(client.players) - cpu_count
+    min_cpu = 1 if client.is_single else 0
+    max_cpu = 11 - non_cpu_count
+    r = range(min_cpu, max_cpu)
 
-    non_cpu_count = len([p for p in client.players if not p.is_cpu])
-    cpus = Flipper.Counter(range(non_cpu_count, 10), index=settings['cpus'] - 1, text_size=30, size=tt.rect.size)
+    cpus = Flipper.Counter(r, index=r.index(cpu_count), text_size=30, size=tt.rect.size)
     cpus.rect.center = (x1, tb.rect.centery)
     elements.append(cpus)
     

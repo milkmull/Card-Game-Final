@@ -237,7 +237,7 @@ class Game(game_base.Game_Base):
         self.new_status('waiting')
             
     def add_player(self):
-        if self.status == 'waiting' and not self.resetting:
+        if len(self.players) < 10 and self.status == 'waiting' and not self.resetting:
         
             pid = self.pid
             p = Player(self, pid, self.blank_player_info(pid))
