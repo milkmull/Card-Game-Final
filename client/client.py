@@ -1,3 +1,5 @@
+import traceback
+
 import pygame as pg
 
 from .client_base import Client_Base
@@ -37,5 +39,8 @@ class Client(Client_Base):
             super().run()
         except Exception as e:
             self.close()
+            
+            print(e)
+            print(traceback.format_exc())
             raise e
         

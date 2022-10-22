@@ -175,8 +175,6 @@ class Auto_Player(Player):
 
     def update(self):
         ct = self.timer - (time.time() - self.start_time)
-        
-        print(self.timer, ct)
 
         if not self.played and ct <= self.timer / 2:
             choice = self.get_decision()

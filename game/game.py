@@ -35,20 +35,26 @@ class Game(game_base.Game_Base):
         
         self.tree = Tree(self)
         self.running_main = False
+        self.resetting = False
 
         self.new_status('waiting')
 
         if self.mode == 'single':
             self.add_player()
             self.add_cpus()
+            
+        self.request_queue = []
         
 # new game stuff
 
     def reset(self):
+        self.resetting = True
+        self.request_queue.clear()
         self.add_log({'t': 'res'})
         super().reset()
         self.tree.reset()
         self.running_main = False
+        self.resetting = False
         
     def start(self, pid):
         if pid == 0:
@@ -71,28 +77,41 @@ class Game(game_base.Game_Base):
                 if not self.running_main:
                     self.main()
                 reply = self.get_info(pid)
-                
-            case 'settings':
-                if pid == 0:
-                    self.set_settings(data)
-                
-            case 'start':
-                if pid == 0:
-                    self.start(0)
-                
-            case 'reset':
-                if pid == 0:
-                    self.reset()
-                
-            case 'play' | 'select' | 'rand':
-                if self.status == 'playing':
-                    self.get_player(pid).update(cmd=cmd, data=data)    
-                
+    
             case 'msg':
                 self.add_message(pid, data)
+                
+            case 'settings' | 'start' | 'reset' | 'play' | 'select':
+                self.request_queue.append((
+                    pid,
+                    cmd,
+                    data
+                ))
                     
         return reply
         
+    def handel_requests(self):
+        while self.request_queue:
+            pid, cmd, data = self.request_queue.pop(0)
+            
+            match cmd:
+        
+                case 'settings':
+                    if pid == 0:
+                        self.set_settings(data)
+                    
+                case 'start':
+                    if pid == 0:
+                        self.start(0)
+                    
+                case 'reset':
+                    if pid == 0:
+                        self.reset()
+                    
+                case 'play' | 'select':
+                    if self.status == 'playing':
+                        self.get_player(pid).update(cmd=cmd, data=data) 
+
 # settings stuff
 
     def set_settings(self, settings):
@@ -116,7 +135,7 @@ class Game(game_base.Game_Base):
         if log['t'] == 'p' or log['t'] == 's':
             self.tree.trim(log)
      
-        for p in self.players:
+        for p in self.players.copy():
             if not p.is_cpu and log.get('exc', p.pid) == p.pid:
                 p.log_queue.append(log)
 
@@ -218,7 +237,7 @@ class Game(game_base.Game_Base):
         self.new_status('waiting')
             
     def add_player(self):
-        if self.status == 'waiting':
+        if self.status == 'waiting' and not self.resetting:
         
             pid = self.pid
             p = Player(self, pid, self.blank_player_info(pid))
@@ -233,10 +252,7 @@ class Game(game_base.Game_Base):
             self.get_startup_log(p.pid)
             
             self.pid += 1
-            self.new_status('waiting')
-            
-            print(self.players)
-            
+
             return pid
             
     def remove_player(self, pid):
@@ -311,6 +327,7 @@ class Game(game_base.Game_Base):
         
     def main(self):
         self.running_main = True
+        self.handel_requests()
         if self.status == 'playing':
             self.tree.simulate()
             super().main()

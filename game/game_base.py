@@ -71,6 +71,7 @@ class Game_Base:
 
     def new_game(self):
         self.reset()
+        self.new_status('playing') 
         
         for p in self.players:
             p.start()
@@ -78,8 +79,7 @@ class Game_Base:
         self.current_turn = random.choice([p.pid for p in self.players])
 
         self.new_turn()
-        self.new_status('playing')  
-        
+
         for c in self.draw_cards(num=9):
             self.add_public(c)
                 
