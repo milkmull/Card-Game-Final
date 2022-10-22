@@ -229,6 +229,10 @@ class Input(Text_Element):
         lines = self.max_lines is None or len(text.splitlines()) <= self.max_lines
         if not text or (check and length and lines):
             super().set_text(text)
+            
+    def clear(self):
+        self.set_text('')
+        self.set_index(0)
 
     def add_text(self, text):
         if self.selected:
@@ -352,7 +356,6 @@ class Input(Text_Element):
                                 self.add_text('\n')
                             else:
                                 self.run_events('enter')
-                                self.close()
                         case pg.K_TAB:
                             self.add_text('    ')
                     

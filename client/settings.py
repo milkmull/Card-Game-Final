@@ -6,9 +6,14 @@ from data.save import SAVE
 
 from ui.scene.scene import Scene
 from ui.scene.templates.notice import Notice
+from ui.scene.templates.yes_no import Yes_No
 
 from ui.element.base.element import Element
 from ui.element.elements import Textbox, Button, Flipper
+
+def confirm_exit():
+    m = Yes_No(text_kwargs={'text': 'Are you sure you want to exit the game?'}, overlay=True)
+    return m.run()
         
 def run_settings(client):
     m = Scene(settings_scene, init_args=[client], overlay=True)
@@ -171,7 +176,7 @@ def settings_scene(scene, client):
         outline_color=(255, 255, 255),
         outline_width=2,
         border_radius=5,
-        func=lambda: 1,
+        func=confirm_exit,
         tag='return'
     )
     exit_button.rect.midtop = (s.rect.centerx, s.rect.bottom + 20)

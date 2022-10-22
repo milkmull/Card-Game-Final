@@ -8,6 +8,7 @@ from .exceptions import CommunicationError
 from spritesheet.spritesheet import Spritesheet
 
 from ui.scene.scene import Scene
+from ui.scene.templates.yes_no import Yes_No
 
 from ui.element.elements import Textbox, Button, Popup, Live_Window
 from ui.icons.icons import icons
@@ -52,6 +53,7 @@ def client_screen(scene):
     main_button.set_parent(scene, centerx_anchor='right', centerx_offset=-110, centery_anchor='bottom', centery_offset=-50)
     elements.append(main_button)
     scene.main_button = main_button
+    main_button.turn_off()
     
     def click_main():
         if scene.pid == 0:
@@ -258,6 +260,8 @@ class Client_Base(Scene):
                 
                 case 'pid':
                     self.pid = log['pid']
+                    if self.pid == 0:
+                        self.main_button.turn_on()
             
                 case 'res':
                     self.reset()
@@ -512,6 +516,11 @@ class Client_Base(Scene):
                 i += 1
 
 # running stuff
+
+    def exit(self):
+        m = Yes_No(text_kwargs={'text': 'Are you sure you want to exit the game?'}, overlay=True)
+        if m.run():
+            super().exit()
     
     def run(self):
         self.start()

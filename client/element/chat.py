@@ -52,6 +52,7 @@ class Chat(Button.Text_Button):
             outline_width=2,
             x_pad=5,
             y_pad=2,
+            max_length=100,
             max_lines=1
         )
         self.message_box.rect.topleft = (self.window.rect.left + 20, self.window.rect.bottom + 20)
@@ -112,6 +113,7 @@ class Chat(Button.Text_Button):
     def end_open(self):
         self.animated_box.turn_off()
         self.chat.turn_on()
+        self.message_box.open()
         
         self.is_open = True
         
