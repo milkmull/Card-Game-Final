@@ -77,10 +77,9 @@ class Game_Base:
             p.start()
 
         self.current_turn = random.choice([p.pid for p in self.players])
-
         self.new_turn()
 
-        for c in self.draw_cards(num=6):
+        for c in self.draw_cards(num=9):
             self.add_public(c)
                 
     def add_cpus(self, num=0):
