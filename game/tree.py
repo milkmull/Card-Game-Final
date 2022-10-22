@@ -56,7 +56,7 @@ class Tree:
         
             g = self.game.copy(seed=self.sims)
             turn = 0
-            while not g.done and turn < max_deapth:
+            while not g.done and turn < max_deapth and g.public_deck:
                 g.main()
                 turn += 1
 

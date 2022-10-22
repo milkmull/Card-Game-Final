@@ -80,7 +80,7 @@ class Game_Base:
 
         self.new_turn()
 
-        for c in self.draw_cards(num=9):
+        for c in self.draw_cards(num=6):
             self.add_public(c)
                 
     def add_cpus(self, num=0):
