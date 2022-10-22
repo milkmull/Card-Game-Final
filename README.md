@@ -19,7 +19,7 @@ Table top card game with local wireless play.
 * cv2
 ```python3 -m pip install -U opencv-python```
 * pyperclip
-```python3 -m pip install -U pyperclip```
+```python3 -m pip install -U pyperclip``` on linux you may need to also install `xclip` via `sudo apt install xclip`
 * pyaudio
 ```python3 -m pip install -U pyaudio``` 
   on linux: ```sudo apt install python3-pyaudio```
