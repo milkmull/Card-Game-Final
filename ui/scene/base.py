@@ -38,10 +38,7 @@ class Base_Loop:
         for e in event_batch:
         
             match e.type:
-                
-                case pg.VIDEORESIZE:
-                    events['vr'] = e
-                
+
                 case pg.QUIT:
                     events['q'] = e
                     
@@ -141,9 +138,6 @@ class Base_Loop:
                 self.exit()
                 return {}
                 
-        #if (vr := events.get('vr')):
-        #    self.resize(vr.w, vr.h)
-
         self.sub_events(events)
         
         if not events['cursor_set']:

@@ -123,8 +123,8 @@ class Server(Network_Base):
             reply = f'{CONFIRMATION_CODE}-{self.port}'
             Network_Base.sendto(reply, address[0], 5556)
     
-s = Server()
-s.run()   
+with Server() as s:
+    s.run()   
         
         
         

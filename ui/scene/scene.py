@@ -34,6 +34,15 @@ class Scene(Base_Loop):
 
         self.rect = self.body
         
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, type, value, traceback):
+        try:
+            self.close()
+        except Exception:
+            pass
+        
     @property
     def body(self):
         return self.window.get_rect()
@@ -88,9 +97,6 @@ class Scene(Base_Loop):
     def close(self):
         for e in self.all_elements:
             e.kill()
-            
-    def __del__(self):
-        self.close()
         
     def start_draw(self):
         self.window.fill(self.fill_color)

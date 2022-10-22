@@ -137,6 +137,15 @@ class Network_Base:
         self.sock = Network_Base.TCP(timeout=self.timeout)
         self.buffer = b''
         
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, type, value, traceback):
+        try:
+            self.close()
+        except Exception:
+            pass
+        
     @property
     def address(self):
         return (self.host, self.port)
@@ -153,9 +162,6 @@ class Network_Base:
         for t in self.threads:
             t.join()
         self.threads.clear()
-        
-    def __del__(self):
-        self.close()
 
     def bind(self):
         self.connected = False

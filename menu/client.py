@@ -85,26 +85,26 @@ def host_game():
         m = Notice(text_kwargs={'text': text})
         m.run()
         return
-    
-    n = Network(get_local_ip(), port)
-    connect(n)
-    
-    if not n.connected:
-        text = 'Game could not be started.'
-        m = Notice(text_kwargs={'text': text})
-        m.run()
-        return
+        
+    with Network(get_local_ip(), port) as n:
+        connect(n)
+        
+        if not n.connected:
+            text = 'Game could not be started.'
+            m = Notice(text_kwargs={'text': text})
+            m.run()
+            return
 
-    c = Client(n)
-    try:
-        c.run()
-    except OSError:
-        pass
-    except Exception:
-        text = 'An error occurred.'
-        m = Notice(text_kwargs={'text': text})
-        m.run()   
-        return
+        try:
+            with Client(n) as c:
+                c.run()
+        except OSError:
+            pass
+        except Exception:
+            text = 'An error occurred.'
+            m = Notice(text_kwargs={'text': text})
+            m.run()   
+            return
         
 def find_local_game():
     results = scan()
@@ -118,29 +118,29 @@ def find_local_game():
         return
         
     host, port = choice
+    
+    with Network(host, port) as n:
+        connect(n)
 
-    n = Network(host, port)
-    connect(n)
+        if not n.connected:
+            text = 'Failed to connect to game.'
+            m = Notice(text_kwargs={'text': text})
+            m.run()
+            return
 
-    if not n.connected:
-        text = 'Failed to connect to game.'
-        m = Notice(text_kwargs={'text': text})
-        m.run()
-        return
-
-    c = Client(n)
-    try:
-        c.run()
-    except OSError:
-        text = 'The game has been closed.'
-        m = Notice(text_kwargs={'text': text})
-        m.run()   
-        return
-    except Exception:
-        text = 'An error occurred.'
-        m = Notice(text_kwargs={'text': text})
-        m.run()   
-        return
+        try:
+            with Client(n) as c:
+                c.run()
+        except OSError:
+            text = 'The game has been closed.'
+            m = Notice(text_kwargs={'text': text})
+            m.run()   
+            return
+        except Exception:
+            text = 'An error occurred.'
+            m = Notice(text_kwargs={'text': text})
+            m.run()   
+            return
             
 def find_global_game():
     result = run_find_online()
@@ -149,28 +149,28 @@ def find_global_game():
         
     host, port = result
     
-    n = Network(host, port)
-    connect(n)
-    
-    if not n.connected:
-        text = 'No game could be found.'
-        m = Notice(text_kwargs={'text': text})
-        m.run()
-        return    
-            
-    c = Client(n)
-    try:
-        c.run()
-    except OSError:
-        text = 'The game has been closed.'
-        m = Notice(text_kwargs={'text': text})
-        m.run()   
-        return  
-    except Exception:
-        text = 'An error occurred.'
-        m = Notice(text_kwargs={'text': text})
-        m.run()   
-        return
+    with Network(host, port) as n:
+        connect(n)
+        
+        if not n.connected:
+            text = 'No game could be found.'
+            m = Notice(text_kwargs={'text': text})
+            m.run()
+            return    
+
+        try:
+            with Client(n) as c:
+                c.run()
+        except OSError:
+            text = 'The game has been closed.'
+            m = Notice(text_kwargs={'text': text})
+            m.run()   
+            return  
+        except Exception:
+            text = 'An error occurred.'
+            m = Notice(text_kwargs={'text': text})
+            m.run()   
+            return
             
             
             
