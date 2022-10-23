@@ -263,9 +263,7 @@ class Client_Base(Scene):
             match log['t']:
                 
                 case 'pid':
-                    self.pid = log['pid']
-                    if self.pid == 0:
-                        self.main_button.turn_on()
+                    self.set_pid(log['pid'])
             
                 case 'res':
                     self.reset()
@@ -308,6 +306,14 @@ class Client_Base(Scene):
                     self.chat.add_message(log)
             
 # log process stuff
+    
+    def set_pid(self, pid):
+        self.pid = pid
+        
+        if self.pid == 0:
+            self.main_button.turn_on()
+        else:
+            self.chat.rect.center = self.main_button.rect.center
 
     def update_settings(self, log):
         self.settings = log['settings']

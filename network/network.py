@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import time
+import traceback
 
 from .net_base import Network_Base
 
@@ -82,8 +83,10 @@ class Network(Network_Base):
             self.host_game_process()
         except (OSError, KeyboardInterrupt):
             pass
+        except Exception:
+            print(traceback.format_exc())
         self.connected = False
-        
+
     def host_game_process(self):
         last_ping = 0
         

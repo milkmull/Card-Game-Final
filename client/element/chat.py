@@ -124,8 +124,9 @@ class Chat(Button.Text_Button):
     def close(self):
         self.is_open = False
         self.animated_box.turn_on()
+        self.message_box.clear()
         self.chat.turn_off()
-        
+
         self.animated_box.add_animation([{
             'attr': 'width',
             'end': 5,
@@ -183,7 +184,7 @@ class Chat(Button.Text_Button):
     def send(self):
         text = self.message_box.text.strip()
         if text:
-            self.client.send(f'msg-{self.message_box.text}')
+            self.client.send(f'msg-{text}')
             self.message_box.clear()
             
     def clear(self):
