@@ -323,6 +323,7 @@ class Client_Base(Scene):
     def new_turn(self, log):
         for p in self.players:
             p.end_turn()
+        self.sort_by_score()
         self.get_player(log['p']).start_turn()
         
         if not self.turn:
@@ -449,6 +450,18 @@ class Client_Base(Scene):
         for s in spots:
             s.rect.topright = (x, y)
             y += s.rect.height + 10
+            
+    def sort_by_score(self):
+        spots = [p.spot for p in self.players]
+        spots1 = sorted(spots, key=lambda s: s.rect.top)
+        spots2 = sorted(spots, key=lambda s: s.points_spot.text, reverse=True)
+        for s in spots1:
+            s.add_animation([{
+                'attr': 'pos',
+                'end': spots1[spots2.index(s)].pos,
+                'frames': 10,
+                'method': 'ease_out_expo'
+            }])
             
 # card stuff
 
