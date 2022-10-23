@@ -101,6 +101,12 @@ def settings_scene(scene, client):
     diff.rect.center = (x1, tb.rect.centery)
     elements.append(diff)
     
+# turn off all elements if player is not host
+
+    if not client.is_host:
+        for e in elements[1:]:
+            e.set_enabled(False)
+    
 # bottom section
 
     cancel_button = Button.Text_Button(
@@ -114,57 +120,62 @@ def settings_scene(scene, client):
         border_radius=5,
         tag='exit'
     )
-    cancel_button.rect.bottomright = (s.rect.right - 20, s.rect.bottom - 20)
+    if client.is_host:
+        cancel_button.rect.bottomright = (s.rect.right - 20, s.rect.bottom - 20)
+    else:
+        cancel_button.rect.midbottom = (s.rect.centerx, s.rect.bottom - 20)
     elements.append(cancel_button)
     
-    def set_defaults():
-        settings = SAVE.get_base_settings()
+    if client.is_host:
+    
+        def set_defaults():
+            settings = SAVE.get_base_settings()
+            
+            w.set_text(str(settings['size'][0]))
+            h.set_text(str(settings['size'][1]))
+            tt.set_text(str(settings['tt']))
+            cpus.set_text(str(settings['cpus']))
+            diff.set_text(str(settings['diff']))
         
-        w.set_text(str(settings['size'][0]))
-        h.set_text(str(settings['size'][1]))
-        tt.set_text(str(settings['tt']))
-        cpus.set_text(str(settings['cpus']))
-        diff.set_text(str(settings['diff']))
-    
-    defaults_button = Button.Text_Button(
-        text='Defaults',
-        size=(100, 30),
-        center_aligned=True,
-        hover_color=(255, 255, 0),
-        hover_text_color=(0, 0, 0),
-        outline_color=(255, 255, 255),
-        outline_width=2,
-        border_radius=5,
-        func=set_defaults
-    )
-    defaults_button.rect.midbottom = (s.rect.centerx, s.rect.bottom - 20)
-    elements.append(defaults_button)
-    
-    def apply_settings():
-        new_settings = {
-            'size': [int(w.text), int(h.text)],
-            'tt': int(tt.text),
-            'cpus': int(cpus.text),
-            'diff': int(diff.text)
-        }
-        client.send(f'settings-{json.dumps(new_settings)}')
+        defaults_button = Button.Text_Button(
+            text='Defaults',
+            size=(100, 30),
+            center_aligned=True,
+            hover_color=(255, 255, 0),
+            hover_text_color=(0, 0, 0),
+            outline_color=(255, 255, 255),
+            outline_width=2,
+            border_radius=5,
+            func=set_defaults
+        )
+        defaults_button.rect.midbottom = (s.rect.centerx, s.rect.bottom - 20)
+        elements.append(defaults_button)
+        
+        def apply_settings():
+            new_settings = {
+                'size': [int(w.text), int(h.text)],
+                'tt': int(tt.text),
+                'cpus': int(cpus.text),
+                'diff': int(diff.text)
+            }
+            client.send(f'settings-{json.dumps(new_settings)}')
 
-        n = Notice(text_kwargs={'text': 'Settings have been applied successfully!'}, overlay=True)
-        n.run()
-    
-    apply_button = Button.Text_Button(
-        text='Apply',
-        size=(100, 30),
-        center_aligned=True,
-        hover_color=(0, 255, 0),
-        hover_text_color=(0, 0, 0),
-        outline_color=(255, 255, 255),
-        outline_width=2,
-        border_radius=5,
-        func=apply_settings
-    )
-    apply_button.rect.bottomleft = (s.rect.left + 20, s.rect.bottom - 20)
-    elements.append(apply_button)
+            n = Notice(text_kwargs={'text': 'Settings have been applied successfully!'}, overlay=True)
+            n.run()
+        
+        apply_button = Button.Text_Button(
+            text='Apply',
+            size=(100, 30),
+            center_aligned=True,
+            hover_color=(0, 255, 0),
+            hover_text_color=(0, 0, 0),
+            outline_color=(255, 255, 255),
+            outline_width=2,
+            border_radius=5,
+            func=apply_settings
+        )
+        apply_button.rect.bottomleft = (s.rect.left + 20, s.rect.bottom - 20)
+        elements.append(apply_button)
     
     exit_button = Button.Text_Button(
         text='Exit Game',

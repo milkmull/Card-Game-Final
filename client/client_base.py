@@ -201,6 +201,10 @@ class Client_Base(Scene):
     def is_single(self):
         return type(self) == Client_Base
         
+    @property
+    def is_host(self):
+        return self.pid == 0
+        
 # start stuff
         
     def start(self):
