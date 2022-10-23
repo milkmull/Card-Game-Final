@@ -174,7 +174,10 @@ class Chat(Button.Text_Button):
             text_style=style
         )
         tb.wrap_to_width()
-        self.window.add_element(tb)
+        
+        elements = self.window.elements[-99:]
+        elements.append(tb)
+        self.window.join_elements(elements, use_last=True)
         self.window.y_scroll_bar.go_to_bottom()
         
         if not self.is_open:
