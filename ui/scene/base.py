@@ -68,6 +68,7 @@ class Base_Loop:
         events['ctrl'] = cls.CTRL
         events['cursor_set'] = False
         events['clicked'] = None
+        events['hover'] = None
 
         return events
     

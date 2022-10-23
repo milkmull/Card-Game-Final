@@ -40,16 +40,18 @@ class Card(Position):
         self.client.set_view_card(self)
                 
     def events(self, events):
-        if self.rect.collidepoint(pg.mouse.get_pos()):
-            self.client.set_hover_card(self)
-            
-            if (mbd := events.pop('mbd', None)):
+        if not events['hover']:
+        
+            if self.rect.collidepoint(pg.mouse.get_pos()):
+                self.client.set_hover_card(self)
                 
-                match mbd.button:
-                    case 1:
-                        self.left_click()
-                    case 3:
-                        self.right_click()    
+                if (mbd := events.pop('mbd', None)):
+                    
+                    match mbd.button:
+                        case 1:
+                            self.left_click()
+                        case 3:
+                            self.right_click()    
 
     def update(self):
         self.update_position()

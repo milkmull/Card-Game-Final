@@ -104,6 +104,9 @@ class Element(Style, Event, Animation):
         if self.hit:
             if not last_hit:
                 self.run_animations('hover')
+            if not events['hover']:
+                events['hover'] = self
+                    
             if not events['cursor_set']:
                 pg.mouse.set_cursor(self.cursor)
                 events['cursor_set'] = True
