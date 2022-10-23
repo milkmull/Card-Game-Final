@@ -582,6 +582,8 @@ class Client_Base(Scene):
                 r = self.hover_image.get_rect()
                 r.center = self.hover_card.rect.center
                 self.window.blit(self.hover_image, r)
+                if self.hover_card.player:
+                    pg.draw.rect(self.window, self.hover_card.player.color, r, width=4)
                 
                 other = self.grid.cards.get(self.hover_card.cid)
                 if other and other is not self.hover_card:
@@ -589,6 +591,8 @@ class Client_Base(Scene):
 
         if self.view_card:
             self.window.blit(self.view_image, self.view_rect)
+            if self.view_card.player:
+                pg.draw.rect(self.window, self.view_card.player.color, self.view_rect.inflate(8, 8), width=8)
             
         if self.held_card:
             r = self.held_card.rect.copy()
