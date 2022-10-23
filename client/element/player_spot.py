@@ -4,8 +4,6 @@ from ui.element.elements import Textbox, Image
 from ui.element.utils.image import get_arrow
 from ui.icons.icons import icons
 
-from .points_spot import Points_Spot
-
 class Player_Spot(Textbox):
     SEP = 3
     def __init__(self):
@@ -48,7 +46,11 @@ class Player_Spot(Textbox):
             },
         ], loop=True)
         
-        self.points_spot = Points_Spot(self)
+        self.points_spot = Textbox(
+            text='0',
+            text_outline_color=(0, 0, 0),
+            text_outline_width=2
+        )
         self.add_child(
             self.points_spot,
             left_anchor='right',
@@ -121,6 +123,9 @@ class Player_Spot(Textbox):
         self.set_text(self.display_name)
         self.turn_indicator.text_color = player.color
         self.points_spot.text_color = player.color
+        
+    def set_score(self, score):
+        self.points_spot.set_text(str(score))
         
     def start_turn(self):
         self.turn_indicator.turn_on()

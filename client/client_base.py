@@ -90,7 +90,6 @@ def client_screen(scene):
     public_label = Textbox(
         text='Public:',
         text_size=15,
-        #fill_color=scene.fill_color,
         text_color=(255, 0, 0),
         text_outline_color=(0, 0, 0),
         text_outline_width=2

@@ -30,7 +30,7 @@ class Player:
 
     def update_score(self, score):
         self.score = score
-        self.spot.points_spot.set_score(self.score)
+        self.spot.set_score(self.score)
             
     def start_turn(self):
         self.spot.start_turn()
