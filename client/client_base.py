@@ -321,7 +321,7 @@ class Client_Base(Scene):
             self.main_button.hover_color = (255, 0, 0)
         
         self.turn += 1
-        self.turn_timer.start(log['st'])
+        self.turn_timer.start()
         
     def set_card(self, log):
         p = self.get_player(log['p'])

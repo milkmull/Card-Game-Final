@@ -321,8 +321,7 @@ class Game(game_base.Game_Base):
         
         self.add_log({
             't': 'nt',
-            'p': self.players[self.current_turn].pid,
-            'st': time.time()
+            'p': self.players[self.current_turn].pid
         })
         
     def main(self):

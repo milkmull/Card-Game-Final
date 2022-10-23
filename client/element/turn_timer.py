@@ -24,9 +24,9 @@ class Timer(Textbox):
         self.current_time = 0
         self.set_text('')
         
-    def start(self, t):
+    def start(self):
         self.current_time = self.max_time
-        self.start_time = t
+        self.start_time = time.time()
         self.text_color = self.client.get_current_turn().color
         self.set_text(str(self.current_time))
         

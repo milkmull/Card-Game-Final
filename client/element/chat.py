@@ -73,7 +73,8 @@ class Chat(Button.Text_Button):
             border_radius=3,
             x_pad=5,
             y_pad=2,
-            func=self.send
+            func=self.send,
+            hover_color=(0, 255, 0)
         )
         self.send_button.rect.midleft = (self.message_box.rect.right + 30, self.message_box.rect.centery)
         self.chat.add_child(self.send_button, current_offset=True)
