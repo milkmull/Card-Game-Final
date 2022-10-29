@@ -43,4 +43,45 @@ class Client(Client_Base):
             print(e)
             print(traceback.format_exc())
             raise e
+            
+    def add_player(self, log):
+        p = super().add_player(log)
+        if p:
+            if not p.is_cpu:
+                self.animation_manager.add_text(
+                    text=f'{p.name} joined!',
+                    text_size=30,
+                    text_color=p.color,
+                    text_outline_color=(0, 0, 0),
+                    text_outline_width=3
+                )
+            
+        return p
+        
+    def remove_player(self, pid):
+        p = super().remove_player(pid)
+        if p:
+            if not p.is_cpu:
+                self.animation_manager.add_text(
+                    text=f'{p.name} left the game',
+                    text_size=30,
+                    text_color=p.color,
+                    text_outline_color=(0, 0, 0),
+                    text_outline_width=3
+                )
+                
+        return p
+        
+    def update_settings(self, log):
+        s = bool(self.settings)
+        super().update_settings(log)
+        
+        if s:
+            self.animation_manager.add_text(
+                text='Game settings have been updated!',
+                text_size=30,
+                text_color=(255, 255, 0),
+                text_outline_color=(0, 0, 0),
+                text_outline_width=3
+            )
         

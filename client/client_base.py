@@ -443,6 +443,8 @@ class Client_Base(Scene):
             
             self.organize_screen()
             
+            return p
+            
     def organize_screen(self):
         spots = [p.spot for p in self.players]
         x = self.rect.right - 60

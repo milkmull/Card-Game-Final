@@ -1,3 +1,4 @@
+from .moving_text import Moving_Text
 from .moving_card import Moving_Card
 from .points import Points
 
@@ -70,6 +71,7 @@ class Animation_Manager:
         self.cards = {}
         self.queue = {}
         self.points = []
+        self.text = []
         
     @property
     def finished(self):
@@ -79,6 +81,19 @@ class Animation_Manager:
         self.cards.clear()
         self.queue.clear()
         self.points.clear()
+        self.text.clear()
+        
+    def add_text(self, *args, **kwargs):
+        t = Moving_Text(*args, **kwargs)
+        t.rect.top = self.text[-1].rect.bottom + 10 if self.text else 10
+        t.start()
+        self.text.append(t)
+        
+        return t
+        
+    def shift_text(self, y):
+        for t in self.text:
+            t.shift(y + 10)
 
     def add_card(self, *args, **kwargs):
         if not (pack := self.queue.get(self.client.turn)):
@@ -105,9 +120,17 @@ class Animation_Manager:
             p.start()
             self.points.append(p)
         
-    def update(self):         
+    def update(self):  
+        i = 0
+        while i < len(self.text):
+            t = self.text[i]
+            if t.update():
+                self.text.pop(i)
+                self.shift_text(t.rect.height)
+            else:
+                i += 1
+                
         if self.queue and not self.points:
-
             turn, pack = min(self.queue.items(), key=lambda item: item[0])
             if turn <= self.client.turn:
                 pack.update(turn == self.client.turn)
@@ -124,6 +147,9 @@ class Animation_Manager:
                 i += 1
     
     def draw(self, surf):
+        for t in self.text:
+            t.draw(surf)
+            
         for pack in reversed(self.queue.values()):
             pack.draw(surf)
             
