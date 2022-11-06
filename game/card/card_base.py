@@ -82,10 +82,11 @@ class Card:
 # setup stuff
 
     def clear(self):
+        self.spot = None
+        
+    def total_clear(self):
         self.game.remove_multiplier(self)
         self.wipe_memory()
-        self.direction = None
-        self.player = None
         self.spot = None
 
     def register(self, card):

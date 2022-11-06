@@ -184,6 +184,7 @@ class OfficeFern(card_base.Card):
         self.player.gain(-5, self)
         
     def kill(self, card):
+        self.total_clear()
         self.player.gain(15 if card.player is self.player else -5, self)
         
 class Dragon(card_base.Card):
@@ -239,6 +240,7 @@ class NegativeZone(card_base.Card):
         return -1
         
     def kill(self, card):
+        self.total_clear()
         self.game.remove_multiplier(self)
             
 class GamblingMan(card_base.Card):

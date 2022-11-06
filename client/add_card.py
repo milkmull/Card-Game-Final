@@ -154,6 +154,14 @@ def add_card_scene(scene, client, spot, deck):
     )
     back_button.rect.bottomright = (s.rect.right - 40, s.rect.bottom - 20)
     s.add_child(back_button, current_offset=True)
+    
+    b = Button.Text_Button(
+        size=scene.rect.size,
+        cursor=0,
+        layer=-2,
+        tag='exit'
+    )
+    elements.append(b)
 
     return elements
     

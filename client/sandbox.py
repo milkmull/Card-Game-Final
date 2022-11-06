@@ -145,7 +145,7 @@ class Sandbox(Client_Base):
         
         spot = self.spot_buttons[log['pos']]
         spot.text_color = (255, 0, 0)
-        spot.set_text(icons['bin'])
+        spot.set_text(icons['X'])
         
     def clear_card(self, log):
         super().clear_card(log)
@@ -224,7 +224,7 @@ class Sandbox(Client_Base):
 
         if b.text == icons['plus']:
             run_add_card(self, spot=spot, deck=deck)
-        elif b.text == icons['bin']:
+        elif b.text == icons['X']:
             if spot.card.visible:
                 self.manual_delete_card(spot)
                 
@@ -267,25 +267,6 @@ class Sandbox(Client_Base):
             
             self.add_element(b)
             self.spot_buttons[spot._pos] = b
-           
-# special card visuals
-
-    def set_hover_card(self, card):
-        super().set_hover_card(card)
-
-        if (pos := card.spot_pos):
-            b = self.spot_buttons[pos]
-            b.set_visible(False)
-            
-    def clear_hover_card(self):
-        if not self.hover_card:
-            return
-            
-        if (pos := self.hover_card.spot_pos):
-            b = self.spot_buttons[pos]
-            b.set_visible(True)
-            
-        super().clear_hover_card()
         
 # base stuff
         
@@ -297,8 +278,9 @@ class Sandbox(Client_Base):
         if self.hover_card:
             self.draw_hover_card()
             
-        for b in self.spot_buttons.values():
-            b.draw(self.window)
+        if self.game.status == 'playing':
+            for b in self.spot_buttons.values():
+                b.draw(self.window)
             
         if self.view_card:
             self.draw_view_card()
