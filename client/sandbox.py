@@ -103,6 +103,7 @@ class Sandbox(Client_Base):
                 
     def switch_view(self, pid):
         if pid != self.pid:
+            self.get_info()
             p = self.get_player(self.pid)
             p.spot.unfreeze_animation('hover')
             if not p.spot.hit:
@@ -159,8 +160,7 @@ class Sandbox(Client_Base):
         self.game.add_public(c)
         
         p = self.game.get_player(self.get_player_by_name(player_name).pid)
-        self.game.set_turn(p.pid)
-
+        self.switch_view(p.pid)
         self.send(f'play-public-{c.cid}-{spot._pos[0]}-{spot._pos[1]}')
         
     def manual_delete_card(self, spot):
