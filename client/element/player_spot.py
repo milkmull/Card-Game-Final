@@ -1,6 +1,6 @@
 import pygame as pg
 
-from ui.element.elements import Textbox, Image
+from ui.element.elements import Textbox, Image, Input
 from ui.element.utils.image import get_arrow
 from ui.icons.icons import icons
 
@@ -46,17 +46,7 @@ class Player_Spot(Textbox):
             },
         ], loop=True)
         
-        self.points_spot = Textbox(
-            text='0',
-            text_outline_color=(0, 0, 0),
-            text_outline_width=2
-        )
-        self.add_child(
-            self.points_spot,
-            left_anchor='right',
-            left_offset=10,
-            centery_anchor='centery'
-        )
+        self.set_points_spot()
         
         self.add_animation(
             [{
@@ -71,6 +61,19 @@ class Player_Spot(Textbox):
         
     def __repr__(self):
         return f'{self.player.name} spot'
+        
+    def set_points_spot(self):
+        self.points_spot = Textbox(
+            text='0',
+            text_outline_color=(0, 0, 0),
+            text_outline_width=2
+        )
+        self.add_child(
+            self.points_spot,
+            left_anchor='right',
+            left_offset=10,
+            centery_anchor='centery'
+        )
         
     @property
     def display_full(self):
@@ -133,6 +136,37 @@ class Player_Spot(Textbox):
     def end_turn(self):
         self.turn_indicator.turn_off()
         
+class Sandbox_Player_Spot(Player_Spot):
+    def __init__(self):
+        super().__init__()
         
+        self.cursor = pg.SYSTEM_CURSOR_HAND
+        self.add_animation(
+            [{
+                'attr': 'outline_width',
+                'end': 2
+            }],
+            tag='hover'
+        )
         
+    def set_points_spot(self):
+        self.points_spot = Input(
+            text='0',
+            fill_color=None,
+            text_outline_color=(0, 0, 0),
+            text_outline_width=2,
+            text_check=lambda t: t.lstrip('-').isnumeric(),
+            max_length=3,
+            max_lines=1
+        )
+        self.add_child(
+            self.points_spot,
+            left_anchor='right',
+            left_offset=10,
+            centery_anchor='centery'
+        )
+
+    def set_player(self, player):
+        super().set_player(player)
+        self.outline_color = player.color
         

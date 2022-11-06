@@ -9,7 +9,7 @@ class Player(player_base.Player_Base):
         
         self.player_info = player_info
         self.log_queue = []
-        
+
         self.timer = 0
         self.start_time = 0
         
@@ -174,6 +174,9 @@ class Auto_Player(Player):
                     return cid
 
     def update(self):
+        if not getattr(self.game, 'cpus_enabled', True):
+            return
+            
         ct = self.timer - (time.time() - self.start_time)
 
         if not self.played and ct <= self.timer / 2:

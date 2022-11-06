@@ -1,4 +1,5 @@
 import pygame as pg
+import pygame.gfxdraw
 
 from .position import Position
 
@@ -11,6 +12,8 @@ class Style(Position):
         outline_width=0,
         inner_outline_color=None,
         inner_outline_width=0,
+        shadow_color=None,
+        shadow_offset=(-5, 5),
         key_color=None,
         
         border_radius=0,
@@ -37,6 +40,8 @@ class Style(Position):
         self.outline_width = outline_width
         self.inner_outline_color = inner_outline_color
         self.inner_outline_width = inner_outline_width
+        self.shadow_color = shadow_color
+        self.shadow_offset = shadow_offset
         self.key_color = key_color
         
         self.border_radius = border_radius
@@ -165,6 +170,19 @@ class Style(Position):
     def draw_rect(self, surf):
         fill = self.fill_color and self.fill_color != self.key_color
         bk = self.border_kwargs
+        
+        if self.shadow_color and any(self.shadow_offset):
+            clip = surf.get_clip()
+            surf.set_clip(None)
+            
+            pygame.gfxdraw.box(
+                surf,
+                self.outline_rect.move(*self.shadow_offset),
+                self.shadow_color
+            )
+            
+            surf.set_clip(clip)
+
         if self.outline_color and self.outline_width:
             pg.draw.rect(
                 surf,

@@ -100,20 +100,19 @@ class Element(Style, Event, Animation):
         super().events(events)
         
         last_hit = self.hit
-        self.hit = self.get_hit()
+        self.hit = self.get_hit() and not events['hover']
         if self.hit:
             if not last_hit:
                 self.run_animations('hover')
-            if not events['hover']:
-                events['hover'] = self
+            events['hover'] = self
                     
             if not events['cursor_set']:
                 pg.mouse.set_cursor(self.cursor)
                 events['cursor_set'] = True
-                
+                    
         elif last_hit:
             self.run_animations('hover', reverse=True)
-                
+
         if not events['clicked']:    
             if self.hit and (mbd := events.get('mbd')):
                 events['clicked'] = self

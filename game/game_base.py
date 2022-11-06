@@ -45,7 +45,7 @@ class Game_Base:
         g.players = [p.copy(g) for p in self.players]
         self.grid.copy_to(g)
         
-        g.multipliers = {c.cid: g.grid.get_spot(c.spot.pos).card for cid, c in self.multipliers.items()}
+        g.multipliers = {cid: g.grid.get_spot(c.spot.pos).card for cid, c in self.multipliers.items()}
 
         for p in self.players:
             p.copy_cards_to(g)
@@ -132,7 +132,8 @@ class Game_Base:
         raise exceptions.CardNotFound(name)
 
     def add_public(self, card):
-        self.public_deck[card.cid] = card
+        if len(self.public_deck) < 15:
+            self.public_deck[card.cid] = card
         
     def remove_public(self, card):
         self.public_deck.pop(card.cid)
@@ -145,7 +146,7 @@ class Game_Base:
         self.multipliers[card.cid] = card
         
     def remove_multiplier(self, card):
-        self.multipliers.pop(card.cid)
+        r = self.multipliers.pop(card.cid, None)
 
 # update info stuff
             

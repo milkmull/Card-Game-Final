@@ -4,8 +4,10 @@ import threading
 import time
 
 from client.client_base import Client_Base
+from client.sandbox import Sandbox
 from game.game import Game
-from client.client import Client, HostLeft
+from game.sandbox import Sandbox as Sandbox_Game
+from client.client import Client
 from network.network import Network, scan_connections
 from network.net_base import get_local_ip, port_in_use
 
@@ -72,6 +74,11 @@ def connect(n, timeout=5):
 def run_client_single():
     g = Game('single')
     c = Client_Base(g)
+    c.run()
+    
+def run_sandbox():
+    g = Sandbox_Game('single')
+    c = Sandbox(g)
     c.run()
     
 def host_game():  

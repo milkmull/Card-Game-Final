@@ -43,12 +43,12 @@ def get_sorted_names_dict():
     names = sorted(BASE_NAMES)
     
     out = {
-        'A-D': {n: None for n in names if n[0] in 'abcd'},
-        'E-H': {n: None for n in names if n[0] in 'efgh'},
-        'I-L': {n: None for n in names if n[0] in 'ijkl'},
-        'M-P': {n: None for n in names if n[0] in 'mnop'},
-        'Q-T': {n: None for n in names if n[0] in 'qrst'},
-        'U-Z': {n: None for n in names if n[0] in 'uvwxyz'}
+        'A-D': {n.title(): None for n in names if n[0] in 'abcd'},
+        'E-H': {n.title(): None for n in names if n[0] in 'efgh'},
+        'I-L': {n.title(): None for n in names if n[0] in 'ijkl'},
+        'M-P': {n.title(): None for n in names if n[0] in 'mnop'},
+        'Q-T': {n.title(): None for n in names if n[0] in 'qrst'},
+        'U-Z': {n.title(): None for n in names if n[0] in 'uvwxyz'}
     }
     
     return out

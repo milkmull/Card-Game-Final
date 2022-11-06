@@ -72,8 +72,25 @@ def gradient(colors, dir, size, angle=0):
             surf.set_at((x, 0), color)
             
     return pg.transform.rotozoom(surf, 0, 100)
+    
+def print_pixel_alphas(surf):
+    for y in range(surf.get_height()):
+        row = '['
+        for x in range(surf.get_width()):
+            a = str(surf.get_at((x, y))[3])
+            row += f"{' ' * (3 - len(a))}{a}, "
+        row = row[:-2] + ']'
+        print(row)
+    print()
 
+def swap_colors(surf, old_color, new_color):
+    cop = surf.copy()
+    cop.fill((0, 0, 0), special_flags=pg.BLEND_RGB_MIN)
+    cop.fill(new_color, special_flags=pg.BLEND_RGB_MAX)
 
+    surf.set_colorkey(old_color)
+    cop.blit(surf, (0, 0))
+    return cop
 
 
 

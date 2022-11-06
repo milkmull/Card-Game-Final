@@ -4,7 +4,7 @@ from ..standard.button import Button
 from ..standard.image import Image
 from ..window.live_window import Live_Window
 
-from ..utils.image import get_arrow, transform
+from ..utils.image import get_arrow, transform, swap_colors
 from ...ui import get_size
 
 class Dropdown(Button.Text_Button):
@@ -92,12 +92,23 @@ class Dropdown(Button.Text_Button):
         self.arrow = Image(
             image=down_arrow,
             cursor=pg.SYSTEM_CURSOR_HAND,
-            pad=5
+            pad=5,
+            enabled=False
         )
         self.add_child(self.arrow, left_anchor='right', centery_anchor='centery')
         self.right_pad = self.arrow.rect.width + 3
         
         self.original_width = self.rect.width
+        
+    @property
+    def text_color(self):
+        return self._text_color
+        
+    @text_color.setter
+    def text_color(self, text_color):
+        self.arrow.swap_colors(self.text_color, text_color)
+        self._text_color = text_color
+        self._render()
     
     @property
     def click_close(self):
@@ -135,6 +146,9 @@ class Dropdown(Button.Text_Button):
         self.windows.clear()
         
     def new_window(self, data, last=None, level=0):  
+        if not data:
+            return
+            
         found = False
         
         for w, info in self.windows.copy().items():

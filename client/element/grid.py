@@ -25,16 +25,20 @@ class Spot(Position):
         return 1 if self.hover else 0
         
     def click_up(self, button):
-        if button == 1:
-            if self.client.held_card and not self.client.held_card.player:
-                self.client.send(f'play-{self.client.held_card.deck}-{self.client.held_card.cid}-{self._pos[0]}-{self._pos[1]}')
+        match button:
         
+            case 1:
+                if self.client.held_card and not self.client.held_card.player:
+                    self.client.send(
+                        f'play-{self.client.held_card.deck}-{self.client.held_card.cid}-{self._pos[0]}-{self._pos[1]}'
+                    )
+
     def events(self, events):
         if self.children:
             self.child_events(events)
             return
             
-        if self.rect.collidepoint(pg.mouse.get_pos()):
+        if self.rect.collidepoint(events['p']):
             self.hover = True
             if (mbu := events.get('mbu')):
                 self.click_up(mbu.button)
@@ -128,10 +132,14 @@ class Grid(Position):
         return self.cards.get(cid)
                 
     def set_card(self, card, pos):
+        card.spot_pos = pos
         self.cards[card.cid] = card
         self.grid[pos[1]][pos[0]].set_card(card)
             
     def clear_card(self, pos):
+        spot = self.grid[pos[1]][pos[0]]
+        card = spot.card
+        card.spot_pos = None
         self.grid[pos[1]][pos[0]].clear_card()
         
     def draw(self, surf):
@@ -139,7 +147,12 @@ class Grid(Position):
             self.child_draw(self.image)
             surf.blit(self.image, self.rect)
             
-        pg.draw.rect(surf, (255, 255, 255), self.rect, width=1)
+        if self.client.pid is not None:
+            c = self.client.get_player(self.client.pid).color
+        else:
+            c = (255, 255, 255)
+            
+        pg.draw.rect(surf, c, self.rect.inflate(10, 10), width=5)
             
             
                 

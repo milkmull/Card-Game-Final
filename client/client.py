@@ -4,10 +4,11 @@ import pygame as pg
 
 from .client_base import Client_Base
 
-class HostLeft(Exception):
-    pass
-
 class Client(Client_Base):
+    @property
+    def is_single(self):
+        return False
+        
     def refresh(self):
         super().refresh()
         self.conn.client = self
@@ -63,7 +64,7 @@ class Client(Client_Base):
         if p:
             if not p.is_cpu:
                 self.animation_manager.add_text(
-                    text=f'{p.name} left the game',
+                    text=f'{p.name} left.',
                     text_size=30,
                     text_color=p.color,
                     text_outline_color=(0, 0, 0),

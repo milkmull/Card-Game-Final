@@ -212,6 +212,8 @@ class BigSandWorm(card_base.Card):
         self.player.start_select(self, self.spot.get_card_group('border'))
         
     def select(self, card):
+        if self.spot is None:
+            print(self.game.log)
         self.direction = self.spot.get_direction(card.spot)
         self.move()
         

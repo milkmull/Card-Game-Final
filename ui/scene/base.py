@@ -90,6 +90,8 @@ class Base_Loop:
         self.elements = elements or []
         self.fill_color = fill_color
         
+        self.current_events = []
+        
     @property
     def framerate(self):
         return self.clock.get_fps()
@@ -111,7 +113,8 @@ class Base_Loop:
         element.set_scene(None)
             
     def get_events(self):
-        return Base_Loop.get_event_batch()
+        self.current_events = Base_Loop.get_event_batch()
+        return self.current_events
         
     def post_event(self, key, value):
         self.current_event_batch[key] = value

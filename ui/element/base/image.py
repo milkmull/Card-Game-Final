@@ -1,5 +1,7 @@
 import pygame as pg
 
+from ..utils.image import swap_colors
+
 class Image:
     @staticmethod
     def get_max_aspect(images):
@@ -69,6 +71,9 @@ class Image:
         
     def fill(self, color):
         self.image.fill(color)
+        
+    def swap_colors(self, old_color, new_color, overwrite=True):
+        self.set_image(swap_colors(self.image, old_color, new_color), overwrite=overwrite)
         
     def reset_image(self):
         self.set_image(

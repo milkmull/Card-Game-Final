@@ -50,18 +50,16 @@ def client_screen(scene):
         hover_text_color=(0, 0, 0)
     )
     main_button.rect.bottomright = (scene.rect.right - 40, scene.rect.bottom - 40)
-    main_button.set_parent(scene, centerx_anchor='right', centerx_offset=-110, centery_anchor='bottom', centery_offset=-50)
     elements.append(main_button)
     scene.main_button = main_button
     main_button.turn_off()
     
     def click_main():
-        if scene.pid == 0:
-            match main_button.text:
-                case 'Reset':
-                    scene.send('reset')
-                case 'Start':
-                    scene.send('start')
+        match main_button.text:
+            case 'Reset':
+                scene.send('reset')
+            case 'Start':
+                scene.send('start')
                     
     main_button.add_event(func=click_main, tag='left_click')
     
@@ -198,7 +196,7 @@ class Client_Base(Scene):
         
     @property
     def is_single(self):
-        return type(self) == Client_Base
+        return True
         
     @property
     def is_host(self):
@@ -422,6 +420,11 @@ class Client_Base(Scene):
         for p in self.players:
             if p.pid == pid:
                 return p
+                
+    def get_player_by_name(self, name):
+        for p in self.players:
+            if p.name == name:
+                return p
 
     def add_player(self, log):
         pid = log['p']
@@ -456,7 +459,7 @@ class Client_Base(Scene):
     def sort_by_score(self):
         spots = [p.spot for p in self.players]
         spots1 = sorted(spots, key=lambda s: s.rect.top)
-        spots2 = sorted(spots, key=lambda s: s.points_spot.text, reverse=True)
+        spots2 = sorted(spots, key=lambda s: int(s.points_spot.text), reverse=True)
         for s in spots1:
             s.add_animation([{
                 'attr': 'pos',
@@ -475,20 +478,36 @@ class Client_Base(Scene):
         self.view_card = None
         self.view_image = None
         
+    def draw_view_card(self):
+        self.window.blit(self.view_image, self.view_rect)
+        if self.view_card.player:
+            pg.draw.rect(self.window, self.view_card.player.color, self.view_rect.inflate(8, 8), width=8)
+        
     def set_hover_card(self, card):
         self.hover_card = card
         self.hover_image = card.get_image(
             mini=False, 
-            scale=(
-                CONSTANTS['card_width'] * 0.15,
-                CONSTANTS['card_height'] * 0.15
-            )
+            scale=0.15
         )
         
     def clear_hover_card(self):
         self.hover_card = None
         self.hover_image = None
         self.hover_matches.clear()
+        
+    def draw_hover_card(self):
+        if not self.hover_card.visible:
+            self.clear_hover_card()
+        else:
+            r = self.hover_image.get_rect()
+            r.center = self.hover_card.rect.center
+            self.window.blit(self.hover_image, r)
+            if self.hover_card.player:
+                pg.draw.rect(self.window, self.hover_card.player.color, r, width=4)
+            
+            other = self.grid.cards.get(self.hover_card.cid)
+            if other and other is not self.hover_card:
+                pg.draw.line(self.window, other.player.color, self.hover_card.rect.center, other.rect.center, width=3)
         
     def set_held_card(self, card):
         card.set_visible(False)
@@ -498,6 +517,11 @@ class Client_Base(Scene):
         if self.held_card:
             self.held_card.set_visible(True)
             self.held_card = None
+            
+    def draw_held_card(self):
+        r = self.held_card.rect.copy()
+        r.center = pg.mouse.get_pos()
+        self.window.blit(self.held_card.get_image(), r)
 
     def get_card(self, name, cid, player=None, deck=None, add=True):
         c = Card(self, name, cid, player=player, deck=deck)
@@ -590,44 +614,13 @@ class Client_Base(Scene):
         self.animation_manager.draw(self.window)
         
         if self.hover_card:
-            if not self.hover_card.visible:
-                self.clear_hover_card()
-            else:
-                r = self.hover_image.get_rect()
-                r.center = self.hover_card.rect.center
-                self.window.blit(self.hover_image, r)
-                if self.hover_card.player:
-                    pg.draw.rect(self.window, self.hover_card.player.color, r, width=4)
-                
-                other = self.grid.cards.get(self.hover_card.cid)
-                if other and other is not self.hover_card:
-                    pg.draw.line(self.window, other.player.color, self.hover_card.rect.center, other.rect.center, width=3)
-
+            self.draw_hover_card()
         if self.view_card:
-            self.window.blit(self.view_image, self.view_rect)
-            if self.view_card.player:
-                pg.draw.rect(self.window, self.view_card.player.color, self.view_rect.inflate(8, 8), width=8)
-            
+            self.draw_view_card()
         if self.held_card:
-            r = self.held_card.rect.copy()
-            r.center = pg.mouse.get_pos()
-            self.window.blit(self.held_card.get_image(), r)
+            self.draw_held_card()
             
         for p, _, r, _, color in self.kill_particles:
             pg.draw.circle(self.window, color, p, r)
 
-        pg.display.flip()
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        pg.display.flip() 

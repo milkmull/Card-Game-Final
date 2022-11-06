@@ -168,6 +168,7 @@ class Input(Text_Element):
         self.index = 0
         self.end_index = 0
         self.held_key = None
+        self.run_events('close')
                         
     def set_index(self, index):
         if index < 0:
@@ -389,12 +390,14 @@ class Input(Text_Element):
                     self.highlight_color,
                     c.rect.inflate(2 * self.text_outline_width, 2 * self.text_outline_width)
                 )
+            for c in self.selected_characters:
                 s = self.font.render(
                     c.character,
                     size=c.size,
                     fgcolor=self.highlight_text_color
                 )[0]
                 surf.blit(s, c.rect)
+
 
             if self.blink_timer.time < 0:
                 r = self.characters[self.index].rect

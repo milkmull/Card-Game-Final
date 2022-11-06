@@ -11,6 +11,7 @@ class Card(Position):
         self.cid = cid
         self.player = player
         self.deck = deck
+        self.spot_pos = None
         
         super().__init__(size=CONSTANTS['mini_card_size'])
  

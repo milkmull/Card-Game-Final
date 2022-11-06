@@ -69,6 +69,7 @@ class Spritesheet:
         else:
             img = self.get_full_size(name)
             if scale:
-                img = pg.transform.smoothscale(img, scale)
+                W, H = CONSTANTS['card_size']
+                img = pg.transform.smoothscale(img, (W * scale, H * scale))
             
         return img

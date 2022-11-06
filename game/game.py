@@ -302,7 +302,8 @@ class Game(game_base.Game_Base):
                 'd': 'public'
             })
             
-            self.add_public(self.draw_cards()[0])
+            if len(self.public_deck) < 9:
+                self.add_public(self.draw_cards()[0])
         
         return card
    

@@ -141,6 +141,7 @@ class Player_Base:
 # selection stuff
 
     def start_select(self, card, selection):
+        self.end_select()
         if selection:
             if len(selection) == 1:
                 card.select(selection[0])
@@ -182,6 +183,11 @@ class Player_Base:
     def start_turn(self):
         self.played = False  
         
+    def end_turn(self):
+        if self.active_card:
+            self.random_selection()
+        self.played = True
+        
     @property
     def done_game(self):
         return not self.decks['private'] and not self.active_card
@@ -195,12 +201,16 @@ class Player_Base:
 
     def choose_random_spot(self):
         spots = [spot for spot in self.game.grid.spots if spot.is_open]
-        return random.choice(spots) 
+        if spots:
+            return random.choice(spots) 
         
     def random_turn(self):
         deck, cid = self.choose_random_play()
         spot = self.choose_random_spot()
-        Player_Base.play_card(self, deck, cid, spot)
+        if spot:
+            Player_Base.play_card(self, deck, cid, spot)
+        else:
+            self.played = True
         
     def random_selection(self):
         cid = random.choice(list(self.decks['selection']))

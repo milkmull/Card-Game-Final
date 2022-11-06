@@ -38,24 +38,33 @@ def settings_scene(scene, client):
     
     x0 = s.rect.left + 10
     x1 = s.rect.left + 300
-    y = s.rect.top + 25
+    y = 25
     
 # grid size section
 
     tb = Textbox(text='Grid Size:')
-    tb.rect.topleft = (x0, y)
+    tb.set_parent(
+        s,
+        left_anchor='left',
+        left_offset=10,
+        top_anchor='top',
+        top_offset=y
+    )
     elements.append(tb)
     
     x = Textbox(text='x')
     x.rect.center = (x1, tb.rect.centery)
+    x.set_parent(tb, centery_anchor='centery')
     elements.append(x)
 
     w = Flipper.Counter(range(1, 13), index=settings['size'][0] - 1, text_size=30)
     w.rect.midright = (x.rect.left - 40, x.rect.centery)
+    w.set_parent(tb, centery_anchor='centery')
     elements.append(w)
 
     h = Flipper.Counter(range(1, 9), index=settings['size'][1] - 1, text_size=30)
     h.rect.midleft = (x.rect.right + 40, x.rect.centery)
+    h.set_parent(tb, centery_anchor='centery')
     elements.append(h)
     
     y += 50
@@ -63,12 +72,19 @@ def settings_scene(scene, client):
 # turn timer section
 
     tb = Textbox(text='Seconds Per Turn:')
-    tb.rect.topleft = (x0, y)
+    tb.set_parent(
+        s,
+        left_anchor='left',
+        left_offset=10,
+        top_anchor='top',
+        top_offset=y
+    )
     elements.append(tb)
 
     r = range(10, 300, 10)
     tt = Flipper.Counter(r, index=r.index(settings['tt']), text_size=30)
     tt.rect.center = (x1, tb.rect.centery)
+    tt.set_parent(tb, centery_anchor='centery')
     elements.append(tt)
     
     y += 50
@@ -76,7 +92,13 @@ def settings_scene(scene, client):
 # cpu section
 
     tb = Textbox(text='CPU Players:')
-    tb.rect.topleft = (x0, y)
+    tb.set_parent(
+        s,
+        left_anchor='left',
+        left_offset=10,
+        top_anchor='top',
+        top_offset=y
+    )
     elements.append(tb)
     
     cpu_count = len([p for p in client.players if p.is_cpu])
@@ -87,6 +109,7 @@ def settings_scene(scene, client):
 
     cpus = Flipper.Counter(r, index=r.index(cpu_count), text_size=30, size=tt.rect.size)
     cpus.rect.center = (x1, tb.rect.centery)
+    cpus.set_parent(tb, centery_anchor='centery')
     elements.append(cpus)
     
     y += 50
@@ -94,11 +117,18 @@ def settings_scene(scene, client):
 # difficulty section
 
     tb = Textbox(text='CPU Difficulty:')
-    tb.rect.topleft = (x0, y)
+    tb.set_parent(
+        s,
+        left_anchor='left',
+        left_offset=10,
+        top_anchor='top',
+        top_offset=y
+    )
     elements.append(tb)
 
     diff = Flipper.Counter(range(1, 5), index=settings['diff'] - 1, text_size=30, size=tt.rect.size)
     diff.rect.center = (x1, tb.rect.centery)
+    diff.set_parent(tb, centery_anchor='centery')
     elements.append(diff)
     
 # turn off all elements if player is not host
@@ -109,7 +139,7 @@ def settings_scene(scene, client):
     
 # bottom section
 
-    cancel_button = Button.Text_Button(
+    back_button = Button.Text_Button(
         text='Back',
         size=(100, 30),
         center_aligned=True,
@@ -121,10 +151,21 @@ def settings_scene(scene, client):
         tag='exit'
     )
     if client.is_host:
-        cancel_button.rect.bottomright = (s.rect.right - 20, s.rect.bottom - 20)
+        back_button.set_parent(
+            s,
+            right_anchor='right',
+            right_offset=-20,
+            bottom_anchor='bottom',
+            bottom_offset=-20
+        )
     else:
-        cancel_button.rect.midbottom = (s.rect.centerx, s.rect.bottom - 20)
-    elements.append(cancel_button)
+        back_button.set_parent(
+            s,
+            centerx_anchor='centerx',
+            bottom_anchor='bottom',
+            bottom_offset=-20
+        )
+    elements.append(back_button)
     
     if client.is_host:
     
@@ -148,7 +189,12 @@ def settings_scene(scene, client):
             border_radius=5,
             func=set_defaults
         )
-        defaults_button.rect.midbottom = (s.rect.centerx, s.rect.bottom - 20)
+        defaults_button.set_parent(
+            s,
+            centerx_anchor='centerx',
+            bottom_anchor='bottom',
+            bottom_offset=-20
+        )
         elements.append(defaults_button)
         
         def apply_settings():
@@ -174,7 +220,13 @@ def settings_scene(scene, client):
             border_radius=5,
             func=apply_settings
         )
-        apply_button.rect.bottomleft = (s.rect.left + 20, s.rect.bottom - 20)
+        apply_button.set_parent(
+            s,
+            left_anchor='left',
+            left_offset=20,
+            bottom_anchor='bottom',
+            bottom_offset=-20
+        )
         elements.append(apply_button)
     
     exit_button = Button.Text_Button(
@@ -190,7 +242,12 @@ def settings_scene(scene, client):
         func=confirm_exit,
         tag='return'
     )
-    exit_button.rect.midtop = (s.rect.centerx, s.rect.bottom + 20)
+    exit_button.set_parent(
+        s,
+        centerx_anchor='centerx',
+        top_anchor='bottom',
+        top_offset=20
+    )
     elements.append(exit_button)
     
     b = Button.Text_Button(
