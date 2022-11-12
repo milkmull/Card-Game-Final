@@ -132,7 +132,7 @@ class Game(game_base.Game_Base):
     
     def add_log(self, log):
         self.log.append(log)
-        if log['t'] == 'p' or log['t'] == 's':
+        if log['t'] in ('p', 's', 'rand'):
             self.tree.trim(log)
      
         for p in self.players.copy():

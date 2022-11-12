@@ -80,7 +80,7 @@ class Player(player_base.Player_Base):
 
         return card
         
-    def play_card(self, data):
+    def play_card_from_data(self, data):
         deck, cid, x, y = data
         
         cid = int(cid)
@@ -88,11 +88,11 @@ class Player(player_base.Player_Base):
         y = int(y)
         spot = self.game.grid.get_spot((x, y))
         
-        super().play_card(deck, cid, spot)
+        self.play_card(deck, cid, spot)
         
-    def select_card(self, data):
+    def select_card_from_data(self, data):
         cid = int(data[0])
-        super().select_card(cid)
+        self.select_card(cid)
         
     def gain_ownership(self, card):
         card.set_player(self)
@@ -110,10 +110,10 @@ class Player(player_base.Player_Base):
 
     def update(self, cmd='', data=[]):
         if cmd == 'play' and not self.played:
-            self.play_card(data)
+            self.play_card_from_data(data)
         
         elif cmd == 'select' and self.active_card:
-            self.select_card(data)
+            self.select_card_from_data(data)
             
         if (not self.played or self.active_card) and self.timer_up:
             super().update()
@@ -131,8 +131,8 @@ class Player(player_base.Player_Base):
 class Auto_Player(Player):   
     def set_timer(self):
         self.start_time = time.time()
-        tmin = 9
-        tmax = min(self.max_time, 30)
+        tmin = 4
+        tmax = min(self.current_time // 2, 15)
         self.timer = random.randrange(tmin, tmax)
         
     def get_decision(self):
@@ -159,6 +159,11 @@ class Auto_Player(Player):
         if not self.played:
 
             spots = self.game.grid.get_open_spots()
+            
+            #for (pid, deck, cid, x, y), score in choices:
+            #    deck = decks[deck]
+            #    if self.decks[deck].get(cid) and (spot := spots.get((x, y))):
+            #        print(self.decks[deck].get(cid), score)
 
             for (pid, deck, cid, x, y), score in choices:
                 deck = decks[deck]
@@ -178,13 +183,17 @@ class Auto_Player(Player):
             return
             
         ct = self.timer - (time.time() - self.start_time)
+        
+        if ct <= 0:
 
-        if not self.played and ct <= self.timer / 2:
-            choice = self.get_decision()
-            if choice:
-                player_base.Player_Base.play_card(self, *choice)
-                
-        elif self.active_card and ct <= 0:
-            choice = self.get_decision()
-            if choice:
-                player_base.Player_Base.select_card(self, choice)
+            if not self.played:
+                choice = self.get_decision()
+                if choice:
+                    self.play_card(*choice)
+                    
+            elif self.active_card:
+                choice = self.get_decision()
+                if choice:
+                    self.select_card(choice)
+                    
+            self.set_timer()

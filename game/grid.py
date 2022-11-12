@@ -49,6 +49,12 @@ class Grid:
         
     def get_open_spots(self):
         return {spot.pos: spot for spot in self.spots if spot.is_open}
+        
+    def any_open(self):
+        for s in self.spots:
+            if not s.card:
+                return True
+        return False
     
 # transforming operations
         

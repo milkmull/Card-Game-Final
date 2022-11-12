@@ -43,6 +43,12 @@ class Tree:
                 pid = log['u']
                 cid = log['c']
                 return (pid, cid)
+                
+            case 'rand':
+                pid = log['u']
+                len = log['len']
+                id = log['id']
+                return (pid, len, id)
         
     def trim(self, log):
         key = self.log_to_key(log)
@@ -51,17 +57,17 @@ class Tree:
             new_tree = {}
         self.tree = new_tree
 
-    def simulate(self, num=5, max_deapth=10):
+    def simulate(self, num=50, max_deapth=3):
         for _ in range(num):
         
-            g = self.game.copy(seed=self.sims)
+            g = self.game.copy()#seed=self.sims)
             turn = 0
             while not g.done and turn < max_deapth and g.public_deck:
                 g.main()
                 turn += 1
 
             scores = [p.score for p in sorted(g.players, key=lambda p: p.pid)]
-            logs = [log for log in g.log if log['t'] == 'p' or log['t'] == 's']
+            logs = [log for log in g.log if log['t'] in ('p', 's', 'rand')]
 
             self.update_tree(
                 scores,
@@ -80,7 +86,7 @@ class Tree:
             
         log = logs.pop(0)
         key = self.log_to_key(log)
-        
+
         if key not in branch:
             branch[key] = self.update_tree(scores, logs)
             
@@ -92,7 +98,7 @@ class Tree:
             
         return branch
     
-    def get_scores(self, pid, branch=None, deapth=0):
+    def get_scores(self, pid, branch=None, deapth=0, data=None):
         if branch is None:
             branch = self.tree
 
@@ -106,12 +112,16 @@ class Tree:
             if isinstance(subbranch, list):
                 scores[key] = analyze(subbranch, pid)
             else:
-                scores[key] = self.get_scores(pid, branch=subbranch, deapth=deapth + 1)
-   
+                scores[key] = self.get_scores(pid, branch=subbranch, deapth=deapth + 1, data=key)
+
         if deapth == 0:
             return scores
         if not scores:
             return 0
+            
+        if data is not None:
+            if len(data) == 3:
+                return sum(scores.values()) / data[1]
 
         if decider == pid:
             return max(scores.values())
@@ -121,12 +131,11 @@ class Tree:
         if branch is None:
             branch = self.tree
             
-        for choice, subbranch in branch.items():
-        
-            if isinstance(subbranch, list):
-                print((' ' * deapth) + str(subbranch))
-        
-            else:
+        if isinstance(branch, list):
+            print((' ' * deapth) + str(branch))
+            
+        else:
+            for choice, subbranch in branch.items():
                 print((' ' * deapth) + str(choice) + ': {')
                 self.print_tree(branch=subbranch, deapth=deapth + indent)
                 print((' ' * deapth) + '}')

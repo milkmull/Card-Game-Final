@@ -19,7 +19,7 @@ class Pack:
         phase = card.phase
         for _phase, cards in self.queue.items():
             for cid, c in cards.items():
-                if c.card.rect.center == card.card.rect.center:
+                if c.card == card.card or c.target_rect.center == card.target_rect.center:
                     if phase <= _phase:
                         phase = _phase + 1   
 

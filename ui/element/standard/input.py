@@ -290,7 +290,7 @@ class Input(Text_Element):
             self.selecting = True
         elif self.is_open:
             if self.clicks == 2:
-                self.highlight_section(' \n')
+                self.highlight_section(',;:.?!(){}[] \n')
             elif self.clicks == 3:
                 self.highlight_section('\n')
                 

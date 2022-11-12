@@ -91,8 +91,13 @@ class Game_Base:
             
 # log stuff
 
-    def add_log(self, log):
+    def add_log(self, log):  
         self.log.append(log)
+        
+    def get_last_log(self, types):
+        for log in reverse(self.log):
+            if log['t'] in types:
+                return log
 
 # player stuff 
    

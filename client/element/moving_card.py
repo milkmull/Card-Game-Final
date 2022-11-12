@@ -12,6 +12,7 @@ class Moving_Card(Base_Element):
         self.card.turn_off()
         self.base_image = self.card.get_image(mini=False)
         self.rect = self.card.rect.copy()
+        self.target_rect = self.rect.copy()
 
         self.child = None
         self.type = type

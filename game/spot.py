@@ -55,6 +55,13 @@ class Spot:
     def is_open(self):
         return self.card is None
         
+    @property
+    def is_corner(self):
+        x, y = self.pos
+        w, h = self.grid.size
+        
+        return (y == 0 or y + 1 == h) and (x == 0 or x + 1 == w)
+        
 # setting card stuff
 
     def set_card(self, card, parent=None):

@@ -10,14 +10,6 @@ class Fish(card_base.Card):
     type = 'play'
     weight = 1
     tags = ('water', 'animal')
-    
-    def special(self):
-        cards = self.spot.get_card_group('border')
-        if len(cards) == 4:
-            if all({c.name == self.name for c in cards}):
-                for c in cards:
-                    c.spot.kill_card(self)
-                    self.player.gain(3, self, extra=c)
 
     def update(self):
         for c in self.spot.get_card_group('row'):
@@ -29,8 +21,6 @@ class Fish(card_base.Card):
             if self.register(c):
                 if c.name == self.name:
                     self.player.gain(1, self, extra=c)
-                    
-        self.special()
                 
 class Michael(card_base.Card):
     sid = 1
@@ -156,6 +146,7 @@ class Vines(card_base.Card):
                 c = self.player_copy()
                 c.can_move = True
                 s.set_card(c, parent=self)
+                self.player.gain(1, self)
                 
     def update(self):
         self.can_move = True
@@ -181,11 +172,12 @@ class OfficeFern(card_base.Card):
     tags = ('city', 'plant')
     
     def play(self):
-        self.player.gain(-5, self)
+        self.player.gain(-4, self)
         
     def kill(self, card):
         self.total_clear()
-        self.player.gain(15 if card.player is self.player else -5, self)
+        if card.player is self.player:
+            self.player.gain(8, self)
         
 class Dragon(card_base.Card):
     sid = 11
@@ -213,8 +205,6 @@ class BigSandWorm(card_base.Card):
         self.player.start_select(self, self.spot.get_card_group('border'))
         
     def select(self, card):
-        if self.spot is None:
-            print(self.game.log)
         self.direction = self.spot.get_direction(card.spot)
         self.move()
         
@@ -251,13 +241,18 @@ class GamblingMan(card_base.Card):
     tags = ('city', 'human')
 
     def play(self):
-        self.player.gain(4, self)
+        if self.spot.grid.any_open():
+            self.player.start_select(self, list(self.player.decks['private'].values()))
+            
+    def select(self, card):
+        spots = list(self.spot.grid.get_open_spots().values())
+        spot = self.player.random_choice(spots, self)
+        self.player.play_card('private', card.cid, spot)
         
-    def update(self):
-        for c in self.spot.get_card_group('border'):
-            if self.register(c):
-                if 'human' in c.tags:
-                    self.player.gain(-2, self, extra=c)
+        if spot.is_corner:
+            self.player.gain(4, self)
+        else:
+            self.player.gain(-4, self)
             
 class Parade(card_base.Card):
     sid = 15
@@ -267,10 +262,13 @@ class Parade(card_base.Card):
     tags = ('event',)
 
     def play(self):
+        count = 1
         for c in self.spot.get_direction_chunk('left', check=lambda c: 'human' in c.tags):
-            self.player.gain(1, self, extra=c)
+            self.player.gain(count, self, extra=c)
+            count *= 2
         for c in self.spot.get_direction_chunk('right', check=lambda c: 'human' in c.tags):
-            self.player.gain(1, self, extra=c)
+            self.player.gain(count, self, extra=c)
+            count *= 2
             
 class FishingPole(card_base.Card):
     sid = 16

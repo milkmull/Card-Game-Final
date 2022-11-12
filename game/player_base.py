@@ -73,8 +73,11 @@ class Player_Base:
         
         selection = p.decks['selection']
         for cid, c in self.decks['selection'].items():
-            spot = game.grid.get_spot(c.spot.pos)
-            card = spot.card
+            if c.spot:
+                spot = game.grid.get_spot(c.spot.pos)
+                card = spot.card
+            else:
+                card = c.game_copy(game)
             if card:
                 selection[cid] = card
             else:
@@ -156,13 +159,15 @@ class Player_Base:
         
     def select_card(self, cid):
         card = self.decks['selection'][cid]
-        self.active_card.select(card)
-        self.end_select()
         
         self.add_log({
             't': 's',
             'c': card.cid
         }, exc=True)
+        
+        active_card = self.active_card
+        self.end_select()
+        active_card.select(card)
 
 # log stuff
 
@@ -191,6 +196,17 @@ class Player_Base:
     @property
     def done_game(self):
         return not self.decks['private'] and not self.active_card
+        
+    def random_choice(self, choices, caller):
+        choice = random.choice(choices)
+        
+        log = self.add_log({
+            't': 'rand',
+            'len': len(choices),
+            'id': caller.cid
+        })
+        
+        return choice
         
     def choose_random_play(self):
         choices = (
