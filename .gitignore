@@ -7,6 +7,9 @@ data/img/temp/
 data/snd/custom/
 data/snd/temp/
 
+# VSCode
+/.vs
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
