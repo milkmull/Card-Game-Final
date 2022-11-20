@@ -77,11 +77,6 @@ class Spot:
             'parent': parent.cid if parent else None
         })
         
-    def kill_card(self, other):
-        if self.card:
-            self.card.kill(other)
-            self.clear_card(kill=True)
-        
     def clear_card(self, kill=False):
         card = self.card
         card.clear()

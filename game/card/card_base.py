@@ -45,6 +45,10 @@ class Card:
         self.player = player
         self.wipe_memory()
         
+    def swap_player(self, player):
+        if self.player:
+            player.gain_ownership(self)
+        
     @property
     def multiplier(self):
         multiplier = 1
@@ -116,12 +120,11 @@ class Card:
         pass
 
     def kill(self, card):
-        pass
+        if self.spot:
+            self.spot.clear_card(kill=True)
+        self.total_clear()
         
     def select(self, card):
-        pass
-        
-    def special(self):
         pass
         
 # other stuff

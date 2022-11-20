@@ -61,7 +61,7 @@ class Cow(card_base.Card):
         c = self.spot.get_card_at(self.direction)
         if c:
             if 'plant' in c.tags:
-                c.spot.kill_card(self)
+                c.kill(self)
                 self.player.gain(5, self)
                 self.can_move = True
     
@@ -107,7 +107,7 @@ class Robber(card_base.Card):
         self.player.start_select(self, self.spot.get_card_group('border'))
         
     def select(self, card):
-        card.spot.kill_card(self)
+        card.kill(self)
         self.player.add_card('private', card.copy())
         
 class Ghost(card_base.Card):
@@ -121,7 +121,7 @@ class Ghost(card_base.Card):
         for c in self.spot.get_card_group('border'):
             if self.register(c):
                 if 'human' in c.tags and c.player is not self.player:
-                    self.player.gain_ownership(c)
+                    c.swap_player(self.player)
                     self.player.gain(1, self, extra=c)
    
 class Vines(card_base.Card):
@@ -167,9 +167,9 @@ class Office_Fern(card_base.Card):
         self.player.gain(-4, self)
         
     def kill(self, card):
-        self.total_clear()
         if card.player is self.player:
             self.player.gain(8, self)
+        super().kill(card)
         
 class Dragon(card_base.Card):
     sid = 11
@@ -182,7 +182,7 @@ class Dragon(card_base.Card):
         self.player.start_select(self, self.spot.get_card_group('all'))
         
     def select(self, card):
-        card.spot.kill_card(self)
+        card.kill(self)
         if 'monster' in card.tags:
             self.player.gain(3, self)
             
@@ -220,10 +220,6 @@ class Negative_Zone(card_base.Card):
         
     def multiply(self, card):
         return -1
-        
-    def kill(self, card):
-        self.total_clear()
-        self.game.remove_multiplier(self)
             
 class Gambling_Man(card_base.Card):
     sid = 14
@@ -284,7 +280,7 @@ class Pelican(card_base.Card):
     def play(self):
         self.player.gain(self.spot.grid.height - self.spot.pos[1], self)
         for c in self.spot.cards_from_vector((0, 1), steps=-1, check=lambda c: c.name == 'fish'):
-            c.spot.kill_card(self)
+            c.kill(self)
             self.player.gain(1, self, extra=c)
         
 class Treasure_Chest(card_base.Card):
