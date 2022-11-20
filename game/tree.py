@@ -57,7 +57,7 @@ class Tree:
             new_tree = {}
         self.tree = new_tree
 
-    def simulate(self, num=50, max_deapth=3):
+    def simulate(self, num=20, max_deapth=6):
         for _ in range(num):
         
             g = self.game.copy()#seed=self.sims)
@@ -115,6 +115,7 @@ class Tree:
                 scores[key] = self.get_scores(pid, branch=subbranch, deapth=deapth + 1, data=key)
 
         if deapth == 0:
+            self.save_tree()
             return scores
         if not scores:
             return 0

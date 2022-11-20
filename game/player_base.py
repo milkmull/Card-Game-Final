@@ -236,7 +236,7 @@ class Player_Base:
         if not self.played:
             self.random_turn()
                 
-        if self.active_card:
+        while self.active_card:
             self.random_selection()
 
 # point stuff

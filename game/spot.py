@@ -1,3 +1,4 @@
+import math
 
 class Spot:
     BORDER_STRINGS = (
@@ -152,8 +153,8 @@ class Spot:
                     self.grid.grid[h - 1][w - 1]
                 ]
                 
-    def get_card_group(self, group):
-        return [spot.card for spot in self.get_spot_group(group) if spot.card is not None]
+    def get_card_group(self, group, check=lambda c: True):
+        return [spot.card for spot in self.get_spot_group(group) if spot.card is not None and check(spot.card)]
                 
     def get_direction(self, spot):
         sx, sy = self.pos
@@ -181,15 +182,17 @@ class Spot:
             elif oy == sy - 1:
                 return 'topleft'
                 
-    def get_chunk(self, check=lambda c: True, include_self=False):
-        cards = []
+    def get_chunk(self, check=lambda c: True, include_self=False, cards=None):
+        if cards is None:
+            cards = []
         
         if include_self:
             cards.append(self.card)
             
         for c in self.get_card_group('border'):
-            if check(c):
-                cards += c.spot.get_chunk(check=check, include_self=True)
+            if c not in cards:
+                if check(c):
+                    cards += c.spot.get_chunk(check=check, include_self=True, cards=cards)
             
         return cards
         
@@ -235,7 +238,57 @@ class Spot:
                         
         return cards  
     
+    def cards_from_vector(self, dir, steps=1, da=360, check=lambda c: True, stop_on_empty=False, stop_on_fail=False):    
+        cards = []
+            
+        sx, sy = self.pos
+        dx, dy = dir
+        if dx == dy == 0:
+            return cards
+
+        angle =  round(math.degrees(math.atan2(dy, dx)))
+        if angle < 0:
+            angle += 360
+        assert not angle % 45
+        dr = math.radians(da)
+        rcos = math.cos(dr)
+        rsin = math.sin(dr)
+        
+        if steps == -1:
+            steps = math.inf
+
+        for angle in range(angle, angle + 360, da):
+            
+            step = 0
+            x = sx + dx
+            y = sy + dy
+        
+            while step < steps:
+                
+                spot = self.grid.grid.get(y, {}).get(x)
+                if spot is None:
+                    break
+                    
+                if (card := spot.card):
+                    if check(card):
+                        cards.append(card)
+                    elif stop_on_fail:
+                        break
+                elif stop_on_fail or stop_on_empty:
+                    break
+                        
+                x += dx
+                y += dy
+                step += 1
     
+            ndx = round((dx * rcos) - (dy * rsin))
+            ndy = round((dx * rsin) + (dy * rcos))
+            dx, dy = ndx, ndy
+
+        return cards
+            
+            
+        
     
     
     

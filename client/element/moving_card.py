@@ -187,7 +187,7 @@ class Moving_Card(Base_Element):
                     'method': 'random_shake'
                 }])
                 
-            case 'own':
+            case 'own' | 'tf':
                 
                 self.add_animation([
                     {

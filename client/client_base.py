@@ -295,6 +295,8 @@ class Client_Base(Scene):
                     self.play_card(log)
                 case 'own':
                     self.set_owner(log)
+                case 'tf':
+                    self.transform(log)
                     
                 case 'fin':
                     self.end_game(log)
@@ -394,6 +396,9 @@ class Client_Base(Scene):
     def set_owner(self, log):
         self.grid.cards[log['c']].player = self.get_player(log['u'])
         self.animation_manager.add_card(self.grid.cards[log['c']], 'own')
+        
+    def transform(self, log):
+        self.animation_manager.add_card(self.grid.cards[log['c']], 'tf')
         
     def end_game(self, log):
         self.turn += 1

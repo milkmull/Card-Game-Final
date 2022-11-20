@@ -21,7 +21,7 @@ class Spot(Position):
     @property
     def state(self):
         if self.card:
-            return 2 if self.card.visible else 0
+            return self.card.cid if self.card.visible else 0
         return 1 if self.hover else 0
         
     def click_up(self, button):
@@ -54,6 +54,7 @@ class Spot(Position):
         if self.card:
             self.remove_child(self.card)
             self.card = None
+            print(self.children)
             
     def _draw(self, surf):
         match self.last_state:
@@ -61,7 +62,7 @@ class Spot(Position):
                 pg.draw.rect(surf, self.client.fill_color, self.rect)
             case 1:
                 pg.draw.rect(surf, (100, 100, 100), self.rect)
-            case 2:
+            case _:
                 super().draw(surf)
 
         pg.draw.rect(surf, (255, 255, 255), self.rect, width=1)
@@ -140,7 +141,7 @@ class Grid(Position):
         spot = self.grid[pos[1]][pos[0]]
         card = spot.card
         card.spot_pos = None
-        self.grid[pos[1]][pos[0]].clear_card()
+        spot.clear_card()
         
     def draw(self, surf):
         if self.image:

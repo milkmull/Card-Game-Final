@@ -8,19 +8,13 @@ class Fish(card_base.Card):
     sid = 0
     name = 'fish'
     type = 'play'
-    weight = 1
+    weight = 1.25
     tags = ('water', 'animal')
 
     def update(self):
-        for c in self.spot.get_card_group('row'):
+        for c in self.spot.cards_from_vector((1, 0), steps=-1, da=90, check=lambda c: c.name == 'fish'):
             if self.register(c):
-                if c.name == self.name:
-                    self.player.gain(1, self, extra=c)
-                    
-        for c in self.spot.get_card_group('column'):
-            if self.register(c):
-                if c.name == self.name:
-                    self.player.gain(1, self, extra=c)
+                self.player.gain(1, self, extra=c)
                 
 class Michael(card_base.Card):
     sid = 1
@@ -129,9 +123,7 @@ class Ghost(card_base.Card):
                 if 'human' in c.tags and c.player is not self.player:
                     self.player.gain_ownership(c)
                     self.player.gain(1, self, extra=c)
-                    
-# make special vine goes from bottom to top condition
-    
+   
 class Vines(card_base.Card):
     sid = 8
     name = 'vines'
@@ -164,7 +156,7 @@ class Fox(card_base.Card):
     def select(self, card):
         self.swap_with(card)
     
-class OfficeFern(card_base.Card):
+class Office_Fern(card_base.Card):
     sid = 10
     name = 'office fern'
     type = 'play'
@@ -194,7 +186,7 @@ class Dragon(card_base.Card):
         if 'monster' in card.tags:
             self.player.gain(3, self)
             
-class BigSandWorm(card_base.Card):
+class Big_Sand_Worm(card_base.Card):
     sid = 12
     name = 'big sand worm'
     type = 'play'
@@ -216,7 +208,7 @@ class BigSandWorm(card_base.Card):
     def update(self):
         self.can_move = True
             
-class NegativeZone(card_base.Card):
+class Negative_Zone(card_base.Card):
     sid = 13
     name = 'negative zone'
     type = 'play'
@@ -233,7 +225,7 @@ class NegativeZone(card_base.Card):
         self.total_clear()
         self.game.remove_multiplier(self)
             
-class GamblingMan(card_base.Card):
+class Gambling_Man(card_base.Card):
     sid = 14
     name = 'gambling man'
     type = 'play'
@@ -263,10 +255,7 @@ class Parade(card_base.Card):
 
     def play(self):
         count = 1
-        for c in self.spot.get_direction_chunk('left', check=lambda c: 'human' in c.tags):
-            self.player.gain(count, self, extra=c)
-            count *= 2
-        for c in self.spot.get_direction_chunk('right', check=lambda c: 'human' in c.tags):
+        for c in self.spot.cards_from_vector((1, 0), steps=-1, da=180, check=lambda c: 'human' in c.tags):
             self.player.gain(count, self, extra=c)
             count *= 2
             
@@ -284,4 +273,54 @@ class FishingPole(card_base.Card):
         self.player.gain_ownership(card)
         self.swap_with(card)
                 
+                
+class Pelican(card_base.Card):
+    sid = 17
+    name = 'pelican'
+    type = 'play'
+    weight = 0.75
+    tags = ('sky', 'animal')
+    
+    def play(self):
+        self.player.gain(self.spot.grid.height - self.spot.pos[1], self)
+        for c in self.spot.cards_from_vector((0, 1), steps=-1, check=lambda c: c.name == 'fish'):
+            c.spot.kill_card(self)
+            self.player.gain(1, self, extra=c)
+        
+class Treasure_Chest(card_base.Card):
+    sid = 18
+    name = 'treasure chest'
+    type = 'play'
+    weight = 0.25
+    tags = ('item',)
+    
+    def update(self):
+        for c in self.spot.cards_from_vector((1, 0), da=90):
+            if self.register(c):
+                c.player.gain(3, self, extra=c)
+    
+class Zombie(card_base.Card):
+    sid = 19
+    name = 'zombie'
+    type = 'play'
+    weight = 0.25
+    tags = ('monster',)
+    
+    def update(self):
+        for c in self.spot.cards_from_vector((1, 0), da=90, check=lambda c: 'human' in c.tags):
+            if self.register(c):
+                self.game.transform(c, self.name)
+                self.player.gain(1, self, extra=c)
+                
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
                 

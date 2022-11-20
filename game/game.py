@@ -306,6 +306,16 @@ class Game(game_base.Game_Base):
                 self.add_public(self.draw_cards()[0])
         
         return card
+        
+    def transform(self, card, name):
+        new_card = super().transform(card, name)
+        
+        self.add_log({
+            't': 'tf',
+            'c': new_card.cid
+        })
+        
+        return new_card
    
 # main game logic
  

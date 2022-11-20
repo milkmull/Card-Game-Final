@@ -91,7 +91,7 @@ class Game_Base:
             
 # log stuff
 
-    def add_log(self, log):  
+    def add_log(self, log):     
         self.log.append(log)
         
     def get_last_log(self, types):
@@ -152,6 +152,16 @@ class Game_Base:
         
     def remove_multiplier(self, card):
         r = self.multipliers.pop(card.cid, None)
+        
+    def transform(self, card, name):
+        new_card = self.get_card(name)
+        new_card.set_player(card.player)
+        
+        spot = card.spot
+        spot.clear_card()
+        spot.set_card(new_card)
+        
+        return new_card
 
 # update info stuff
             
