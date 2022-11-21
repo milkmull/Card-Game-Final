@@ -5,9 +5,17 @@ def analyze(scores, pid):
     return score
 
 class Tree:
+    log_types = (
+        'p', 
+        's', 
+        'rand', 
+        'randres'
+    )
+    
     def __init__(self, game):
         self.tree = {}
         self.game = game
+        self.f = ""
         
         self.sims = 0
         
@@ -49,6 +57,11 @@ class Tree:
                 len = log['len']
                 id = log['id']
                 return (pid, len, id)
+                
+            case 'randres':
+                pid = log['u']
+                res = log['res']
+                return (pid, res)
         
     def trim(self, log):
         key = self.log_to_key(log)
@@ -57,17 +70,17 @@ class Tree:
             new_tree = {}
         self.tree = new_tree
 
-    def simulate(self, num=20, max_deapth=6):
+    def simulate(self, num=50, max_deapth=3):
         for _ in range(num):
         
-            g = self.game.copy()#seed=self.sims)
+            g = self.game.copy()
             turn = 0
             while not g.done and turn < max_deapth and g.public_deck:
                 g.main()
                 turn += 1
 
             scores = [p.score for p in sorted(g.players, key=lambda p: p.pid)]
-            logs = [log for log in g.log if log['t'] in ('p', 's', 'rand')]
+            logs = [log for log in g.log if log['t'] in Tree.log_types]
 
             self.update_tree(
                 scores,
@@ -97,7 +110,7 @@ class Tree:
             self.update_tree(scores, logs, branch=branch[key])
             
         return branch
-    
+        
     def get_scores(self, pid, branch=None, deapth=0, data=None):
         if branch is None:
             branch = self.tree

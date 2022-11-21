@@ -269,12 +269,11 @@ class FishingPole(card_base.Card):
         self.player.gain_ownership(card)
         self.swap_with(card)
                 
-                
 class Pelican(card_base.Card):
     sid = 17
     name = 'pelican'
     type = 'play'
-    weight = 0.75
+    weight = 0
     tags = ('sky', 'animal')
     
     def play(self):

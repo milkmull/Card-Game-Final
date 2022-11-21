@@ -176,7 +176,8 @@ class Player_Base:
         if exc:
             log['exc'] = self.pid
         self.log.append(log)
-        self.game.add_log(log)
+        if not (log['t'] == 'p' and self.played):
+            self.game.add_log(log)
         return log
 
 # turn stuff
@@ -200,10 +201,15 @@ class Player_Base:
     def random_choice(self, choices, caller):
         choice = random.choice(choices)
         
-        log = self.add_log({
+        self.add_log({
             't': 'rand',
             'len': len(choices),
             'id': caller.cid
+        })
+        
+        self.add_log({
+            't': 'randres',
+            'res': choices.index(choice)
         })
         
         return choice

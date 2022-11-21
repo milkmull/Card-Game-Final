@@ -160,11 +160,11 @@ class Auto_Player(Player):
 
             spots = self.game.grid.get_open_spots()
             
-            for (pid, deck, cid, x, y), score in choices:
-                print(pid, deck, cid, x, y)
-                deck = decks[deck]
-                if self.decks[deck].get(cid) and (spot := spots.get((x, y))):
-                    print(self.decks[deck].get(cid), score)
+            #for (pid, deck, cid, x, y), score in choices:
+            #    print(pid, deck, cid, x, y)
+            #    deck = decks[deck]
+            #    if self.decks[deck].get(cid) and (spot := spots.get((x, y))):
+            #        print(self.decks[deck].get(cid), score)
 
             for (pid, deck, cid, x, y), score in choices:
                 deck = decks[deck]
