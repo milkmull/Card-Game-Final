@@ -21,6 +21,7 @@ class Game_Base:
         self.log = []
         self.public_deck = {}
         self.multipliers = {}
+        self.wait = {}
         self.players = [] 
         self.grid = Grid(self, self.get_setting('size'))
         
@@ -46,6 +47,7 @@ class Game_Base:
         self.grid.copy_to(g)
         
         g.multipliers = {cid: g.grid.get_spot(c.spot.pos).card for cid, c in self.multipliers.items()}
+        g.wait = {cid: g.grid.get_spot(c.spot.pos).card for cid, c in self.wait.items()}
 
         for p in self.players:
             p.copy_cards_to(g)
@@ -58,6 +60,7 @@ class Game_Base:
         self.log.clear()
         self.public_deck.clear()
         self.multipliers.clear()
+        self.wait.clear()
         self.grid.reset()
         
         for p in self.players: 
@@ -151,7 +154,13 @@ class Game_Base:
         self.multipliers[card.cid] = card
         
     def remove_multiplier(self, card):
-        r = self.multipliers.pop(card.cid, None)
+        self.multipliers.pop(card.cid, None)
+        
+    def add_wait(self, card):
+        self.wait[card.cid] = card
+        
+    def remove_wait(self, card):
+        self.wait.pop(card.cid, None)
         
     def transform(self, card, name):
         new_card = self.get_card(name)
@@ -184,6 +193,7 @@ class Game_Base:
     def new_turn(self):
         self.current_turn = (self.current_turn + 1) % len(self.players)
         self.players[self.current_turn].start_turn()
+        self.run_wait('nt', self.players[self.current_turn])
         
     def card_update(self):
         cards = self.grid.cards
@@ -200,7 +210,12 @@ class Game_Base:
         for card in cards:
             if card.spot:
                 card.update()
-   
+                
+    def run_wait(self, wait, player, card=None):
+        for c in list(self.wait.values()):
+            if c.wait == wait:
+                c.run_wait(player, card)
+
     def main(self):
         if self.status == 'playing':
             p = self.players[self.current_turn]

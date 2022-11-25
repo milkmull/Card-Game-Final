@@ -108,6 +108,8 @@ class Robber(card_base.Card):
         
     def select(self, card):
         card.kill(self)
+        if 'item' in card.tags:
+            self.player.gain(3, self)
         self.player.add_card('private', card.copy())
         
 class Ghost(card_base.Card):
@@ -255,7 +257,7 @@ class Parade(card_base.Card):
             self.player.gain(count, self, extra=c)
             count *= 2
             
-class FishingPole(card_base.Card):
+class Fishing_Pole(card_base.Card):
     sid = 16
     name = 'fishing pole'
     type = 'play'
@@ -307,7 +309,19 @@ class Zombie(card_base.Card):
                 self.game.transform(c, self.name)
                 self.player.gain(1, self, extra=c)
                 
+class Future_Orb(card_base.Card):
+    sid = 20
+    name = 'future orb'
+    type = 'play'
+    weight = 0.25
+    tags = ('item',)
     
+    def play(self):
+        self.start_wait('nt')
+    
+    def run_wait(self, player, card):
+        if player == self.player:
+            self.kill(self)
     
     
     

@@ -19,6 +19,7 @@ class Card:
         self.memory = set()
         self.direction = None
         self.can_move = False
+        self.wait = None
 
     def __str__(self):
         return self.name
@@ -75,6 +76,7 @@ class Card:
         c.memory = self.memory.copy()
         c.direction = self.direction
         c.can_move = self.can_move
+        c.wait = self.wait
         
         if self.player:
             c.player = game.get_player(self.player.pid)
@@ -89,7 +91,8 @@ class Card:
         self.spot = None
         
     def total_clear(self):
-        self.game.remove_multiplier(self)
+        self.end_multiplier()
+        self.end_wait()
         self.wipe_memory()
         self.spot = None
 
@@ -106,6 +109,9 @@ class Card:
 
     def multiply(self, card):
         return 1
+        
+    def run_wait(self, player, card):
+        pass
 
     def play(self):
         pass
@@ -142,5 +148,17 @@ class Card:
         self.move_to(new_spot)
         last_spot.set_card(card)
         
+    def start_multiplier(self):
+        self.game.add_multiplier(self)
         
+    def end_multiplier(self):
+        self.game.remove_multiplier(self)
+        
+    def start_wait(self, wait):
+        self.wait = wait
+        self.game.add_wait(self)
+        
+    def end_wait(self):
+        self.game.remove_wait(self)
+        self.wait = None
         

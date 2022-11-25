@@ -70,7 +70,7 @@ class Tree:
             new_tree = {}
         self.tree = new_tree
 
-    def simulate(self, num=50, max_deapth=3):
+    def simulate(self, num=20, max_deapth=4):
         for _ in range(num):
         
             g = self.game.copy()
