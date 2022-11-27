@@ -141,6 +141,9 @@ class Card:
             spot.set_card(self)
    
     def swap_with(self, card):
+        if card is self:
+            return
+        
         new_spot = card.spot
         last_spot = self.spot
         

@@ -94,3 +94,33 @@ class Grid:
                 open_spots.pop(0).set_card(card)
                 open_spots.append(spot)
       
+    def shift(self, cards, dir=1):
+        for i in range(0, len(cards) - 1, dir):
+            c0 = cards[i]
+            c1 = cards[(i + 1) % len(cards)]
+            c0.swap_with(c1)
+            
+    def slide(self, card, dir, max_dist=99):
+        dx, dy = dir
+        assert dx or dy
+        x, y = card.spot.pos
+        dist = 0
+        last_spot = None
+ 
+        while True:
+            x += dx
+            y += dy
+            
+            if dist < max_dist and self.in_bounds((x, y)):
+                spot = self.get_spot((x, y))
+                if not spot.card:
+                    last_spot = spot
+                    dist += 1
+                    continue
+                    
+            break
+
+        if last_spot:
+            card.move_to(last_spot)
+            
+        return dist

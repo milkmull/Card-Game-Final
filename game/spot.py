@@ -233,7 +233,7 @@ class Spot:
                         
         return cards  
     
-    def cards_from_vector(self, dir, steps=1, da=360, check=lambda c: True, stop_on_empty=False, stop_on_fail=False):    
+    def cards_from_vector(self, dir, steps=1, da=360, check=lambda c: True, stop_on_empty=False, stop_on_fail=False, reverse=False):    
         cards = []
             
         sx, sy = self.pos
@@ -279,6 +279,9 @@ class Spot:
             ndx = round((dx * rcos) - (dy * rsin))
             ndy = round((dx * rsin) + (dy * rcos))
             dx, dy = ndx, ndy
+            
+        if reverse:
+            cards.reverse()
 
         return cards
             

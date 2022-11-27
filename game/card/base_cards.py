@@ -80,8 +80,10 @@ class Wind_Gust(card_base.Card):
     tags = ('sky',)
     
     def play(self):
-        self.spot.grid.condense_row(self.spot, 1)
-        self.spot.grid.condense_row(self.spot, -1)
+        for c in self.spot.cards_from_vector((-1, 0), steps=-1, reverse=True):
+            self.spot.grid.slide(c, (-1, 0))
+        for c in self.spot.cards_from_vector((1, 0), steps=-1, reverse=True):
+            self.spot.grid.slide(c, (1, 0))
         
 class Dom(card_base.Card):
     sid = 5
@@ -92,9 +94,8 @@ class Dom(card_base.Card):
     
     def update(self):
         for c in self.spot.get_card_group('corner'):
-            if self.register(c):
-                if 'animal' in c.tags:
-                    self.player.gain(3 if c.player is self.player else 1, self, extra=c)
+            if self.register(c) and 'animal' in c.tags:
+                self.player.gain(3 if c.player is self.player else 1, self, extra=c)
             
 class Robber(card_base.Card):
     sid = 6
@@ -121,11 +122,10 @@ class Ghost(card_base.Card):
     
     def play(self):
         for c in self.spot.get_card_group('border'):
-            if self.register(c):
-                if 'human' in c.tags and c.player is not self.player:
-                    c.swap_player(self.player)
-                    self.player.gain(1, self, extra=c)
-   
+            if self.register(c) and 'human' in c.tags and c.player is not self.player:
+                c.swap_player(self.player)
+                self.player.gain(1, self, extra=c)
+
 class Vines(card_base.Card):
     sid = 8
     name = 'vines'
@@ -236,13 +236,14 @@ class Gambling_Man(card_base.Card):
             
     def select(self, card):
         spots = list(self.spot.grid.get_open_spots().values())
-        spot = self.player.random_choice(spots, self)
-        self.player.play_card('private', card.cid, spot)
-        
-        if spot.is_corner:
-            self.player.gain(4, self)
-        else:
-            self.player.gain(-4, self)
+        if spots:
+            spot = self.player.random_choice(spots, self)
+            self.player.play_card('private', card.cid, spot)
+            
+            if spot.is_corner:
+                self.player.gain(4, self)
+            else:
+                self.player.gain(-4, self)
             
 class Parade(card_base.Card):
     sid = 15
@@ -253,7 +254,7 @@ class Parade(card_base.Card):
 
     def play(self):
         count = 1
-        for c in self.spot.cards_from_vector((1, 0), steps=-1, da=180, check=lambda c: 'human' in c.tags):
+        for c in self.spot.cards_from_vector((1, 0), steps=-1, da=180, check=lambda c: 'human' in c.tags, stop_on_fail=True):
             self.player.gain(count, self, extra=c)
             count *= 2
             
@@ -313,7 +314,7 @@ class Future_Orb(card_base.Card):
     sid = 20
     name = 'future orb'
     type = 'play'
-    weight = 0.25
+    weight = 0.5
     tags = ('item',)
     
     def play(self):
@@ -323,10 +324,19 @@ class Future_Orb(card_base.Card):
         if player == self.player:
             self.kill(self)
     
+class Ninja(card_base.Card):
+    sid = 21
+    name = 'ninja'
+    type = 'play'
+    weight = 0.5
+    tags = ('human',)
     
-    
-    
-    
+    def play(self):
+        cards = self.spot.cards_from_vector((1, 0), steps=-1, da=90, stop_on_empty=True)
+        self.player.start_select(self, cards)
+        
+    def select(self, card):
+        self.swap_with(card)
     
     
     
