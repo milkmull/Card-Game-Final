@@ -59,12 +59,10 @@ class Cow(card_base.Card):
     
     def remove(self):
         c = self.spot.get_card_at(self.direction)
-        if c:
-            if 'plant' in c.tags:
-                c.kill(self)
-                self.player.gain(5, self)
-                s = self.spot.get_spot_at(self.direction)
-                self.move_to(s)
+        if c and 'plant' in c.tags:
+            c.kill(self)
+            self.player.gain(5, self)
+            self.move_in(self.direction)
                 
 class Wind_Gust(card_base.Card):
     sid = 4
@@ -132,11 +130,10 @@ class Vines(card_base.Card):
 
     def move(self):
         s = self.spot.get_spot_at('top')
-        if s:
-            if not s.card:
-                c = self.player_copy()
-                s.set_card(c, parent=self)
-                self.player.gain(1, self)
+        if s and s.is_open:
+            c = self.player_copy()
+            s.set_card(c, parent=self)
+            self.player.gain(1, self)
                 
 class Fox(card_base.Card):
     sid = 9
@@ -151,19 +148,15 @@ class Fox(card_base.Card):
     def select(self, card):
         self.swap_with(card)
     
-class Office_Fern(card_base.Card):
+class Cactus(card_base.Card):
     sid = 10
-    name = 'office fern'
+    name = 'cactus'
     type = 'play'
     weight = 0.5
     tags = ('city', 'plant')
-    
-    def play(self):
-        self.player.gain(-4, self)
-        
+
     def kill(self, card):
-        if card.player is self.player:
-            self.player.gain(8, self)
+        card.player.gain(-5, self, extra=card)
         super().kill(card)
         
 class Dragon(card_base.Card):
@@ -267,14 +260,28 @@ class Pelican(card_base.Card):
     sid = 17
     name = 'pelican'
     type = 'play'
-    weight = 0
+    weight = 0.15
     tags = ('sky', 'animal')
     
     def play(self):
-        self.player.gain(self.spot.grid.height - self.spot.pos[1], self)
-        for c in self.spot.cards_from_vector((0, 1), steps=-1, check=lambda c: c.name == 'fish'):
-            c.kill(self)
-            self.player.gain(1, self, extra=c)
+        c = self.spot.get_card_at('bottom')
+        if c and c.name == 'fish':
+            s = self.spot.get_spot_at('top')
+            if not s or (s and not s.is_open):
+                c.kill(self)
+                self.player.gain(5, self, extra=c)
+        self.skip_move = True
+
+    def move(self):
+        if not self.move_in('down'):
+            c = self.spot.get_card_at('bottom')
+            if c and c.name == 'fish':
+                if self.move_in('up'):
+                    c.move_in('up')
+                s = self.spot.get_spot_at('top')
+                if not s or (s and not s.is_open):
+                    c.kill(self)
+                    self.player.gain(5, self, extra=c)
         
 class Treasure_Chest(card_base.Card):
     sid = 18
@@ -323,14 +330,7 @@ class Ninja(card_base.Card):
     tags = ('human',)
     
     def play(self):
-        cards = self.spot.cards_from_vector((1, 0), steps=-1, da=90, stop_on_empty=True)
-        self.player.start_select(self, cards)
+        self.player.start_select(self, self.spot.get_card_group('all'))
         
     def select(self, card):
-        self.swap_with(card)
-    
-    
-    
-    
-    
-                
+        self.swap_with(card)        

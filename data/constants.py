@@ -19,9 +19,9 @@ SPRITESHEET_FILE = 'data/img/spritesheet.png'
 CUSTOMSHEET_FILE = 'data/img/customsheet.png'
 
 BASE_NAMES = (
-    'big sand worm', 'cow', 'dom', 'dragon', 'fish', 'fishing pole', 'fox', 'future orb', 'gambling man',
-    'ghost', 'michael', 'negative zone', 'office fern', 'parade', 'pelican', 'robber', 'sunflower', 'treasure chest', 
-    'vines', 'wind gust', 'zombie'
+    'big sand worm', 'cactus', 'cow', 'dom', 'dragon', 'fish', 'fishing pole', 'fox', 'future orb', 
+    'gambling man', 'ghost', 'michael', 'negative zone', 'ninja', 'parade', 'pelican', 'robber', 'sunflower',
+    'treasure chest', 'vines', 'wind gust', 'zombie'
     
 )
 

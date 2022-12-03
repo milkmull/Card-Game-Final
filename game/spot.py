@@ -99,9 +99,9 @@ class Spot:
                 return self.grid.grid.get(y, {}).get(x - 1)
             case 'right':
                 return self.grid.grid.get(y, {}).get(x + 1)
-            case 'top':
+            case 'top' | 'up':
                 return self.grid.grid.get(y - 1, {}).get(x)
-            case 'bottom':
+            case 'bottom' |'down':
                 return self.grid.grid.get(y + 1, {}).get(x)
             case 'topleft':
                 return self.grid.grid.get(y - 1, {}).get(x - 1)

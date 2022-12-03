@@ -155,6 +155,17 @@ class Card:
         self.spot.clear_card()
         if spot.is_open:
             spot.set_card(self)
+            
+    def move_in(self, dir):
+        result = False
+        
+        spot = self.spot.get_spot_at(dir)
+        if spot and spot.is_open:
+            self.spot.clear_card()
+            spot.set_card(self)
+            result = True
+        
+        return result
    
     def swap_with(self, card):
         if card is self:
