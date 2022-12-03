@@ -210,7 +210,8 @@ class Player_Base:
         
         self.add_log({
             't': 'randres',
-            'res': choices.index(choice)
+            'res': choices.index(choice),
+            'w': 1
         })
         
         return choice

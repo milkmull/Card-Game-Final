@@ -305,7 +305,7 @@ class Zombie(card_base.Card):
     def update(self):
         for c in self.spot.cards_from_vector((1, 0), da=90, check=lambda c: 'human' in c.tags):
             if self.register(c):
-                self.game.transform(c, self.name)
+                self.game.transform(c, self.game.get_card(self.name))
                 self.player.gain(1, self, extra=c)
                 
 class Future_Orb(card_base.Card):
@@ -334,3 +334,17 @@ class Ninja(card_base.Card):
         
     def select(self, card):
         self.swap_with(card)        
+        
+class Mystery_Seed(card_base.Card):
+    sid = 22
+    name = 'mystery seed'
+    type = 'play'
+    weight = 0.1
+    tags = ('garden', 'plant')
+    
+    def play(self):
+        self.start_wait('nt')
+        
+    def run_wait(self, player, card):
+        if player == self.player:
+            self.game.transform(self, self.game.draw_card_from_tag('plant'))

@@ -121,6 +121,12 @@ class Game_Base:
         cid = self.cid
         self.cid += 1
         return cid
+        
+    def draw_card_from_tag(self, tag):
+        deck = {name: cls for name, cls in self.cards['play'].items() if tag in cls.tags}
+        weights = [cls.weight for cls in deck.values()]
+        cards = random.choices(list(deck.keys()), weights=weights, k=1)
+        return self.get_card(cards[0])
      
     def draw_cards(self, type='play', num=1):
         deck = self.cards[type]
@@ -162,12 +168,13 @@ class Game_Base:
     def remove_wait(self, card):
         self.wait.pop(card.cid, None)
         
-    def transform(self, card, name):
-        new_card = self.get_card(name)
+    def transform(self, card, new_card):
         new_card.set_player(card.player)
+        new_card.set_priority(card.priority)
         
         spot = card.spot
         spot.clear_card()
+        card.total_clear()
         spot.set_card(new_card)
         
         return new_card
