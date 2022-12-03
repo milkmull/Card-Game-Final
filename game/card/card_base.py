@@ -16,6 +16,7 @@ class Card:
         self.player = None
 
         self.cid = cid
+        self.priority = 0
         self.memory = set()
         self.direction = None
         self.can_move = False
@@ -49,6 +50,9 @@ class Card:
     def swap_player(self, player):
         if self.player:
             player.gain_ownership(self)
+            
+    def set_priority(self, p):
+        self.priority = p
         
     @property
     def multiplier(self):
@@ -74,6 +78,7 @@ class Card:
         c = type(self)(game, self.cid)
         
         c.memory = self.memory.copy()
+        c.priority = self.priority
         c.direction = self.direction
         c.can_move = self.can_move
         c.wait = self.wait
@@ -93,6 +98,7 @@ class Card:
     def total_clear(self):
         self.end_multiplier()
         self.end_wait()
+        self.priority = 0
         self.wipe_memory()
         self.spot = None
 

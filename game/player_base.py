@@ -125,6 +125,7 @@ class Player_Base:
             return
         
         card.set_player(self)
+        card.set_priority(self.game.grid.get_priority())
         spot.set_card(card)
         
         self.add_log({

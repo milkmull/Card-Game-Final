@@ -196,7 +196,7 @@ class Game_Base:
         self.run_wait('nt', self.players[self.current_turn])
         
     def card_update(self):
-        cards = self.grid.cards
+        cards = sorted(self.grid.cards, key=lambda c: c.priority, reverse=True)
         
         for card in cards:
             if card.spot:

@@ -6,6 +6,7 @@ class Grid:
         self.size = size
         self.grid = {y: {x: Spot(self, (x, y)) for x in range(size[0])} for y in range(size[1])}
         self.spots = [spot for y, row in self.grid.items() for x, spot in row.items()]
+        self.priority = 0
         
     @property
     def width(self):
@@ -31,12 +32,14 @@ class Grid:
     def reset(self):
         for spot in self.spots:
             spot.card = None
+        self.priority = 0
     
     def copy_to(self, game):
         for y, row in self.grid.items():
             for x, spot in row.items():
                 if spot.card:
                     game.grid.grid[y][x].card = spot.card.deepcopy(game)
+        game.grid.priority = self.priority
         
     def in_bounds(self, pos):
         x, y = pos
@@ -55,6 +58,11 @@ class Grid:
             if not s.card:
                 return True
         return False
+        
+    def get_priority(self):
+        p = self.priority
+        self.priority += 1
+        return p
     
 # transforming operations
         
