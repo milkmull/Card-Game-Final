@@ -19,8 +19,11 @@ class Card:
         self.priority = 0
         self.memory = set()
         self.direction = None
-        self.can_move = False
         self.wait = None
+        
+        self.skip_remove = False
+        self.skip_move = False
+        self.skip_update = False
 
     def __str__(self):
         return self.name
@@ -80,8 +83,11 @@ class Card:
         c.memory = self.memory.copy()
         c.priority = self.priority
         c.direction = self.direction
-        c.can_move = self.can_move
         c.wait = self.wait
+        
+        c.skip_remove = self.skip_remove
+        c.skip_move = self.skip_move
+        c.skip_update = self.skip_update
         
         if self.player:
             c.player = game.get_player(self.player.pid)
@@ -101,6 +107,10 @@ class Card:
         self.priority = 0
         self.wipe_memory()
         self.spot = None
+        
+        self.skip_remove = False
+        self.skip_move = False
+        self.skip_update = False
 
     def register(self, card):
         if card:

@@ -63,14 +63,8 @@ class Cow(card_base.Card):
             if 'plant' in c.tags:
                 c.kill(self)
                 self.player.gain(5, self)
-                self.can_move = True
-    
-    def move(self):
-        s = self.spot.get_spot_at(self.direction)
-        if s:
-            if not s.card:
+                s = self.spot.get_spot_at(self.direction)
                 self.move_to(s)
-        self.can_move = False
                 
 class Wind_Gust(card_base.Card):
     sid = 4
@@ -132,18 +126,17 @@ class Vines(card_base.Card):
     type = 'play'
     weight = 0.5
     tags = ('garden', 'plant')
+    
+    def play(self):
+        self.skip_move = True
 
     def move(self):
         s = self.spot.get_spot_at('top')
         if s:
             if not s.card:
                 c = self.player_copy()
-                c.can_move = True
                 s.set_card(c, parent=self)
                 self.player.gain(1, self)
-                
-    def update(self):
-        self.can_move = True
                 
 class Fox(card_base.Card):
     sid = 9
@@ -201,14 +194,12 @@ class Big_Sand_Worm(card_base.Card):
     def select(self, card):
         self.direction = self.spot.get_direction(card.spot)
         self.move()
+        self.skip_move = True
         
     def move(self):
         c = self.spot.get_card_at(self.direction)
         if c:
             self.swap_with(c)
-            
-    def update(self):
-        self.can_move = True
             
 class Negative_Zone(card_base.Card):
     sid = 13

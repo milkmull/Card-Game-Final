@@ -199,17 +199,19 @@ class Game_Base:
         cards = sorted(self.grid.cards, key=lambda c: c.priority, reverse=True)
         
         for card in cards:
-            if card.spot:
+            if not card.skip_remove and card.spot:
                 card.remove()
+            card.skip_remove = False
             
         for card in cards:
-            if card.spot:
-                if card.can_move:
-                    card.move()
+            if not card.skip_move and card.spot:
+                card.move()
+            card.skip_move = False
             
         for card in cards:
-            if card.spot:
+            if not card.skip_update and card.spot:
                 card.update()
+            card.skip_update = False
                 
     def run_wait(self, wait, player, card=None):
         for c in list(self.wait.values()):
