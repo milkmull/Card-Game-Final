@@ -12,7 +12,7 @@ class Fish(card_base.Card):
     tags = ('water', 'animal')
 
     def update(self):
-        for c in self.spot.cards_from_vector((1, 0), steps=-1, da=90, check=lambda c: c.name == 'fish'):
+        for c in self.spot.cards_from_vector((1, 0), steps=-1, da=90, check=lambda c: c.has_name('fish')):
             if self.register(c):
                 self.player.gain(1, self, extra=c)
                 
@@ -51,17 +51,16 @@ class Cow(card_base.Card):
     tags = ('farm', 'animal')
     
     def play(self):
-        cards = [c for c in self.spot.get_card_group('x') if 'plant' in c.tags]
-        self.player.start_select(self, cards)
+        self.player.start_select(self, self.spot.get_card_group('x', check=lambda c: c.has_tag('plant')))
         
     def select(self, card):
         self.direction = self.spot.get_direction(card.spot)
     
     def remove(self):
-        c = self.spot.get_card_at(self.direction)
-        if c and 'plant' in c.tags:
+        c = self.spot.get_card_at(self.direction, check=lambda c: c.has_tag('plant'))
+        if c:
             c.kill(self)
-            self.player.gain(5, self)
+            self.player.gain(3, self)
             self.move_in(self.direction)
                 
 class Wind_Gust(card_base.Card):
@@ -85,8 +84,8 @@ class Dom(card_base.Card):
     tags = ('human',)
     
     def update(self):
-        for c in self.spot.get_card_group('corner'):
-            if self.register(c) and 'animal' in c.tags:
+        for c in self.spot.get_card_group('corner', check=lambda c: c.has_tag('animal')):
+            if self.register(c):
                 self.player.gain(3 if c.player is self.player else 1, self, extra=c)
             
 class Robber(card_base.Card):
@@ -101,7 +100,7 @@ class Robber(card_base.Card):
         
     def select(self, card):
         card.kill(self)
-        if 'item' in card.tags:
+        if card.has_tag('item'):
             self.player.gain(3, self)
         self.player.add_card('private', card.copy())
         
@@ -113,8 +112,8 @@ class Ghost(card_base.Card):
     tags = ('monster',)
     
     def play(self):
-        for c in self.spot.get_card_group('border'):
-            if self.register(c) and 'human' in c.tags and c.player is not self.player:
+        for c in self.spot.get_card_group('border', check=lambda c: c.has_tag('human')):
+            if self.register(c) and c.player is not self.player:
                 c.swap_player(self.player)
                 self.player.gain(1, self, extra=c)
 
@@ -129,8 +128,7 @@ class Vines(card_base.Card):
         self.skip_move = True
 
     def move(self):
-        s = self.spot.get_spot_at('top')
-        if s and self.copy_to(s):
+        if self.copy_to(self.spot.get_spot_at('top')):
             self.player.gain(1, self)
                 
 class Fox(card_base.Card):
@@ -165,11 +163,11 @@ class Dragon(card_base.Card):
     tags = ('sky', 'monster')
     
     def play(self):
-        self.player.start_select(self, self.spot.get_card_group('all'))
+        self.player.start_select(self, self.spot.get_global_card_group('all'))
         
     def select(self, card):
         card.kill(self)
-        if 'monster' in card.tags:
+        if card.has_tag('monster'):
             self.player.gain(3, self)
             
 class Big_Sand_Worm(card_base.Card):
@@ -214,10 +212,10 @@ class Gambling_Man(card_base.Card):
 
     def play(self):
         if self.spot.grid.any_open():
-            self.player.start_select(self, list(self.player.decks['private'].values()))
+            self.player.start_select(self, self.player.get_deck('private'))
             
     def select(self, card):
-        spots = list(self.spot.grid.get_open_spots().values())
+        spots = self.spot.get_global_card_group('open')
         if spots:
             spot = self.player.random_choice(spots, self)
             self.player.play_card('private', card.cid, spot)
@@ -236,7 +234,7 @@ class Parade(card_base.Card):
 
     def play(self):
         count = 1
-        for c in self.spot.cards_from_vector((1, 0), steps=-1, da=180, check=lambda c: 'human' in c.tags, stop_on_fail=True):
+        for c in self.spot.cards_from_vector((1, 0), steps=-1, da=180, check=lambda c: c.has_tag('human'), stop_on_fail=True):
             self.player.gain(count, self, extra=c)
             count *= 2
             
@@ -248,7 +246,7 @@ class Fishing_Pole(card_base.Card):
     tags = ('item',)
 
     def play(self):
-        self.player.start_select(self, self.spot.get_all_name('fish'))
+        self.player.start_select(self, self.spot.get_global_card_group('all', check=lambda c: c.has_name('fish')))
         
     def select(self, card):
         self.player.gain_ownership(card)
@@ -263,7 +261,7 @@ class Pelican(card_base.Card):
     
     def play(self):
         c = self.spot.get_card_at('bottom')
-        if c and c.name == 'fish':
+        if c and c.has_name('fish'):
             s = self.spot.get_spot_at('top')
             if not s or (s and not s.is_open):
                 c.kill(self)
@@ -273,7 +271,7 @@ class Pelican(card_base.Card):
     def move(self):
         if not self.move_in('down'):
             c = self.spot.get_card_at('bottom')
-            if c and c.name == 'fish':
+            if c and c.has_name('fish'):
                 if self.move_in('up'):
                     c.move_in('up')
                 s = self.spot.get_spot_at('top')
@@ -301,7 +299,7 @@ class Zombie(card_base.Card):
     tags = ('monster',)
     
     def update(self):
-        for c in self.spot.cards_from_vector((1, 0), da=90, check=lambda c: 'human' in c.tags):
+        for c in self.spot.cards_from_vector((1, 0), da=90, check=lambda c: c.has_tag('human')):
             if self.register(c):
                 self.game.transform(c, self.game.get_card(self.name))
                 self.player.gain(1, self, extra=c)
@@ -328,7 +326,7 @@ class Ninja(card_base.Card):
     tags = ('human',)
     
     def play(self):
-        self.player.start_select(self, self.spot.get_card_group('all'))
+        self.player.start_select(self, self.spot.get_global_card_group('all'))
         
     def select(self, card):
         self.swap_with(card)        

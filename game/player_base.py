@@ -106,6 +106,9 @@ class Player_Base:
     def clear_deck(self, deck):
         for cid in list(self.decks[deck]):
             self.pop_card(deck, cid)
+            
+    def get_deck(self, deck):
+        return list(self.decks[deck].values())
         
     def draw_cards(self, deck, num):
         cards = self.game.draw_cards(num=num)

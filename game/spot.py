@@ -63,6 +63,13 @@ class Spot:
         
         return (y == 0 or y + 1 == h) and (x == 0 or x + 1 == w)
         
+    @property
+    def is_edge(self):
+        x, y = self.pos
+        w, h = self.grid.size
+        
+        return (y == 0 or y + 1 == h or x == 0 or x + 1 == w)
+        
 # setting card stuff
 
     def set_card(self, card, parent=None):
@@ -91,6 +98,9 @@ class Spot:
 # getting group stuff
         
     def get_spot_at(self, dir):
+        if dir is None:
+            return
+            
         x, y = self.pos
         
         match dir:
@@ -110,17 +120,16 @@ class Spot:
                 return self.grid.grid.get(y + 1, {}).get(x - 1)
             case 'bottomright':
                 return self.grid.grid.get(y + 1, {}).get(x + 1)
+                
+        raise Exception(f'Invalid direction: {dir}')
         
-    def get_card_at(self, dir):
+    def get_card_at(self, dir, check=lambda c: True):
         spot = self.get_spot_at(dir)
-        if spot:
+        if spot and spot.card and check(spot.card):
             return spot.card
 
     def get_spot_group(self, group):
         match group:
-            case 'all':
-                return [spot for spot in self.grid.spots if spot is not self]
-            
             case 'border':
                 return [spot for dir in Spot.BORDER_STRINGS if (spot := self.get_spot_at(dir))]
             case 'corner':
@@ -138,17 +147,19 @@ class Spot:
             case 'y':
                 return [spot for dir in Spot.Y_STRINGS if (spot := self.get_spot_at(dir))]
                 
-            case 'gcorner':
-                w, h = self.grid.size
-                return [
-                    self.grid.grid[0][0], 
-                    self.grid.grid[0][w - 1],
-                    self.grid.grid[h - 1][0],
-                    self.grid.grid[h - 1][w - 1]
-                ]
+        raise Exception(f'Invalid group: {group}')
                 
     def get_card_group(self, group, check=lambda c: True):
-        return [spot.card for spot in self.get_spot_group(group) if spot.card is not None and check(spot.card)]
+        return [spot.card for spot in self.get_spot_group(group) if spot.card and check(spot.card)]
+        
+    def get_global_spot_group(self, group, include_self=False):
+        spots = self.grid.get_spot_group(group)
+        if not include_self and self in spots:
+            spots.remove(self)
+        return spots
+        
+    def get_global_card_group(self, group, include_self=False, check=lambda c: True):
+        return [spot.card for spot in self.get_global_spot_group(group, include_self=include_self) if spot.card and check(spot.card)]
                 
     def get_direction(self, spot):
         sx, sy = self.pos
@@ -175,62 +186,6 @@ class Spot:
                 return 'bottomleft'
             elif oy == sy - 1:
                 return 'topleft'
-                
-    def get_chunk(self, check=lambda c: True, include_self=False, cards=None):
-        if cards is None:
-            cards = []
-        
-        if include_self:
-            cards.append(self.card)
-            
-        for c in self.get_card_group('border'):
-            if c not in cards:
-                if check(c):
-                    cards += c.spot.get_chunk(check=check, include_self=True, cards=cards)
-            
-        return cards
-        
-    def get_direction_chunk(self, dir, check=lambda c: True, include_self=False):
-        cards = []
-        
-        if include_self:
-            cards.append(self.card)
-            
-        next_card = self.get_card_at(dir)
-        if next_card:
-            if check(next_card):
-                cards += next_card.spot.get_direction_chunk(dir, check=check, include_self=True)
-            
-        return cards
-            
-    def get_all_name(self, name=None):
-        if name is None:
-            name = self.card.name
-            
-        cards = []
-        for spot in self.grid.spots:
-            if spot is not self:
-                if spot.card:
-                    if spot.card.name == name:
-                        cards.append(spot.card)
-                        
-        return cards
-                        
-    def get_all_tags(self, tags=None):
-        if tags is None:
-            tags = self.card.tags
-            
-        elif isinstance(tags, str):
-            tags = [tags]
-
-        cards = []
-        for spot in self.grid.spots:
-            if spot is not self:
-                if spot.card:
-                    if any({tag in tags for tag in spot.card.tags}):
-                        cards.append(spot.card)
-                        
-        return cards  
     
     def cards_from_vector(self, dir, steps=1, da=360, check=lambda c: True, stop_on_empty=False, stop_on_fail=False, reverse=False):    
         cards = []
@@ -283,21 +238,3 @@ class Spot:
             cards.reverse()
 
         return cards
-            
-            
-        
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-            

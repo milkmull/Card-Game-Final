@@ -64,6 +64,12 @@ class Card:
             multiplier *= c.multiply(self)
         return multiplier
         
+    def has_tag(self, tag):
+        return tag in self.tags
+        
+    def has_name(self, name):
+        return self.name == name
+        
 # copy stuff
 
     def copy(self):
@@ -103,6 +109,7 @@ class Card:
         self.end_wait()
         self.priority = 0
         self.wipe_memory()
+        self.spot = None
 
         self.skip_remove = False
         self.skip_move = False
@@ -122,22 +129,18 @@ class Card:
         self.set_priority(self.game.grid.get_priority())
         
     def spawn_to(self, spot, parent=None):
-        r = spot.is_open
-        
+        r = spot and spot.is_open
         if r:
             spot.set_card(self, parent=parent)
             self.spawn()
-            
         return r
             
     def copy_to(self, spot):
-        r = spot.is_open
-        
+        r = spot and spot.is_open
         if r:
             c = self.player_copy()
             spot.set_card(c, parent=self)
             c.spawn()
-            
         return r
 
 # overwrite stuff

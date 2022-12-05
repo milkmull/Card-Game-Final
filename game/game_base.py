@@ -182,10 +182,11 @@ class Game_Base:
         self.wait.pop(card.cid, None)
         
     def transform(self, card, new_card):
+        spot = card.spot
         card.spot.clear_card()
         card.total_clear()
         new_card.setup(card.player)
-        new_card.spawn_to(card.spot)
+        new_card.spawn_to(spot)
         return new_card
 
 # update info stuff
