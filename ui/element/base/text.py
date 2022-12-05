@@ -559,7 +559,6 @@ class Text:
             for word in line:
                 for character in word:
                     if self.can_render(character.character):
-                        print(default_style)
                         self.font.render_to(
                             self.text_surf, 
                             character.rect, 
