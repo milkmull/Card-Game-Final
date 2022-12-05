@@ -10,7 +10,6 @@ from ui.element.elements import Textbox, Image, Button
 from ui.icons.icons import icons
 
 def camera(scene):
-    body = scene.body
     elements = []
     
     image = scene.camera.get_frame()
@@ -20,12 +19,12 @@ def camera(scene):
         outline_color=(255, 255, 255),
         outline_width=3,
     )
-    current_frame.rect.center = (body.centerx, body.centery - 20)
+    current_frame.rect.center = (scene.rect.centerx, scene.rect.centery - 20)
     
     def update_frame():
         frame = scene.camera.get_frame()
         if frame:
-            current_frame.set_image(frame, overwrite=False)
+            current_frame.set_image(frame)
     
     current_frame.add_event(
         func=update_frame
@@ -45,7 +44,7 @@ def camera(scene):
         border_radius=20,
         hover_color=(255, 255, 255)
     )
-    camera_button.rect.midbottom = (body.centerx, body.bottom - 10)
+    camera_button.rect.midbottom = (scene.rect.centerx, scene.rect.bottom - 10)
     elements.append(camera_button)
     
     camera_button.add_animation([{
@@ -54,7 +53,8 @@ def camera(scene):
     }], tag='hover')
     
     flash = Image(
-        image=pg.Surface(body.size).convert_alpha(),
+        image=pg.Surface(scene.rect.size).convert_alpha(),
+        size=scene.rect.size
     )
     flash.set_enabled(False)
     flash.fill((255, 255, 255))
@@ -70,7 +70,7 @@ def camera(scene):
         centery_aligned=True,
         tag='exit'
     )
-    exit_button.rect.topright = (body.right - 20, 20)
+    exit_button.rect.topright = (scene.rect.right - 20, 20)
     elements.append(exit_button)
 
     x = current_frame.rect.right - 85
