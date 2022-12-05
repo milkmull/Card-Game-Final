@@ -130,9 +130,7 @@ class Vines(card_base.Card):
 
     def move(self):
         s = self.spot.get_spot_at('top')
-        if s and s.is_open:
-            c = self.player_copy()
-            s.set_card(c, parent=self)
+        if s and self.copy_to(s):
             self.player.gain(1, self)
                 
 class Fox(card_base.Card):
@@ -201,7 +199,7 @@ class Negative_Zone(card_base.Card):
     weight = 0.125
     tags = ('multiplier',)
     
-    def play(self):
+    def spawn(self):
         self.game.add_multiplier(self)
         
     def multiply(self, card):
@@ -211,7 +209,7 @@ class Gambling_Man(card_base.Card):
     sid = 14
     name = 'gambling man'
     type = 'play'
-    weight = 1
+    weight = 0.15
     tags = ('city', 'human')
 
     def play(self):
@@ -342,9 +340,9 @@ class Mystery_Seed(card_base.Card):
     weight = 0.1
     tags = ('garden', 'plant')
     
-    def play(self):
+    def spawn(self):
         self.start_wait('nt')
-        
+
     def run_wait(self, player, card):
         if player == self.player:
-            self.game.transform(self, self.game.draw_card_from_tag('plant'))
+            self.game.transform(self, self.game.draw_card_from_tag('plant', self))

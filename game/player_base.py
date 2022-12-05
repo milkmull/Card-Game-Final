@@ -124,8 +124,7 @@ class Player_Base:
         if not card:
             return
         
-        card.set_player(self)
-        card.set_priority(self.game.grid.get_priority())
+        card.setup(self)
         spot.set_card(card)
         
         self.add_log({
@@ -137,6 +136,7 @@ class Player_Base:
         })
         
         card.play()
+        card.spawn()
         self.played = True
 
     def gain_ownership(self, card):
@@ -204,8 +204,7 @@ class Player_Base:
         
         self.add_log({
             't': 'rand',
-            'len': len(choices),
-            'id': caller.cid
+            'len': len(choices)
         })
         
         self.add_log({

@@ -74,7 +74,7 @@ class Card:
         
     def player_copy(self):
         c = self.copy()
-        c.player = self.player
+        c.setup(self.player)
         return c
         
     def deepcopy(self, game):
@@ -97,17 +97,13 @@ class Card:
         return c
         
 # setup stuff
-
-    def clear(self):
-        self.spot = None
         
     def total_clear(self):
         self.end_multiplier()
         self.end_wait()
         self.priority = 0
         self.wipe_memory()
-        self.spot = None
-        
+
         self.skip_remove = False
         self.skip_move = False
         self.skip_update = False
@@ -120,6 +116,29 @@ class Card:
                 
     def wipe_memory(self):
         self.memory.clear()
+        
+    def setup(self, player):
+        self.set_player(player)
+        self.set_priority(self.game.grid.get_priority())
+        
+    def spawn_to(self, spot, parent=None):
+        r = spot.is_open
+        
+        if r:
+            spot.set_card(self, parent=parent)
+            self.spawn()
+            
+        return r
+            
+    def copy_to(self, spot):
+        r = spot.is_open
+        
+        if r:
+            c = self.player_copy()
+            spot.set_card(c, parent=self)
+            c.spawn()
+            
+        return r
 
 # overwrite stuff
 
@@ -130,6 +149,9 @@ class Card:
         pass
 
     def play(self):
+        pass
+        
+    def spawn(self):
         pass
         
     def remove(self):

@@ -79,7 +79,6 @@ class Spot:
         
     def clear_card(self, kill=False):
         card = self.card
-        card.clear()
         self.card = None
 
         self.grid.game.add_log({

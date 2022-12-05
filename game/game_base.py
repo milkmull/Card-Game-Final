@@ -122,11 +122,24 @@ class Game_Base:
         self.cid += 1
         return cid
         
-    def draw_card_from_tag(self, tag):
+    def draw_card_from_tag(self, tag, caller):
         deck = {name: cls for name, cls in self.cards['play'].items() if tag in cls.tags}
         weights = [cls.weight for cls in deck.values()]
-        cards = random.choices(list(deck.keys()), weights=weights, k=1)
-        return self.get_card(cards[0])
+        name = random.choices(list(deck.keys()), weights=weights, k=1)[0]
+        
+        self.add_log({
+            'u': caller.player.pid,
+            't': 'rand',
+            'len': len(deck)
+        })
+        self.add_log({
+            'u': caller.player.pid,
+            't': 'randres',
+            'res': deck[name].sid,
+            'w': deck[name].weight
+        })
+        
+        return self.get_card(name)
      
     def draw_cards(self, type='play', num=1):
         deck = self.cards[type]
@@ -169,14 +182,10 @@ class Game_Base:
         self.wait.pop(card.cid, None)
         
     def transform(self, card, new_card):
-        new_card.set_player(card.player)
-        new_card.set_priority(card.priority)
-        
-        spot = card.spot
-        spot.clear_card()
+        card.spot.clear_card()
         card.total_clear()
-        spot.set_card(new_card)
-        
+        new_card.setup(card.player)
+        new_card.spawn_to(card.spot)
         return new_card
 
 # update info stuff

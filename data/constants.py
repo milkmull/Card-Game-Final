@@ -20,8 +20,8 @@ CUSTOMSHEET_FILE = 'data/img/customsheet.png'
 
 BASE_NAMES = (
     'big sand worm', 'cactus', 'cow', 'dom', 'dragon', 'fish', 'fishing pole', 'fox', 'future orb', 
-    'gambling man', 'ghost', 'michael', 'negative zone', 'ninja', 'parade', 'pelican', 'robber', 'sunflower',
-    'treasure chest', 'vines', 'wind gust', 'zombie'
+    'gambling man', 'ghost', 'michael', 'mystery seed', 'negative zone', 'ninja', 'parade', 'pelican', 'robber',
+    'sunflower', 'treasure chest', 'vines', 'wind gust', 'zombie'
     
 )
 

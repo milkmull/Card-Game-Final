@@ -166,7 +166,8 @@ class Auto_Player(Player):
             #    if self.decks[deck].get(cid) and (spot := spots.get((x, y))):
             #        print(self.decks[deck].get(cid), score)
 
-            for (pid, deck, cid, x, y), score in choices:
+            for node, score in choices:
+                pid, deck, cid, x, y = node.data
                 deck = decks[deck]
                 if self.decks[deck].get(cid) and (spot := spots.get((x, y))):
                     return (deck, cid, spot)
@@ -175,7 +176,8 @@ class Auto_Player(Player):
         
             cards = {cid: c for cid, c in self.decks['selection'].items()}
 
-            for (pid, cid), score in choices:
+            for node, score in choices:
+                pid, cid = node.data
                 if cards.get(cid):
                     return cid
 

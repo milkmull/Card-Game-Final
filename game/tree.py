@@ -1,4 +1,23 @@
 
+class Node:
+    def __init__(self, type, data):
+        self.type = type
+        self.data = data
+        
+    def __eq__(self, other):
+        if isinstance(other, Node):
+            return self.type == other.type and self.data == other.data
+        return False
+        
+    def __hash__(self):
+        return hash(self.data)
+        
+    def __str__(self):
+        return str(self.data)
+        
+    def __repr__(self):
+        return f'{self.type}: {str(self.data)}'
+
 def analyze(scores, pid):
     player_score = scores[pid]
     score = sum([player_score - score for score in scores]) / (len(scores) - 1)
@@ -38,30 +57,30 @@ class Tree:
             json.dump(self.remap_to_string(), f, indent=4)
         
     def log_to_key(self, log):
-        match log['t']:
+        match (type := log['t']):
             
             case 'p':
                 pid = log['u']
                 deck = log['d']
                 cid = log['c']
                 x, y = log['pos']
-                return (pid, deck, cid, x, y)
+                return Node(type, (pid, deck, cid, x, y))
             
             case 's':
                 pid = log['u']
                 cid = log['c']
-                return (pid, cid)
+                return Node(type, (pid, cid))
                 
             case 'rand':
                 pid = log['u']
                 len = log['len']
-                id = log['id']
-                return (pid, len, id)
+                return Node(type, (pid, len))
                 
             case 'randres':
                 pid = log['u']
                 res = log['res']
-                return (pid, res)
+                w = log.get('w', 1)
+                return Node(type, (pid, res, w))
         
     def trim(self, log):
         key = self.log_to_key(log)
@@ -70,7 +89,7 @@ class Tree:
             new_tree = {}
         self.tree = new_tree
 
-    def simulate(self, num=20, max_deapth=4):
+    def simulate(self, num=100, max_deapth=2):
         for _ in range(num):
         
             g = self.game.copy()
@@ -89,7 +108,7 @@ class Tree:
             )
             
             self.sims += 1
-                
+            
     def update_tree(self, scores, logs, branch=None):
         if not logs:
             return scores
@@ -99,19 +118,18 @@ class Tree:
             
         log = logs.pop(0)
         key = self.log_to_key(log)
-
+        
+        if isinstance(branch, list):
+            branch = {}
+            
         if key not in branch:
             branch[key] = self.update_tree(scores, logs)
-            
         else:
-            if isinstance(branch[key], list) and logs:
-                branch[key] = {}
-                
             self.update_tree(scores, logs, branch=branch[key])
             
         return branch
         
-    def get_scores(self, pid, branch=None, deapth=0, data=None):
+    def get_scores(self, pid, branch=None, deapth=0, node=None):
         if branch is None:
             branch = self.tree
 
@@ -120,26 +138,30 @@ class Tree:
         scores = {}
         for key, subbranch in branch.items():
             
-            decider = key[0]
+            decider = key.data[0]
 
             if isinstance(subbranch, list):
                 scores[key] = analyze(subbranch, pid)
             else:
-                scores[key] = self.get_scores(pid, branch=subbranch, deapth=deapth + 1, data=key)
+                scores[key] = self.get_scores(pid, branch=subbranch, deapth=deapth + 1, node=key)
 
         if deapth == 0:
-            self.save_tree()
             return scores
         if not scores:
             return 0
             
-        if data is not None:
-            if len(data) == 3:
-                return sum(scores.values()) / data[1]
+        if node and node.type == 'rand':
+            return sum(scores.values()) / node.data[1]
 
+        score = 0
         if decider == pid:
-            return max(scores.values())
-        return min(scores.values())
+            score = max(scores.values())
+        score = min(scores.values())
+        
+        if node.type == 'randres':
+            score *= node.data[2]
+            
+        return score
         
     def print_tree(self, branch=None, deapth=0, indent=1):
         if branch is None:
