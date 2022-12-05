@@ -566,17 +566,19 @@ def builder(scene):
     def set_tab(tab):
         for t, section in sections.items():
             b = buttons[t]
-            if t != tab:
-                section.turn_off()
-                b.unfreeze_animation('hover')
-                if not b.hit:
-                    b.run_animations('hover', reverse=True)
-            else:
+
+            section.turn_off()
+            b.unfreeze_animation('hover')
+            if not b.hit:
+                b.run_animations('hover', reverse=True)
+                
+            if t == tab:
                 section.turn_on()
                 section.rect.center = (
                     (body.right + scene.card.rect.right) // 2,
                     body.centery
                 )
+                b.run_animations('hover')
                 b.freeze_animation('hover')
     
     x = save_section.rect.left
@@ -584,21 +586,15 @@ def builder(scene):
     for tab, section in sections.items():
         b = Button.Text_Button(
             text=tab.title(),
+            center_aligned=True,
             pad=2,
             fill_color=(155, 88, 108),
             outline_color=(0, 0, 0),
             outline_width=2,
             func=set_tab,
             args=[tab],
-            hover_color=(253, 180, 100)
-        )
-        
-        b.add_animation(
-            [{
-                'attr': 'text_color',
-                'end': (0, 0, 0)
-            }],
-            tag='hover'
+            hover_color=(253, 180, 100),
+            hover_text_color=(0, 0, 0)
         )
         
         buttons[tab] = b
@@ -607,8 +603,6 @@ def builder(scene):
         y += b.padded_rect.height + 15
         
     if scene.card.id != 0:
-        
-        buttons['type'].run_animations('hover')
         set_tab('type')
         
         b = Button.Text_Button(
@@ -630,8 +624,6 @@ def builder(scene):
         elements.append(b)
         
     else:
-        
-        buttons['image'].run_animations('hover')
         set_tab('image')
     
     b = Button.Text_Button(

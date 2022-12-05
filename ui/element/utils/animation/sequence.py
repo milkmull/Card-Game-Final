@@ -55,6 +55,7 @@ class Sequence:
     def start(self, reverse=False):
         f = self.finished
         self.dir = 1 if not reverse else -1
+        self.t = 1 if reverse else 0
         if f and self.index == 0:
             self.start_next()
             

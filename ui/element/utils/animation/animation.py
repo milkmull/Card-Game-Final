@@ -66,7 +66,7 @@ class Animation:
     def update(self, t):
         if self.start_value is None:
             self.start()
-            
+
         cv = []
         for s, e in zip(self.start_value, self.end_value):
             v = s + ((e - s) * self.equation(t))
@@ -82,7 +82,7 @@ class Animation:
             else:
                 value = tuple(value)
             setattr(self.element, self.attr, value)
-            
+ 
     def end(self, reverse):
         self.set_value(self.end_value if not reverse else self.start_value) 
         if self.auto_start and reverse:
