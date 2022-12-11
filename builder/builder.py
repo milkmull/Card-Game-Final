@@ -20,8 +20,8 @@ from ui.element.base.style import Style
 from ui.element.elements import Textbox, Button, Check_Box, Dropdown, Input_Dropdown, Flipper
 from ui.icons.icons import icons
 
-from .elements.rgb_slider import RGB_Slider
-from .elements.audio_manager import Audio_Manager
+from .element.rgb_slider import RGB_Slider
+from .element.audio_manager import Audio_Manager
 
 def get_section(elements, label, scene):
     r = elements[0].rect.unionall([e.padded_rect for e in elements]).inflate(20, 30)
@@ -205,7 +205,7 @@ def builder(scene):
             tags.append(tag)
             
             b = Button.Text_Button(
-                text=icons['X'],
+                text=icons['cross'],
                 text_color=(255, 0, 0),
                 **icon_kwargs
             )
@@ -291,6 +291,7 @@ def builder(scene):
                     if not tag.text:
                         tag.set_text(text)
                         tag.first_born.turn_on()
+                        tag_select.close()
                         break
                     
         add_button.add_event(
@@ -379,7 +380,7 @@ def builder(scene):
     
     keep_aspect = scene.card._pic.keep_aspect
     aspect_icon = Textbox(
-        text=icons['check'] if keep_aspect else icons['X'],
+        text=icons['check'] if keep_aspect else icons['cross'],
         text_color=(0, 255, 0) if keep_aspect else (255, 0, 0),
         **icon_kwargs
     )
@@ -396,7 +397,7 @@ def builder(scene):
             aspect_icon.set_text(icons['check'])
         else:
             aspect_icon.text_color = (255, 0, 0)
-            aspect_icon.set_text(icons['X'])
+            aspect_icon.set_text(icons['cross'])
             
     aspect_button.add_event(tag='left_click', func=set_keep_aspect)
     
@@ -411,7 +412,7 @@ def builder(scene):
     
     outline = bool(scene.card._pic.outline_color)
     outline_icon = Textbox(
-        text=icons['check'] if outline else icons['X'],
+        text=icons['check'] if outline else icons['cross'],
         text_color=(0, 255, 0) if outline else (255, 0, 0),
         **icon_kwargs
     )
@@ -428,7 +429,7 @@ def builder(scene):
             outline_icon.set_text(icons['check'])
         else:
             outline_icon.text_color = (255, 0, 0)
-            outline_icon.set_text(icons['X'])
+            outline_icon.set_text(icons['cross'])
             
     outline_button.add_event(tag='left_click', func=set_outline)
     

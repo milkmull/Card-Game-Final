@@ -146,7 +146,7 @@ class Sandbox(Client_Base):
         
         spot = self.spot_buttons[log['pos']]
         spot.text_color = (255, 0, 0)
-        spot.set_text(icons['X'])
+        spot.set_text(icons['cross'])
         
     def clear_card(self, log):
         super().clear_card(log)
@@ -224,7 +224,7 @@ class Sandbox(Client_Base):
 
         if b.text == icons['plus']:
             run_add_card(self, spot=spot, deck=deck)
-        elif b.text == icons['X']:
+        elif b.text == icons['cross']:
             if spot.card.visible:
                 self.manual_delete_card(spot)
                 

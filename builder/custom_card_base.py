@@ -16,7 +16,7 @@ from ui.element.base.image_element import Image_Element
 from ui.element.base.style import Style
 from ui.element.elements import Textbox, Image, Button, Input
 
-from .elements.fitted_image import Fitted_Image
+from .element.fitted_image import Fitted_Image
 
 CARD_SIZE = CONSTANTS['card_size']
 CARD_WIDTH, CARD_HEIGHT = CARD_SIZE

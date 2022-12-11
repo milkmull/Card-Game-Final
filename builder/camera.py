@@ -62,7 +62,7 @@ def camera(scene):
     elements.append(flash)
     
     exit_button = Button.Text_Button(
-        text=icons['X'],
+        text=icons['cross'],
         font_name='icons.ttf',
         text_color=(255, 0, 0),
         pad=5,

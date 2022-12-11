@@ -15,11 +15,11 @@ icons = {
     'switch': u'\ue9b6',
     'warning': u'\uea07',
     'blocked': u'\uea0e',
-    'X': u'\uea0f',
+    'cross': u'\uea0f',
     'check': u'\uea10',
-    'play': u'\uea1c',
-    'pause': u'\uea1d',
-    'stop': u'\uea20',
+    'play3': u'\uea1c',
+    'pause2': u'\uea1d',
+    'stop2': u'\uea1e',
     'circle-up': u'\uea41',
     'circle-right': u'\uea42',
     'circle-down': u'\uea43',
@@ -35,5 +35,6 @@ icons = {
     'file-text': u'\ue922',
     'bubble': u'\ue96b',
     'bubble2': u'\ue96e',
-    'spinner3': u'\ue97c'
+    'spinner3': u'\ue97c',
+    'eyedropper': u'\ue90a'
 }

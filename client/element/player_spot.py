@@ -17,7 +17,7 @@ class Player_Spot(Textbox):
         self._display_full = 0
         
         self.turn_indicator = Textbox(
-            text=icons['play'],
+            text=icons['play3'],
             font_name='icons.ttf',
             text_outline_color=(0, 0, 0),
             text_outline_width=2

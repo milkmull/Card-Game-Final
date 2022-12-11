@@ -61,7 +61,7 @@ class Text:
     DEFAULT_FONT = pg.freetype.get_default_font()
     FONTS = {
         DEFAULT_FONT: pg.freetype.Font(None),
-        'icons.ttf': pg.freetype.Font('ui/icons/icons.ttf')
+        'icons.ttf': pg.freetype.Font('ui/icons/icomoon.ttf')
     }
     for font in FONTS.values():
         font.pad = True

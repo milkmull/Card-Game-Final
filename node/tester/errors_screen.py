@@ -26,7 +26,7 @@ def full_error(scene, err):
     window.join_elements([tb], border=5)
     
     exit_button = Button.Text_Button(
-        text=icons['X'],
+        text=icons['cross'],
         font_name='icons.ttf',
         text_color=(255, 0, 0),
         tag='exit'

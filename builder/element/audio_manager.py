@@ -59,7 +59,7 @@ def select_device(scene, mic):
         scene.refresh()
         
     exit_button = Button.Text_Button(
-        text=icons['X'],
+        text=icons['cross'],
         font_name='icons.ttf',
         centerx_aligned=True,
         centery_aligned=True,
@@ -159,7 +159,7 @@ def audio_manager(manager):
     x += record_button.padded_rect.width + 10
     
     play_button = Button.Text_Button(
-        text=icons['play'],
+        text=icons['play3'],
         font_name='icons.ttf',
         text_color=(0, 255, 0),
         func=manager.play_stop,
@@ -199,7 +199,7 @@ def audio_manager(manager):
     x -= file_button.padded_rect.width + 5
 
     clear_button = Button.Text_Button(
-        text=icons['X'],
+        text=icons['cross'],
         font_name='icons.ttf',
         text_color=(255, 0, 0),
         func=manager.clear_sound,
@@ -267,7 +267,7 @@ class Audio_Manager(Position):
         self.mic.start()
         
         self.record_button.text_color = (0, 0, 255)
-        self.record_button.set_text(icons['stop'])
+        self.record_button.set_text(icons['stop2'])
         self.record_button.description = 'Stop'
 
     def stop_record(self):
@@ -334,7 +334,7 @@ class Audio_Manager(Position):
             self.sound.play()
             
             self.play_button.text_color = (0, 0, 255)
-            self.play_button.set_text(icons['stop'])
+            self.play_button.set_text(icons['stop2'])
             self.play_button.description = 'Stop'
         
     def stop_sound(self):
@@ -344,7 +344,7 @@ class Audio_Manager(Position):
             self.bar.set_state(0)
             
             self.play_button.text_color = (0, 255, 0)
-            self.play_button.set_text(icons['play'])
+            self.play_button.set_text(icons['play3'])
             self.play_button.description = 'Play'
         
     def clear_sound(self):

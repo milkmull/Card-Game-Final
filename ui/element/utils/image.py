@@ -22,7 +22,7 @@ def get_arrow(
     w, h = size
     
     image = Text.render(
-        icons['play'],
+        icons['play3'],
         font_name='icons.ttf',
         fgcolor=color,
         bgcolor=background_color,
