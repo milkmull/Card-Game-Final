@@ -225,11 +225,14 @@ class Input(Text_Element):
         return i
         
     def set_text(self, text):
+        added = False
         check = self.text_check(text) and self.can_render(text)
         length = self.max_length is None or len(text) <= self.max_length
         lines = self.max_lines is None or len(text.splitlines()) <= self.max_lines
         if not text or (check and length and lines):
             super().set_text(text)
+            added = True
+        return added
             
     def clear(self):
         self.set_text('')
@@ -238,8 +241,8 @@ class Input(Text_Element):
     def add_text(self, text):
         if self.selected:
             self.remove_selected()
-        self.set_text(self.text[:self.index] + text + self.text[self.index:])
-        self.set_index(self.index + len(text))
+        if self.set_text(self.text[:self.index] + text + self.text[self.index:]):
+            self.set_index(self.index + len(text))
         
     def backspace(self):
         if self.selected:
@@ -367,8 +370,6 @@ class Input(Text_Element):
                     
             if self.selecting:
                 self.set_index(self.get_closest_index(pg.mouse.get_pos()))
-
-        super().events(events)
         
     def update(self):
         super().update()

@@ -256,6 +256,9 @@ def builder(scene):
             y_pad=2,
             fill_color=(255, 255, 255),
             text_color=(0, 0, 0),
+            button_kwargs={
+                'hover_color': (100, 100, 100)
+            },
             window_kwargs={
                 'fill_color': scene.fill_color,
                 'outline_color': (255, 255, 255),
