@@ -30,3 +30,6 @@ def is_light(c):
     
 def is_dark(c):
     return not is_light(c)
+    
+def color_shade(c):
+    return (0, 0, 0) if not is_light(c) else (255, 255, 255)

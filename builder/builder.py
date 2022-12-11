@@ -21,6 +21,7 @@ from ui.element.elements import Textbox, Button, Check_Box, Dropdown, Input_Drop
 from ui.icons.icons import icons
 
 from .element.rgb_slider import RGB_Slider
+from .element.color_picker import Color_Picker
 from .element.audio_manager import Audio_Manager
 
 def get_section(elements, label, scene):
@@ -466,13 +467,37 @@ def builder(scene):
         color_elements.append(rgb_slider)
 
         y += rgb_slider.rect.height + 20
+        
+    color_picker = Color_Picker()
+    color_picker.rect.topleft = color_elements[0].rect.topright
+    color_picker.rect.top -= 5
+    color_picker.rect.left += 10
+    color_elements.append(color_picker)
 
     color_section = get_section(color_elements, 'Color:', scene)
+    color_section.remove_child(color_picker)
+    color_picker.set_parent(color_section, current_offset=True)
     elements.append(color_section)
+    elements.append(color_picker)
+    
+    def set_color():
+        c = color_picker.last_color
+        print(c)
+        r, g, b = c[:3]
+        rs, gs, bs = color_elements[:3]
+        rs.set_state(r)
+        gs.set_state(g)
+        bs.set_state(b)
+        scene.card.set_color([r, g, b])
+        
+    color_picker.add_event(
+        tag='set_color',
+        func=set_color
+    )
 
     color_section.add_event(
         tag='update',
-        func=lambda: scene.card.set_color([e.get_state() for e in color_elements])
+        func=lambda: scene.card.set_color([e.get_state() for e in color_elements[:3]])
     )
  
 # audio section

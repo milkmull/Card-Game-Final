@@ -515,7 +515,7 @@ class Position(Base_Element):
         self.child_events(events)
 
     def child_update(self):
-        for c in self.children:
+        for c in sorted(self.children, key=lambda c: c.layer):
             if c.refresh:
                 c.update()
    

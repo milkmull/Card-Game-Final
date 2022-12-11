@@ -1,69 +1,62 @@
 import pygame as pg
 
-from ui.element.standard.slider import Slider
-from ui.element.standard.textbox import Textbox
+from ui.element.elements import Textbox
+from ui.icons.icons import icons
 
-class RGB_Slider(Slider):
-    CHANNELS = ('r', 'g', 'b')
-    
-    def __init__(
-        self,
-        channel,
-        **kwargs
-    ):
+class Color_Picker(Textbox):
+    def __init__(self):
         super().__init__(
-            range=range(255),
-            handel_kwargs={
-                'outline_color': (255, 255, 255)
-            },
-            **kwargs
-        )
+            font_name='icons.ttf',
+            text=icons['eyedropper'],
+            center_aligned=True,
+            text_outline_color=(0, 0, 0),
+            text_outline_width=1,
+            layer=10
+        ) 
+
+        self.home = None
+        self.last_color = (0, 0, 0)
         
-        self.channel = RGB_Slider.CHANNELS.index(channel)
+    @property
+    def is_held(self):
+        return self.home is not None
         
-        surf = pg.Surface((255, 1)).convert()
-        color = [0, 0, 0]
-        for x in self.range:
-            color[self.channel] = x
-            surf.set_at((x, 0), color)
-        if self.dir:
-            surf = pg.transform.rotate(surf, -90)
-        self.image = pg.transform.scale(surf, self.rect.size)
+    @property
+    def display_rect(self):
+        mx, my = pg.mouse.get_pos()
+        r = pg.Rect(0, 0, 10, 10)
+        r.center = (mx - 5, my - 20)
+        return r
+  
+    def left_click(self):
+        super().left_click()
+        self.home = self.pos
         
-        color = self.get_color()
-        self.textbox = Textbox(pad=1)
-        self.handel.add_child(self.textbox, centerx_anchor='centerx', bottom_anchor='top', bottom_offset=-5)
-        
-        self.textbox.add_event(
-            tag='update',
-            func=self.update_textbox
-        )
- 
-    def flip(self):
-        super().flip()
-        if not self.dir:
-            self.image = pg.transform.flip(self.image, True, False) 
-        else:
-            self.image = pg.transform.flip(self.image, False, True)
+    def click_up(self, button):
+        if self.is_held:
+            self.pos = self.home
+            self.home = None
+            self.run_events('set_color')
             
-    def get_color(self):
-        color = [0, 0, 0]
-        color[self.channel] = self.get_state()
-        return color
-        
-    def update_textbox(self):
-        p = pg.mouse.get_pos()
-        self.textbox.set_visible(self.held or self.handel.rect.collidepoint(p))
-        if self.textbox.visible:
-            color = self.get_color()
-            self.textbox.text_color = color
-            self.textbox.fill_color = Textbox.color_text(color)
-            self.textbox.set_text(str(self.get_state()))
+    def events(self, events):
+        if self.is_held:
+            mx, my = pg.mouse.get_pos()
+            self.rect.bottomleft = (mx - 2, my + 3)
+        super().events(events)
         
     def update(self):
-        super().update()
-        self.handel.fill_color = self.get_color()
-
+        self.set_visible(self.parent.visible)
+        if not self.is_held:
+            super().update()
+            
     def draw(self, surf):
-        surf.blit(self.image, self.rect)
+        if self.is_held:
+            r = self.display_rect
+            c = pg.display.get_surface().get_at(pg.mouse.get_pos())
+            pg.draw.rect(surf, self.color_text(c), r.inflate(4, 4))
+            pg.draw.rect(surf, c, r)
+            self.last_color = c
+            
         super().draw(surf)
+        
+        
