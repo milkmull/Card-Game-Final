@@ -165,32 +165,6 @@ def builder(scene):
             args=[lambda: int(weight_flipper.get_text())]
         )
     
-# type section
-
-        type_select = Dropdown(
-            TYPES_DICT,
-            selected=scene.card.type,
-            left_pad=5,
-            right_pad=25,
-            y_pad=2,
-            hover_color=(100, 100, 100),
-            window_kwargs = {
-                'fill_color': scene.fill_color,
-                'outline_color': (255, 255, 255),
-                'outline_width': 3
-            }
-        )
-
-        type_section = get_section([type_select], 'Type:', scene)
-        type_section.layer = 2
-        elements.append(type_section)
-
-        type_select.add_event(
-            tag='set_text',
-            func=scene.card.set_type,
-            args=[type_select.get_text]
-        )
-    
 # tag section
     
         tag_elements = []
@@ -576,7 +550,6 @@ def builder(scene):
     
     if scene.card.id != 0:
         sections = {
-            'type': type_section,
             'image': image_section,
             'color': color_section,
             'tags': tags_section,
@@ -631,18 +604,9 @@ def builder(scene):
         elements.append(b)
         y += b.padded_rect.height + 15
         
+    set_tab('image')
+        
     if scene.card.id != 0:
-        set_tab('type')
-        
-        b = Button.Text_Button(
-            size=scene.card._type.rect.size,
-            func=set_tab,
-            args=['type'],
-            layer=1
-        )
-        b.set_parent(scene.card._type, left_anchor='left', top_anchor='top')
-        elements.append(b)
-        
         b = Button.Text_Button(
             size=scene.card._tags.rect.size,
             func=set_tab,
@@ -651,9 +615,6 @@ def builder(scene):
         )
         b.set_parent(scene.card._tags, left_anchor='left', top_anchor='top')
         elements.append(b)
-        
-    else:
-        set_tab('image')
     
     b = Button.Text_Button(
         size=scene.card._pic.rect.size,

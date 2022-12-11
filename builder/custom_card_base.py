@@ -38,7 +38,6 @@ class Card(Image_Element):
         self,
         
         name='name',
-        type='play',
         description='description',
         tags=None,
         color=[161, 195, 161],
@@ -140,25 +139,14 @@ class Card(Image_Element):
         
         text_kwargs['pad'] = 1
 
-        type = Textbox(
-            size=((pic.rect.width // 3) - 20, 20),
-            text=type,
-            text_size=45,
-            **text_kwargs,
-            **style_kwargs
-        )
-        type.rect.topleft = (pic.rect.left + 5, self.rect.top + 480)
-        self.add_child(type, current_offset=True)
-        self._type = type
-
         tags = Textbox(
-            size=(pic.rect.width - type.rect.width - 20, 20),
+            size=(pic.rect.width - 20, 20),
             text=str(tags).replace("'", '') if tags else '', 
             text_size=45,
             **text_kwargs,
             **style_kwargs
         )
-        tags.rect.topright = (pic.rect.right - 5, self.rect.top + 480)
+        tags.rect.midtop = (self.rect.centerx, self.rect.top + 480)
         self.add_child(tags, current_offset=True)
         self._tags = tags
 
@@ -169,10 +157,6 @@ class Card(Image_Element):
     @property
     def name(self):
         return self._name.text.strip()
-        
-    @property
-    def type(self):
-        return self._type.text
         
     @property
     def description(self):
@@ -213,7 +197,6 @@ class Card(Image_Element):
     def get_info(self):
         info = {
             'name': self.name,
-            'type': self.type,
             'description': self.description,
             'tags': self.tags, 
             'color': self.color, 
@@ -262,9 +245,6 @@ class Card(Image_Element):
         
     def export_image(self, filename):
         pg.image.save(self.get_card_image(), filename)
-        
-    def set_type(self, type):
-        self._type.set_text(type)
 
     def add_tag(self, tag):
         tag = tag.strip()
