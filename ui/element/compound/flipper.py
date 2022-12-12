@@ -49,7 +49,7 @@ class Flipper(Text_Element):
         )
         left_button.add_event(
             self.flip,
-            args=[-1],
+            args=[1],
             tag='left_click'
         )
 
@@ -59,7 +59,7 @@ class Flipper(Text_Element):
         )
         right_button.add_event(
             self.flip,
-            args=[1],
+            args=[-1],
             tag='left_click'
         )
         
@@ -77,6 +77,5 @@ class Flipper(Text_Element):
     def events(self, events):
         super().events(events)
         
-        if self.hit:
-            if (mw := events.get('mw')):
-                self.flip(mw.y)
+        if self.hit and (mw := events.get('mw')):
+            self.flip(mw.y)
