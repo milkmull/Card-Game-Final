@@ -163,7 +163,7 @@ def builder(scene):
         weight_flipper.add_event(
             tag='set',
             func=scene.card.set_weight,
-            args=[lambda: int(weight_flipper.get_text())]
+            args=[lambda: float(weight_flipper.get_text())]
         )
     
 # tag section
