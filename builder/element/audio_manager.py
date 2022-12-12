@@ -43,7 +43,7 @@ def select_device(scene, mic):
                 break
             
     mic_select.add_event(
-        tag='set',
+        tag='set_text',
         func=select
     )
     
