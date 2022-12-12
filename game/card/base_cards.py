@@ -2,8 +2,6 @@ import random
 
 from . import card_base
 
-# play
-
 class Fish(card_base.Card):
     sid = 0
     name = 'fish'

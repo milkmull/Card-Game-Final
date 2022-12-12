@@ -27,8 +27,7 @@ class Save:
     @staticmethod
     def get_blank_card_data():
         data = {
-            'name': 'Player 0', 
-            'type': 'user',
+            'name': 'Player 0',
             'description': 'description', 
             'tags': ['player'], 
             'color': [161, 195, 161],
@@ -245,7 +244,6 @@ class Save:
     def get_new_card_data(self):
         data = Save.get_blank_card_data()
         data['id'] = self.new_card_id()
-        data['type'] = 'play'
         data['name'] = 'New Card'
         data['tags'].clear()
         return data

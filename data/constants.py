@@ -22,7 +22,40 @@ BASE_NAMES = (
     'big sand worm', 'cactus', 'cow', 'dom', 'dragon', 'fish', 'fishing pole', 'fox', 'future orb', 
     'gambling man', 'ghost', 'michael', 'mystery seed', 'negative zone', 'ninja', 'parade', 'pelican', 'robber',
     'sunflower', 'treasure chest', 'vines', 'wind gust', 'zombie'
-    
+)
+
+WEIGHTS = (
+    2,
+    1.75,
+    1.5,
+    1.25,
+    1,
+    0.95,
+    0.9,
+    0.85,
+    0.8,
+    0.75,
+    0.7,
+    0.65,
+    0.6,
+    0.55,
+    0.5,
+    0.45,
+    0.4,
+    0.35,
+    0.3,
+    0.25,
+    0.2,
+    0.175,
+    0.15,
+    0.125,
+    0.1,
+    0.075,
+    0.05,
+    0.025,
+    0.005,
+    0.001,
+    0.0001
 )
 
 CONSTANTS = {

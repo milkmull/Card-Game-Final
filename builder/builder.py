@@ -3,7 +3,7 @@ Tk().withdraw()
 
 import pygame as pg
 
-from data.constants import TYPES_DICT, TAGS_DICT
+from data.constants import TYPES_DICT, TAGS_DICT, WEIGHTS
 
 from .custom_card_base import Card
 from node.editor import Node_Editor
@@ -146,8 +146,9 @@ def builder(scene):
     if scene.card.id != 0:
 
         weight_flipper = Flipper.Counter(
-            range(1, 5),
-            index=scene.card.weight - 1,
+            reversed(WEIGHTS),
+            index=-5,
+            text_size=30,
             button_kwargs={
                 'pad': 5,
                 'border_radius': 5
