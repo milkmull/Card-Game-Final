@@ -7,7 +7,6 @@ from . import card_base
 class Fish(card_base.Card):
     sid = 0
     name = 'fish'
-    type = 'play'
     weight = 1.25
     tags = ('water', 'animal')
 
@@ -19,7 +18,6 @@ class Fish(card_base.Card):
 class Michael(card_base.Card):
     sid = 1
     name = 'michael'
-    type = 'play'
     weight = 0.5
     tags = ('human',)
     
@@ -31,7 +29,6 @@ class Michael(card_base.Card):
 class Sunflower(card_base.Card):
     sid = 2
     name = 'sunflower'
-    type = 'play'
     weight = 0.75
     tags = ('garden', 'plant')
     
@@ -46,7 +43,6 @@ class Sunflower(card_base.Card):
 class Cow(card_base.Card):
     sid = 3
     name = 'cow'
-    type = 'play'
     weight = 0.5
     tags = ('farm', 'animal')
     
@@ -66,7 +62,6 @@ class Cow(card_base.Card):
 class Wind_Gust(card_base.Card):
     sid = 4
     name = 'wind gust'
-    type = 'play'
     weight = 0.5
     tags = ('sky',)
     
@@ -79,7 +74,6 @@ class Wind_Gust(card_base.Card):
 class Dom(card_base.Card):
     sid = 5
     name = 'dom'
-    type = 'play'
     weight = 1
     tags = ('human',)
     
@@ -91,7 +85,6 @@ class Dom(card_base.Card):
 class Robber(card_base.Card):
     sid = 6
     name = 'robber'
-    type = 'play'
     weight = 0.5
     tags = ('human',)
     
@@ -107,7 +100,6 @@ class Robber(card_base.Card):
 class Ghost(card_base.Card):
     sid = 7
     name = 'ghost'
-    type = 'play'
     weight = 0.5
     tags = ('monster',)
     
@@ -120,7 +112,6 @@ class Ghost(card_base.Card):
 class Vines(card_base.Card):
     sid = 8
     name = 'vines'
-    type = 'play'
     weight = 0.5
     tags = ('garden', 'plant')
     
@@ -134,7 +125,6 @@ class Vines(card_base.Card):
 class Fox(card_base.Card):
     sid = 9
     name = 'fox'
-    type = 'play'
     weight = 1
     tags = ('city', 'animal')
     
@@ -147,7 +137,6 @@ class Fox(card_base.Card):
 class Cactus(card_base.Card):
     sid = 10
     name = 'cactus'
-    type = 'play'
     weight = 0.5
     tags = ('city', 'plant')
 
@@ -158,7 +147,6 @@ class Cactus(card_base.Card):
 class Dragon(card_base.Card):
     sid = 11
     name = 'dragon'
-    type = 'play'
     weight = 0.25
     tags = ('sky', 'monster')
     
@@ -173,7 +161,6 @@ class Dragon(card_base.Card):
 class Big_Sand_Worm(card_base.Card):
     sid = 12
     name = 'big sand worm'
-    type = 'play'
     weight = 0.5
     tags = ('desert', 'animal', 'bug')
     
@@ -193,7 +180,6 @@ class Big_Sand_Worm(card_base.Card):
 class Negative_Zone(card_base.Card):
     sid = 13
     name = 'negative zone'
-    type = 'play'
     weight = 0.125
     tags = ('multiplier',)
     
@@ -206,7 +192,6 @@ class Negative_Zone(card_base.Card):
 class Gambling_Man(card_base.Card):
     sid = 14
     name = 'gambling man'
-    type = 'play'
     weight = 0.15
     tags = ('city', 'human')
 
@@ -228,7 +213,6 @@ class Gambling_Man(card_base.Card):
 class Parade(card_base.Card):
     sid = 15
     name = 'parade'
-    type = 'play'
     weight = 0.25
     tags = ('event',)
 
@@ -241,7 +225,6 @@ class Parade(card_base.Card):
 class Fishing_Pole(card_base.Card):
     sid = 16
     name = 'fishing pole'
-    type = 'play'
     weight = 0.5
     tags = ('item',)
 
@@ -255,7 +238,6 @@ class Fishing_Pole(card_base.Card):
 class Pelican(card_base.Card):
     sid = 17
     name = 'pelican'
-    type = 'play'
     weight = 0.15
     tags = ('sky', 'animal')
     
@@ -282,7 +264,6 @@ class Pelican(card_base.Card):
 class Treasure_Chest(card_base.Card):
     sid = 18
     name = 'treasure chest'
-    type = 'play'
     weight = 0.25
     tags = ('item',)
     
@@ -294,7 +275,6 @@ class Treasure_Chest(card_base.Card):
 class Zombie(card_base.Card):
     sid = 19
     name = 'zombie'
-    type = 'play'
     weight = 0.25
     tags = ('monster',)
     
@@ -307,7 +287,6 @@ class Zombie(card_base.Card):
 class Future_Orb(card_base.Card):
     sid = 20
     name = 'future orb'
-    type = 'play'
     weight = 0.5
     tags = ('item',)
     
@@ -321,7 +300,6 @@ class Future_Orb(card_base.Card):
 class Ninja(card_base.Card):
     sid = 21
     name = 'ninja'
-    type = 'play'
     weight = 0.5
     tags = ('human',)
     
@@ -334,7 +312,6 @@ class Ninja(card_base.Card):
 class Mystery_Seed(card_base.Card):
     sid = 22
     name = 'mystery seed'
-    type = 'play'
     weight = 0.1
     tags = ('garden', 'plant')
     

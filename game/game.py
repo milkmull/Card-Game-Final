@@ -31,7 +31,6 @@ class Game(game_base.Game_Base):
             cards = card_manager.get_base_card_data()
    
         super().__init__(mode, settings, cards)
-        print(self.seed)
         
         self.tree = Tree(self)
         self.running_main = False

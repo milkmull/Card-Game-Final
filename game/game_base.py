@@ -112,7 +112,7 @@ class Game_Base:
 # card stuff
      
     def add_card_data(self, cls):
-        self.cards[cls.type][cls.name] = cls
+        self.cards[cls.name] = cls
      
     def set_card_data(self, data):
         self.cards = data
@@ -123,7 +123,7 @@ class Game_Base:
         return cid
         
     def draw_card_from_tag(self, tag, caller):
-        deck = {name: cls for name, cls in self.cards['play'].items() if tag in cls.tags}
+        deck = {name: cls for name, cls in self.cards.items() if tag in cls.tags}
         weights = [cls.weight for cls in deck.values()]
         name = random.choices(list(deck.keys()), weights=weights, k=1)[0]
         
@@ -141,10 +141,9 @@ class Game_Base:
         
         return self.get_card(name)
      
-    def draw_cards(self, type='play', num=1):
-        deck = self.cards[type]
-        weights = [cls.weight for cls in deck.values()]
-        cards = random.choices(list(deck.keys()), weights=weights, k=num)
+    def draw_cards(self, num=1):
+        weights = [cls.weight for cls in self.cards.values()]
+        cards = random.choices(list(self.cards), weights=weights, k=num)
         for i, name in enumerate(cards):
             cards[i] = self.get_card(name)
         return cards
@@ -152,10 +151,9 @@ class Game_Base:
     def get_card(self, name, cid=None):
         if cid is None:
             cid = self.get_new_cid()
-        for type, deck in self.cards.items():
-            cls = deck.get(name)
-            if cls:
-                return cls(self, cid)
+        cls = self.cards.get(name)
+        if cls:
+            return cls(self, cid)
         raise exceptions.CardNotFound(name)
 
     def add_public(self, card):

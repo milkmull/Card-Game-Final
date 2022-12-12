@@ -3,15 +3,6 @@ import re
 from .node import mapping
 
 class Compiler:
-    REQUIRED = {
-        'play': ('Start',),
-        'item': ('Can_Use', 'Start'),
-        'spell': ('Can_Cast', 'Start_Ongoing', 'Init_Ongoing', 'Add_To_Ongoing', 'Ongoing'),
-        'treasure': ('End',),
-        'event': ('Start', 'Start_Ongoing', 'Init_Ongoing', 'Add_To_Ongoing', 'Ongoing'),
-        'landscape': ('Start_Ongoing', 'Init_Ongoing', 'Add_To_Ongoing', 'Ongoing')
-    }
-    
     @staticmethod
     def unmark(text):
         return re.sub(r'(#<)([0-9]+)(,-?[0-9]+)(>#)', '', text)
@@ -57,22 +48,13 @@ class Compiler:
         return (
             f"\nclass {self.card.classname}(card_base.Card):\n"
                 f"\tname = '{self.card.name}'\n"
-                f"\ttype = '{self.card.type}'\n"
                 f"\tweight = {self.card.weight}\n"
                 f"\ttags = {self.card.tags}\n"
         )
         
     @property
     def missing(self):
-        missing = set()
-        for n in self.nodes:
-            for name in n.get_required():
-                if not any({o.name == name for o in self.nodes}):
-                    missing.add(name)
-        for name in Compiler.REQUIRED.get(self.card.type, ()):
-            if not any({o.name == name for o in self.nodes}):
-                missing.add(name)
-        return list(missing)
+        return []
                 
     @property
     def funcs(self):
