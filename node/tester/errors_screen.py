@@ -12,7 +12,8 @@ def full_error(scene, err):
         font_name='JetBrainsMonoNL-Regular.ttf',
         text_size=17,
         text_color=(224, 226, 228),
-        pad=5
+        pad=5,
+        max_line_width=630
     )
     tb.size = tb.text_surf.get_size()
 

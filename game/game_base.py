@@ -165,6 +165,8 @@ class Game_Base:
             
     def pop_public(self, cid):
         card = self.public_deck.pop(cid)
+        if self.mode == 'test' and len(self.public_deck) < 9:
+            self.add_public(self.draw_cards()[0])
         return card
         
     def add_multiplier(self, card):

@@ -44,19 +44,16 @@ class Tester:
         from game.card import cards as card_manager
         cards = card_manager.get_playable_card_data()
         test_card = inspect.getmembers(testing_card, inspect.isclass)[0][1]
-        cards[test_card.type][test_card.name] = test_card
+        cards[test_card.name] = test_card
         return cards
         
     @staticmethod
     def get_settings():
         return {
-            'rounds': 1, 
-            'ss': 20, 
-            'cards': 5,
-            'items': 3,
-            'spells': 1,
+            'size': [5, 5],
+            'tt': 200,
             'cpus': 3,
-            'diff': 1
+            'diff': 3
         }
         
     def __init__(self, card):
@@ -120,14 +117,18 @@ class Tester:
         
     def sim(self, num):
         for _ in range(num):
-            g = game_base.Game_Base.simulator(self.settings, self.cards)
+            g = game_base.Game_Base('test', self.settings, self.cards)
+            g.add_cpus()
+            g.new_game()
+
+            turn = 0
             err = None
 
             try:
-                while not g.done():
+                while not g.done:
                     g.main()
-                    if g.turn > 600:
-                        g.debug()
+                    turn += 1
+                    if turn > 600:
                         raise Exception(f"game took too long ({g.turn} turns)")
             except:
                 err = traceback.format_exc()
