@@ -7,3 +7,5 @@ class Cow2(card_base.Card):
     
     def start(self, player):
         self.reset()
+        if {}.get('c'):
+            pass

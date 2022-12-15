@@ -145,7 +145,7 @@ def key_scene(scene, type, data):
     
     return elements
 
-def run(sheet='types'):
+def run(sheet='decks'):
     m = Scene(info_sheet, init_args=[sheet], fill_color=(32, 32, 40))
     m.run()
 
@@ -173,7 +173,6 @@ def info_sheet(scene, sheet):
     window.add_child(label, current_offset=True)
 
     all_keys = (
-        'types', 
         'decks',
         'requests',
         'logs'
@@ -196,25 +195,6 @@ def info_sheet(scene, sheet):
                 type_tb = Textbox(
                     text=type,
                     size=(window.rect.width // 4, info_tb.rect.height)
-                )
-                texts.append(type_tb)
-                texts.append(info_tb)
-                
-        elif key == 'types':
-            texts = []
-            for type, info in data[label.text[:-1].lower()].items():
-                info_tb = Textbox(
-                    text=info,
-                    max_line_width=window.rect.width * 3 // 4,
-                )
-                type_tb = Button.Text_Button(
-                    text=type,
-                    size=(window.rect.width // 4, info_tb.rect.height),
-                    hover_color=(100, 100, 100),
-                    right_pad=window.rect.width * 3 // 4,
-                    y_pad=5,
-                    func=run_flow_scene,
-                    args=[type, Compiler.REQUIRED.get(type, ())]
                 )
                 texts.append(type_tb)
                 texts.append(info_tb)
@@ -241,7 +221,7 @@ def info_sheet(scene, sheet):
         window.join_elements(texts, dir=0, marginy=20)
     
     right_swap = Button.Image_Button(
-        image=get_arrow('>', (20, 20), padding=(5, 5)),
+        image=get_arrow('>', (20, 20), pad=(5, 5)),
         pad=5,
         func=swap,
         args=[1],
@@ -251,7 +231,7 @@ def info_sheet(scene, sheet):
     window.add_child(right_swap, current_offset=True)
     
     left_swap = Button.Image_Button(
-        image=get_arrow('<', (20, 20), padding=(5, 5)),
+        image=get_arrow('<', (20, 20), pad=(5, 5)),
         pad=5,
         func=swap,
         args=[-1],
