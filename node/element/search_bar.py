@@ -75,18 +75,20 @@ class Search_Bar(Input):
         self.set_visible(False)
         
     def set_text(self, text):
-        super().set_text(text)
+        added = super().set_text(text)
         
-        key = lambda b: sort_strings(self.text.lower(), b.text.lower())
-        self.search_window.join_elements(sorted(self.buttons, key=key, reverse=True)[:self.max_buttons], use_last=True)
-        self.search_window.y_scroll_bar.go_to_top()
+        if added:
+            key = lambda b: sort_strings(self.text.lower(), b.text.lower())
+            self.search_window.join_elements(sorted(self.buttons, key=key, reverse=True)[:self.max_buttons], use_last=True)
+            self.search_window.y_scroll_bar.go_to_top()
+        
+        return added
     
     def events(self, events):
         if self.visible:
             super().events(events)
-        
-        mbd = events.get('mbd')
-        if mbd:
+
+        if not events['clicked'] and (mbd := events.get('mbd')):
             if mbd.button == 1:
                 if self.open_timer < self.CLICK_TIMER_MAX:
                     self.open_search(mbd.pos)

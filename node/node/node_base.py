@@ -872,16 +872,6 @@ class Node(Dragger, Element):
             self.rect.width + (2 * Node.OUTLINE_SPACE),
             self.rect.height + (3 * Node.OUTLINE_SPACE) + Node.LABEL_HEIGHT
         )
-        
-    @property
-    def offset_pos(self):
-        if not self.manager:
-            return self.pos
-        dx, dy = self.manager.scroll_offset
-        return (
-            dx + self.rect.left,
-            dy + self.rect.top
-        )
 
     @property
     def is_group(self):
@@ -1102,7 +1092,7 @@ class Node(Dragger, Element):
         super().kill()
         
         if self.manager and not d:
-            self.manager.add_log({'t': 'del', 'node': self, 'm': method, 'pos': self.offset_pos})
+            self.manager.add_log({'t': 'del', 'node': self, 'm': method, 'pos': self.pos})
         
     def del_port(self, port):
         self.ports.remove(port)
@@ -1145,7 +1135,7 @@ class Node(Dragger, Element):
         if not self.pickup_pos:
             return (0, 0)
 
-        px, py = self.offset_pos
+        px, py = self.pos
         return (
             px - self.pickup_pos[0],
             py - self.pickup_pos[1]
@@ -1161,9 +1151,6 @@ class Node(Dragger, Element):
                     'node': self,
                     'dist': dist
                 })
-                
-    def set_pickup(self):
-        self.pickup_pos = self.offset_pos
         
 # input stuff
             

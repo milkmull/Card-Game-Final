@@ -156,7 +156,7 @@ class Dropdown(Button.Text_Button):
                 self.remove_child(w)
                 self.windows.pop(w)
                 if (p := info['parent']):
-                    p.unfreeze_animation('hover')
+                    p.unfreeze_animations('hover')
                     if not p.hit:
                         p.run_animations('hover', reverse=True)
                     if p is last:
@@ -212,7 +212,7 @@ class Dropdown(Button.Text_Button):
                 last.outline_rect.right + self.pad['left'] + window.outline_width + 2,
                 last.outline_rect.top - self.pad['top'] - window.outline_width
             )
-            last.freeze_animation('hover')
+            last.freeze_animations('hover')
         else:
             window.rect.midtop = (
                 self.padded_rect.centerx,

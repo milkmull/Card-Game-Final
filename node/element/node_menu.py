@@ -87,11 +87,9 @@ class Node_Menu(Popup.Live_Popup):
     @property
     def safety_rect(self):
         return list(self.buttons.values())[0].rect.unionall([b.rect for b in self.buttons.values()])
-        
-    @property
-    def click_close(self):
-        hits = self.hit or self.hit_any() or self.safety_rect.collidepoint(pg.mouse.get_pos()) or self.label.hit
-        return not hits and self.is_open
+
+    def get_hit(self):
+        return self.hit_any() or self.safety_rect.collidepoint(pg.mouse.get_pos()) or self.label.hit
         
     def set_tab(self, tab):
         elements = []
@@ -137,12 +135,12 @@ class Node_Menu(Popup.Live_Popup):
         self.y_scroll_bar.go_to_top()
         
         for t, b in self.buttons.items():
+            b.unfreeze_animations('hover')
+            if not b.hit:
+                b.run_animations('hover', reverse=True)
             if t == tab:
-                b.freeze_animation('hover')
-            else:
-                b.freeze_animation(None)
-                if not b.hit:
-                    b.run_animations('hover', reverse=True)
+                b.run_animations('hover')
+                b.freeze_animations('hover')
 
     def get_node(self, *args, **kwargs):
         self.manager.get_node(*args, **kwargs)
@@ -155,12 +153,10 @@ class Node_Menu(Popup.Live_Popup):
     def events(self, events):
         super().events(events)
         self.label.events(events)
-        
-        mbd = events.get('mbd_a')
-        if mbd and self.click_close:
+
+        if (mbd := events.get('mbd')) and (not self.get_hit() and self.is_open):
             if mbd.button == 1 or mbd.button == 3:
-                if self.is_open:
-                    self.close() 
+                self.close() 
                     
     def update(self):
         super().update()

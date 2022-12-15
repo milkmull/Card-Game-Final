@@ -12,7 +12,7 @@ from ui.element.elements import Button, Live_Window
 class Context_Manager(Live_Window):
     def __init__(
         self,
-        menu,
+        scene,
         node=None
     ):
         self.separators = []
@@ -36,18 +36,18 @@ class Context_Manager(Live_Window):
             if not node.selected:
                 node.select()
 
-            selected = menu.get_selected()
+            selected = scene.get_selected()
             
             b = Button.Text_Button(
                 text='Copy',
-                func=menu.copy_nodes,
+                func=scene.copy_nodes,
                 **button_kwargs
             )
             buttons.append(b)
             
             b = Button.Text_Button(
                 text='Delete',
-                func=menu.delete_nodes,
+                func=scene.delete_nodes,
                 **button_kwargs
             )
             buttons.append(b)
@@ -57,7 +57,7 @@ class Context_Manager(Live_Window):
             if node.is_group:
                 b = Button.Text_Button(
                     text='Ungroup',
-                    func=menu.ungroup_node,
+                    func=scene.ungroup_node,
                     args=[node],
                     **button_kwargs
                 )
@@ -66,7 +66,7 @@ class Context_Manager(Live_Window):
             elif len(selected) > 1:
                 b = Button.Text_Button(
                     text='Group',
-                    func=menu.create_new_group_node,
+                    func=scene.create_new_group_node,
                     **button_kwargs
                 )
                 buttons.append(b)
@@ -93,43 +93,41 @@ class Context_Manager(Live_Window):
                 
             add_sep()
                 
-        elif menu.copy_data:
+        elif scene.copy_data:
             b = Button.Text_Button(
                 text='Paste',
-                func=menu.paste_nodes,
+                func=scene.paste_nodes,
                 **button_kwargs
             )
             buttons.append(b)
             
             add_sep()
             
-        if menu.get_required():
+        if scene.get_required():
             b = Button.Text_Button(
                 text='Get Required',
-                func=menu.load_required_nodes,
+                func=scene.load_required_nodes,
                 **button_kwargs
             )
             buttons.append(b)
             
             add_sep()
             
-        def select_all(menu):
-            menu.get_current_events().update({
-                'ctrl': True,
-                'kd': pg.event.Event(pg.KEYDOWN, key=pg.K_a)
-            })
+        def select_all(scene):
+            scene.post_event('ctrl', True)
+            scene.post_event('kd', pg.event.Event(pg.KEYDOWN, key=pg.K_a))
             
         b = Button.Text_Button(
             text='Select All',
             func=select_all,
-            args=[menu],
+            args=[scene],
             **button_kwargs
         )
         buttons.append(b)
         
         b = Button.Text_Button(
             text='Clean Up',
-            func=menu.clean_up,
+            func=scene.clean_up,
             **button_kwargs
         )
         buttons.append(b)
@@ -156,10 +154,10 @@ class Context_Manager(Live_Window):
                 borderx=5
             )
             
-        if self.rect.bottom > menu.body.height:
-            self.rect.bottom = menu.body.height - 10
-        if self.rect.right > menu.body.width:
-            self.rect.right = menu.body.width - 10
+        if self.rect.bottom > scene.body.height:
+            self.rect.bottom = scene.body.height - 10
+        if self.rect.right > scene.body.width:
+            self.rect.right = scene.body.width - 10
         
     def draw(self, surf):
         super().draw(surf)

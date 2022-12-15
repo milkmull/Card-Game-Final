@@ -70,6 +70,7 @@ def get_elements(scene):
     elements = []
     
     rect_selector = Rect_Selector()
+    scene.rect_selector = rect_selector
     elements.append(rect_selector)
 
     search_bar = Search_Bar(scene)
@@ -195,7 +196,6 @@ def get_elements(scene):
     
     home_button = Button.Text_Button(
         text='Home',
-        func=scene.go_home,
         **button_kwargs
     )
     home_button.rect.topleft = (x, y)
@@ -258,10 +258,6 @@ class Node_Editor(Scene):
         self.cm = None
   
         self.anchor = None
-        self.scroll_anchor = None
-        self.last_scroll_pos = (0, 0)
-        self.scroll_offset = (0, 0)
-        self.scroll_vel = [0, 0]
 
         self.no_logs = True
         self.log = []
@@ -368,9 +364,7 @@ class Node_Editor(Scene):
                 self.add_node(n, d=True) 
                 if n.is_group:
                     n.reset_ports()
-                dx, dy = self.scroll_offset
-                px, py = log['pos']
-                n.rect.topleft = (px - dx, py - dy)
+                n.rect.topleft = log['pos']
                     
             elif type == 'conn':
                 p0, p1 = log['ports']
@@ -626,8 +620,6 @@ class Node_Editor(Scene):
 # other stuff
 
     def clean_up(self, nodes=None):
-        self.go_home()
-        
         if nodes is None:
             nodes = self.nodes
             
@@ -699,28 +691,6 @@ class Node_Editor(Scene):
         if self.cm:
             self.elements.remove(self.cm)
             self.cm = None
-            
-    def go_home(self):
-        sx, sy = self.scroll_offset
-        for n in self.nodes:
-            n.move(sx, sy)
-        self.scroll_offset = (0, 0)
-        self.last_scroll_pos = (0, 0)
-        
-    def scroll_screen(self, dx=0, dy=0):
-        if self.scroll_anchor:
-            x0, y0 = self.last_scroll_pos
-            x1, y1 = pg.mouse.get_pos()
-            self.last_scroll_pos = (x1, y1)
-            
-            dx = x1 - x0
-            dy = y1 - y0
-  
-        if dx or dy:
-            for n in self.nodes:
-                n.move(dx, dy)
-            sx, sy = self.scroll_offset
-            self.scroll_offset = (sx - dx, sy - dy)
 
 # run stuff
 
@@ -766,57 +736,20 @@ class Node_Editor(Scene):
 
             elif kd.key == pg.K_DELETE:
                 self.delete_nodes()
-            elif kd.key == pg.K_HOME:
-                self.go_home()
                 
-            elif kd.key == pg.K_LEFT:
-                self.scroll_vel[0] = 15
-            elif kd.key == pg.K_RIGHT:
-                self.scroll_vel[0] = -15
-            elif kd.key == pg.K_UP:
-                self.scroll_vel[1] = 15
-            elif kd.key == pg.K_DOWN:
-                self.scroll_vel[1] = -15
-                
-        for e in events['all']:
-            if e.type == pg.KEYUP:
-                ku = e
-                
-                if ku.key == pg.K_LEFT:
-                    self.scroll_vel[0] = 0
-                elif ku.key == pg.K_RIGHT:
-                    self.scroll_vel[0] = 0
-                elif ku.key == pg.K_UP:
-                    self.scroll_vel[1] = 0
-                elif ku.key == pg.K_DOWN:
-                    self.scroll_vel[1] = 0
-                
-        if 'mbd_a' in events:
+        if (mbd := events.get('mbd')):
             self.close_context()
-
-        if mbd := events.get('mbd'):
-            if mbd.button == 1:
-                self.scroll_anchor = mbd.pos
-                self.last_scroll_pos = mbd.pos
-            elif mbd.button == 3:
+            if not events['clicked'] and mbd.button == 3:
                 self.anchor = mbd.pos
-
-        elif mbu := events.get('mbu'):
-            if mbu.button == 1:
-                self.scroll_anchor = None
-                
-            elif mbu.button == 3:
+        
+        elif (mbu := events.get('mbu')):
+            if mbu.button == 3:
                 if not self.cm:
                     if self.anchor and self.anchor_dist < 2:
                         self.new_context()
                 if self.anchor:
                     self.check_wire_break()
                     self.anchor = None
-                    
-        if self.scroll_anchor:
-            self.scroll_screen()
-        elif any(self.scroll_vel):
-            self.scroll_screen(dx=self.scroll_vel[0], dy=self.scroll_vel[1])
 
     def update(self):   
         super().update()

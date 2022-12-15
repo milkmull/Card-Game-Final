@@ -44,7 +44,6 @@ class Base_Loop:
                     
                 case pg.MOUSEBUTTONDOWN:
                     events['mbd'] = e
-                    events['mbd_a'] = e
                 case pg.MOUSEBUTTONUP:
                     events['mbu'] = e
                     
@@ -90,7 +89,7 @@ class Base_Loop:
         self.elements = elements or []
         self.fill_color = fill_color
         
-        self.current_events = []
+        self.current_events = {}
         
     @property
     def framerate(self):
@@ -117,7 +116,7 @@ class Base_Loop:
         return self.current_events
         
     def post_event(self, key, value):
-        self.current_event_batch[key] = value
+        self.current_events[key] = value
         
     def exit(self):
         self.running = False

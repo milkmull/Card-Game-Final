@@ -571,7 +571,7 @@ def builder(scene):
             b = buttons[t]
 
             section.turn_off()
-            b.unfreeze_animation('hover')
+            b.unfreeze_animations('hover')
             if not b.hit:
                 b.run_animations('hover', reverse=True)
                 
@@ -582,7 +582,7 @@ def builder(scene):
                     body.centery
                 )
                 b.run_animations('hover')
-                b.freeze_animation('hover')
+                b.freeze_animations('hover')
     
     x = save_section.rect.left
     y = save_section.rect.bottom + 25

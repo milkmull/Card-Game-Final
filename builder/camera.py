@@ -119,7 +119,7 @@ def camera(scene):
         
         ok_button.set_enabled(False)
         retake_button.set_enabled(False)
-        retake_button.cancel_animation('hover')
+        retake_button.cancel_animations('hover')
         
         current_frame.add_animation([{
             'attr': 'x',
@@ -139,7 +139,7 @@ def camera(scene):
             
         scene.camera.stop()
         
-        camera_button.cancel_animation('hover')
+        camera_button.cancel_animations('hover')
         camera_button.set_enabled(False)
         
         ok_button.set_enabled(True)

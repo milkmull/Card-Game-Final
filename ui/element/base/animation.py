@@ -57,21 +57,21 @@ class Animation:
                     self.active_animations.append(a)
                 a.start(reverse=reverse)
                     
-    def cancel_animation(self, tag):
+    def cancel_animations(self, tag):
         if (animations := self.animations.get(tag)):
             for a in animations:
                 a.cancel()
                 if a in self.active_animations:
                     self.active_animations.remove(a)
                 
-    def freeze_animation(self, tag):
+    def freeze_animations(self, tag):
         self.frozen_tags.add(tag)
         
-    def unfreeze_animation(self, tag):
+    def unfreeze_animations(self, tag):
         if tag in self.frozen_tags:
             self.frozen_tags.remove(tag)
         
-    def unfreeze_all_animation(self):
+    def unfreeze_all_animations(self):
         self.frozen_tags.clear()
                 
     def update_animations(self):

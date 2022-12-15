@@ -105,7 +105,7 @@ class Sandbox(Client_Base):
         if pid != self.pid:
             self.get_info()
             p = self.get_player(self.pid)
-            p.spot.unfreeze_animation('hover')
+            p.spot.unfreeze_animations('hover')
             if not p.spot.hit:
                 p.spot.run_animations('hover', reverse=True)
 
@@ -114,7 +114,7 @@ class Sandbox(Client_Base):
             
             p = self.get_player(pid)
             p.spot.run_animations('hover')
-            p.spot.freeze_animation('hover')
+            p.spot.freeze_animations('hover')
             
     def check_player_selecting(self):
         if (p := self.get_selecting_player()):
@@ -211,7 +211,7 @@ class Sandbox(Client_Base):
             
             if p.pid == self.pid:
                 ps.run_animations('hover')
-                ps.freeze_animation('hover')
+                ps.freeze_animations('hover')
                 
             return p
 
