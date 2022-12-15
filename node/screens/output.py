@@ -7,6 +7,7 @@ from ui.scene.scene import Scene
 from ui.element.base.base import Base_Element
 from ui.element.elements import Textbox, Button, Check_Box, Live_Window
 from ui.element.utils.image import get_arrow
+from ui.color.ops import color_shade
 
 def run(node):
     m = Scene(info_scene, init_args=[node], fill_color=(32, 32, 40))
@@ -98,8 +99,8 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
     full_output = Check_Box(value=show_full_out)
     full_output.rect.topright = (node.rect.right - 10, node.rect.bottom + 20)
     full_output.add_event(
-        tag='set',
-        func=lambda: wire.port.button.left_click()
+        tag='set_text',
+        func=lambda: wire.port.button.run_events('left_click')
     )
     elements.append(full_output)
     
@@ -186,7 +187,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
                 image=get_arrow(
                     '<' if visible_port.port > 0 else '>',
                     (20, 20),
-                    padding=(5, 5),
+                    pad=(5, 5),
                     color=visible_port.color
                 ),
                 func=refresh
@@ -205,7 +206,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         )
         style = {
             'bgcolor': visible_port.color,
-            'fgcolor': Text.color_text(visible_port.color)
+            'fgcolor': color_shade(visible_port.color)
         }
         for s, e in ranges:
             text_style.update({i: style for i in range(s, e)})
@@ -214,7 +215,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         text_window.join_elements([out_text], border=5)
         text_window.outline_color = visible_port.color
 
-        text_label.text_color = Text.color_text(visible_port.color)
+        text_label.text_color = color_shade(visible_port.color)
         text_label.fill_color = visible_port.color
         text_label.set_text(f"Port {visible_port.port} {'Input' if visible_port.port > 0 else 'Output'}:")
         
@@ -239,8 +240,8 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         elements.append(b)
         setattr(p, 'button', b)
         
-        if last_port is None or (last_port is not None and p.port == last_port):
-            b.left_click()
+        if not found_port and (last_port is None or (last_port is not None and p.port == last_port)):
+            b.run_events('left_click')
             found_port = True
             
     back_button = Button.Text_Button(

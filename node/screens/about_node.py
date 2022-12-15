@@ -152,7 +152,7 @@ def info_scene(scene, name):
             node_info.rect.width = 400
         
         swap_button = Button.Image_Button(
-            image=get_arrow('>', (20, 20), padding=(5, 5)),
+            image=get_arrow('>', (20, 20), pad=(5, 5)),
             pad=5,
             func=swap,
             hover_color=(100, 100, 100)
@@ -261,7 +261,7 @@ def info_scene(scene, name):
                 set_port(port)
             
             swap_button = Button.Image_Button(
-                image=get_arrow('>', (15, 15), padding=(5, 5)),
+                image=get_arrow('>', (15, 15), pad=(5, 5)),
                 pad=5,
                 func=swap,
                 args=[1],
@@ -276,7 +276,7 @@ def info_scene(scene, name):
             )
             
             swap_button = Button.Image_Button(
-                image=get_arrow('<', (15, 15), padding=(5, 5)),
+                image=get_arrow('<', (15, 15), pad=(5, 5)),
                 pad=5,
                 func=swap,
                 args=[-1],
