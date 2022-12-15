@@ -158,6 +158,7 @@ class Input(Text_Element):
         self.is_open = True
         self.blink_timer.reset()
         self.index = len(self.text)
+        self.run_animations('open')
         
     def close(self):
         if not self.text:
@@ -168,7 +169,7 @@ class Input(Text_Element):
         self.index = 0
         self.end_index = 0
         self.held_key = None
-        self.run_events('close')
+        self.run_animations('open', reverse=True)
                         
     def set_index(self, index):
         if index < 0:

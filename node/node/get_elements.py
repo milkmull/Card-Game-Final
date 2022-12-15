@@ -1,7 +1,7 @@
 from ui.element.standard.button import Button
-from .element.input import INPUTS
-from .element.check_box import Logged_Check_Box as Check_Box
-from .element.dropdown import Logged_Dropdown as Dropdown
+from .element.logged_input import INPUTS
+from .element.logged_check_box import Logged_Check_Box as Check_Box
+from .element.logged_dropdown import Logged_Dropdown as Dropdown
 from ui.element.utils.image import get_arrow
 from ui.icons.icons import icons
 

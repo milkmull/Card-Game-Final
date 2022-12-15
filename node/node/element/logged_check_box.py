@@ -53,9 +53,4 @@ class Logged_Check_Box(Check_Box):
                 self.set_value(out)
                 
             else:
-                self.set_enabled(True)
-                
-                
-                
-                
-                
+                self.set_enabled(True)         

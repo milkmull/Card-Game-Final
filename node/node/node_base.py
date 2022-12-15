@@ -11,7 +11,7 @@ from ui.element.standard.textbox import Textbox
 from ui.element.drag.dragger import Dragger
 from ui.math import line
 
-from .element.input import Logged_Label_Input as Input
+from .element.logged_input import Logged_Label_Input as Input
 
 def pack(_nodes):
     d = mapping.find_all_nodes(_nodes)

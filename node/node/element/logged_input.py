@@ -171,7 +171,7 @@ class Logged_Code_Input(Logged_Input):
         
     def set_text(self, text):
         self.text_style = self.style_text(text)
-        super().set_text(text)
+        return super().set_text(text)
         
 class Logged_Label_Input(Logged_Input):
     def __init__(
@@ -199,6 +199,4 @@ INPUTS = {
     'string': Logged_String_Input,
     'code': Logged_Code_Input,
     'label': Logged_Label_Input
-}
-            
-            
+}     
