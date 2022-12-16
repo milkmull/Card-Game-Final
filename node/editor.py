@@ -299,9 +299,7 @@ class Node_Editor(Scene):
     def add_log(self, log):
         if self.no_logs:
             return
-            
-        print('d', log)
- 
+
         if self.logs and log['t'] == 'disconn':
             last_log = self.logs[-1]
             if last_log['t'] == 'conn':
@@ -345,7 +343,6 @@ class Node_Editor(Scene):
         logs = self.log_history[self.log_index]
 
         for log in logs[::-1]:
-            print('u', log)
             type = log['t']
             
             if type == 'carry':
@@ -393,7 +390,7 @@ class Node_Editor(Scene):
             elif type == 'val':
                 e = log['e']
                 v0, v1 = log['v']
-                e.set_value(v0)
+                e.set_value(v0, undo=True)
                 
             elif type == 'transform':
                 n = log['node']
@@ -424,7 +421,6 @@ class Node_Editor(Scene):
         logs = self.log_history[self.log_index + 1]
 
         for log in logs:
-            print('r', log)
             type = log['t']
             
             if type == 'carry':

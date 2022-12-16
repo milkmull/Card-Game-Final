@@ -22,6 +22,11 @@ class Logged_Check_Box(Check_Box):
     def get_output(self):
         return str(self.value)
         
+    def set_value(self, value, undo=False):
+        super().set_value(value)
+        if undo:
+            self.last_value = value
+        
     def reset_value(self, value):
         self.set_value(value)
         self.last_value = self.value

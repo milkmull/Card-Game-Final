@@ -63,9 +63,9 @@ class Logged_Dropdown(Input_Dropdown):
     def get_output(self):
         return f"'{self.text}'" 
         
-    def set_value(self, text):
+    def set_value(self, text, undo=False):
         super().set_value(text)
-        if not self.is_open:
+        if undo:
             self.last_text = self.text
         
     def reset_value(self, text):
@@ -96,11 +96,4 @@ class Logged_Dropdown(Input_Dropdown):
                 
             elif not self.enabled:
                 self.set_enabled(True)
-                self.set_text(self.last_text)
-                
-        print(self.text, self.last_text)
-        
-        
-        
-        
-        
+                self.set_text(self.last_text)      

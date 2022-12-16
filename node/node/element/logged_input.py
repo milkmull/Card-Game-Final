@@ -22,9 +22,9 @@ class Logged_Input(Input):
     def get_output(self):
         return self.text
             
-    def set_value(self, text):
+    def set_value(self, text, undo=False):
         self.set_text(text)
-        if not self.is_open:
+        if undo:
             self.last_text = self.text
         
     def reset_value(self, text):
