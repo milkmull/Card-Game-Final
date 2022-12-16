@@ -196,7 +196,7 @@ class Chat(Button.Text_Button):
     def events(self, events):
         super().events(events)
         
-        if self.is_open and 'mbd' in events and not self.chat.get_hit():
+        if self.is_open and (('mbd' in events and not self.chat.get_hit()) or events.pop('e', None)):
             self.close()
         
         

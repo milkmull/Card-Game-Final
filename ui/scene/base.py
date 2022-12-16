@@ -134,14 +134,14 @@ class Base_Loop:
     def events(self):
         events = self.get_events()
 
-        if self.can_quit:
-            if 'q' in events:
-                self.quit()
-            elif 'e' in events:
-                self.exit()
-                return {}
-                
+        if self.can_quit and 'q' in events:
+            self.quit()
+
         self.sub_events(events)
+        
+        if self.can_quit and 'e' in events:
+            self.exit()
+            return {}
         
         if not events['cursor_set']:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)

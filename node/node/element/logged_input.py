@@ -24,6 +24,8 @@ class Logged_Input(Input):
             
     def set_value(self, text):
         self.set_text(text)
+        if not self.is_open:
+            self.last_text = self.text
         
     def reset_value(self, text):
         self.set_text(text)
@@ -109,7 +111,7 @@ class Logged_String_Input(Logged_Input):
             inf_height=False,
             centery_aligned=True,
             text_check=lambda text: "'" not in text and '"' not in text and text.isascii(),
-            max_length=20,
+            max_length=25,
             max_lines=1,
             outline_color=(0, 0, 0),
             outline_width=3
@@ -182,12 +184,13 @@ class Logged_Label_Input(Logged_Input):
         super().__init__(
             node,
             text=text,
+            max_length=25,
             text_color=(255, 255, 255),
             size=node.label_rect.size,
             inf_width=False,
             centerx_aligned=True,
             centery_aligned=True,
-            text_check=lambda text: text.isalnum(),
+            text_check=lambda text: text.replace(' ', '').isalnum(),
             fill_color=None
         )
         

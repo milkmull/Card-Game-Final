@@ -19,6 +19,8 @@ class Logged_Dropdown(Input_Dropdown):
             centery_aligned=True,
             inf_width=False,
             inf_height=False,
+            max_length=25,
+            max_lines=1,
             text_check=lambda text: "'" not in text and '"' not in text and text.isascii(),
             text_color=(255, 255, 255),
             cursor_color=(255, 255, 255),
@@ -32,6 +34,11 @@ class Logged_Dropdown(Input_Dropdown):
                 'outline_width': 3
             },
             max_buttons=6
+        )
+        
+        self.add_event(
+            func=self.close,
+            tag='enter'
         )
 
         self.add_animation(
@@ -55,6 +62,11 @@ class Logged_Dropdown(Input_Dropdown):
         
     def get_output(self):
         return f"'{self.text}'" 
+        
+    def set_value(self, text):
+        super().set_value(text)
+        if not self.is_open:
+            self.last_text = self.text
         
     def reset_value(self, text):
         self.set_text(text)
@@ -85,6 +97,8 @@ class Logged_Dropdown(Input_Dropdown):
             elif not self.enabled:
                 self.set_enabled(True)
                 self.set_text(self.last_text)
+                
+        print(self.text, self.last_text)
         
         
         

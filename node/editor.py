@@ -300,6 +300,8 @@ class Node_Editor(Scene):
         if self.no_logs:
             return
             
+        print('d', log)
+ 
         if self.logs and log['t'] == 'disconn':
             last_log = self.logs[-1]
             if last_log['t'] == 'conn':
@@ -343,6 +345,7 @@ class Node_Editor(Scene):
         logs = self.log_history[self.log_index]
 
         for log in logs[::-1]:
+            print('u', log)
             type = log['t']
             
             if type == 'carry':
@@ -421,6 +424,7 @@ class Node_Editor(Scene):
         logs = self.log_history[self.log_index + 1]
 
         for log in logs:
+            print('r', log)
             type = log['t']
             
             if type == 'carry':

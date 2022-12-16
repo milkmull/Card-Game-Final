@@ -2,7 +2,6 @@
 class Card:
     sid = -1
     name = 'base'
-    type = 'base'
     weight = 0
     tags = []
     
@@ -20,6 +19,7 @@ class Card:
         self.memory = set()
         self.direction = None
         self.wait = None
+        self.timer = 0
         
         self.skip_remove = False
         self.skip_move = False
@@ -90,6 +90,7 @@ class Card:
         c.priority = self.priority
         c.direction = self.direction
         c.wait = self.wait
+        c.timer = self.timer
         
         c.skip_remove = self.skip_remove
         c.skip_move = self.skip_move
