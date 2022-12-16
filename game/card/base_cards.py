@@ -291,8 +291,8 @@ class Future_Orb(card_base.Card):
     def play(self):
         self.start_wait('nt')
     
-    def run_wait(self, player, card):
-        if player == self.player:
+    def run_wait(self, data):
+        if data['player'] == self.player:
             self.kill(self)
     
 class Ninja(card_base.Card):
@@ -316,6 +316,6 @@ class Mystery_Seed(card_base.Card):
     def spawn(self):
         self.start_wait('nt')
 
-    def run_wait(self, player, card):
-        if player == self.player:
+    def run_wait(self, data):
+        if data['player'] == self.player:
             self.game.transform(self, self.game.draw_card_from_tag('plant', self))

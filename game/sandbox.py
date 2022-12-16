@@ -28,7 +28,7 @@ class Sandbox(game.Game):
             if p.pid == pid:
                 self.current_turn = i
                 self.players[self.current_turn].start_turn()
-                self.run_wait('nt', self.players[self.current_turn])
+                self.run_wait('nt', player=self.players[self.current_turn])
                 
                 self.add_log({
                     't': 'nt',

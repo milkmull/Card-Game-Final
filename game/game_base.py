@@ -210,7 +210,7 @@ class Game_Base:
     def new_turn(self):
         self.current_turn = (self.current_turn + 1) % len(self.players)
         self.players[self.current_turn].start_turn()
-        self.run_wait('nt', self.players[self.current_turn])
+        self.run_wait('nt', player=self.players[self.current_turn])
         
     def card_update(self):
         cards = sorted(self.grid.cards, key=lambda c: c.priority, reverse=True)
@@ -230,10 +230,10 @@ class Game_Base:
                 card.update()
             card.skip_update = False
                 
-    def run_wait(self, wait, player, card=None):
+    def run_wait(self, wait, **data):
         for c in list(self.wait.values()):
             if c.wait == wait:
-                c.run_wait(player, card)
+                c.run_wait(data)
 
     def main(self):
         if self.status == 'playing':
