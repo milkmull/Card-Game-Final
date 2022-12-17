@@ -1,7 +1,7 @@
 from ui.element.standard.button import Button
 from .element.logged_input import INPUTS
 from .element.logged_check_box import Logged_Check_Box as Check_Box
-from .element.logged_dropdown import Logged_Dropdown as Dropdown
+from .element.logged_dropdown import Logged_Dropdown as Const_Dropdown, Logged_Input_Dropdown as Dropdown
 from ui.element.utils.image import get_arrow
 from ui.icons.icons import icons
 
@@ -19,12 +19,19 @@ def set_check_element(port):
     )
     port.set_element(cb)
     
-def set_dropdown_element(port, options, value=None):
-    dd = Dropdown(
-        port,
-        options,
-        value=value
-    )
+def set_dropdown_element(port, options, value=None, const=False):
+    if const:
+        dd = Const_Dropdown(
+            port,
+            options,
+            value=value
+        )
+    else:
+        dd = Dropdown(
+            port,
+            options,
+            value=value
+        )
     port.set_element(dd)
 
 def get_transform_button(node):

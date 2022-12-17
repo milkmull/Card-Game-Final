@@ -134,6 +134,9 @@ class Dropdown(Button.Text_Button):
             self.open()
         
     def open(self):
+        if len(self.selection) <= 1:
+            return
+            
         super().open()
         self.arrow.image = pg.transform.flip(self.arrow.image, False, True)
         self.new_window(self.selection)

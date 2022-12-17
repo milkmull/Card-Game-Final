@@ -162,7 +162,7 @@ def map_flow(n, nodes, map, port=None, row=0, column=0):
                 row = max_row + 1
         map[column][row] = n
     nodes.remove(n)
-
+    
     ipp = sorted([p for p in n.get_input_ports() if p.visible], key=lambda p: p.rect.top, reverse=True)
     i = ipp.index(port) if port in ipp else 0
     for j, ip in enumerate(ipp):
@@ -174,7 +174,7 @@ def map_flow(n, nodes, map, port=None, row=0, column=0):
     opp = sorted([p for p in n.get_output_ports() if p.visible], key=lambda p: p.rect.top, reverse=True)
     i = opp.index(port) if port in opp else 0
     for j, op in enumerate(opp):
-        if op.connection:
+        if op.connection and not op.parent_port:
             connected_node = op.connection_port.parent
             if connected_node in nodes:
                 map_flow(connected_node, nodes, map, port=op.connection_port, row=row + (i - j), column=column + 1)

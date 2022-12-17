@@ -343,73 +343,90 @@ class Node_Editor(Scene):
         logs = self.log_history[self.log_index]
 
         for log in logs[::-1]:
-            type = log['t']
-            
-            if type == 'carry':
-                n = log['node']
-                dx, dy = log['dist']
-                n.move(-dx, -dy)
-                n.pickup_pos = None
+        
+            match log['t']:
+
+                case 'carry':
+                    n = log['node']
+                    dx, dy = log['dist']
+                    n.move(-dx, -dy)
+                    n.pickup_pos = None
+                        
+                case 'add':
+                    n = log['node']
+                    if not n.is_group:
+                        self.del_node(n, d=True)
+                    else:
+                        self.ungroup_node(n, d=True)
+                        
+                case 'del':
+                    n = log['node']
+                    m = log['m']
+                    self.add_node(n, d=True) 
+                    if n.is_group:
+                        n.reset_ports(m)
+                    n.rect.topleft = log['pos']
+                        
+                case 'conn':
+                    p0, p1 = log['ports']
+                    Port.disconnect(p0, p1, d=True)
                     
-            elif type == 'add':
-                n = log['node']
-                if not n.is_group:
-                    self.del_node(n, d=True)
-                else:
-                    self.ungroup_node(n, d=True)
-                    
-            elif type == 'del':
-                n = log['node']
-                m = log['m']
-                self.add_node(n, d=True) 
-                if n.is_group:
-                    n.reset_ports()
-                n.rect.topleft = log['pos']
-                    
-            elif type == 'conn':
-                p0, p1 = log['ports']
-                Port.disconnect(p0, p1, d=True)
-                
-            elif type == 'disconn':
-                n0, n1 = log['nodes']
-                p0, p1 = log['ports']
-                if p0.parent_port:
+                case 'disconn':
+                    n0, n1 = log['nodes']
+                    p0, p1 = log['ports']
                     if p0 not in n0.ports:
                         n0.ports.append(p0)
-                    if p0.group_node:
-                        if p0 not in p0.group_node.ports:
-                            p0.group_node.ports.append(p0)
-                if p1.parent_port:
+                        n0.set_port_pos()
+                    if p0.group_node and p0 not in p0.group_node.ports:
+                        p0.group_node.ports.append(p0)
+                        p0.group_node.sort_ports()
+                        p0.group_node.set_port_pos()
                     if p1 not in n1.ports:
                         n1.ports.append(p1)
-                    if p1.group_node:
-                        if p1 not in p1.group_node.ports:
-                            p1.group_node.ports.append(p1)
-                Port.new_connection(p0, p1, force=True, d=True)
+                        n1.set_port_pos()
+                    if p1.group_node and p1 not in p1.group_node.ports:
+                        p1.group_node.ports.append(p1)
+                        p1.group_node.sort_ports()
+                        p1.group_node.set_port_pos()
+                    Port.new_connection(p0, p1, force=True, d=True)
 
-            elif type == 'val':
-                e = log['e']
-                v0, v1 = log['v']
-                e.set_value(v0, undo=True)
-                
-            elif type == 'transform':
-                n = log['node']
-                n.transform(form=log['form0'], d=True)
+                case 'val':
+                    e = log['e']
+                    v0, v1 = log['v']
+                    e.set_value(v0, undo=True)
                     
-            elif type == 'suppress':
-                p = log['p']
-                s = log['s']
-                p.set_suppressed(not s, d=True)
-                
-            elif type == 'ap':
-                n = log['node']
-                p = log['port']
-                n.rp(p=p)
-                
-            elif type == 'rp':
-                n = log['node']
-                p = log['port']
-                n.ap(p=p)
+                case 'transform':
+                    n = log['node']
+                    n.transform(form=log['form0'], d=True)
+                        
+                case 'suppress':
+                    p = log['p']
+                    s = log['s']
+                    p.set_suppressed(not s, d=True)
+                    
+                case 'ap':
+                    n = log['node']
+                    p = log['port']
+                    n.rp(p=p)
+                    
+                case 'rp':
+                    n = log['node']
+                    p = log['port']
+                    n.ap(p=p)
+                    
+                case 'hp':
+                    n = log['node']
+                    ports = log['ports']
+                    for p in ports:
+                        p.show()
+                    n.set_port_pos()
+                    
+                case 'sp':
+                    n = log['node']
+                    ports = log['ports']
+                    for p in ports:
+                        p.hide()
+                    n.set_port_pos()
                 
         self.log_index -= 1
         self.card.set_node_data(self.nodes)
@@ -421,72 +438,91 @@ class Node_Editor(Scene):
         logs = self.log_history[self.log_index + 1]
 
         for log in logs:
-            type = log['t']
             
-            if type == 'carry':
-                n = log['node']
-                dx, dy = log['dist']
-                n.move(dx, dy)
-                n.pickup_pos = None
+            match log['t']:
+            
+                case 'carry':
+                    n = log['node']
+                    dx, dy = log['dist']
+                    n.move(dx, dy)
+                    n.pickup_pos = None
+                        
+                case 'del':
+                    n = log['node']
+                    m = log['m']
+                    if m == 'ug':
+                        self.ungroup_node(n, d=True)
+                    else:
+                        self.del_node(n, d=True)   
+                        
+                case 'add':
+                    n = log['node']
+                    self.add_node(n, d=True)
+                    if n.is_group:
+                        n.reset_ports('add')
+                        
+                case 'disconn':
+                    p0, p1 = log['ports']
+                    Port.disconnect(p0, p1, d=True)
+                    p0.node.set_port_pos()
+                    p1.node.set_port_pos()
                     
-            elif type == 'del':
-                n = log['node']
-                m = log['m']
-                if m == 'ug':
-                    self.ungroup_node(n, d=True)
-                else:
-                    self.del_node(n, d=True)   
-                    
-            elif type == 'add':
-                n = log['node']
-                self.add_node(n, d=True)
-                if n.is_group:
-                    n.reset_ports()
-                    
-            elif type == 'disconn':
-                p0, p1 = log['ports']
-                Port.disconnect(p0, p1, d=True)
-                
-            elif type == 'conn':
-                n0, n1 = log['nodes']
-                p0, p1 = log['ports']
-                if p0.parent_port:
+                case 'conn':
+                    n0, n1 = log['nodes']
+                    p0, p1 = log['ports']
                     if p0 not in n0.ports:
                         n0.ports.append(p0)
-                    if p0.group_node:
-                        if p0 not in p0.group_node.ports:
-                            p0.group_node.ports.append(p0)
-                if p1.parent_port:
+                        n0.set_port_pos()
+                    if p0.group_node and p0 not in p0.group_node.ports:
+                        p0.group_node.ports.append(p0)
+                        p0.group_node.sort_ports()
+                        p0.group_node.set_port_pos()
                     if p1 not in n1.ports:
                         n1.ports.append(p1)
-                    if p1.group_node:
-                        if p1 not in p1.group_node.ports:
-                            p1.group_node.ports.append(p1)
-                Port.new_connection(p0, p1, d=True)
-                
-            elif type == 'val':
-                e = log['e']
-                v0, v1 = log['v']
-                e.set_value(v1)
-                
-            elif type == 'transform':
-                n = log['node']
-                n.transform(form=log['form1'], d=True)
+                        n1.set_port_pos()
+                    if p1.group_node and p1 not in p1.group_node.ports:
+                        p1.group_node.ports.append(p1)
+                        p1.group_node.sort_ports()
+                        p1.group_node.set_port_pos()
+                    Port.new_connection(p0, p1, d=True)
                     
-            elif type == 'suppress':
-                p = log['p']
-                s = log['s']
-                p.set_suppressed(s, d=True)
-                
-            elif type == 'ap':
-                n = log['node']
-                p = log['port']
-                n.ap(p=p)
-                
-            elif type == 'rp':
-                n = log['node']
-                p = log['port']
-                n.rp(p=p)
+                case 'val':
+                    e = log['e']
+                    v0, v1 = log['v']
+                    e.set_value(v1)
+                    
+                case 'transform':
+                    n = log['node']
+                    n.transform(form=log['form1'], d=True)
+                        
+                case 'suppress':
+                    p = log['p']
+                    s = log['s']
+                    p.set_suppressed(s, d=True)
+                    
+                case 'ap':
+                    n = log['node']
+                    p = log['port']
+                    n.ap(p=p)
+                    
+                case 'rp':
+                    n = log['node']
+                    p = log['port']
+                    n.rp(p=p)
+                    
+                case 'hp':
+                    n = log['node']
+                    ports = log['ports']
+                    for p in ports:
+                        p.hide()
+                    n.set_port_pos()
+                    
+                case 'sp':
+                    n = log['node']
+                    ports = log['ports']
+                    for p in ports:
+                        p.show()
+                    n.set_port_pos()
                 
         self.log_index += 1
         self.card.set_node_data(self.nodes)
@@ -717,22 +753,23 @@ class Node_Editor(Scene):
             
             if events['ctrl']:
                 
-                if kd.key == pg.K_s:
-                    self.builder.save_card()
-                elif kd.key == pg.K_c:
-                    self.copy_nodes()
-                elif kd.key == pg.K_v:
-                    self.paste_nodes()
-                elif kd.key == pg.K_q:
-                    self.clean_up()
-                elif kd.key == pg.K_z:
-                    self.undo_log()
-                elif kd.key == pg.K_y:
-                    self.redo_log()
-                elif kd.key == pg.K_g:
-                    self.create_new_group_node()
-                elif kd.key == pg.K_u:
-                    self.ungroup_nodes()
+                match kd.key:
+                    case pg.K_s:
+                        self.builder.save_card()
+                    case pg.K_c:
+                        self.copy_nodes()
+                    case pg.K_v:
+                        self.paste_nodes()
+                    case pg.K_q:
+                        self.clean_up()
+                    case pg.K_z:
+                        self.undo_log()
+                    case pg.K_y:
+                        self.redo_log()
+                    case pg.K_g:
+                        self.create_new_group_node()
+                    case pg.K_u:
+                        self.ungroup_nodes()
 
             elif kd.key == pg.K_DELETE:
                 self.delete_nodes()
@@ -763,7 +800,7 @@ class Node_Editor(Scene):
     def draw(self):
         self.window.fill(self.fill_color)
 
-        for n in self.nodes:
+        for n in sorted(self.nodes, key=lambda n: n.layer):
             if n.visible:
                 n.draw(self.window)
 

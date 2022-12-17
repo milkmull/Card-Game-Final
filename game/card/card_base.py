@@ -117,10 +117,9 @@ class Card:
         self.skip_update = False
 
     def register(self, card):
-        if card:
-            if card.cid not in self.memory:
-                self.memory.add(card.cid)
-                return True
+        if card and card is not self and card.cid not in self.memory:
+            self.memory.add(card.cid)
+            return True
                 
     def wipe_memory(self):
         self.memory.clear()

@@ -22,7 +22,8 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
     original_node = node
     node = original_node.copy()
     for p in node.ports:
-        p.set_visible(True)
+        if not p.hidden:
+            p.set_visible(True)
     node.enabled = False
     node.refresh = False
     elements.append(node)
@@ -227,7 +228,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
     found_port = False
 
     for p in node.ports:
-        if p.parent_port:
+        if p.parent_port or p.hidden:
             continue
             
         b = Button.Text_Button(

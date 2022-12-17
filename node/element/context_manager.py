@@ -53,6 +53,24 @@ class Context_Manager(Live_Window):
             buttons.append(b)
             
             add_sep()
+            
+            if any({p.hidden for p in node.ports}):
+                b = Button.Text_Button(
+                    text='Show Ports',
+                    func=node.show_ports,
+                    **button_kwargs
+                )
+                buttons.append(b)
+                
+            if any({p.suppressed and not p.hidden for p in node.ports}):
+                b = Button.Text_Button(
+                    text='Hide Ports',
+                    func=node.hide_ports,
+                    **button_kwargs
+                )
+                buttons.append(b)
+                
+            add_sep()
     
             if node.is_group:
                 b = Button.Text_Button(
@@ -82,7 +100,7 @@ class Context_Manager(Live_Window):
                 )
                 buttons.append(b)
                 
-            if not node.is_group and node.ports:
+            if not node.is_group and any({p.visible for p in node.ports}):
                 b = Button.Text_Button(
                     text='View Output',
                     func=run_output,

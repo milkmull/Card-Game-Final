@@ -3,12 +3,10 @@ import pygame as pg
 from data.constants import (
     SORTED_NAMES_DICT,
     TAGS_DICT,
-    TYPES_DICT,
     DECKS_DICT,
-    REQUESTS_DICT,
-    LOGS_DICT,
-    LOG_KEYS_DICT,
-    EVENTS_DICT
+    WAIT_DICT,
+    WAIT_KEYS_DICT,
+    LOCAL_GROUP_DICT
 )
 
 from . import mapping
@@ -23,7 +21,7 @@ from .get_elements import (
     get_ar_buttons
 )
 
-class Start(Node):
+class Play(Node):
     cat = 'func'
     def __init__(self, id, **kwargs):
         super().__init__(id, tag='func', **kwargs)
@@ -31,24 +29,9 @@ class Start(Node):
         self.set_ports([
             Port(-1, ['flow'])
         ])
-        
-    def _get_start(self):
-        return '\t\tself.reset()\n'
-        
+
     def _get_text(self):
-        return '\n\tdef start(self, player):\n'
-        
-class End(Node):
-    cat = 'func'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, tag='func', **kwargs)
-        
-        self.set_ports([
-            Port(-1, ['flow'])
-        ])
-        
-    def _get_text(self):
-        return '\n\tdef end(self, player):\n'
+        return '\n\tdef play(self):\n'
    
 class If(Node):
     cat = 'flow'
@@ -118,7 +101,7 @@ class Else(Node):
         text = 'else:\n'  
         return text
  
-class If_Else(Node):
+class Ternary(Node):
     cat = 'flow'
     subcat = 'conditional'
     def __init__(self, id, **kwargs):
@@ -232,27 +215,32 @@ class String():
         
     def _get_output(self, p):
         return self.get_port(-1).get_output()
- 
-class Code():
-    cat = 'flow'
-    subcat = 'other'
+        
+class Extend(Node):
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['string']),
-            Port(2, ['flow']),
-            Port(-1, ['flow'])
+            Port(1, Port.get_comparison_types()),
+            Port(-1, ['num'])
         ])
-
-        set_input_element(self.get_port(1), 'code')
-        self.set_port_pos()
         
-    def _get_text(self):
-        val = self.get_port(1).value
-        if 'import' in val:
-            val = 'raise ValueError'
-        return f"{val}\n"
+    def connection_update(self):
+        ip = self.get_port(1)
+        op = self.get_port(-1)
+
+        if ip.connection:
+            t = ip.types[0]
+            if t not in op.types:
+                op.update_types([t])
+        elif 'num' not in op.types:
+            op.update_types(['num'])
+        
+    def _get_default(self, p):
+        return '0'
+        
+    def _get_output(self, p):
+        return self.get_input()
 
 class And(Node):
     cat = 'boolean'
@@ -332,9 +320,11 @@ class Equal(Node):
         elif 'bool' in ip.types:
             return 'True'
         elif 'player' in ip.types:
-            return 'player'
+            return 'self.player'
         elif 'card' in ip.types:
             return 'self'
+        elif 'spot' in ip.types:
+            return 'self.spot'
         else:
             return '[]'
 
@@ -396,6 +386,7 @@ class Max(Node):
         
         self.set_ports([
             Port(1, ['ns'], description='[0, 1, 2...]'),
+            Port(2, ['ns'], description='[0, 1, 2...]'),
             Port(-1, ['num'], description='max value')
         ])
         
@@ -431,9 +422,9 @@ class Add(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['num'], description='x'),
-            Port(2, ['num'], description='y'),
-            Port(-1, ['num'], description='x + y')
+            Port(1, ['num'], description='a'),
+            Port(2, ['num'], description='b'),
+            Port(-1, ['num'], description='a + b')
         ])
         
         set_input_element(self.get_port(1), 'num')
@@ -453,8 +444,8 @@ class Increment(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['num'], description='x'),
-            Port(-1, ['num'], description='x + 1')
+            Port(1, ['num'], description='a'),
+            Port(-1, ['num'], description='a + 1')
         ])
         
     def _get_default(self, p):
@@ -470,8 +461,8 @@ class Decrement(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['num'], description='x'),
-            Port(-1, ['num'], description='x - 1')
+            Port(1, ['num'], description='a'),
+            Port(-1, ['num'], description='a - 1')
         ])
         
     def _get_default(self, p):
@@ -487,9 +478,9 @@ class Subtract(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['num'], description='x'),
-            Port(2, ['num'], description='y'),
-            Port(-1, ['num'], description='x - y')
+            Port(1, ['num'], description='a'),
+            Port(2, ['num'], description='b'),
+            Port(-1, ['num'], description='a - b')
         ])
         
         set_input_element(self.get_port(1), 'num')
@@ -509,9 +500,9 @@ class Multiply(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['num'], description='x'),
-            Port(2, ['num'], description='y'),
-            Port(-1, ['num'], description='x * y')
+            Port(1, ['num'], description='a'),
+            Port(2, ['num'], description='b'),
+            Port(-1, ['num'], description='a * b')
         ])
         
         set_input_element(self.get_port(1), 'num')
@@ -531,8 +522,8 @@ class Negate(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['num'], description='x'),
-            Port(-1, ['num'], description='-x')
+            Port(1, ['num'], description='a'),
+            Port(-1, ['num'], description='-a')
         ])
         
     def _get_default(self, p):
@@ -548,9 +539,9 @@ class Divide(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, ['num'], description='x'),
-            Port(2, ['num'], description='y'),
-            Port(-1, ['num'], description='x / y')
+            Port(1, ['num'], description='a'),
+            Port(2, ['num'], description='b'),
+            Port(-1, ['num'], description='a / b')
         ])
         
         set_input_element(self.get_port(1), 'num')
@@ -587,7 +578,7 @@ class For(Node):
         super().__init__(id, **kwargs)  
         
         self.set_ports([
-            Port(1, ['cs', 'ps', 'ns', 'ss', 'bs'], description='list'),
+            Port(1, ['as', 'cs', 'ps', 'ss', 'ns'], description='list'),
             Port(2, ['flow']),
             Port(-1, ['num'], description='list value'),
             Port(-2, ['process', 'flow']),
@@ -607,18 +598,15 @@ class For(Node):
 
     def get_loop_var(self):
         op = self.get_port(-1)
-        contains = op.types[0]
-        if contains == 'player':
-            loop_var = f'p{self.id}'  
-        elif contains == 'num':  
-            loop_var = f'i{self.id}'
-        elif contains == 'card':
-            loop_var = f'c{self.id}'
-        elif contains == 'string':
-            loop_var = f's{self.id}'
-        elif contains == 'bool':
-            loop_var = f'b{self.id}'
-        return loop_var
+        match op.types[0]:
+            case 'player':
+                return f'p{self.id}'  
+            case 'card':
+                return f'c{self.id}'
+            case 'spot':
+                return f's{self.id}'
+            case 'num':  
+                return f'i{self.id}'
         
     def _get_default(self, p):
         if p == 1:
@@ -639,8 +627,8 @@ class Zipped_For(Node):
         super().__init__(id, **kwargs)  
         
         self.set_ports([
-            Port(1, ['cs', 'ps', 'ns', 'bs', 'ss'], description='list 1'),
-            Port(2, ['cs', 'ps', 'ns', 'bs', 'ss'], description='list 2'),
+            Port(1, ['as', 'cs', 'ps', 'ss', 'ns'], description='list 1'),
+            Port(2, ['as', 'cs', 'ps', 'ss', 'ns'], description='list 2'),
             Port(3, ['flow']),
             Port(-1, ['num'], description='value 1'),
             Port(-2, ['num'], description='value 2'),
@@ -663,17 +651,15 @@ class Zipped_For(Node):
 
     def get_loop_var(self, p):   
         op = self.get_port(p)
-        contains = op.types[0]
-        if contains == 'player':
-            return f'p{self.id}{abs(p)}'  
-        elif contains == 'num':  
-            return f'i{self.id}{abs(p)}'
-        elif contains == 'card':
-            return f'c{self.id}{abs(p)}'
-        elif contains == 'string':
-            return f's{self.id}{abs(p)}'
-        elif contains == 'bool':
-            return f'b{self.id}{abs(p)}'
+        match op.types[0]:
+            case 'player':
+                return f'p{self.id}{abs(p)}'  
+            case 'card':
+                return f'c{self.id}{abs(p)}'
+            case 'spot':
+                return f's{self.id}{abs(p)}'
+            case 'num':  
+                return f'i{self.id}{abs(p)}'
         
     def _get_default(self, p):
         return 'range(1)'
@@ -757,7 +743,7 @@ class Range(Node):
         text = 'range({0}, {1})'.format(*self.get_input()) 
         return text
        
-class User(Node):
+class Player(Node):
     cat = 'player'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)  
@@ -767,7 +753,7 @@ class User(Node):
         ])
 
     def _get_output(self, p):
-        return 'player'
+        return 'self.player'
        
 class All_Players(Node):
     cat = 'player'
@@ -780,46 +766,7 @@ class All_Players(Node):
         ])
 
     def _get_output(self, p):
-        return 'self.get_players()'
-        
-class Stored_Players(Node):
-    cat = 'card attributes'
-    subcat = 'player'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(-1, ['ps'], description='player list')
-        ])
-        
-    def _get_output(self, p):
-        return 'self.players'
-        
-class Stored_Cards(Node):
-    cat = 'card attributes'
-    subcat = 'card'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(-1, ['cs'], description='card list')
-        ])
-        
-    def _get_output(self, p):
-        return 'self.cards'
-        
-class Opponents(Node):
-    cat = 'player'
-    subcat = 'lists'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(-1, ['ps'], description='player list')
-        ])
-        
-    def _get_output(self, p):
-        return 'self.get_opponents(player)'
+        return 'self.game.get_players()'
         
 class Card(Node):
     cat = 'card'
@@ -840,7 +787,7 @@ class Length(Node):
         super().__init__(id, **kwargs)
 
         self.set_ports([
-            Port(1, ['ps', 'cs', 'ns', 'bs'], description='list'),
+            Port(1, ['as', 'ps', 'cs', 'ss', 'ns'], description='list'),
             Port(-1, ['num'], description='length of list')
         ])
         
@@ -870,7 +817,11 @@ class Merge_Lists(Node):
             for p in self.ports:
                 p.set_types(['cs'])
             self.form = 1
-        elif form == 0 or (form is None and 'cs' in op.types):
+        elif form == 2 or (form is None and 'cs' in op.types):
+            for p in self.ports:
+                p.set_types(['ss'])
+            self.form = 2
+        elif form == 0 or (form is None and 'ss' in op.types):
             for p in self.ports:
                 p.set_types(['ps'])
             self.form = 0
@@ -902,29 +853,23 @@ class Contains(Node):
         ip2 = self.get_port(2)
         
         if form == 1 or (form is None and 'num' in ip1.types):
-            ip1.set_types(['string'])
-            set_input_element(ip1, 'string')
-            ip2.set_types(['ss'])
+            ip1.set_types(['player'])
+            set_input_element(ip1, 'player')
+            ip2.set_types(['ps'])
             self.form = 1
             
-        elif form == 2 or (form is None and 'string' in ip1.types):
-            ip1.set_types(['bool'])
-            set_check_element(ip1)
-            ip2.set_types(['bs'])
-            self.form = 2
-            
-        elif form == 3 or (form is None and 'bool' in ip1.types):
-            ip1.set_types(['player'])
-            ip1.clear_element()
-            ip2.set_types(['ps'])
-            self.form = 3
-            
-        elif form == 4 or (form is None and 'player' in ip1.types):
+        elif form == 2 or (form is None and 'player' in ip1.types):
             ip1.set_types(['card'])
             ip2.set_types(['cs'])
-            self.form = 4
+            self.form = 2
             
-        elif form == 0 or (form is None and 'card' in ip1.types):
+        elif form == 3 or (form is None and 'card' in ip1.types):
+            ip1.set_types(['spot'])
+            set_input_element(ip1, 'spot')
+            ip2.set_types(['ss'])
+            self.form = 3
+            
+        elif form == 0 or (form is None and 'spot' in ip1.types):
             ip1.set_types(['num'])
             set_input_element(ip1, 'num')
             ip2.set_types(['ns'])
@@ -965,31 +910,6 @@ class Has_Tag(Node):
         
     def _get_output(self, p):
         text = '({0} in {1}.tags)'.format(*self.get_input())
-        return text
-        
-class Has_Type(Node):
-    cat = 'card'
-    subcat = 'boolean'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['string'], description='type'),
-            Port(2, ['card'], description='card'),
-            Port(-1, ['bool'], description='card is type')
-        ])
-        
-        set_dropdown_element(self.get_port(1), TYPES_DICT, value='play')
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        if p == 1:
-            return "'play'"
-        elif p == 2:
-            return 'self'
-        
-    def _get_output(self, p):
-        text = '({1}.type == {0})'.format(*self.get_input())
         return text
       
 class Get_Name(Node):
@@ -1034,96 +954,8 @@ class Has_Name(Node):
     def _get_output(self, p):
         text = '({1}.name == {0})'.format(*self.get_input())
         return text
-    
-class Find_Owner(Node):
-    cat = 'card'
-    subcat = 'player'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
         
-        self.set_ports([
-            Port(1, ['card'], description='card'),
-            Port(-1, ['player'], description='card owner')
-        ])
-        
-    def _get_default(self, p):
-        return 'self'
-        
-    def _get_output(self, p):
-        text = 'self.game.find_owner({0})'.format(*self.get_input())
-        return text
-
-class Tag_Filter(Node):
-    cat = 'iterator'
-    subcat = 'filter'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['string'], description='tag'),
-            Port(2, ['bool'], description='filter self'),
-            Port(3, ['cs'], description='card list'),
-            Port(-1, ['cs'], description='cards with tag from list')
-        ])
-        
-        set_dropdown_element(self.get_port(1), TAGS_DICT)
-        set_check_element(self.get_port(2))
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        if p == 1:
-            return "''"
-        elif p == 3:
-            return '[]'
-        
-    def _get_output(self, p):
-        ip = self.get_port(2)
-        if ip.connection:
-            if ip.connection_port.value:
-                text = "[x for x in {2} if {0} in x.tags and x != self]"
-            else:
-                text = "[x for x in {2} if {0} in x.tags]"
-        else:
-            text = "[x for x in {2} if {0} in x.tags]"
-        text = text.format(*self.get_input())
-        return text
-        
-class Name_Filter(Node):
-    cat = 'iterator'
-    subcat = 'filter'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['string'], description='name'),
-            Port(2, ['bool'], description='include self'),
-            Port(3, ['cs'], description='list'),
-            Port(-1, ['cs'], description='cards with name from list')
-        ])
-        
-        set_dropdown_element(self.get_port(1), SORTED_NAMES_DICT)
-        set_check_element(self.get_port(2))
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        if p == 1:
-            return "''"
-        elif p == 3:
-            return '[]'
-        
-    def _get_output(self, p):
-        ip = self.get_port(2)
-        if ip.connection:
-            if ip.connection_port.value:
-                text = "[x for x in {2} if x.name == {0} and x != self]"
-            else:
-                text = "[x for x in {2} if x.name == {0}]"
-        else:
-            text = "[x for x in {2} if x.name == {0}]"
-        text = text.format(*self.get_input())
-        return text
-        
-class Custom_Filter(Node):
+class Filter(Node):
     cat = 'iterator'
     subcat = 'filter'
     def __init__(self, id, **kwargs):
@@ -1131,7 +963,7 @@ class Custom_Filter(Node):
         
         self.set_ports([
             Port(1, Port.get_comparison_types(), description='condition'),
-            Port(2, ['cs', 'ps', 'ns', 'ss', 'bs'], description='list'),
+            Port(2, ['cs', 'ps', 'ss', 'ns'], description='list'),
             Port(-1, ['ns'], description='filtered list')
         ])
         
@@ -1169,25 +1001,7 @@ class Custom_Filter(Node):
             ip.node.defaults.clear()
         text = '[{2} for {2} in {1} if {0}]'.format(*input)
         return text
-        
-class Any(Node):
-    cat = 'iterator'
-    subcat = 'operators'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['cs', 'ps', 'ns', 'ss', 'bs'], description='list'),
-            Port(-1, ['bool'], description='any is True')
-        ])
-            
-    def _get_default(self, p):
-        return '[]'
-            
-    def _get_output(self, p):
-        text = 'any({})'.format(*self.get_input())
-        return text
-   
+
 class Gain(Node):
     cat = 'player'
     subcat = 'points'
@@ -1195,51 +1009,29 @@ class Gain(Node):
         super().__init__(id, **kwargs)
 
         self.set_ports([
-            Port(1, ['num'], description='points'),
-            Port(2, ['player']),
-            Port(3, ['flow']),
+            Port(1, ['card'], description='extra card'),
+            Port(2, ['num'], description='points'),
+            Port(3, ['player']),
+            Port(4, ['flow']),
             Port(-1, ['flow'])
         ])
         
-        set_input_element(self.get_port(1), 'num')
+        set_input_element(self.get_port(2), 'num')
         self.set_port_pos()
      
     def _get_default(self, p):
-        if p == 1:
-            return '0'
-        elif p == 2:
-            return 'player'
+        match p:
+            case 1:
+                return 'None'
+            case 2:
+                return '0'
+            case 3:
+                return 'self.player'
         
     def _get_text(self):
-        text = '{1}.gain(self, {0})\n'.format(*self.get_input())
+        text = '{2}.gain({1}, self, extra={0})\n'.format(*self.get_input())
         return text      
 
-class Lose(Node):
-    cat = 'player'
-    subcat = 'points'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)  
-        
-        self.set_ports([
-            Port(1, ['num'], description='points'),
-            Port(2, ['player']),
-            Port(3, ['flow']),
-            Port(-1, ['flow'])
-        ])
-        
-        set_input_element(self.get_port(1), 'num')
-        self.set_port_pos()
-     
-    def _get_default(self, p):
-        if p == 1:
-            return '0'
-        elif p == 2:
-            return 'player'
-        
-    def _get_text(self):
-        text = '{1}.lose(self, {0})\n'.format(*self.get_input())
-        return text      
-        
 class Steal(Node):
     cat = 'player'
     subcat = 'points'
@@ -1247,114 +1039,30 @@ class Steal(Node):
         super().__init__(id, **kwargs)  
         
         self.set_ports([
-            Port(1, ['num'], description='points'),
-            Port(2, ['player']),
-            Port(3, ['player'], description='target'),
-            Port(4, ['flow']),
+            Port(1, ['card'], description='extra card'),
+            Port(2, ['num'], description='points'),
+            Port(3, ['player']),
+            Port(4, ['player'], description='target'),
+            Port(5, ['flow']),
             Port(-1, ['flow'])
         ])
         
-        set_input_element(self.get_port(1), 'num')
+        set_input_element(self.get_port(2), 'num')
         self.set_port_pos()
      
     def _get_default(self, p):
-        if p == 1:
-            return '0'
-        elif p in (2, 3):
-            return 'player'
+        match p:
+            case 1:
+                return 'None'
+            case 2:
+                return '0'
+            case 3 | 4:
+                return 'self.player'
         
     def _get_text(self):
-        text = '{1}.steal(self, {0}, {2})\n'.format(*self.get_input())
+        text = '{2}.steal({1}, self, {3}, extra={0})\n'.format(*self.get_input())
         return text      
-
-class Start_Flip(Node):
-    cat = 'func'
-    subcat = 'flip'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs) 
-        
-        self.set_ports([
-            Port(1, ['flow'])
-        ])
-
-    def _get_text(self):
-        pf = mapping.find_parent_func(self)
-        if pf:
-            if isinstance(pf, (Flip, Roll, Select)):
-                return "self.wait = 'flip'\n"
-        return "player.add_request(self, 'flip')\n"
-        
-    def get_required(self):
-        return ['Flip']
-
-class Flip(Node):
-    cat = 'func'
-    subcat = 'flip'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, tag='func', **kwargs) 
-        
-        self.set_ports([
-            Port(-1, ['bool'], description='flip result'),
-            Port(-2, ['flow'])
-        ])
-            
-    def _get_start(self):
-        return '\t\tself.t_coin = coin\n'
-            
-    def _get_text(self):
-        return '\n\tdef flip(self, player, coin):\n'
-        
-    def _get_output(self, p):
-        if p == -1:
-            return 'coin'
-            
-    def get_required(self):
-        return ['Start_Flip']
-
-class Start_Roll(Node):
-    cat = 'func'
-    subcat = 'roll'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs) 
-        
-        self.set_ports([
-            Port(1, ['flow'])
-        ])
-        
-    def _get_text(self):
-        pf = mapping.find_parent_func(self)
-        if pf:
-            if isinstance(pf, (Flip, Roll, Select)):
-                return "self.wait = 'roll'\n"
-        return "player.add_request(self, 'roll')\n"
-            
-    def get_required(self):
-        return ['Roll']
-
-class Roll(Node):
-    cat = 'func'
-    subcat = 'roll'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, tag='func', **kwargs) 
-        
-        self.set_ports([
-            Port(-1, ['num'], description='roll result'),
-            Port(-2, ['flow'])
-        ])
-
-    def _get_start(self):
-        return '\t\tself.t_roll = dice\n'
-            
-    def _get_text(self):
-        return '\n\tdef roll(self, player, dice):\n'
-        
-    def _get_output(self, p):
-        if p == -1:
-            return 'dice'
-            
-    def get_required(self):
-        return ['Start_Roll']
-            
+          
 class Start_Select(Node):
     cat = 'func'
     subcat = 'select'
@@ -1362,84 +1070,13 @@ class Start_Select(Node):
         super().__init__(id, **kwargs) 
         
         self.set_ports([
-            Port(1, ['flow'])
+            Port(1, ['cs'], description='selection'),
+            Port(2, ['flow'])
         ])
 
     def _get_text(self):
-        pf = mapping.find_parent_func(self)
-        if pf:
-            if isinstance(pf, (Flip, Roll, Select)):
-                return "self.wait = 'select'\n"
-        return "player.add_request(self, 'select')\n"
-        
-    def get_required(self):
-        return ['Get_Selection', 'Select']
-            
-class Get_Selection(Node):
-    cat = 'func'
-    subcat = 'select'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, tag='func', **kwargs) 
-        
-        self.set_ports([
-            Port(-1, ['ps'], description='selection'),
-            Port(-2, ['cs'], description='selection'),
-            Port(-3, ['flow'])
-        ])
-            
-    def _get_start(self):
-        ports = mapping.map_ports(self, [], skip_ip=True)
-        for p in ports:
-            if 'flow' in p.types:
-                if isinstance(p.connection, Return_List):
-                    return ''
-        else:
-            return '\t\tselection = []\n'
-            
-    def _get_text(self):
-        return '\n\tdef get_selection(self, player):\n'
-        
-    def _get_end(self):
-        ports = mapping.map_ports(self, [], skip_ip=True)
-        for p in ports:
-            if 'flow' in p.types:
-                if isinstance(p.connection, Return_List):
-                    return ''
-        else:
-            return '\t\treturn selection\n'
-        
-    def _get_output(self, p):
-        return 'selection'
-        
-    def get_required(self):
-        return ['Start_Select', 'Select']
-        
-class Return_List(Node):
-    cat = 'func'
-    subcat = 'select'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-            
-        self.set_ports([
-            Port(1, ['cs', 'ps'], description='list'),
-            Port(2, ['flow'])
-        ])
-        
-    def connection_update(self):
-        ip = self.get_port(2)
-        if ip.connection:
-            ports = mapping.map_ports(self, [], skip_op=True)
-            for p in ports:
-                if isinstance(p.connection, Get_Selection):
-                    break
-            else:
-                ip.clear()
-        
-    def _get_default(self, p):
-        return '[]'
-        
-    def _get_text(self):
-        return 'return {0}\n'.format(*self.get_input())
+        text = 'self.player.start_select(self, {0})\n'.format(*self.get_input())
+        return text
 
 class Select(Node):
     cat = 'func'
@@ -1448,243 +1085,68 @@ class Select(Node):
         super().__init__(id, tag='func', **kwargs) 
         
         self.set_ports([
-            Port(-1, ['num'], description='number selected'),
-            Port(-2, ['player'], description='selected player'),
-            Port(-3, ['card'], description='selected card'),
-            Port(-4, ['flow'])
+            Port(-1, ['card'], description='selected card'),
+            Port(-2, ['flow'])
         ])
-                
-    def _get_start(self):
-        return (
-            '\t\tif not num:\n'
-                '\t\t\treturn\n'
-            '\t\tsel = player.selected[-1]\n'
-            '\t\tself.t_select = sel\n'
-            '\t\tsel_c = None\n'
-            '\t\tsel_p = None\n'
-            '\t\tif isinstance(sel, Card):\n'
-                '\t\t\tsel_c = sel\n'
-            '\t\telse:\n'
-            '\t\t\tsel_p = sel\n'
-        )
             
     def _get_text(self):
-        return '\n\tdef select(self, player, num):\n'
+        return '\n\tdef select(self, card):\n'
         
     def _get_output(self, p):
-        if p == -1:
-            return 'num'
-        elif p == -2:
-            return 'sel_p'
-        elif p == -3:
-            return 'sel_c'
-            
-    def get_required(self):
-        return ['Start_Select', 'Get_Selection']
-  
-class Return_Bool(Node):
+        return 'card'
+
+class Start_Wait(Node):
     cat = 'func'
-    subcat = 'item and spell'
+    subcat = 'wait'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
         self.set_ports([
-            Port(1, Port.get_comparison_types(), description='return bool'),
+            Port(1, ['string'], description='wait type'),
             Port(2, ['flow'])
         ])
         
-    def connection_update(self):
-        ip = self.get_port(2)
-        if ip.connection:
-            ports = mapping.map_ports(self, [], skip_op=True)
-            for p in ports:
-                if isinstance(p.connection, (Can_Use, Can_Cast)):
-                    break
-            else:
-                ip.clear()
-        
-    def _get_default(self, p):
-        return 'True'
-        
-    def _get_text(self):
-        return 'return {0}\n'.format(*self.get_input())
-
-class Can_Cast(Node):
-    cat = 'func'
-    subcat = 'item and spell'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, tag='func', **kwargs) 
-        
-        self.set_ports([
-            Port(-1, ['bool'], description='can cast'),
-            Port(-2, ['flow'])
-        ])
-            
-    def _get_start(self):
-        return '\t\tcancast = True\n'
-            
-    def _get_text(self):
-        return '\n\tdef can_cast(self, player):\n'
-        
-    def _get_end(self):
-        ports = mapping.map_ports(self, [], skip_ip=True)
-        for p in ports:
-            if 'flow' in p.types:
-                if isinstance(p.connection, Return_Bool):
-                    return ''
-        else:
-            return '\t\treturn cancast\n'
-
-    def _get_output(self, p):
-        if p == -1:
-            return 'cancast'   
-
-class Can_Use(Node):
-    cat = 'func'
-    subcat = 'item and spell'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, tag='func', **kwargs) 
-        
-        self.set_ports([
-            Port(-1, ['bool'], description='can use'),
-            Port(-2, ['flow'])
-        ])
-            
-    def _get_start(self):
-        return '\t\tcanuse = True\n'
-            
-    def _get_text(self):
-        return '\n\tdef can_use(self, player):\n'
-        
-    def _get_end(self):
-        ports = mapping.map_ports(self, [], skip_ip=True)
-        for p in ports:
-            if 'flow' in p.types:
-                if isinstance(p.connection, Return_Bool):
-                    return ''
-        else:
-            return '\t\treturn canuse\n'
-
-    def _get_output(self, p):
-        if p == -1:
-            return 'canuse'             
-  
-class Start_Ongoing(Node):
-    cat = 'func'
-    subcat = 'ongoing'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs) 
-        
-        self.set_ports([
-            Port(1, ['flow'])
-        ])
+        set_dropdown_element(self.get_port(1), WAIT_DICT)
+        self.set_port_pos()
                 
     def _get_text(self):
-        return "self.start_ongoing(player)\n"
+        text = 'self.start_wait({0})'.format(*self.get_input())
+        return text
         
-    def get_required(self):
-        return ['Init_Ongoing', 'Add_To_Ongoing', 'Ongoing']
-        
-class Init_Ongoing(Node):
-    cat = 'func'
-    subcat = 'ongoing'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, tag='func', **kwargs) 
-        
-        self.set_ports([
-            Port(-1, ['flow'])
-        ])
-            
-    def _get_text(self):
-        return '\n\tdef start_ongoing(self, player):\n'
-        
-    def get_required(self):
-        return ['Start_Ongoing', 'Add_To_Ongoing', 'Ongoing']
-        
-class Add_To_Ongoing(Node):
-    cat = 'func'
-    subcat = 'ongoing'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs) 
-        
-        self.set_ports([
-            Port(1, ['string'], description='log type'),
-            Port(2, ['flow']),
-            Port(-1, ['flow'])
-        ])
-
-        set_dropdown_element(self.get_port(1), LOGS_DICT, value='cont')
-        self.set_port_pos()
-        
-    def connection_update(self):
-        ip = self.get_port(2)
-        if ip.connection:
-            ports = mapping.map_ports(self, [], skip_op=True)
-            for p in ports:
-                if isinstance(p.connection, Init_Ongoing):
-                    break
-            else:
-                ip.clear()
-            
     def _get_default(self, p):
         return "''"
-            
-    def _get_text(self):
-        return 'player.add_og(self, {0})\n'.format(*self.get_input())
         
-    def get_required(self):
-        return ['Start_Ongoing', 'Init_Ongoing', 'Ongoing']
-        
-class Ongoing(Node):
+class Run_Wait(Node):
     cat = 'func'
-    subcat = 'ongoing'
+    subcat = 'wait'
     def __init__(self, id, **kwargs):
         super().__init__(id, tag='func', **kwargs) 
         
         self.set_ports([
-            Port(-1, ['log'], description='log info'),
+            Port(-1, ['log'], description='data'),
             Port(-2, ['flow'])
         ])
-        
-    def _get_text(self):
-        return f'\n\tdef ongoing(self, player, {self.get_output(-1)}):\n'
-        
-    def _get_output(self, p):
-        if p == -1:
-            return 'log'
             
-    def get_required(self):
-        return ['Start_Ongoing', 'Init_Ongoing', 'Add_To_Ongoing']
-        
-class End_Ongoing(Node):
+    def _get_text(self):
+        return '\n\tdef run_wait(self, data):\n'
+       
+class End_Wait(Node):
     cat = 'func'
-    subcat = 'ongoing'
+    subcat = 'wait'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
         self.set_ports([
-            Port(1, ['flow'])
+            Port(1, ['flow']),
+            Port(-1, ['flow'])
         ])
-        
-    def connection_update(self):
-        ip = self.get_port(1)
-        if ip.connection:
-            ports = mapping.map_ports(self, [], skip_op=True)
-            for p in ports:
-                if isinstance(p.connection, Ongoing):
-                    break
-            else:
-                ip.clear()
             
     def _get_text(self):
-        return 'player.end_og(self)\n'
-        
-    def get_required(self):
-        return ['Start_Ongoing', 'Init_Ongoing', 'Ongoing']
+        return 'self.end_wait()\n'
 
 class Extract_Value(Node):
     cat = 'func'
-    subcat = 'ongoing'
+    subcat = 'wait'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
@@ -1694,7 +1156,7 @@ class Extract_Value(Node):
             Port(-1, ['num'], description='value')
         ])
         
-        set_dropdown_element(self.get_port(1), LOG_KEYS_DICT)
+        set_dropdown_element(self.get_port(1), WAIT_KEYS_DICT, const=True)
         self.set_port_pos()
         
     def _get_output(self, p):
@@ -1708,16 +1170,11 @@ class Extract_Value(Node):
             return '{}'
         
     def eval_text(self, text):
-        if text == 'c':
-            return 'card'
-        elif text in ('gp', 'lp', 'sp', 'give', 'dice'):
-            return 'num'
-        elif text in ('t', 'deck'):
-            return 'string'
-        elif text in ('u', 'target'):
-            return 'player'
-        elif text == 'coin':
-            return 'bool'
+        match text:
+            case 'card':
+                return 'card'
+            case 'player':
+                return 'player'
         
     def connection_update(self):
         ip = self.get_port(1)
@@ -1727,384 +1184,7 @@ class Extract_Value(Node):
         t = self.eval_text(text)
         if t and t not in op.types:
             op.update_types([t])
-
-class Deploy(Node):
-    cat = 'func'
-    subcat = 'deploy'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs) 
-        
-        self.set_ports([
-            Port(1, ['string'], description='type'),
-            Port(2, ['ps'], description='players to send to'),
-            Port(3, ['card'], description='set stored card'),
-            Port(4, ['player'], description='set stored player'),
-            Port(5, ['flow']),
-            Port(-1, ['flow'])
-        ])
-        
-        set_dropdown_element(self.get_port(1), REQUESTS_DICT)
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        if p == 1:
-            return "''"
-        elif p == 2:
-            return '[]'
-        elif p == 3 or p == 4:
-            return 'None'
-            
-    def _get_text(self):
-        input = self.get_input()
-        request = input[0]
-        if request.strip("'") not in ('', 'flip', 'roll', 'select', 'og'):
-            input[0] = "''"
-        return "self.deploy(player, {1}, {0}, extra_card={2}, extra_player={3})\n".format(*input)
-
-class Get_Flip_Results(Node):
-    cat = 'func'
-    subcat = 'deploy'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['flow']),
-            Port(-1, ['ps'], description='players'),
-            Port(-2, ['bs'], description='flip results'),
-            Port(-3, ['flow'])
-        ])
-        
-    def _get_text(self):
-        input = [self.get_output(-1), self.get_output(-2)]
-        return '{0}, {1} = self.get_flip_results()\n'.format(*input)
-        
-    def _get_output(self, p):
-        if p == -1:
-            return f'players{self.id}'
-        elif p == -2:
-            return f'results{self.id}'
-            
-class Get_Roll_Results(Node):
-    cat = 'func'
-    subcat = 'deploy'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['flow']),
-            Port(-1, ['ps'], description='players'),
-            Port(-2, ['ns'], description='roll results'),
-            Port(-3, ['flow'])
-        ])
-        
-    def _get_text(self):
-        input = [self.get_output(-1), self.get_output(-2)]
-        return '{0}, {1} = self.get_roll_results()\n'.format(*input)
-        
-    def _get_output(self, p):
-        if p == -1:
-            return f'players{self.id}'
-        elif p == -2:
-            return f'results{self.id}'
-            
-class Get_Select_Results(Node):
-    cat = 'func'
-    subcat = 'deploy'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['flow']),
-            Port(-1, ['ps'], description='players'),
-            Port(-2, ['cs'], description='select results'),
-            Port(-3, ['flow'])
-        ])
-        
-    def _get_text(self):
-        input = [self.get_output(-1), self.get_output(-2)]
-        return '{0}, {1} = self.get_select_results()\n'.format(*input)
-        
-    def _get_output(self, p):
-        if p == -1:
-            return f'players{self.id}'
-        elif p == -2:
-            return f'results{self.id}'
-
-class Self_Index(Node):
-    cat = 'card'
-    subcat = 'index'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs) 
-
-        self.set_ports([
-            Port(-1, ['num'])
-        ])
-
-    def _get_output(self, p):
-        return 'player.played.index(self)'
-        
-class Index_Above(Node):
-    cat = 'card'
-    subcat = 'index'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)  
-        
-        self.set_ports([
-            Port(-1, ['num'], description='self index - 1')
-        ])
-
-    def _get_output(self, p):
-        return 'max({player.played.index(self) - 1, 0})'
-        
-class Index_Below(Node):
-    cat = 'card'
-    subcat = 'index'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)  
-        
-        self.set_ports([
-            Port(-1, ['num'], description='self index + 1')
-        ])
-
-    def _get_output(self, p):
-        return 'min({player.played.index(self) + 1, len(player.played)})'
-        
-class Check_Index(Node):
-    cat = 'func'
-    subcat = 'ongoing'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)  
-
-        self.set_ports([
-            Port(1, ['player']),
-            Port(2, ['num'], description='index'),
-            Port(3, ['string'], description='tag'),
-            Port(4, ['flow']),
-            Port(-1, ['card'], description='card at index'),
-            Port(-2, ['bool'], description='new card'),
-            Port(-3, ['flow'])
-        ])
-        
-        set_input_element(self.get_port(2), 'num')
-        set_dropdown_element(self.get_port(3), TAGS_DICT, value='')
-        self.set_port_pos()
- 
-    def _get_default(self, p):
-        if p == 1:
-            return 'player'
-        elif p == 2:
-            return '-1'
-        elif p == 3:
-            return ''
-        
-    def _get_text(self):
-        ip = self.get_port(3)
-        input = self.get_input()
-        if ip.value:
-            text = f"{self.get_output(-2)}, {self.get_output(-1)} = self.check_index({'{0}'}, {'{1}'}, tags=[{'{2}'}])\n"
-        else:
-            text = f"{self.get_output(-2)}, {self.get_output(-1)} = self.check_index({'{0}'}, {'{1}'})\n"
-            input.pop(-1)
-        return text.format(*input)
-        
-    def _get_output(self, p):
-        if p == -1:
-            return f'c{self.id}'
-        elif p == -2:
-            return f'added{self.id}'
        
-class Check_First(Node):
-    cat = 'player'
-    subcat = 'boolean'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['player']),
-            Port(-1, ['bool'], description='player is first')
-        ])
-        
-    def _get_default(self, p):
-        if p == 1:
-            return 'player'
-        
-    def _get_output(self, p):
-        return 'self.game.check_first({0})'.format(*self.get_input())  
-        
-class Check_Last(Node):
-    cat = 'player'
-    subcat = 'boolean'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-            
-        self.set_ports([
-            Port(1, ['player']),
-            Port(-1, ['bool'], description='player is last')
-        ])
-        
-    def _get_default(self, p):
-        if p == 1:
-            return 'player'
-        
-    def _get_output(self, p):
-        return 'self.game.check_last({0})'.format(*self.get_input())  
-
-class Draw_Cards(Node):
-    cat = 'player'
-    subcat = 'get cards'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['string'], description='type'),
-            Port(2, ['num'], description='number of cards'),
-            Port(3, ['player']),
-            Port(4, ['flow']),
-            Port(-1, ['cs'], description='cards'),
-            Port(-2, ['flow'])
-        ])
-        
-        set_dropdown_element(self.get_port(1), TYPES_DICT, 'play')
-        set_input_element(self.get_port(2), 'num')
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        if p == 1:
-            return "'treasure'"
-        elif p == 2:
-            return '1'
-        elif p == 3:
-            return 'player'
-        
-    def _get_text(self):
-        input = self.get_input()
-        input.insert(0, self.get_output(-1))
-        return "{0} = {3}.draw_cards({1}, num={2})\n".format(*input)
-        
-    def _get_output(self, p):
-        return f'seq{self.id}'
-        
-class Is_Event(Node):
-    cat = 'card'
-    subcat = 'boolean'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['string'], description='event name'),
-            Port(-1, ['bool'], description='event has name')
-        ])
-        
-        set_dropdown_element(self.get_port(1), EVENTS_DICT)
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        return "''"
-        
-    def _get_output(self, p):
-        return 'self.game.is_event({0})'.format(*self.get_input())
-                
-class Play_Card(Node):
-    cat = 'player'
-    subcat = 'use cards'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['card']),
-            Port(2, ['player']),
-            Port(3, ['flow']),
-            Port(-1, ['flow'])
-        ])
-        
-    def _get_default(self, p):
-        if p == 1:
-            return 'self'
-        elif p == 2:
-            return 'player'
-        
-    def _get_text(self):
-        return "{1}.play_card({0})\n".format(*self.get_input())
-           
-class Copy_Card(Node):
-    cat = 'card'
-    subcat = 'operators'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['card']),
-            Port(-1, ['card'], description='card copy')
-        ])
-        
-    def _get_default(self, p):
-        return 'self'
-
-    def _get_output(self, p):
-        return "{0}.copy()".format(*self.get_input())
-
-class Set_Extra_Card(Node):
-    cat = 'card attributes'
-    subcat = 'card'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['card'], description='new extra card'),
-            Port(2, ['flow']),
-            Port(-1, ['flow'])
-        ])
-            
-    def _get_text(self):
-        return 'self.extra_card = {0}\n'.format(*self.get_input())
-        
-    def _get_default(self, p):
-        return 'None'
-
-class Get_Extra_Card(Node):
-    cat = 'card attributes'
-    subcat = 'card'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(-1, ['card'], description='extra card')
-        ])
-            
-    def _get_output(self, p):
-        return 'self.extra_card'   
-        
-class Set_Extra_Player(Node):
-    cat = 'card attributes'
-    subcat = 'player'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['player'], description='new extra player'),
-            Port(2, ['flow']),
-            Port(-1, ['flow'])
-        ])
-            
-    def _get_text(self):
-        return 'self.extra_player = {0}\n'.format(*self.get_input())
-        
-    def _get_default(self, p):
-        return 'None'
-
-class Get_Extra_Player(Node):
-    cat = 'card attributes'
-    subcat = 'player'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(-1, ['player'], description='extra player')
-        ])
-            
-    def _get_output(self, p):
-        return 'self.extra_player' 
-        
 class Index(Node):
     cat = 'iterator'
     subcat = 'index'
@@ -2125,13 +1205,17 @@ class Index(Node):
         ip = self.get_port(2)
         op = self.get_port(-1)
         
-        if form == 1 or (form is None and 'ps' in ip.types):
+        if form == 1 or (form is None and 'ss' in ip.types):
             ip.set_types(['cs'])
             op.set_types(['card'])
             self.form = 1
-        elif form == 0 or (form is None and 'cs' in ip.types):
+        elif form == 2 or (form is None and 'cs' in ip.types):
             ip.set_types(['ps'])
             op.set_types(['player'])
+            self.form = 2
+        elif form == 0 or (form is None and 'ps' in ip.types):
+            ip.set_types(['ss'])
+            op.set_types(['spot'])
             self.form = 0
             
     def _get_output(self, p):
@@ -2142,134 +1226,24 @@ class Index(Node):
             return '-1'
         elif p == 2:
             return "player.string_to_deck('played')"
-        
-class Safe_Index(Node):
-    cat = 'iterator'
-    subcat = 'index'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['num'], description='index'),
-            Port(2, ['ps'], description='list'),
-            Port(-1, ['player'], description='list value at index')
-        ])
-
-        set_input_element(self.get_port(1), 'num')
-        self.set_port_pos()
-        
-    def tf(self, form=None):
-        ip = self.get_port(2)
-        op = self.get_port(-1)
-        
-        if form == 1 or (form is None and 'ps' in ip.types):
-            ip.set_types(['cs'])
-            op.set_types(['card'])
-            self.form = 1
-        elif form == 0 or (form is None and 'cs' in ip.types):
-            ip.set_types(['ps'])
-            op.set_types(['player'])
-            self.form = 0
             
-    def _get_output(self, p):
-        return '{1}[{0}] if {0} < len({1}) else None'.format(*self.get_input())
-        
-    def _get_default(self, p):
-        if p == 1:
-            return '-1'
-        elif p == 2:
-            return "player.string_to_deck('played')"
-        
-class Discard(Node):
-    cat = 'player'
-    subcat = 'use cards'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['bool'], description='add to discard?'),
-            Port(2, ['player']),
-            Port(3, ['card']),
-            Port(4, ['flow']),
-            Port(-1, ['flow'])
-        ])
-        
-        set_check_element(self.get_port(1))
-        self.set_port_pos()
-
-    def _get_text(self):
-        return '{1}.discard_card({2}, add_to_discrd={0})\n'.format(*self.get_input())
-        
-    def _get_default(self, p):
-        if p == 1:
-            return 'True'
-        elif p == 2:
-            return 'player'
-        elif p == 3:
-            return 'None'
-                     
-class Use_Item(Node):
-    cat = 'player'
-    subcat = 'use cards'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['card'], description='item'),
-            Port(2, ['flow']),
-            Port(-1, ['flow'])
-        ])
-
-    def _get_text(self):
-        return 'player.use_item({0})\n'.format(*self.get_input())
-        
-    def _get_default(self, p):
-        return 'self'
-        
-class Cast_Spell(Node):
-    cat = 'player'
-    subcat = 'use cards'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['card'], description='spell card'),
-            Port(2, ['player'], description='target'),
-            Port(3, ['flow']),
-            Port(-1, ['flow'])
-        ])
-
-    def _get_text(self):
-        return 'player.cast({1}, {0})\n'.format(*self.get_input())
-        
-    def _get_default(self, p):
-        if p == 1:
-            return 'self'
-        elif p == 2:
-            return 'player'
-            
-class Give_Card(Node):
-    cat = 'player'
-    subcat = 'use cards'
+class Copy_Card(Node):
+    cat = 'card'
+    subcat = 'operators'
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
         self.set_ports([
             Port(1, ['card']),
-            Port(2, ['player'], description='target'),
-            Port(3, ['flow']),
-            Port(-1, ['flow'])
+            Port(-1, ['card'], description='card copy')
         ])
-
-    def _get_text(self):
-        return 'player.give_card({0}, {1})\n'.format(*self.get_input())
         
     def _get_default(self, p):
-        if p == 1:
-            return 'self'
-        elif p == 2:
-            return 'player'
-     
+        return 'self'
+
+    def _get_output(self, p):
+        return "{0}.copy()".format(*self.get_input())
+   
 class Get_New_Card(Node):
     cat = 'card'
     def __init__(self, id, **kwargs):
@@ -2299,14 +1273,21 @@ class Transfom(Node):
             Port(1, ['string'], description='new card name'),
             Port(2, ['card']),
             Port(3, ['flow']),
-            Port(-1, ['flow'])
+            Port(-1, ['card'], description='new card'),
+            Port(-2, ['flow'])
         ])
         
         set_dropdown_element(self.get_port(1), SORTED_NAMES_DICT)
         self.set_port_pos()
+        
+    def _get_output(self, p):
+        return f'c{self.id}'
 
     def _get_text(self):
-        return 'self.game.transform({1}, {0})\n'.format(*self.get_input())
+        input = self.get_input()
+        input.insert(0, self.get_output(-1))
+        text = '{0} = self.game.transform({2}, self.game.get_card({1}))\n'.format(*input)
+        return text
         
     def _get_default(self, p):
         if p == 1:
@@ -2314,7 +1295,33 @@ class Transfom(Node):
         elif p == 2:
             return 'self'
             
-class Swap(Node):
+class Transfom2(Node):
+    cat = 'card'
+    subcat = 'operators'
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)
+        
+        self.set_ports([
+            Port(1, ['card'], description='new card'),
+            Port(2, ['card']),
+            Port(3, ['flow']),
+            Port(-1, ['card'], description='new card'),
+            Port(-2, ['flow'])
+        ])
+
+    def _get_output(self, p):
+        return f'c{self.id}'
+
+    def _get_text(self):
+        input = self.get_input()
+        input.insert(0, self.get_output(-1))
+        text = '{0} = self.game.transform({2}, {1})\n'.format(*input)
+        return text
+        
+    def _get_default(self, p):
+        return 'self'
+            
+class Swap_With(Node):
     cat = 'card'
     subcat = 'operators'
     def __init__(self, id, **kwargs):
@@ -2322,126 +1329,17 @@ class Swap(Node):
         
         self.set_ports([
             Port(1, ['card']),
-            Port(2, ['card']),
-            Port(3, ['flow']),
-            Port(-1, ['flow'])
-        ])
-
-    def _get_text(self):
-        return 'self.game.swap({0}, {1})\n'.format(*self.get_input())
-        
-    def _get_default(self, p):
-        return 'self'
-        
-class Get_Discard(Node):
-    cat = 'card'
-    subcat = 'lists'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(-1, ['cs'], description='discarded cards')
-        ])
-        
-    def _get_output(self, p):
-        return 'self.game.get_discard()'
-     
-class Set_Mode(Node):
-    cat = 'card attributes'
-    subcat = 'mode'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-
-        self.set_ports([
-            Port(1, ['num'], description='new mode'),
             Port(2, ['flow']),
             Port(-1, ['flow'])
         ])
-        
-        set_input_element(self.get_port(1), 'num')
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        if p == 1:
-            return '0'
-        
-    def _get_text(self):
-        return 'self.mode = {0}\n'.format(*self.get_input())
-        
-class Get_Mode(Node):
-    cat = 'card attributes'
-    subcat = 'mode'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(-1, ['num'], description='mode')
-        ])
-        
-    def _get_output(self, p):
-        return 'self.mode'
-
-class Steal_Random(Node):
-    cat = 'player'
-    subcat = 'get cards'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs) 
-
-        self.set_ports([
-            Port(1, ['string'], description='type'),
-            Port(2, ['player'], description='target'),
-            Port(3, ['flow']),
-            Port(-1, ['card']),
-            Port(-2, ['flow'])
-        ])
-        
-        set_dropdown_element(self.get_port(1), TYPES_DICT, value='treasure')
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        if p == 1:
-            return "'treasure'"
-        elif p == 2:
-            return 'player'
 
     def _get_text(self):
-        input = self.get_input()
-        input.insert(0, self.get_output(-1))
-        return "{0} = player.steal_random_card({1}, {2})\n".format(*input)
-        
-    def _get_output(self, p):
-        return f'c{self.id}'
-        
-class Add_Card(Node):
-    cat = 'player'
-    subcat = 'get cards'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)   
-        
-        self.set_ports([
-            Port(1, ['player']),
-            Port(2, ['card']),
-            Port(3, ['string'], description='deck'),
-            Port(4, ['num'], description='index'),
-            Port(5, ['flow']),
-            Port(-1, ['flow'])
-        ])
-        
-        set_dropdown_element(self.get_port(3), DECKS_DICT, 'unplayed')
-        set_input_element(self.get_port(4), 'num')
-        self.set_port_pos()
+        text = 'self.swap_with({0})\n'.format(*self.get_input())
+        return text
         
     def _get_default(self, p):
-        if p == 1:
-            return 'player'
-        elif p == 4:
-            return '-1'
-        else:
-            return 'None'
-
-    def _get_text(self):
-        return "{0}.add_card({1}, deck_string={2}, i={3})\n".format(*self.get_input())
-                
+        return 'self'
+              
 class Get_Deck(Node):
     cat = 'player'
     subcat = 'lists'
@@ -2473,7 +1371,7 @@ class Get_Score(Node):
         
         self.set_ports([
             Port(1, ['player']),
-            Port(-1, ['num'], description='points')
+            Port(-1, ['num'], description='score')
         ])
         
     def _get_default(self, p):
@@ -2481,127 +1379,133 @@ class Get_Score(Node):
 
     def _get_output(self, p):
         return "{0}.score".format(*self.get_input())
-        
-class Has_Card(Node):
-    cat = 'player'
-    subcat = 'boolean'
+    
+class Cards_From_Vector(Node):
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
         self.set_ports([
-            Port(1, ['string'], description='card name'),
-            Port(2, ['player']),
-            Port(-1, ['bool'], description='player has card')
+            Port(1, ['num'], description='dx'),
+            Port(2, ['num'], description='dy'),
+            Port(3, ['num'], description='steps'),
+            Port(4, ['num'], description='da'),
+            Port(5, ['bool'], description='condition'),
+            Port(6, ['bool'], description='stop on empty'),
+            Port(7, ['bool'], description='stop on fail'),
+            Port(8, ['bool'], description='reverse'),
+            Port(-1, ['cs'], description='cards')
         ])
         
-        set_dropdown_element(self.get_port(1), SORTED_NAMES_DICT)
+        set_input_element(self.get_port(1), 'num')
+        set_input_element(self.get_port(2), 'num')
+        set_input_element(self.get_port(3), 'num')
+        set_input_element(self.get_port(4), 'num')
+        set_check_element(self.get_port(6))
+        self.get_port(6).hide()
+        set_check_element(self.get_port(7))
+        set_check_element(self.get_port(8))
+        self.get_port(8).hide()
         self.set_port_pos()
         
     def _get_default(self, p):
-        if p == 1:
-            return 'self.name'
-        elif p == 2:
-            return 'player'
+        match p:
+            case 1 | 2:
+                return '0'
+            case 3:
+                return '1'
+            case 4:
+                return '360'
+            case 5:
+                return 'True'
+            case 6 | 7 | 8:
+                return 'False'
 
     def _get_output(self, p):
-        return "{1}.has_card({0})".format(*self.get_input())
+        ipp = mapping.find_all_input_ports(self)
+        for ip in ipp:
+            if 'card' in ip.types:
+                ip.node.defaults[ip.port] = 'c'
+                
+        text = (
+            'self.spot.cards_from_vector('
+                '({0}, {1}), '
+                'steps={2}, '
+                'da={3}, '
+                'check=lambda c: {4}, '
+                'stop_on_empty={5}, '
+                'stop_on_fail={6}, '
+                'reverse={7}'
+            ')'
+        ).format(*self.get_input())
+        return text
         
-class Is_Player(Node):
-    cat = 'player'
-    subcat = 'boolean'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs) 
-
-        self.set_ports([
-            Port(1, ['card', 'player']),
-            Port(-1, ['bool'])
-        ])
-        
-    def _get_default(self, p):
-        return 'player'
-
-    def _get_output(self):
-        return "({0}.type == 'player')".format(*self.get_input())        
-        
-class Is_Card(Node):
-    cat = 'card'
-    subcat = 'boolean'
+class Get_Spot_Group(Node):
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
         self.set_ports([
-            Port(1, ['card', 'player']),
-            Port(-1, ['bool'])
+            Port(1, ['string'], description='group'),
+            Port(-1, ['ss'], description='spots')
+        ])
+        
+        set_dropdown_element(self.get_port(1), LOCAL_GROUP_DICT, const=True)
+        self.set_port_pos()
+        
+    def _get_output(self, p):
+        text = 'self.spot.get_spot_group({0})'.format(*self.get_input())
+        return text
+        
+class Get_Card_Group(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['string'], description='group'),
+            Port(2, ['bool'], description='check'),
+            Port(-1, ['cs'], description='spots')
+        ])
+        
+        set_dropdown_element(self.get_port(1), LOCAL_GROUP_DICT, const=True)
+        self.set_port_pos()
+        
+    def _get_default(self, p):
+        return 'True'
+        
+    def _get_output(self, p):
+        ipp = mapping.find_all_input_ports(self)
+        for ip in ipp:
+            if 'card' in ip.types:
+                ip.node.defaults[ip.port] = 'c'
+                
+        text = 'self.spot.get_card_group({0}, check=lambda c: {1})'.format(*self.get_input())
+        return text
+        
+class Register(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['card']),
+            Port(-1, ['bool'], description='new card?')
         ])
         
     def _get_default(self, p):
         return 'self'
 
-    def _get_output(self):
-        return "isinstance({0}, card_base.Card)".format(*self.get_input())  
-        
-class Get_Shop(Node):
-    cat = 'card'
-    subcat = 'lists'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(-1, ['cs'], description='shop cards')
-        ])
-        
     def _get_output(self, p):
-        return 'self.game.get_shop()'
+        return 'self.register({})'.format(*self.get_input())
         
-class Buy_Card(Node):
-    cat = 'player'
-    subcat = 'get cards'
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-        
-        self.set_ports([
-            Port(1, ['bool'], description='free?'),
-            Port(2, ['card']),
-            Port(3, ['flow']),
-            Port(-1, ['card']),
-            Port(-2, ['flow'])
-        ])
-        
-        set_check_element(self.get_port(1))
-        self.set_port_pos()
-        
-    def _get_default(self, p):
-        if p == 1:
-            return 'False'
-        elif p == 2:
-            return 'self'
-            
-    def _get_text(self):
-        text = 'player.buy_card({1}.uid, free={0})\n'
-        return text.format(*self.get_input())
-        
-class Random_Cards(Node):
-    cat = 'card'
+class Get_Player(Node):
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
         self.set_ports([
-            Port(1, ['string'], description='type'),
-            Port(2, ['num'], description='number of cards'),
-            Port(-1, ['cs'], description='cards')
+            Port(1, ['card']),
+            Port(-1, ['player'], description='owner')
         ])
         
-        set_dropdown_element(self.get_port(1), TYPES_DICT, value='play')
-        set_input_element(self.get_port(2), 'num')
-        self.set_port_pos()
-        
     def _get_default(self, p):
-        if p == 1:
-            return "'play'"
-        elif p == 2:
-            return '1'
-        
+        return 'self'
+
     def _get_output(self, p):
-        text = "self.game.draw_cards(type={0}, num={1})"
-        return text.format(*self.get_input())
-        
+        return '{0}.player'.format(*self.get_input())

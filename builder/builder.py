@@ -3,7 +3,7 @@ Tk().withdraw()
 
 import pygame as pg
 
-from data.constants import TYPES_DICT, TAGS_DICT, WEIGHTS
+from data.constants import TAGS_DICT, WEIGHTS
 
 from .custom_card_base import Card
 from node.editor import Node_Editor

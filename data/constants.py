@@ -109,15 +109,6 @@ TAGS_DICT = {
         'plant': None
     }
 }
-    
-TYPES_DICT = {
-    'event': None,
-    'item': None,
-    'landscape': None,
-    'play': None,
-    'spell': None,
-    'treasure': None,
-}
 
 DECKS_DICT = {
     'active_spells': None,
@@ -129,58 +120,24 @@ DECKS_DICT = {
     'unplayed': None
 }
 
-REQUESTS_DICT = {
-    'flip': None,
-    'roll': None,
-    'select': None,
-    'og': None
+WAIT_DICT = {
+    'nt': None
 }
 
-LOGS_DICT = {
-    'buy': None,
-    'cast': None,
-    'cfe': None,
-    'cont': None,
-    'draw': None,
-    'dre': None,
-    'gp': None,
-    'lp': None,
-    'p': None,
-    'sp': None,
-    'ui': None
+WAIT_KEYS_DICT = {
+    'player': None,
+    'card': None
 }
 
-LOG_KEYS_DICT = {
-    'c': None,
-    'coin': None,
-    'deck': None,
-    'dice': None,
-    'give': None,
-    'gp': None,
-    'lp': None,
-    'sp': None,
-    't': None,
-    'target': None,
-    'u': None
-}
-
-EVENTS_DICT = {
-    'fishing trip': None,
-    'flu': None,
-    'harvest': None,
-    'hunting season': None,
-    'item frenzy': None,
-    'negative zone': None,
-    'sand storm': None,
-    'spell reverse': None,
-    'sunny day': None,
-    'parade': None,
-    'wind gust': None
+LOCAL_GROUP_DICT = {
+    'border': None,
+    'corner': None,
+    'around': None,
+    'row': None,
+    'column': None,
+    'x': None,
+    'y': None
 }
 
 with open(NODE_DATA_FILE, 'r') as f:
     NODE_DATA = list(json.load(f))
-        
-        
-        
-        

@@ -276,6 +276,9 @@ class Player_Base:
         })
         
     def steal(self, sp, card, target, extra=None):
+        if target is self:
+            return
+            
         sp *= card.multiplier
         sp = target.rob(sp)
         if not sp:

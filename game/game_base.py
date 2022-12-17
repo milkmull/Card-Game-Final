@@ -108,6 +108,9 @@ class Game_Base:
         for p in self.players:
             if p.pid == pid:
                 return p
+                
+    def get_players(self):
+        return self.players.copy()
 
 # card stuff
      
@@ -182,6 +185,9 @@ class Game_Base:
         self.wait.pop(card.cid, None)
         
     def transform(self, card, new_card):
+        if card.name is new_card:
+            return card
+            
         spot = card.spot
         card.spot.clear_card()
         card.total_clear()

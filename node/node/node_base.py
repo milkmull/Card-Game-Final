@@ -41,6 +41,7 @@ def pack(_nodes):
                 'added': p.added,
                 'suppressed': p.suppressed,
                 'visible': p.visible,
+                'hidden': p.hidden,
                 'types': p.types,
                 'element_value': p.value
             }
@@ -92,6 +93,7 @@ def unpack(data, manager=None, map=True):
             added = ports[port]['added']
             suppressed = ports[port]['suppressed']
             visible = ports[port]['visible']
+            hidden = ports[port]['hidden']
             types = ports[port]['types']
             element_value = ports[port]['element_value']
             if added:
@@ -103,6 +105,10 @@ def unpack(data, manager=None, map=True):
             p0.set_types(types)
             p0.suppressed = suppressed
             p0.visible = visible
+            if hidden:
+                p0.hide()
+            elif p0.hidden:
+                p0.show()
             p0.parent_port = parent_port
             if parent_port:
                 p0.remove_child(p0.label)
@@ -302,18 +308,17 @@ class Port(Element):
         'string',
         'ps',
         'cs',
-        'ns',
         'ss', 
-        'bs',
+        'ns',
         'player',
-        'card'
+        'card',
+        'spot'
     ]
     contains_dict = {
         'ps': 'player',
         'cs': 'card',
-        'ns': 'num',
-        'ss': 'string',
-        'bs': 'bool'
+        'ss': 'spot',
+        'ns': 'num'
     }
     desc_cache = {}
 
@@ -401,6 +406,7 @@ class Port(Element):
         self.connection_port = None
         self.wire = None
         self.suppressed = False
+        self.hidden = False
         
         self.rect = pg.Rect(0, 0, Port.SIZE, Port.SIZE)
 
@@ -525,10 +531,26 @@ class Port(Element):
                     's': suppressed,
                     'p': self
                 })
+                
+    def hide(self):
+        self.hidden = True
+        self.turn_off()
+        
+    def show(self):
+        self.hidden = False
+        self.turn_on()
 
     def get_parent_port(self):
-        if self.parent_port is not None:
+        if self.parent_port:
             return self.node.get_port(self.parent_port)
+            
+    def get_parent_visible(self):
+        visible = False
+        if self.parent_port:
+            p = self.node.get_port(self.parent_port)
+            if p and p.visible:
+                visible = True
+        return visible
         
 # type stuff
         
@@ -597,7 +619,7 @@ class Port(Element):
                         Port.new_connection(ap, self)
                         Port.close_active_port()
                     elif 'flow' not in self.types and self.port < 0:
-                        Port.new_connection(self.copy(), ap.active_port)
+                        Port.new_connection(self.copy(), ap)
                         Port.close_active_port()
 
             elif button == 3:
@@ -627,47 +649,47 @@ class Port(Element):
     def color(self):
         if not self.types:
             return (0, 0, 0)
-        main_type = self.types[0]
-        if main_type == 'bool':
-            return (255, 255, 0)
-        elif main_type == 'player':
-            return (255, 0, 0)
-        elif main_type in ('cs', 'ps', 'ns', 'ss', 'bs'):
-            return (0, 255, 0)
-        elif main_type == 'log':
-            return (255, 128, 0)
-        elif main_type == 'num':
-            return (0, 0, 255)
-        elif main_type == 'string':
-            return (255, 0, 255)
-        elif main_type == 'card':
-            return (145, 30, 180)
-        elif main_type == 'process':
-            return (128, 128, 128)
-        elif main_type == 'flow':
-            return (255, 255, 255)
-        else:
-            return (100, 100, 100)
+        match self.types[0]:
+            case 'bool':
+                return (255, 255, 0)
+            case 'player':
+                return (255, 0, 0)
+            case 'as' | 'ps' | 'cs' | 'ss' | 'ns':
+                return (0, 255, 0)
+            case 'log':
+                return (255, 128, 0)
+            case 'num':
+                return (0, 0, 255)
+            case 'string':
+                return (255, 0, 255)
+            case 'card':
+                return (145, 30, 180)
+            case 'process':
+                return (128, 128, 128)
+            case 'flow':
+                return (255, 255, 255)
+            case 'spot':
+                return (0, 161, 255)
+            case _:
+                return (100, 100, 100)
 
     @property
     def contains_color(self):
-        if 'ps' in self.types and 'cs' in self.types:
+        if 'as' in self.types:
             return (0, 255, 0)
         elif 'ps' in self.types:
             return (255, 0, 0)
         elif 'cs' in self.types:
             return (145, 30, 180)
+        elif 'ss' in self.types:
+            return (0, 161, 255)
         elif 'ns' in self.types:
             return (0, 0, 255)
-        elif 'ss' in self.types:
-            return (255, 0, 255)
-        elif 'bs' in self.types:
-            return (255, 255, 0)
         else:
             return (0, 255, 0)
 
     def draw(self, surf):
-        if getattr(self.parent_port, 'visible', False):
+        if self.get_parent_visible():
             return
         
         r = self.rect.width // 2 if not self.suppressed else 2
@@ -842,6 +864,14 @@ class Node(Dragger, Element):
         self.nid = id
         
     @property
+    def layer(self):
+        return self.nid
+        
+    @layer.setter
+    def layer(self, layer):
+        pass
+        
+    @property
     def color(self):
         return (89, 90, 123)
         
@@ -926,7 +956,7 @@ class Node(Dragger, Element):
         op = self.get_output_ports()
         ex = []
         for p in op.copy():
-            if (not self.is_group and p.parent_port) or (self.is_group and getattr(p.parent_port, 'visible', False)):
+            if (not self.is_group and p.parent_port) or (self.is_group and p.get_parent_visible()):
                 op.remove(p)
                 ex.append(p)
 
@@ -938,7 +968,8 @@ class Node(Dragger, Element):
             p.layer = -i
             self.add_child(p, current_offset=True)
                 
-            y += p.total_rect.height + Node.PORT_SPACING
+            if not p.hidden:
+                y += p.total_rect.height + Node.PORT_SPACING
                 
         for p in ex:
             p.set_node(self)
@@ -1127,7 +1158,37 @@ class Node(Dragger, Element):
                 'node': self,
                 'port': p
             })
+            
+    def hide_ports(self):
+        hidden = []
+        for p in self.ports:
+            if p.suppressed:
+                p.hide()
+                hidden.append(p)
+        self.set_port_pos()
         
+        if hidden and self.manager:
+            self.manager.add_log({
+                't': 'hp',
+                'node': self,
+                'ports': hidden
+            })
+                
+    def show_ports(self):
+        shown = []
+        for p in self.ports:
+            if p.hidden:
+                p.show()
+                shown.append(p)
+        self.set_port_pos()
+        
+        if shown and self.manager:
+            self.manager.add_log({
+                't': 'sp',
+                'node': self,
+                'ports': shown
+            })
+                
 # drag stuff
 
     @property
@@ -1174,7 +1235,7 @@ class Node(Dragger, Element):
         return self.background_rect.collidepoint(pg.mouse.get_pos())
         
     def context_click(self):
-        return self.get_hit() and not any({p.hit or (p.element.hit if p.element else False) for p in self.ports})
+        return self.get_hit() and not any({p.hit or (p.element.hit if p.element else False) for p in self.ports}) 
         
     def click_up(self, button):
         if self.manager:
@@ -1270,8 +1331,12 @@ class Group_Node(Node):
             if n.visible:
                 return n
         
-    def reset_ports(self):
-        self.set_ports(self.get_group_ports(ports=self.visible_ports))
+    def reset_ports(self, method):
+        if method == 'del':
+            self.set_ports(self.visible_ports.copy())
+        else:
+            self.set_ports(self.get_group_ports(ports=self.visible_ports.copy()))
+        self.set_port_pos()
    
     def set_rel_node_pos(self):
         rel_node_pos = {}
@@ -1289,6 +1354,13 @@ class Group_Node(Node):
         
     def get_visible_ports(self):
         return self.ports.copy()
+        
+    def sort_ports(self):
+        ipp = self.get_input_ports()
+        ipp.sort(key=lambda p: 10 if 'process' in p.types else 11 if 'flow' in p.types else p.port)
+        opp = self.get_output_ports()
+        opp.sort(key=lambda p: 10 if 'process' in p.types else 11 if 'flow' in p.types else abs(p.port))
+        self.ports = (opp + ipp)
         
     def get_group_ports(self, ports=[]):
         ipp = []
@@ -1332,16 +1404,23 @@ class Group_Node(Node):
         
     def set_visible_ports(self):
         self.visible_ports = self.ports.copy()
+        
+    def kill(self, method='del', d=False):
+        if method == 'del':
+            self.set_visible_ports()
+        super().kill(method=method, d=d)
 
     def ungroup(self):
         self.set_visible_ports()
         sx, sy = self.rect.center
+        self.show_ports()
         for n in self.nodes:
             n.turn_on()
             n.held = False
             n.group_node = None
             for p in n.ports:
-                p.turn_on()
+                if not p.hidden:
+                    p.turn_on()
             rx, ry = self.rel_node_pos[n]
             n.rect.center = (sx + rx, sy + ry)
             n.set_port_pos()
