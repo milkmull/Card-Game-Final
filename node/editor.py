@@ -860,7 +860,7 @@ class Node_Editor(Scene):
         elif any(self.scroll_vel):
             self.scroll_screen(dx=self.scroll_vel[0], dy=self.scroll_vel[1])
             
-        if events['ctrl'] and not events['cursor_set']:
+        if self.scroll_anchor or (events['ctrl'] and not events['cursor_set']):
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_SIZEALL)
 
     def update(self):   

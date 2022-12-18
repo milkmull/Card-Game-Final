@@ -35,6 +35,11 @@ class Base_Loop:
         events['all'] = event_batch
         events['p'] = pg.mouse.get_pos()
         
+        mbd = False
+        mbu = False
+        kd = False
+        ku = False
+        
         for e in event_batch:
         
             match e.type:
@@ -43,21 +48,37 @@ class Base_Loop:
                     events['q'] = e
                     
                 case pg.MOUSEBUTTONDOWN:
-                    events['mbd'] = e
+                    if not mbd:
+                        events['mbd'] = e
+                        mbd = True
+                    else:
+                        pg.event.post(e)
                 case pg.MOUSEBUTTONUP:
-                    events['mbu'] = e
+                    if not mbu:
+                        events['mbu'] = e
+                        mbu = True
+                    else:
+                        pg.event.post(e)
                     
                 case pg.MOUSEWHEEL:
                     events['mw'] = e
                 
                 case pg.KEYDOWN:
-                    events['kd'] = e
+                    if not kd:
+                        events['kd'] = e
+                        kd = True
+                    else:
+                        pg.event.post(e)
                     if e.key == pg.K_ESCAPE:
                         events['e'] = e
                     elif e.key == pg.K_RCTRL or e.key == pg.K_LCTRL:
                         cls.CTRL = True
                 case pg.KEYUP:
-                    events['ku'] = e
+                    if not ku:
+                        events['ku'] = e
+                        ku = True
+                    else:
+                        pg.event.post(e)
                     if e.key == pg.K_RCTRL or e.key == pg.K_LCTRL:
                         cls.CTRL = False
                         

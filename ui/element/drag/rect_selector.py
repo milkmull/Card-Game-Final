@@ -26,6 +26,10 @@ class Rect_Selector(Base_Element):
         self.line_width = line_width
         
     @property
+    def open(self):
+        return self.anchor is not None
+        
+    @property
     def selected(self):
         return [d for d in self.selection if d.selected]
         
@@ -46,11 +50,12 @@ class Rect_Selector(Base_Element):
                 if mbd.button == 1:
                     self.anchor = mbd.pos
                     events['clicked'] = self
-
-            if (mbu := events.get('mbu')):
-                if mbu.button == 1:
-                    self.select()
-                    self.anchor = None
+        
+        print(events)
+        if (mbu := events.get('mbu')):
+            if mbu.button == 1:
+                self.select()
+                self.anchor = None
         
     def update(self):
         if self.anchor:

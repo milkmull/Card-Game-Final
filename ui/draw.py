@@ -2,6 +2,8 @@ import math
 
 import pygame as pg
 
+from .math.bezier import bezier_points
+
 def aaline(surf, color, start_pos, end_pos, width=1):
     x0, y0 = start_pos
     x1, y1 = end_pos
@@ -47,26 +49,19 @@ def aaline(surf, color, start_pos, end_pos, width=1):
 def aalines(surf, color, closed, points, width=1):
     for i in range(-closed, len(points) - 1):
         aaline(surf, color, points[i], points[i + 1], width=width)
-        
-def _point_on_bezier(points, t):
-    q = list(points)
-    for k in range(1, len(points)):
-        for i in range(len(points) - k):
-            q[i] = (1 - t) * q[i][0] + t * q[i + 1][0], (1 - t) * q[i][1] + t * q[i + 1][1]
-    return (round(q[0][0]), round(q[0][1]))
 
 def bezier(surf, color, points, width=1, samples=20):
-    new_points = [_point_on_bezier(points, i / samples) for i in range(samples + 1)]
+    new_points = bezier_points(points, samples)
     aalines(surf, color, False, new_points, width=width)
     
 def dashed_bezier(surf, color, points, width=1, samples=20):
-    new_points = [_point_on_bezier(points, i / samples) for i in range(0, samples + 1)]
+    new_points = bezier_points(points, samples)
     for i in range(0, len(new_points) - 1, 2):
         p0 = new_points[i]
         p1 = new_points[i + 1]
         aaline(surf, color, p0, p1, width=width)
     
-def circle(surf, color, center, radius):
+def aacircle(surf, color, center, radius):
     x, y = center
     pg.gfxdraw.aacircle(surf, x, y, radius, color)
     pg.gfxdraw.filled_circle(surf, x, y, radius, color)

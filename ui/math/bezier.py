@@ -1,6 +1,31 @@
 import math
 import random
 
+def _point_on_bezier(points, t):
+    q = list(points)
+    for k in range(1, len(points)):
+        for i in range(len(points) - k):
+            q[i] = (1 - t) * q[i][0] + t * q[i + 1][0], (1 - t) * q[i][1] + t * q[i + 1][1]
+    return (round(q[0][0]), round(q[0][1]))
+    
+def bezier_points(points, samples=20):
+    return [_point_on_bezier(points, i / samples) for i in range(0, samples + 1)]
+    
+def bezier_structure(start, end, max_pad=50):
+    ox, oy = start
+    ix, iy = end
+    
+    cx = (ox + ix) // 2
+    cy = (oy + iy) // 2 
+        
+    dx = max(ix - ox, -max_pad)
+    if dx > 0:
+        return (start, (cx, oy), (cx, iy), end)
+        
+    xmin = ix + dx
+    xmax = ox - dx
+    return (start, (xmax, oy), (xmax, cy), (xmin, cy), (xmin, iy), end)
+
 class Bezier:
     
     RAND = random.Random()

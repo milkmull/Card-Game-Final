@@ -10,6 +10,7 @@ from ui.element.base.element import Element
 from ui.element.standard.textbox import Textbox
 from ui.element.drag.dragger import Dragger
 from ui.math import line
+import ui.math.bezier as bezier
 import ui.draw
 
 from .element.logged_input import Logged_Label_Input as Input
@@ -156,28 +157,23 @@ class Wire:
             self.ip = p0
         self.op.wire = self
         self.ip.wire = self
-
-        self.points = self.find_points()
-        self.dashed_points = line.segment(self.points)
+        
+        self.bezier_points = bezier.bezier_points(self.bezier_structure())
 
         self.bad = False
-        self.last_pos = (
-            self.op.rect.center,
-            self.ip.rect.center
-        )
+        self.last_pos = (self.op.rect.center, self.ip.rect.center)
 
     def check_intersect(self, a, b):
-        for i in range(len(self.points) - 1):
-            c = self.points[i]
-            d = self.points[i + 1]
+        for i in range(len(self.bezier_points) - 1):
+            c = self.bezier_points[i]
+            d = self.bezier_points[i + 1]
             if line.intersect(a, b, c, d):
                 return True
                     
     def check_break(self, a, b):
-        if self.op.visible:
-            if self.check_intersect(a, b):
-                self.op.clear()
-                return True
+        if self.op.visible and self.check_intersect(a, b):
+            self.op.clear()
+            return True
                 
     def is_bad(self):
         onode = self.op.node
@@ -191,8 +187,8 @@ class Wire:
     def clip(self):
         Node.del_wire(self)
         
-    def find_points(self):
-        return line.bezier_structure(self.op.rect.center, self.ip.rect.center)
+    def bezier_structure(self):
+        return bezier.bezier_structure(self.op.rect.center, self.ip.rect.center)
      
     def update(self):
         update_points = False
@@ -202,14 +198,10 @@ class Wire:
             self.bad = bad
             update_points = True
             
-        current_pos = (
-            self.op.rect.center,
-            self.ip.rect.center
-        )
+        current_pos = (self.op.rect.center, self.ip.rect.center)
 
         if update_points or current_pos != self.last_pos:
-            self.points = self.find_points()
-            self.dashed_points = line.segment(self.points)
+            self.bezier_points = bezier.bezier_points(self.bezier_structure())
             
         self.last_pos = current_pos
 
@@ -217,9 +209,12 @@ class Wire:
         self.update()
         if self.op.visible and self.ip.visible:
             if not self.bad:
-                ui.draw.bezier(surf, self.op.color, self.points, width=3)
+                ui.draw.aalines(surf, self.op.color, False, self.bezier_points, width=3)
             else:
-                ui.draw.dashed_bezier(surf, self.op.color, self.points, width=3)
+                for i in range(0, len(self.bezier_points) - 1, 2):
+                    p0 = self.bezier_points[i]
+                    p1 = self.bezier_points[i + 1]
+                    ui.draw.aaline(surf, self.op.color, p0, p1, width=3)
 
 class Port(Element):
     ACTIVE_PORT = None
