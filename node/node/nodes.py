@@ -32,6 +32,18 @@ class Play(Node):
 
     def _get_text(self):
         return '\n\tdef play(self):\n'
+        
+class Update(Node):
+    cat = 'func'
+    def __init__(self, id, **kwargs):
+        super().__init__(id, tag='func', **kwargs)
+        
+        self.set_ports([
+            Port(-1, ['flow'])
+        ])
+
+    def _get_text(self):
+        return '\n\tdef update(self):\n'
    
 class If(Node):
     cat = 'flow'
@@ -221,8 +233,8 @@ class Extend(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port.get_comparison_types()),
-            Port(-1, ['num'])
+            Port(1, Port.get_comparison_types(), description=' '),
+            Port(-1, ['bool'], description=' ')
         ])
         
     def connection_update(self):
@@ -230,14 +242,14 @@ class Extend(Node):
         op = self.get_port(-1)
 
         if ip.connection:
-            t = ip.types[0]
+            t = ip.connection_port.types[0]
             if t not in op.types:
                 op.update_types([t])
-        elif 'num' not in op.types:
-            op.update_types(['num'])
+        elif 'bool' not in op.types:
+            op.update_types(['bool'])
         
     def _get_default(self, p):
-        return '0'
+        return 'True'
         
     def _get_output(self, p):
         return self.get_input()
@@ -909,7 +921,7 @@ class Has_Tag(Node):
             return 'self'
         
     def _get_output(self, p):
-        text = '({0} in {1}.tags)'.format(*self.get_input())
+        text = '{1}.has_tag({0})'.format(*self.get_input())
         return text
       
 class Get_Name(Node):
@@ -952,7 +964,7 @@ class Has_Name(Node):
             return 'self'
         
     def _get_output(self, p):
-        text = '({1}.name == {0})'.format(*self.get_input())
+        text = '{1}.has_name({0})'.format(*self.get_input())
         return text
         
 class Filter(Node):

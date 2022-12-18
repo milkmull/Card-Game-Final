@@ -302,6 +302,11 @@ class Text:
 
     def clear(self):
         self.set_text('')
+        
+    def set_text_size(self, text_size):
+        if text_size != self.text_size:
+            self.text_size = text_size
+            self.fit_text()
 
     def set_text_alignment(
         self,

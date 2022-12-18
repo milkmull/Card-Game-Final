@@ -10,6 +10,7 @@ from ui.element.base.element import Element
 from ui.element.standard.textbox import Textbox
 from ui.element.drag.dragger import Dragger
 from ui.math import line
+import ui.draw
 
 from .element.logged_input import Logged_Label_Input as Input
 
@@ -191,79 +192,7 @@ class Wire:
         Node.del_wire(self)
         
     def find_points(self):
-        start = self.op.rect.center
-        end = self.ip.rect.center
-        
-        ox, oy = start
-        ix, iy = end
-        
-        orect = self.op.parent.background_rect
-        irect = self.ip.parent.background_rect
-        
-        if orect.right < irect.left:
-            cx = (orect.right + irect.left) // 2
-        else:
-            cx = (irect.right + orect.left) // 2
-        if orect.bottom < irect.top:
-            cy = (orect.bottom + irect.top) // 2
-        else:
-            cy = (irect.bottom + orect.top) // 2
-            
-        if ix - Port.SIZE < ox:
-                 
-            r = orect.union(irect)
-            shift = Port.SIZE // 2
-            xmax = orect.right + shift
-
-            if r.height > orect.height + irect.height:
-                xmin = irect.left - shift
-                return (
-                    start,
-                    (xmax, oy),
-                    (xmax, cy),
-                    (xmin, cy),
-                    (xmin, iy),
-                    end
-                )
-                
-            else:
-                if orect.right > irect.left:
-                    if orect.left < irect.left:
-                        xmin = orect.left - shift
-                    else:
-                        xmin = irect.left - shift
-                else:
-                    xmin = orect.left - shift
-            
-                if irect.top == r.top:
-                    ymax = r.bottom + shift
-                    return (
-                        start,
-                        (xmax, oy),
-                        (xmax, ymax),
-                        (xmin, ymax),
-                        (xmin, iy),
-                        end
-                    )
-                    
-                else:
-                    ymin = r.top - shift
-                    return (
-                        start,
-                        (xmax, oy),
-                        (xmax, ymin),
-                        (xmin, ymin),
-                        (xmin, iy),
-                        end
-                    )
-
-        else:
-            return (
-                start,
-                (cx, oy),
-                (cx, iy),
-                end
-            )
+        return line.bezier_structure(self.op.rect.center, self.ip.rect.center)
      
     def update(self):
         update_points = False
@@ -288,12 +217,9 @@ class Wire:
         self.update()
         if self.op.visible and self.ip.visible:
             if not self.bad:
-                pg.draw.lines(surf, self.op.color, False, self.points, width=3)
+                ui.draw.bezier(surf, self.op.color, self.points, width=3)
             else:
-                for i in range(0, len(self.dashed_points) - 1, 2):
-                    p0 = self.dashed_points[i]
-                    p1 = self.dashed_points[i + 1]
-                    pg.draw.line(surf, self.op.color, p0, p1, width=3)
+                ui.draw.dashed_bezier(surf, self.op.color, self.points, width=3)
 
 class Port(Element):
     ACTIVE_PORT = None
@@ -695,7 +621,8 @@ class Port(Element):
         r = self.rect.width // 2 if not self.suppressed else 2
         
         pg.draw.circle(
-            surf, (0, 0, 0),
+            surf, 
+            (0, 0, 0),
             self.rect.center,
             r + 2
         )
@@ -721,7 +648,7 @@ class Port(Element):
             self.wire.draw(surf)
             
     def draw_wire(self, surf):
-        pg.draw.line(
+        ui.draw.aaline(
             surf,
             self.color,
             self.rect.center,
@@ -902,6 +829,13 @@ class Node(Dragger, Element):
             self.rect.width + (2 * Node.OUTLINE_SPACE),
             self.rect.height + (3 * Node.OUTLINE_SPACE) + Node.LABEL_HEIGHT
         )
+        
+    @property
+    def offset_pos(self):
+        if not self.manager:
+            return self.pos
+        dx, dy = self.manager.scroll_offset
+        return (dx + self.rect.left, dy + self.rect.top)
 
     @property
     def is_group(self):
@@ -1123,7 +1057,12 @@ class Node(Dragger, Element):
         super().kill()
         
         if self.manager and not d:
-            self.manager.add_log({'t': 'del', 'node': self, 'm': method, 'pos': self.pos})
+            self.manager.add_log({
+                't': 'del', 
+                'node': self, 
+                'm': method, 
+                'pos': self.offset_pos
+            })
         
     def del_port(self, port):
         self.ports.remove(port)
@@ -1196,11 +1135,8 @@ class Node(Dragger, Element):
         if not self.pickup_pos:
             return (0, 0)
 
-        px, py = self.pos
-        return (
-            px - self.pickup_pos[0],
-            py - self.pickup_pos[1]
-        )
+        px, py = self.offset_pos
+        return (px - self.pickup_pos[0], py - self.pickup_pos[1])
         
     def drop(self, *args, **kwargs):
         dist = super().drop()
@@ -1212,6 +1148,9 @@ class Node(Dragger, Element):
                     'node': self,
                     'dist': dist
                 })
+                
+    def set_pickup(self):
+        self.pickup_pos = self.offset_pos
         
 # input stuff
             

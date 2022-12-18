@@ -8,6 +8,7 @@ from ui.scene.scene import Scene
 
 from .screens.info_sheet import run as run_info_sheet
 
+import ui.draw
 from ui.element.base.style import Style
 from ui.element.elements import Textbox, Button, Check_Box
 from ui.element.drag.dragger import Dragger
@@ -196,6 +197,7 @@ def get_elements(scene):
     
     home_button = Button.Text_Button(
         text='Home',
+        func=scene.go_home,
         **button_kwargs
     )
     home_button.rect.topleft = (x, y)
@@ -258,6 +260,10 @@ class Node_Editor(Scene):
         self.cm = None
   
         self.anchor = None
+        self.scroll_anchor = None
+        self.last_scroll_pos = (0, 0)
+        self.scroll_offset = (0, 0)
+        self.scroll_vel = [0, 0]
 
         self.no_logs = True
         self.log = []
@@ -288,6 +294,9 @@ class Node_Editor(Scene):
         nodes = unpack(data, manager=self)
         for n in nodes:
             self.add_node(n)
+            
+    def transform_pos(self, pos):
+        return (pos[0] + self.camera_pos[0], pos[1] + self.camera_pos[1])
         
 # log stuff
 
@@ -365,7 +374,9 @@ class Node_Editor(Scene):
                     self.add_node(n, d=True) 
                     if n.is_group:
                         n.reset_ports(m)
-                    n.rect.topleft = log['pos']
+                    dx, dy = self.scroll_offset
+                    px, py = log['pos']
+                    n.rect.topleft = (px - dx, py - dy)
                         
                 case 'conn':
                     p0, p1 = log['ports']
@@ -670,7 +681,7 @@ class Node_Editor(Scene):
             map = mapping.map_flow(chunk[0], chunk.copy(), {})
 
             x, y = self.body.center
-            space = 5
+            space = 40
             
             for column in sorted(map):
                 row = [map[column][row] for row in sorted(map[column])]
@@ -689,7 +700,7 @@ class Node_Editor(Scene):
                 
         x = 20
         y = 130
-        space = 5
+        space = 20
         x_shift = 0
         
         chunks.sort(key=lambda chunk: chunk[0].background_rect.unionall([n.background_rect for n in chunk]).width)
@@ -727,6 +738,28 @@ class Node_Editor(Scene):
         if self.cm:
             self.elements.remove(self.cm)
             self.cm = None
+            
+    def go_home(self):
+        sx, sy = self.scroll_offset
+        for n in self.nodes:
+            n.move(sx, sy)
+        self.scroll_offset = (0, 0)
+        self.last_scroll_pos = (0, 0)
+            
+    def scroll_screen(self, dx=0, dy=0):
+        if self.scroll_anchor:
+            x0, y0 = self.last_scroll_pos
+            x1, y1 = pg.mouse.get_pos()
+            self.last_scroll_pos = (x1, y1)
+
+            dx = x1 - x0
+            dy = y1 - y0
+
+        if dx or dy:
+            for n in self.nodes:
+                n.move(dx, dy)
+            sx, sy = self.scroll_offset
+            self.scroll_offset = (sx - dx, sy - dy)
 
 # run stuff
 
@@ -770,23 +803,65 @@ class Node_Editor(Scene):
                         self.create_new_group_node()
                     case pg.K_u:
                         self.ungroup_nodes()
+                        
+            else:
+                match kd.key:
 
-            elif kd.key == pg.K_DELETE:
-                self.delete_nodes()
-                
+                    case pg.K_DELETE:
+                        self.delete_nodes()
+                        
+                    case pg.K_HOME:
+                        self.go_home()
+                    case pg.K_LEFT:
+                        self.scroll_vel[0] = 15
+                    case pg.K_RIGHT:
+                        self.scroll_vel[0] = -15
+                    case pg.K_UP:
+                        self.scroll_vel[1] = 15
+                    case pg.K_DOWN:
+                        self.scroll_vel[1] = -15
+                        
+        if (ku := events.get('ku')):
+            match ku.key:
+            
+                case pg.K_LEFT:
+                    self.scroll_vel[0] = 0
+                case pg.K_RIGHT:
+                    self.scroll_vel[0] = 0
+                case pg.K_UP:
+                    self.scroll_vel[1] = 0
+                case pg.K_DOWN:
+                    self.scroll_vel[1] = 0
+
         if (mbd := events.get('mbd')):
             self.close_context()
-            if not events['clicked'] and mbd.button == 3:
+            
+            if mbd.button == 1 and not events['clicked']:
+                self.scroll_anchor = mbd.pos
+                self.last_scroll_pos = mbd.pos
+                
+            elif mbd.button == 3 and not events['clicked']:
                 self.anchor = mbd.pos
         
         elif (mbu := events.get('mbu')):
-            if mbu.button == 3:
+            if mbu.button == 1:
+                self.scroll_anchor = None
+                
+            elif mbu.button == 3:
                 if not self.cm:
                     if self.anchor and self.anchor_dist < 2:
                         self.new_context()
                 if self.anchor:
                     self.check_wire_break()
                     self.anchor = None
+                    
+        if self.scroll_anchor:
+            self.scroll_screen()
+        elif any(self.scroll_vel):
+            self.scroll_screen(dx=self.scroll_vel[0], dy=self.scroll_vel[1])
+            
+        if events['ctrl'] and not events['cursor_set']:
+            pg.mouse.set_cursor(pg.SYSTEM_CURSOR_SIZEALL)
 
     def update(self):   
         super().update()
@@ -807,15 +882,14 @@ class Node_Editor(Scene):
         if Port.ACTIVE_PORT:
             Port.ACTIVE_PORT.draw_wire(self.window)
             
-        if self.anchor:
-            if self.anchor_dist > 2:
-                pg.draw.line(
-                    self.window,
-                    (0, 0, 255),
-                    self.anchor,
-                    pg.mouse.get_pos(),
-                    width=4
-                )
+        if self.anchor and self.anchor_dist > 2:
+            ui.draw.aaline(
+                self.window,
+                (0, 0, 255),
+                self.anchor,
+                pg.mouse.get_pos(),
+                width=4
+            )
                 
         super().lite_draw()
        

@@ -33,3 +33,31 @@ def segment(points, step=3):
             for y in range(y0, y1, s):
                 dashed_points.append((x, y))
     return dashed_points
+    
+def bezier_structure(start, end, max_pad=50):
+    ox, oy = start
+    ix, iy = end
+    
+    cx = (ox + ix) // 2
+    cy = (oy + iy) // 2 
+        
+    dx = max(ix - ox, -max_pad)
+        
+    if dx <= 0:
+        xmin = ix + dx
+        xmax = ox - dx
+
+        return (start,
+               (xmax, oy),
+               (xmax, cy),
+               (xmin, cy),
+               (xmin, iy),
+                end)
+
+    else:
+        return (
+            start,
+            (cx, oy),
+            (cx, iy),
+            end
+        )
