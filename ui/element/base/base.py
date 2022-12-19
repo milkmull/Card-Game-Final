@@ -20,6 +20,8 @@ class Base_Element:
         events=None,
         update=None,
         draw=None,
+        
+        scalable=False,
 
         **kwargs
     ):
@@ -35,6 +37,8 @@ class Base_Element:
             self.update = MethodType(update, self)
         if draw:
             self.draw = MethodType(draw, self)
+            
+        self.scalable = scalable
 
         self.enabled = enabled
         self.refresh = refresh
@@ -96,6 +100,9 @@ class Base_Element:
         self.refresh = on_off
         self.enabled = on_off
         self.visible = on_off
+        
+    def scale(self, scale):
+        pass
         
     def kill(self):
         pass

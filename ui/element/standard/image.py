@@ -4,11 +4,11 @@ from ..base.image_element import Image_Element
 
 class Image(Image_Element): 
     @classmethod
-    def from_path(cls, path, alpha=False, **kwargs):
+    def from_file(cls, file, alpha=False, **kwargs):
         if alpha:
-            image = pg.image.load(path).convert_alpha()
+            image = pg.image.load(file).convert_alpha()
         else:
-            image = pg.image.load(path).convert()
+            image = pg.image.load(file).convert()
         return cls(image=image, **kwargs)
         
     @classmethod

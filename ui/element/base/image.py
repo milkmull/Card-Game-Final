@@ -100,7 +100,7 @@ class Image:
     def get_scaled(self, size):
         return pg.transform.smoothscale(self.original_image, size)
         
-    def scale(self, size):
+    def scale_image(self, size):
         w, h = size
         if w < 0:
             w = 0
@@ -111,7 +111,7 @@ class Image:
     def scale_by_factor(self, factor):
         if factor != 1:
             w, h = self.image.get_size()
-            self.scale((w * factor, h * factor))
+            self.scale_image((w * factor, h * factor))
 
     def fit_image(self):
         if self.image:

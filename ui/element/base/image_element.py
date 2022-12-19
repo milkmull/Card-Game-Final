@@ -7,15 +7,14 @@ class Image_Element(Element, Image):
             kwargs['auto_fit'] = False
         Element.__init__(self, **kwargs)
         Image.__init__(self, **kwargs)
-        
-    @property
-    def size(self):
-        return self.rect.size
-        
-    @size.setter
-    def size(self, size):
-        self.rect.size = size
+
+    def set_size(self, size):
         self.fit_image()
+        
+    def scale(self, scale):
+        super().scale(scale)
+        if self.scalable:
+            self.scale_image(self.rect.size)
 
     def draw(self, surf):
         self.draw_rect(surf)
