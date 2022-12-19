@@ -6,7 +6,8 @@ from data.constants import (
     DECKS_DICT,
     WAIT_DICT,
     WAIT_KEYS_DICT,
-    LOCAL_GROUP_DICT
+    LOCAL_GROUP_DICT,
+    DIRECTIONS_DICT
 )
 
 from . import mapping
@@ -15,6 +16,7 @@ from .node_base import Node, Port
 from ui.element.elements import Textbox, Input
 from .get_elements import (
     set_input_element,
+    set_vec_element,
     set_check_element,
     set_dropdown_element,
     get_transform_button,
@@ -33,6 +35,30 @@ class Play(Node):
     def _get_text(self):
         return '\n\tdef play(self):\n'
         
+class Remove(Node):
+    cat = 'func'
+    def __init__(self, id, **kwargs):
+        super().__init__(id, tag='func', **kwargs)
+        
+        self.set_ports([
+            Port(-1, ['flow'])
+        ])
+
+    def _get_text(self):
+        return '\n\tdef remove(self):\n'
+        
+class Move(Node):
+    cat = 'func'
+    def __init__(self, id, **kwargs):
+        super().__init__(id, tag='func', **kwargs)
+        
+        self.set_ports([
+            Port(-1, ['flow'])
+        ])
+
+    def _get_text(self):
+        return '\n\tdef move(self):\n'
+        
 class Update(Node):
     cat = 'func'
     def __init__(self, id, **kwargs):
@@ -44,7 +70,7 @@ class Update(Node):
 
     def _get_text(self):
         return '\n\tdef update(self):\n'
-   
+       
 class If(Node):
     cat = 'flow'
     subcat = 'conditional'
@@ -1397,39 +1423,37 @@ class Cards_From_Vector(Node):
         super().__init__(id, **kwargs)   
         
         self.set_ports([
-            Port(1, ['num'], description='dx'),
-            Port(2, ['num'], description='dy'),
-            Port(3, ['num'], description='steps'),
-            Port(4, ['num'], description='da'),
-            Port(5, ['bool'], description='condition'),
-            Port(6, ['bool'], description='stop on empty'),
-            Port(7, ['bool'], description='stop on fail'),
-            Port(8, ['bool'], description='reverse'),
+            Port(1, ['vec'], description='dx, dy'),
+            Port(2, ['num'], description='steps'),
+            Port(3, ['num'], description='da'),
+            Port(4, ['bool'], description='condition'),
+            Port(5, ['bool'], description='stop on empty'),
+            Port(6, ['bool'], description='stop on fail'),
+            Port(7, ['bool'], description='reverse'),
             Port(-1, ['cs'], description='cards')
         ])
         
-        set_input_element(self.get_port(1), 'num')
+        set_vec_element(self.get_port(1))
         set_input_element(self.get_port(2), 'num')
         set_input_element(self.get_port(3), 'num')
-        set_input_element(self.get_port(4), 'num')
+        set_check_element(self.get_port(5))
+        self.get_port(5).hide()
         set_check_element(self.get_port(6))
-        self.get_port(6).hide()
         set_check_element(self.get_port(7))
-        set_check_element(self.get_port(8))
-        self.get_port(8).hide()
+        self.get_port(7).hide()
         self.set_port_pos()
         
     def _get_default(self, p):
         match p:
-            case 1 | 2:
+            case 1:
                 return '0'
-            case 3:
+            case 2:
                 return '1'
-            case 4:
+            case 3:
                 return '360'
-            case 5:
+            case 4:
                 return 'True'
-            case 6 | 7 | 8:
+            case 5 | 6 | 7:
                 return 'False'
 
     def _get_output(self, p):
@@ -1440,13 +1464,13 @@ class Cards_From_Vector(Node):
                 
         text = (
             'self.spot.cards_from_vector('
-                '({0}, {1}), '
-                'steps={2}, '
-                'da={3}, '
-                'check=lambda c: {4}, '
-                'stop_on_empty={5}, '
-                'stop_on_fail={6}, '
-                'reverse={7}'
+                '{0}, '
+                'steps={1}, '
+                'da={2}, '
+                'check=lambda c: {3}, '
+                'stop_on_empty={4}, '
+                'stop_on_fail={5}, '
+                'reverse={6}'
             ')'
         ).format(*self.get_input())
         return text
@@ -1521,3 +1545,249 @@ class Get_Player(Node):
 
     def _get_output(self, p):
         return '{0}.player'.format(*self.get_input())
+        
+class Set_Player(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['player']),
+            Port(2, ['card']),
+            Port(3, ['flow']),
+            Port(-1, ['bool'], description='changed?'),
+            Port(-2, ['flow'])
+        ])
+        
+    def _get_output(self, p):
+        return f'b{self.id}'
+        
+    def _get_default(self, p):
+        match p:
+            case 1:
+                return 'self.player'
+            case 2:
+                return 'self'
+
+    def _get_text(self):
+        input = self.get_input()
+        input.insert(0, self.get_output(-1))
+        return '{0} = {2}.change_player({1})\n'.format(*input)
+        
+class Set_Player2(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['player']),
+            Port(2, ['card']),
+            Port(-1, ['bool'], description='changed?')
+        ])
+
+    def _get_default(self, p):
+        match p:
+            case 1:
+                return 'self.player'
+            case 2:
+                return 'self'
+
+    def _get_output(self, p):
+        return '{1}.change_player({0})'.format(*self.get_input())
+        
+class Get_Spot(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['card']),
+            Port(-1, ['spot'], description='spot')
+        ])
+        
+    def _get_default(self, p):
+        return 'self'
+
+    def _get_output(self, p):
+        return '{0}.spot'.format(*self.get_input())
+        
+class Get_Direction_Of(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['spot']),
+            Port(-1, ['string'], description='direction')
+        ])
+        
+    def _get_default(self, p):
+        return 'self.spot'
+
+    def _get_output(self, p):
+        return 'self.spot.get_direction({0})'.format(*self.get_input())
+        
+class Get_Direction(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(-1, ['string'], description='direction')
+        ])
+
+    def _get_output(self, p):
+        return 'self.direction'
+        
+class Set_Direction(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['string'], description='direction'),
+            Port(2, ['flow']),
+            Port(-1, ['bool'], description='valid direction?'),
+            Port(-2, ['flow'])
+        ])
+        
+        set_dropdown_element(self.get_port(1), DIRECTIONS_DICT, const=True)
+        self.set_port_pos()
+        
+    def _get_default(self, p):
+        return "''"
+        
+    def _get_output(self, p):
+        return f'b{self.id}'
+
+    def _get_text(self):
+        input = self.get_input()
+        input.insert(0, self.get_output(-1))
+        return '{0} = self.set_direction({1})\n'.format(*input)
+        
+class Get_Card_At(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['string'], description='direction'),
+            Port(2, ['bool'], description='check'),
+            Port(3, ['flow']),
+            Port(-1, ['card']),
+            Port(-2, ['flow'])
+        ])
+        
+        set_dropdown_element(self.get_port(1), DIRECTIONS_DICT, const=True)
+        self.set_port_pos()
+        
+    def _get_default(self, p):
+        match p:
+            case 1:
+                return 'self.direction'
+            case 2:
+                return 'True'
+        
+    def _get_output(self, p):
+        return f'c{self.id}'
+
+    def _get_text(self):
+        ipp = mapping.find_all_input_ports(self)
+        for ip in ipp:
+            if 'card' in ip.types:
+                ip.node.defaults[ip.port] = 'c'
+                
+        input = self.get_input()
+        input.insert(0, self.get_output(-1))
+        return '{0} = self.spot.get_card_at({1}, check=lambda c: {2})\n'.format(*input)
+        
+class Move_In(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['string'], description='direction'),
+            Port(2, ['card']),
+            Port(3, ['flow']),
+            Port(-1, ['bool'], description='moved?'),
+            Port(-2, ['flow'], description='direction')
+        ])
+        
+        set_dropdown_element(self.get_port(1), DIRECTIONS_DICT, const=True)
+        self.set_port_pos()
+        
+    def _get_default(self, p):
+        return 'self'
+        
+    def _get_output(self, p):
+        return f'b{self.id}'
+
+    def _get_text(self):
+        input = self.get_input()
+        input.insert(0, self.get_output(-1))
+        return '{0} = {2}.move_in({1})\n'.format(*input)
+        
+class Kill_Card(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['card']),
+            Port(2, ['flow']),
+            Port(-1, ['flow'])
+        ])
+        
+    def _get_default(self, p):
+        return 'self'
+
+    def _get_text(self):
+        return '{0}.kill(self)\n'.format(*self.get_input())
+        
+class Slide_Card(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['vec'], description='dx, dy'),
+            Port(2, ['num'], description='max distance'),
+            Port(3, ['card']),
+            Port(4, ['flow']),
+            Port(-1, ['num'], description='distance'),
+            Port(-2, ['flow'])
+        ])
+        
+        set_vec_element(self.get_port(1))
+        set_input_element(self.get_port(2), 'num')
+        self.get_port(2).hide()
+        self.set_port_pos()
+        
+    def _get_default(self, p):
+        match p:
+            case 1:
+                return '0'
+            case 2:
+                return '99'
+            case 3:
+                return 'self'
+                
+    def _get_output(self, p):
+        return f'c{self.id}'
+
+    def _get_text(self):
+        input = self.get_input()
+        input.insert(0, self.get_output(-1))
+        return '{0} = self.game.grid.slide({3}, {1}, max_dist={2})\n'.format(*input)
+        
+class Add_To_Private(Node):
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, ['player']),
+            Port(2, ['card']),
+            Port(3, ['flow']),
+            Port(-1, ['flow'])
+        ])
+        
+    def _get_default(self, p):
+        match p:
+            case 1:
+                return 'self.player'
+            case 2:
+                return 'self'
+
+    def _get_text(self):
+        return "{0}.add_card('private', {1}.copy())\n".format(*self.get_input())

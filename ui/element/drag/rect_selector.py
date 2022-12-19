@@ -50,8 +50,7 @@ class Rect_Selector(Base_Element):
                 if mbd.button == 1:
                     self.anchor = mbd.pos
                     events['clicked'] = self
-        
-        print(events)
+
         if (mbu := events.get('mbu')):
             if mbu.button == 1:
                 self.select()

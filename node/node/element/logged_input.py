@@ -1,3 +1,4 @@
+from ui.element.base.position import Position
 from ui.element.base.text_element import Text_Element
 from ui.element.standard.input import Input
 
@@ -9,11 +10,8 @@ class Logged_Input(Input):
         **kwargs
     ):
         super().__init__(text=text, **kwargs)
+        self.port = port
         self.last_text = self.text
-        
-    @property
-    def port(self):
-        return self.parent
         
     @property
     def value(self):
@@ -42,9 +40,6 @@ class Logged_Input(Input):
                     'v': (self.last_text, self.text)
                 })
                 self.last_text = self.text
-            
-    def get_input_text(self):
-        return self.port.connection.get_output(self.port.connection_port.true_port).strip("'")
         
     def update(self):
         super().update()
@@ -53,7 +48,7 @@ class Logged_Input(Input):
         
             if self.port.connection:
                 self.set_enabled(False)
-                super(Text_Element, self).set_text(self.get_input_text())
+                super(Text_Element, self).set_text('-')
                 
             elif not self.enabled:
                 self.set_enabled(True)
@@ -80,14 +75,6 @@ class Logged_Num_Input(Logged_Input):
             outline_color=(0, 0, 0),
             outline_width=3
         )
-        
-    def get_input_text(self):
-        out = super().get_input_text()
-        try:
-            out = str(eval(out))
-        except:
-            pass
-        return out
         
     def get_output(self):
         out = super().get_output()
@@ -197,9 +184,53 @@ class Logged_Label_Input(Logged_Input):
     def update(self):
         Input.update(self)
         
+class Logged_Vec_Input(Position):
+    def __init__(
+        self,
+        port,
+        text=''
+    ):
+        super().__init__()
+        self.port = port
+    
+        self.x_val = Logged_Num_Input(port)
+        self.x_val.width = port.node.WIDTH // 2 - 18
+        self.y_val = Logged_Num_Input(port)
+        self.y_val.width = port.node.WIDTH // 2 - 18
+        
+        self.add_child(self.x_val, left_anchor='left', top_anchor='top')
+        self.add_child(self.y_val, left_anchor='left', left_offset=self.x_val.rect.width + 16, top_anchor='top')
+        
+        if text:
+            x, y = text.strip('()').split(', ')
+            self.x_val.set_value(x)
+            self.y_val.set_value(y)
+            
+    @property
+    def hit(self):
+        return self.x_val.hit or self.y_val.hit
+        
+    @property
+    def value(self):
+        return f'({self.x_val.value}, {self.y_val.value})'
+        
+    def get_output(self):
+        return f'({self.x_val.get_output()}, {self.y_val.get_output()})'
+            
+    def set_value(self, text, undo=False):
+        x, y = text.strip('()').split(', ')
+        self.x_val.set_value(x)
+        self.y_val.set_value(y)
+        
+    def reset_value(self, text):
+        x, y = text.strip('()').split(', ')
+        self.x_val.reset_value(x)
+        self.y_val.reset_value(y)
+        
 INPUTS = {
     'num': Logged_Num_Input,
     'string': Logged_String_Input,
     'code': Logged_Code_Input,
-    'label': Logged_Label_Input
+    'label': Logged_Label_Input,
+    'vec': Logged_Vec_Input
 }     

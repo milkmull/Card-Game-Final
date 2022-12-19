@@ -12,6 +12,13 @@ def set_input_element(port, type, value=''):
     )
     port.set_element(i)
     
+def set_vec_element(port, value=''):
+    v = INPUTS['vec'](
+        port,
+        text=value
+    )
+    port.set_element(v)
+    
 def set_check_element(port):
     cb = Check_Box(
         port,

@@ -92,8 +92,7 @@ class Logged_Dropdown(Dropdown):
         
             if self.port.connection:
                 self.set_enabled(False)
-                out = self.port.connection.get_output(self.port.connection_port.true_port).strip("'")
-                super(Text_Element, self).set_text(out)
+                super(Text_Element, self).set_text('-')
                 
             elif not self.enabled:
                 self.set_enabled(True)
@@ -189,8 +188,7 @@ class Logged_Input_Dropdown(Input_Dropdown):
         
             if self.port.connection:
                 self.set_enabled(False)
-                out = self.port.connection.get_output(self.port.connection_port.true_port).strip("'")
-                super(Text_Element, self).set_text(out)
+                super(Text_Element, self).set_text('-')
                 
             elif not self.enabled:
                 self.set_enabled(True)

@@ -33,7 +33,7 @@ class Sunflower(card_base.Card):
     def update(self):
         for c in self.spot.get_card_group('border'):
             if self.register(c):
-                if c.name == self.name:
+                if c.has_name(self.name):
                     self.player.gain(5, self, extra=c)
                 else:
                     self.player.gain(2, self, extra=c)
@@ -48,7 +48,7 @@ class Cow(card_base.Card):
         self.player.start_select(self, self.spot.get_card_group('x', check=lambda c: c.has_tag('plant')))
         
     def select(self, card):
-        self.direction = self.spot.get_direction(card.spot)
+        self.set_direction(self.spot.get_direction(card.spot))
     
     def remove(self):
         c = self.spot.get_card_at(self.direction, check=lambda c: c.has_tag('plant'))
@@ -103,8 +103,7 @@ class Ghost(card_base.Card):
     
     def play(self):
         for c in self.spot.get_card_group('border', check=lambda c: c.has_tag('human')):
-            if self.register(c) and c.player is not self.player:
-                c.swap_player(self.player)
+            if self.register(c) and c.change_player(self.player):
                 self.player.gain(1, self, extra=c)
 
 class Vines(card_base.Card):
@@ -230,7 +229,7 @@ class Fishing_Pole(card_base.Card):
         self.player.start_select(self, self.spot.get_global_card_group('all', check=lambda c: c.has_name('fish')))
         
     def select(self, card):
-        self.player.gain_ownership(card)
+        card.change_player(self.player)
         self.swap_with(card)
                 
 class Pelican(card_base.Card):

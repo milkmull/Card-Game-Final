@@ -233,7 +233,8 @@ class Port(Element):
         'ns',
         'player',
         'card',
-        'spot'
+        'spot',
+        'vec'
     ]
     contains_dict = {
         'ps': 'player',
@@ -379,16 +380,16 @@ class Port(Element):
         
     @property
     def value(self):
-        if self.element:
+        if self.element is not None:
             return self.element.value
             
     @value.setter
     def value(self, value):
-        if self.element:
+        if self.element is not None:
             self.element.reset_value(value)
             
     def _get_output(self):
-        if self.element:
+        if self.element is not None:
             return self.element.get_output()
         return ''
             
@@ -577,7 +578,7 @@ class Port(Element):
                 return (255, 0, 0)
             case 'as' | 'ps' | 'cs' | 'ss' | 'ns':
                 return (0, 255, 0)
-            case 'log':
+            case 'vec':
                 return (255, 128, 0)
             case 'num':
                 return (0, 0, 255)

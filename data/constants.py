@@ -111,13 +111,8 @@ TAGS_DICT = {
 }
 
 DECKS_DICT = {
-    'active_spells': None,
-    'items': None,
-    'landscapes': None,
-    'played': None,
-    'spells': None,
-    'treasure': None,
-    'unplayed': None
+    'public': None,
+    'private': None
 }
 
 WAIT_DICT = {
@@ -137,6 +132,17 @@ LOCAL_GROUP_DICT = {
     'column': None,
     'x': None,
     'y': None
+}
+
+DIRECTIONS_DICT = {
+    'top': None,
+    'topleft': None,
+    'left': None,
+    'bottomleft': None,
+    'bottom': None,
+    'bottomright': None,
+    'right': None,
+    'topright': None
 }
 
 with open(NODE_DATA_FILE, 'r') as f:

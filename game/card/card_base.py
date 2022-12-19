@@ -50,9 +50,12 @@ class Card:
         self.player = player
         self.wipe_memory()
         
-    def swap_player(self, player):
-        if self.player:
+    def change_player(self, player):
+        changed = False
+        if self.player and self.player != player:
             player.gain_ownership(self)
+            changed = True
+        return changed
             
     def set_priority(self, p):
         self.priority = p
@@ -69,6 +72,10 @@ class Card:
         
     def has_name(self, name):
         return self.name == name
+        
+    def set_direction(self, direction):
+        self.direction = direction
+        return direction
         
 # copy stuff
 
