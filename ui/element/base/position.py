@@ -61,7 +61,6 @@ class Position(Base_Element):
         if size is not None:
             width, height = size
         self.rect = pg.Rect(x, y, width, height)
-        self._scale = (1, 1)
 
         self.parent = None
         
@@ -103,30 +102,12 @@ class Position(Base_Element):
 
     @property
     def size(self):
-        sw, sh = self._scale
-        rw, rh = self.rect.size
-        return (rw // sw, rh // sh)
+        return self.rect.size
         
     @size.setter
     def size(self, size):
-        w, h = size
-        sw, sh = self._scale
-        self.rect.size = (w * sw, h * sh)
-        self.set_size(size)
-        
-    def set_size(self, size):
-        pass
-        
-    def get_scale(self):
-        return self._scale
-        
-    def set_scale(self, scale):
-        w, h = self.size
-        sw, sh = scale
-        self.rect.width = math.ceil(w * sw)
-        self.rect.height = math.ceil(h * sh)
-        self._scale = scale
-        
+        self.rect.size = size
+
     @property
     def pos(self):
         return self.rect.topleft

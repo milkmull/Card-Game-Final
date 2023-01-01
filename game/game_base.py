@@ -253,7 +253,7 @@ class Game_Base:
         if self.status != 'playing':
             return 
 
-        if self.grid.full or (not self.public_deck and all({not p.decks['private'] for p in self.players})):
+        if self.grid.full or (not self.public_deck and all(not p.decks['private'] for p in self.players)):
             self.end_game()
             
         else:

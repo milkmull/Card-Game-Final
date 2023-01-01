@@ -9,7 +9,7 @@ class Animation:
         
     @property
     def moving(self):
-        return any({a.attr in ('x', 'y', 'pos') for s in self.active_animations for a in s.sequence})
+        return any(a.attr in ('x', 'y', 'pos') for s in self.active_animations for a in s.sequence)
         
     def get_animation_by_name(self, name):
         for tag, animations in self.animations.items():

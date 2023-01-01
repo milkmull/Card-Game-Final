@@ -52,7 +52,7 @@ def scan_connections(hosts, port):
         t.start()
         threads.append(t)
         
-    while any({t.is_alive() for t in threads}):
+    while any(t.is_alive() for t in threads):
         continue
         
     available = []

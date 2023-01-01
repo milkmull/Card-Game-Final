@@ -1,4 +1,5 @@
 import json
+from enum import IntEnum
 
 import pygame as pg
 
@@ -216,40 +217,87 @@ class Wire:
                     p1 = self.bezier_points[i + 1]
                     ui.draw.aaline(surf, self.op.color, p0, p1, width=3)
 
+class Port_Types(IntEnum):
+    BOOL = 0
+    NUM = 1
+    STRING = 2
+    PLAYER = 3
+    CARD = 4
+    SPOT = 5
+    VEC = 6
+
+    PLAYER_SEQUENCE = 7
+    CARD_SEQUENCE = 8
+    SPOT_SEQUENCE = 9
+    NUM_SEQUENCE = 10
+    
+    ANY_SEQUENCE = 11
+    ANY = 12
+    
+    FLOW = 13
+    PROCESS = 14
+    
+    @staticmethod
+    def get_contains(type):
+        match type:
+            case Port_Types.PLAYER_SEQUENCE:
+                return Port_Types.PLAYER
+            case Port_Types.CARD_SEQUENCE:
+                return Port_Types.CARD
+            case Port_Types.SPOT_SEQUENCE:
+                return Port_Types.SPOT
+            case Port_Types.NUM_SEQUENCE:
+                return Port_Types.NUM
+                
+    @staticmethod
+    def get_description(type):
+        match type:
+            case Port_Types.BOOL:
+                return 'bool'
+            case Port_Types.NUM:
+                return 'num'
+            case Port_Types.STRING:
+                return 'string'
+            case Port_Types.PLAYER:
+                return 'player'
+            case Port_Types.CARD:
+                return 'card'
+            case Port_Types.SPOT:
+                return 'spot'
+            case Port_Types.VEC:
+                return 'vec'
+            case Port_Types.PLAYER_SEQUENCE:
+                return 'players'
+            case Port_Types.CARD_SEQUENCE:
+                return 'cards'
+            case Port_Types.SPOT_SEQUENCE:
+                return 'spots'
+            case Port_Types.NUM_SEQUENCE:
+                return 'numbers'
+            case Port_Types.ANY_SEQUENCE:
+                return 'list'
+            case Port_Types.ANY:
+                return 'any'
+            case Port_Types.FLOW:
+                return 'flow'
+            case Port_Types.PROCESS:
+                return 'process'
+
 class Port(Element):
     ACTIVE_PORT = None
     CLOSE_ACIVE_PORT = False
     
     SIZE = 10
     ELEMENT_SPACING = 6
-    
-    comparison_types = [
-        'bool',
-        'num',
-        'string',
-        'ps',
-        'cs',
-        'ss', 
-        'ns',
-        'player',
-        'card',
-        'spot',
-        'vec'
-    ]
-    contains_dict = {
-        'ps': 'player',
-        'cs': 'card',
-        'ss': 'spot',
-        'ns': 'num'
-    }
+
     desc_cache = {}
 
     @classmethod
-    def get_comparison_types(cls):
+    def get_comparison_types2(cls):
         return cls.comparison_types.copy()
         
     @classmethod
-    def get_list_types(cls):
+    def get_list_types2(cls):
         return list(cls.contains_dict)
         
     @staticmethod
@@ -257,7 +305,7 @@ class Port(Element):
         n0 = p0.node
         n1 = p1.node
         
-        if (any({t in p1.types for t in p0.types}) or force) and p0.is_output() != p1.is_output():
+        if (any(t in p1.types for t in p0.types) or force) and p0.is_output() != p1.is_output():
             p0.connect(n1, p1)
             p1.connect(n0, p0)
             
@@ -333,7 +381,7 @@ class Port(Element):
         self.rect = pg.Rect(0, 0, Port.SIZE, Port.SIZE)
 
         self.label = Textbox(
-            text=description if description else self.types[0] if self.types else '',
+            text=description if description else Port_Types.get_description(self.types[0]) if self.types else '',
             text_size=15,
             size=(Node.WIDTH - 18, 0),
             inf_width=False,
@@ -399,7 +447,7 @@ class Port(Element):
         
     @property
     def is_flow(self):
-        return 'flow' in self.types
+        return Port_Types.FLOW in self.types
  
     def set_element(self, e):
         self.clear_element()
@@ -475,6 +523,9 @@ class Port(Element):
         return visible
         
 # type stuff
+    
+    def has_type(self, type):
+        return type in self.types
         
     def set_types(self, types):
         self.types.clear()
@@ -497,12 +548,12 @@ class Port(Element):
         self.clear()
         
     def get_contains(self):
-        return Port.contains_dict.get(self.types[0])
+        return Port_Types.get_contains(self.types[0])
         
     def check_connection(self, types):
         if not self.connection:
             return True
-        return any({t in types for t in self.connection_port.types})
+        return any(t in types for t in self.connection_port.types)
 
 # connection stuff
 
@@ -527,7 +578,7 @@ class Port(Element):
         if not self.connection:
             self.set_suppressed(False)
             Port.set_active_port(self)
-        elif 'flow' not in self.types and self.port < 0:
+        elif Port_Types.FLOW not in self.types and self.port < 0:
             Port.set_active_port(self.copy())
             
     def click_up(self, button):
@@ -540,7 +591,7 @@ class Port(Element):
                     if not self.connection:
                         Port.new_connection(ap, self)
                         Port.close_active_port()
-                    elif 'flow' not in self.types and self.port < 0:
+                    elif Port_Types.FLOW not in self.types and self.port < 0:
                         Port.new_connection(self.copy(), ap)
                         Port.close_active_port()
 
@@ -572,40 +623,46 @@ class Port(Element):
         if not self.types:
             return (0, 0, 0)
         match self.types[0]:
-            case 'bool':
+            case Port_Types.BOOL:
                 return (255, 255, 0)
-            case 'player':
+            case Port_Types.PLAYER:
                 return (255, 0, 0)
-            case 'as' | 'ps' | 'cs' | 'ss' | 'ns':
+            case (
+                Port_Types.ANY_SEQUENCE | 
+                Port_Types.PLAYER_SEQUENCE | 
+                Port_Types.CARD_SEQUENCE | 
+                Port_Types.SPOT_SEQUENCE |
+                Port_Types.NUM_SEQUENCE
+            ):
                 return (0, 255, 0)
-            case 'vec':
+            case Port_Types.VEC:
                 return (255, 128, 0)
-            case 'num':
+            case Port_Types.NUM:
                 return (0, 0, 255)
-            case 'string':
+            case Port_Types.STRING:
                 return (255, 0, 255)
-            case 'card':
+            case Port_Types.CARD:
                 return (145, 30, 180)
-            case 'process':
+            case Port_Types.PROCESS:
                 return (128, 128, 128)
-            case 'flow':
+            case Port_Types.FLOW:
                 return (255, 255, 255)
-            case 'spot':
+            case Port_Types.SPOT:
                 return (0, 161, 255)
             case _:
                 return (100, 100, 100)
 
     @property
     def contains_color(self):
-        if 'as' in self.types:
+        if Port_Types.ANY_SEQUENCE in self.types:
             return (0, 255, 0)
-        elif 'ps' in self.types:
+        elif Port_Types.PLAYER_SEQUENCE in self.types:
             return (255, 0, 0)
-        elif 'cs' in self.types:
+        elif Port_Types.CARD_SEQUENCE in self.types:
             return (145, 30, 180)
-        elif 'ss' in self.types:
+        elif Port_Types.SPOT_SEQUENCE in self.types:
             return (0, 161, 255)
-        elif 'ns' in self.types:
+        elif Port_Types.NUM_SEQUENCE in self.types:
             return (0, 0, 255)
         else:
             return (0, 255, 0)
@@ -843,7 +900,7 @@ class Node(Dragger, Element):
         
     @property
     def is_flow(self):
-        return any({'flow' in p.types for p in self.ports})
+        return any(p.has_type(Port_Types.FLOW) for p in self.ports)
 
     def set_ports(self, ports):
         self.ports = ports
@@ -1041,7 +1098,7 @@ class Node(Dragger, Element):
         
     def get_in_flow(self):
         for ip in self.get_input_ports():
-            if 'flow' in ip.types:
+            if ip.has_type(Port_Types.FLOW):
                 return ip
             
     def clear_connections(self):
@@ -1170,7 +1227,7 @@ class Node(Dragger, Element):
         return self.background_rect.collidepoint(pg.mouse.get_pos())
         
     def context_click(self):
-        return self.get_hit() and not any({p.hit or (p.element.hit if p.element else False) for p in self.ports}) 
+        return self.get_hit() and not any(p.hit or (p.element.hit if p.element else False) for p in self.ports) 
         
     def click_up(self, button):
         if self.manager:
@@ -1292,9 +1349,9 @@ class Group_Node(Node):
         
     def sort_ports(self):
         ipp = self.get_input_ports()
-        ipp.sort(key=lambda p: 10 if 'process' in p.types else 11 if 'flow' in p.types else p.port)
+        ipp.sort(key=lambda p: 10 if p.has_type(Port_Types.PROCESS) else 11 if p.has_type(Port_Types.FLOW) else p.port)
         opp = self.get_output_ports()
-        opp.sort(key=lambda p: 10 if 'process' in p.types else 11 if 'flow' in p.types else abs(p.port))
+        opp.sort(key=lambda p: 10 if p.has_type(Port_Types.PROCESS) else 11 if p.has_type(Port_Types.FLOW) else abs(p.port))
         self.ports = (opp + ipp)
         
     def get_group_ports(self, ports=[]):
@@ -1322,8 +1379,8 @@ class Group_Node(Node):
                     else:
                         p.turn_off()
 
-        ipp.sort(key=lambda p: 10 if 'process' in p.types else 11 if 'flow' in p.types else p.port)
-        opp.sort(key=lambda p: 10 if 'process' in p.types else 11 if 'flow' in p.types else abs(p.port))
+        ipp.sort(key=lambda p: 10 if p.has_type(Port_Types.PROCESS) else 11 if p.has_type(Port_Types.FLOW) else p.port)
+        opp.sort(key=lambda p: 10 if p.has_type(Port_Types.PROCESS) else 11 if p.has_type(Port_Types.FLOW) else abs(p.port))
         
         return opp + ipp
         

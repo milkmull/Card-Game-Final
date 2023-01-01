@@ -126,21 +126,6 @@ class Base_Loop:
     @property
     def framerate(self):
         return self.clock.get_fps()
-        
-    def resize(self, w, h):
-        pg.display.set_mode((w, h), flags=self.window.get_flags())
-        self.scale()
-        
-    def scale(self):
-        w0, h0 = ui.get_base_size()
-        w1, h1 = self.window.get_size()
-        scale = (w1 / w0, h1 / h0)
-        self._scale = scale
-        for e in self.elements:
-            e.scale(scale)
-            
-    def get_scale(self):
-        return self._scale
 
     def set_status(self, status):
         self.status = status
@@ -179,9 +164,6 @@ class Base_Loop:
 
         if self.can_quit and 'q' in events:
             self.quit()
-            
-        if 'scale' in events:
-            self.scale()
 
         self.sub_events(events)
         

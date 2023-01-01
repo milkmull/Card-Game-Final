@@ -18,7 +18,7 @@ class Grid:
         
     @property
     def full(self):
-        return all({all({spot.card for spot in row.values()}) for row in self.grid.values()})
+        return all(all({spot.card for spot in row.values()}) for row in self.grid.values())
         
     @property
     def cards(self):

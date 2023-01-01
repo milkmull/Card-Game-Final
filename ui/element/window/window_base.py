@@ -80,7 +80,7 @@ class Window_Base:
         return self.children + self.elements
         
     def compare_elements(self, elements):
-        return all({e0 == e1 for e0, e1 in zip(self.elements, elements)})
+        return all(e0 == e1 for e0, e1 in zip(self.elements, elements))
         
     def sort_elements(self, key, reverse=False):
         elements = sorted(self.elements, key=key, reverse=reverse)

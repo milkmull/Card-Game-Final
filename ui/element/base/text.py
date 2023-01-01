@@ -358,7 +358,7 @@ class Text:
         return (mw, mh)
 
     def can_render(self, text):
-        return all({self.font.get_metrics(c, size=1)[0] or c == '\n' for c in text})
+        return all(self.font.get_metrics(c, size=1)[0] or c == '\n' for c in text)
         
     def wrap_to_width(self, text=None, width=0, end='-'):
         text = text or self.text

@@ -47,7 +47,7 @@ class Container:
             d.move(dx, dy)
             
     def swap(self):
-        if not all({isinstance(d, Container) for d in self.data}):
+        if not all(isinstance(d, Container) for d in self.data):
             return Container(rect=self._rect, data=self.data.copy())
 
         data = []
