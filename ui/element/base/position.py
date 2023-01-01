@@ -1,5 +1,3 @@
-import math
-
 import pygame as pg
 
 from .base import Base_Element
@@ -61,7 +59,6 @@ class Position(Base_Element):
         if size is not None:
             width, height = size
         self.rect = pg.Rect(x, y, width, height)
-        self._scale = (1, 1)
 
         self.parent = None
         
@@ -103,30 +100,12 @@ class Position(Base_Element):
 
     @property
     def size(self):
-        sw, sh = self._scale
-        rw, rh = self.rect.size
-        return (rw // sw, rh // sh)
+        return self.rect.size
         
     @size.setter
     def size(self, size):
-        w, h = size
-        sw, sh = self._scale
-        self.rect.size = (w * sw, h * sh)
-        self.set_size(size)
-        
-    def set_size(self, size):
-        pass
-        
-    def get_scale(self):
-        return self._scale
-        
-    def set_scale(self, scale):
-        w, h = self.size
-        sw, sh = scale
-        self.rect.width = math.ceil(w * sw)
-        self.rect.height = math.ceil(h * sh)
-        self._scale = scale
-        
+        self.rect.size = size
+
     @property
     def pos(self):
         return self.rect.topleft
@@ -526,14 +505,7 @@ class Position(Base_Element):
             if o.visible and o.enabled:
                 if o.set_cursor():
                     return True
-                    
-    def scale(self, scale):
-        if self.scalable:
-            self.set_scale(scale)
 
-        for c in self.children:
-            c.scale(scale)
-                    
     def child_events(self, events):
         for c in sorted(self.children, key=lambda c: c.layer, reverse=True):
             if c.enabled:

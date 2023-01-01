@@ -56,10 +56,6 @@ class Scene(Base_Loop):
                 elements |= e.all_children
         return elements
         
-    def scale(self):
-        self.rect = self.body
-        super().scale()
-        
     def get_background(self, opacity):
         surf = self.window.copy()
         over = pg.Surface(surf.get_size()).convert_alpha()

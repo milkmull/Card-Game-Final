@@ -8,9 +8,16 @@ class Text_Element(Element, Text):
         
         if hover_text_color:
             self.hover_text_color = hover_text_color
+         
+    @property
+    def size(self):
+        return self.rect.size
 
-    def set_size(self, size):
-        self.fit_text()
+    @size.setter
+    def size(self, size):
+        if tuple(self.size) != tuple(size):
+            self.rect.size = size
+            self.fit_text()
             
     @property
     def hover_text_color(self):
@@ -41,11 +48,6 @@ class Text_Element(Element, Text):
     def set_text(self, text, force=False, style=None):
         super().set_text(text, force=force, style=style)
         self.run_events('set_text')
-        
-    def scale(self, scale):
-        super().scale(scale)
-        if self.scalable:
-            self.fit_text()
         
     def draw(self, surf):
         self.draw_rect(surf)

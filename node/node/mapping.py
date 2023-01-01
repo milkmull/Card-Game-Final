@@ -1,3 +1,4 @@
+from .node_base import Port_Types
 
 def find_all_input_ports(n, ports=None):
     if ports is None:
@@ -69,7 +70,7 @@ def find_chunk(n, nodes):
 def map_ports(n, ports, skip_ip=False, skip_op=False, all_ports=False, out_type=None, in_type=None): 
     if not skip_ip:
         for ip in n.get_input_ports():
-            if not in_type or (in_type and in_type in ip.types):
+            if not in_type or (in_type and ip.has_type(in_type)):
                 if ip not in ports:
                     if ip.connection:
                         ports.append(ip)
@@ -89,7 +90,7 @@ def map_ports(n, ports, skip_ip=False, skip_op=False, all_ports=False, out_type=
             
     if not skip_op:
         for op in n.get_output_ports():
-            if not out_type or (out_type and out_type in ip.types):
+            if not out_type or (out_type and ip.has_type(out_type)):
                 if op not in ports:
                     if op.connection:
                         ports.append(op)
@@ -115,13 +116,13 @@ def trace_flow(n, nodes, dir):
     if dir == -1:
         for ip in n.get_input_ports():
             if ip.connection:
-                if 'flow' in ip.types and ip.connection not in nodes:
+                if ip.has_type(Port_Types.FLOW) and ip.connection not in nodes:
                     trace_flow(ip.connection, nodes, dir=dir)
                     
     elif dir == 1:
         for op in n.get_output_ports():
             if op.connection:
-                if 'flow' in op.types and op.connection not in nodes:
+                if op.has_type(Port_Types.FLOW) and op.connection not in nodes:
                     trace_flow(op.connection, nodes, dir=dir)
                     
     return nodes
@@ -194,18 +195,18 @@ def check_bad_connection(n0, n1):
         process_port = None
         check_ports = []
         for op in n.get_output_ports():
-            if 'process' in op.types:
+            if op.has_type(Port_Types.PROCESS):
                 process_port = op
                 if op.connection:
                     check_ports.append(op)
-            elif 'flow' in op.types:
+            elif op.has_type(Port_Types.FLOW):
                 out_port = op
             elif op.connection:
                 check_ports.append(op)
                 
         if process_port and check_ports:
             for op in check_ports:
-                ports = map_ports(op.connection, check_ports.copy(), all_ports=True, in_type='flow')
+                ports = map_ports(op.connection, check_ports.copy(), all_ports=True, in_type=Port_Types.FLOW)
                 if out_port in ports:
                     scope_output.add(op)
 
@@ -213,7 +214,7 @@ def check_bad_connection(n0, n1):
     for op in opp:
         if op.connection:
             ports = map_ports(op.connection, [], skip_ip=True)
-            if any({op in ports for op in opp}):
+            if any(op in ports for op in opp):
                 loop_output.add(op)
             
     return (local_funcs, scope_output, loop_output)

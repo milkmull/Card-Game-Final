@@ -1,5 +1,6 @@
 import re
 
+from .node.node_base import Port_Types
 from .node import mapping
 
 class Compiler:
@@ -103,7 +104,7 @@ class Compiler:
         
         process_found = False
         for op in node.get_output_ports():
-            if 'process' in op.types:
+            if op.has_type(Port_Types.PROCESS):
                 if op.connection:
                     self._compile(op.connection, data, tabs=tabs + 1)
                 process_found = True
@@ -114,6 +115,6 @@ class Compiler:
                 data['body'] += ((tabs + 1) * '\t') + 'pass\n'
 
         for op in node.get_output_ports():
-            if 'flow' in op.types and 'process' not in op.types:
+            if op.has_type(Port_Types.FLOW) and not op.has_type(Port_Types.PROCESS):
                 if op.connection:
                     self._compile(op.connection, data, tabs=tabs)

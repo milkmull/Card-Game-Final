@@ -23,12 +23,7 @@ class Base_Loop:
     FPS = 30
     TIME_STEP = 1
     CTRL = False
-    ORIGINAL_SIZE = (0, 0)
-    
-    @classmethod
-    def set_original_size(cls):
-        cls.ORIGINAL_SIZE = pg.display.get_surface().get_size()
-    
+
     @classmethod
     def set_framerate(cls, fps):
         cls.FPS = fps
@@ -53,10 +48,7 @@ class Base_Loop:
 
                 case pg.QUIT:
                     events['q'] = e
-                    
-                case pg.VIDEORESIZE:
-                    events['scale'] = e
-                    
+
                 case pg.MOUSEBUTTONDOWN:
                     if not mbd:
                         events['mbd'] = e
@@ -126,18 +118,6 @@ class Base_Loop:
     @property
     def framerate(self):
         return self.clock.get_fps()
-        
-    def resize(self, w, h):
-        pg.display.set_mode((w, h), flags=self.window.get_flags())
-        self.scale()
-        
-    def scale(self):
-        w0, h0 = ui.get_base_size()
-        w1, h1 = self.window.get_size()
-        scale = (w1 / w0, h1 / h0)
-        self._scale = scale
-        for e in self.elements:
-            e.scale(scale)
             
     def get_scale(self):
         return self._scale
@@ -179,9 +159,6 @@ class Base_Loop:
 
         if self.can_quit and 'q' in events:
             self.quit()
-            
-        if 'scale' in events:
-            self.scale()
 
         self.sub_events(events)
         
