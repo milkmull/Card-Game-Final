@@ -13,7 +13,7 @@ class Animation:
         frames=1,
         delay=0,
         
-        method='linear',
+        method="linear",
         strict=False
  
     ):

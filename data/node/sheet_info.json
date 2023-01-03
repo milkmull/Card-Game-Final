@@ -3,7 +3,7 @@
 		"play": "These are the cards that are played to progress your turn. They can be drawn and can appear in the shop.",
 		"item": "These cards reside in the players' hand. They can be activated whenever the player decides to use them. Equipment cards are a subset of item cards. These cards start an ongoing process while in your hand and are discarded once a condition is met. To make an Equipment card simply add an ongoing process to an Item card. Item cards can appear in the shop.",
         "spell": "These cards reside in in the players' hand. They can be sent to a player at any point during the game. They will continue to affect the player until a condition is met or the round ends. Spell cards can appear in the shop.",
-        "treasure": "These cards are usually obtained through meeting special conditions and tend to grant a sizable reward. Often times, Treasure cards will have an 'End' function which will activate at the end of the round. This rewards the player for holding onto the card for the whole round.",
+        "treasure": "These cards are usually obtained through meeting special conditions and tend to grant a sizable reward. Often times, Treasure cards will have an "End" function which will activate at the end of the round. This rewards the player for holding onto the card for the whole round.",
         "landscape": "These cards are granted to players at the beginning of each round. They allow Play cards that are tagged with their name to take effect twice when played.",
         "event": "These cards are set into play once at the beginning of each round. They effect all players and sometimes will set some bonus condition to be met at the end of the round."
     },
@@ -26,35 +26,35 @@
 		"cont": {
 			"info": "Occurs when the player is updated every frame. Use this tag if you would like the card's ongoing function to run every time the player is updated.",
 			"data": {
-				"t": "'cont'"
+				"t": ""cont""
 			}
 		},
         "draw": {
             "info": "Occurs when a player draws a new card or cards.",
             "data": {
-                "t": "'draw'",
-				"deck": "Deck string where cards were added. Can be 'unplayed', 'items', 'spells', 'treasure' or 'landscapes'.",
+                "t": ""draw"",
+				"deck": "Deck string where cards were added. Can be "unplayed', 'items', 'spells', 'treasure' or 'landscapes".",
                 "c": "List of cards drawn."
             }
         },
         "play": {
             "info": "Occurs when a player plays a card.",
             "data": {
-				"t": "'p'",
+				"t": ""p"",
 				"c": "The card that was played."
 			}
         },
 		"use item": {
-            "info": "Occurs when a player uses an item. This log is triggered through the 'Use Item' node.",
+            "info": "Occurs when a player uses an item. This log is triggered through the "Use Item" node.",
             "data": {
-				"t": "'ui'",
+				"t": ""ui"",
 				"c": "The item card that was used."
 			}
         },
 		"cast spell": {
             "info": "Occurs when a player casts a spell.",
             "data": {
-				"t": "'cast'",
+				"t": ""cast"",
 				"c": "The spell card that was used.",
 				"target": "The target player."
 			}
@@ -62,28 +62,28 @@
 		"buy": {
             "info": "Occurs when a player buys a card from the shop.",
             "data": {
-				"t": "'buy'",
+				"t": ""buy"",
 				"c": "The card that was bought."
 			}
         },
 		"coin flip end": {
             "info": "Occurs when the results of a coin flip have been decided. If you are looking to manually set the results of a coin flip, you should do it once this log appears.",
             "data": {
-				"t": "'cfe'",
+				"t": ""cfe"",
 				"coin": "Flip result as Boolean value."
 			}
         },
 		"dice roll end": {
             "info": "Occurs when the results of a dice roll have been decided. If you are looking to manually set the results of a dice roll, you should do it once this log appears.",
             "data": {
-				"t": "'dre'",
+				"t": ""dre"",
 				"dice": "Roll number."
 			}
         },
 		"steal points": {
             "info": "Occurs when the user steals points from another player.",
             "data": {
-				"t": "'sp'",
+				"t": ""sp"",
 				"c": "The card that was used.",
 				"target": "The player who had points stolen.",
 				"sp": "Number of points that were stolen."
@@ -92,7 +92,7 @@
 		"gain points": {
             "info": "Occurs when the user gains points.",
             "data": {
-				"t": "'gp'",
+				"t": ""gp"",
 				"c": "The card that was used.",
 				"gp": "Number of points that were gained."
 			}
@@ -100,7 +100,7 @@
 		"lose points": {
             "info": "Occurs when the user loses points.",
             "data": {
-				"t": "'lp'",
+				"t": ""lp"",
 				"c": "The card that was used.",
 				"lp": "Number of points that were lost."
 			}

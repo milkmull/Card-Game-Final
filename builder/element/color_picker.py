@@ -6,8 +6,8 @@ from ui.icons.icons import icons
 class Color_Picker(Textbox):
     def __init__(self):
         super().__init__(
-            font_name='icons.ttf',
-            text=icons['eyedropper'],
+            font_name="icons.ttf",
+            text=icons["eyedropper"],
             center_aligned=True,
             text_outline_color=(0, 0, 0),
             text_outline_width=1,
@@ -36,7 +36,7 @@ class Color_Picker(Textbox):
         if self.is_held:
             self.pos = self.home
             self.home = None
-            self.run_events('set_color')
+            self.run_events("set_color")
             
     def events(self, events):
         if self.is_held:

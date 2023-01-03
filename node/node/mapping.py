@@ -195,7 +195,7 @@ def check_bad_connection(n0, n1):
         process_port = None
         check_ports = []
         for op in n.get_output_ports():
-            if op.has_type(Port_Types.PROCESS):
+            if op.is_process:
                 process_port = op
                 if op.connection:
                     check_ports.append(op)

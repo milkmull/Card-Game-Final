@@ -2,34 +2,34 @@ import math
 
 class Spot:
     BORDER_STRINGS = (
-        'left',
-        'top',
-        'right',
-        'bottom'
+        "left",
+        "top",
+        "right",
+        "bottom"
     )
     CORNER_STRINGS = (
-        'topleft',
-        'topright',
-        'bottomright',
-        'bottomleft'
+        "topleft",
+        "topright",
+        "bottomright",
+        "bottomleft"
     )
     AROUND_STRINGS = (
-        'topleft',
-        'top',
-        'topright',
-        'right',
-        'bottomright',
-        'bottom',
-        'bottomleft',
-        'left'
+        "topleft",
+        "top",
+        "topright",
+        "right",
+        "bottomright",
+        "bottom",
+        "bottomleft",
+        "left"
     )
     X_STRINGS = (
-        'left',
-        'right'
+        "left",
+        "right"
     )
     Y_STRINGS = (
-        'top',
-        'bottom'
+        "top",
+        "bottom"
     )
     
     def __init__(self, grid, pos):
@@ -77,11 +77,11 @@ class Spot:
         card.spot = self
 
         self.grid.game.add_log({
-            't': 'sc',
-            'c': (card.cid, card.name),
-            'p': card.player.pid,
-            'pos': self.pos,
-            'parent': parent.cid if parent else None
+            "t": "sc",
+            "c": (card.cid, card.name),
+            "p": card.player.pid,
+            "pos": self.pos,
+            "parent": parent.cid if parent else None
         })
         
     def clear_card(self, kill=False):
@@ -89,10 +89,10 @@ class Spot:
         self.card = None
 
         self.grid.game.add_log({
-            't': 'cc',
-            'c': card.cid,
-            'pos': self.pos,
-            'k': kill
+            "t": "cc",
+            "c": card.cid,
+            "pos": self.pos,
+            "k": kill
         })  
         
 # getting group stuff
@@ -104,24 +104,24 @@ class Spot:
         x, y = self.pos
         
         match dir:
-            case 'left':
+            case "left":
                 return self.grid.grid.get(y, {}).get(x - 1)
-            case 'right':
+            case "right":
                 return self.grid.grid.get(y, {}).get(x + 1)
-            case 'top' | 'up':
+            case "top" | "up":
                 return self.grid.grid.get(y - 1, {}).get(x)
-            case 'bottom' |'down':
+            case "bottom" |"down":
                 return self.grid.grid.get(y + 1, {}).get(x)
-            case 'topleft':
+            case "topleft":
                 return self.grid.grid.get(y - 1, {}).get(x - 1)
-            case 'topright':
+            case "topright":
                 return self.grid.grid.get(y - 1, {}).get(x + 1)
-            case 'bottomleft':
+            case "bottomleft":
                 return self.grid.grid.get(y + 1, {}).get(x - 1)
-            case 'bottomright':
+            case "bottomright":
                 return self.grid.grid.get(y + 1, {}).get(x + 1)
                 
-        raise Exception(f'Invalid direction: {dir}')
+        raise Exception(f"Invalid direction: {dir}")
         
     def get_card_at(self, dir, check=lambda c: True):
         spot = self.get_spot_at(dir)
@@ -130,24 +130,24 @@ class Spot:
 
     def get_spot_group(self, group):
         match group:
-            case 'border':
+            case "border":
                 return [spot for dir in Spot.BORDER_STRINGS if (spot := self.get_spot_at(dir))]
-            case 'corner':
+            case "corner":
                 return [spot for dir in Spot.CORNER_STRINGS if (spot := self.get_spot_at(dir))]
-            case 'around':
+            case "around":
                 return [spot for dir in Spot.AROUND_STRINGS if (spot := self.get_spot_at(dir))]
             
-            case 'row':
+            case "row":
                 return [spot for spot in self.grid.grid[self.pos[1]].values() if spot is not self]
-            case 'column':
+            case "column":
                 return [row[self.pos[0]] for y, row in self.grid.grid.items() if self.pos[1] != y]
                 
-            case 'x':
+            case "x":
                 return [spot for dir in Spot.X_STRINGS if (spot := self.get_spot_at(dir))]
-            case 'y':
+            case "y":
                 return [spot for dir in Spot.Y_STRINGS if (spot := self.get_spot_at(dir))]
                 
-        raise Exception(f'Invalid group: {group}')
+        raise Exception(f"Invalid group: {group}")
                 
     def get_card_group(self, group, check=lambda c: True):
         return [spot.card for spot in self.get_spot_group(group) if spot.card and check(spot.card)]
@@ -167,25 +167,25 @@ class Spot:
         
         if ox == sx + 1:
             if oy == sy:
-                return 'right'
+                return "right"
             elif oy == sy + 1:
-                return 'bottomright'
+                return "bottomright"
             elif oy == sy - 1:
-                return 'topright'
+                return "topright"
         
         elif ox == sx:
             if oy == sy + 1:
-                return 'bottom'
+                return "bottom"
             elif oy == sy - 1:
-                return 'top'
+                return "top"
                 
         elif ox == sx - 1:
             if oy == sy:
-                return 'left'
+                return "left"
             elif oy == sy + 1:
-                return 'bottomleft'
+                return "bottomleft"
             elif oy == sy - 1:
-                return 'topleft'
+                return "topleft"
     
     def cards_from_vector(self, dir, steps=1, da=360, check=lambda c: True, stop_on_empty=False, stop_on_fail=False, reverse=False):    
         cards = []

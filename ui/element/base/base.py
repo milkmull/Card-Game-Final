@@ -10,7 +10,7 @@ class Base_Element:
         
     def __init__(
         self,
-        tag='',
+        tag="",
         layer=0,
         
         enabled=True,

@@ -37,9 +37,9 @@ class Logged_Check_Box(Check_Box):
         if self.port.manager:
             if self.value != self.last_value:
                 self.port.manager.add_log({
-                    't': 'val',
-                    'e': self,
-                    'v': (self.last_value, self.value)
+                    "t": "val",
+                    "e": self,
+                    "v": (self.last_value, self.value)
                 })
                 self.last_value = self.value
             

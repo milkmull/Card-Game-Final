@@ -10,7 +10,7 @@ from ...icons.icons import icons
 
 class TextFitError(Exception):
     def __init__(self, text_size, rect_size):
-        super().__init__(f'Could not fit text of size {text_size} to rect of size {rect_size}')
+        super().__init__(f"Could not fit text of size {text_size} to rect of size {rect_size}")
             
 class Character:
     def __init__(
@@ -51,24 +51,24 @@ class Text:
     OUTLINE_CACHE = {}
     pg.freetype.init()
     STYLE_DICT = {
-        'normal': 0,
-        'strong': 1,
-        'oblique': 2,
-        'underline': 4,
-        'wide': 8,
-        'default': 255
+        "normal": 0,
+        "strong": 1,
+        "oblique": 2,
+        "underline": 4,
+        "wide": 8,
+        "default": 255
     }
     DEFAULT_FONT = pg.freetype.get_default_font()
     FONTS = {
         DEFAULT_FONT: pg.freetype.Font(None),
-        'icons.ttf': pg.freetype.Font('ui/icons/icomoon.ttf')
+        "icons.ttf": pg.freetype.Font("ui/icons/icomoon.ttf")
     }
     for font in FONTS.values():
         font.pad = True
 
     @classmethod
     def load_font(cls, path):
-        name = path.split('/')[-1]
+        name = path.split("/")[-1]
         font = pg.freetype.Font(path)
         font.pad = True
         cls.FONTS[name] = font
@@ -123,25 +123,25 @@ class Text:
     def style_text(text):
         style = {}
         
-        number_style = {'fgcolor': (255, 205, 34)}
-        for match in re.finditer(r'(?<![a-zA-Z0-9^_])([0-9]+)', text):
+        number_style = {"fgcolor": (255, 205, 34)}
+        for match in re.finditer(r"(?<![a-zA-Z0-9^_])([0-9]+)", text):
             style.update({i: number_style for i in range(match.start(), match.end())})
             
-        keyword_style = {'fgcolor': (147, 199, 99), 'style': 1}
+        keyword_style = {"fgcolor": (147, 199, 99), "style": 1}
         for word in keyword.kwlist:
-            for match in re.finditer(fr'(?<![a-zA-Z0-9^_])({word})(?![a-zA-Z0-9^_])', text):
+            for match in re.finditer(fr"(?<![a-zA-Z0-9^_])({word})(?![a-zA-Z0-9^_])", text):
                 style.update({i: keyword_style for i in range(match.start(), match.end())})
        
-        string_style = {'fgcolor': (236, 118, 0)}
-        for match in re.finditer(r'(["\'])(.*?)\1', text):
+        string_style = {"fgcolor": (236, 118, 0)}
+        for match in re.finditer(r"([\"'])(.*?)\1", text):
             style.update({i: string_style for i in range(match.start(), match.end())})
             
-        class_style = {'fgcolor': (160, 130, 189), 'style': 1}
-        for match in re.finditer(r'(?<=class )([a-zA-Z0-9_]+)', text):
+        class_style = {"fgcolor': (160, 130, 189), 'style": 1}
+        for match in re.finditer(r"(?<=class )([a-zA-Z0-9_]+)", text):
             style.update({i: class_style for i in range(match.start(), match.end())})
             
-        def_style = {'fgcolor': (103, 140, 177), 'style': 1}
-        for match in re.finditer(r'(?<=def )([a-zA-Z0-9_]+)', text):
+        def_style = {"fgcolor": (103, 140, 177), "style": 1}
+        for match in re.finditer(r"(?<=def )([a-zA-Z0-9_]+)", text):
             style.update({i: def_style for i in range(match.start(), match.end())})
             
         return style
@@ -149,7 +149,7 @@ class Text:
     def __init__(
         self,
         
-        text='',
+        text="",
         font_name=pg.freetype.get_default_font(),
         text_size=20,
         line_spacing=1,
@@ -192,10 +192,10 @@ class Text:
         self.text_outline_width = text_outline_width
 
         self.alignment = {
-            'right': False,
-            'bottom': False,
-            'centerx': False,
-            'centery': False
+            "right": False,
+            "bottom": False,
+            "centerx": False,
+            "centery": False
         }
         
         if self.size == (0, 0):
@@ -231,15 +231,15 @@ class Text:
     @property
     def text_rect(self):
         r = self.text_surf.get_rect()
-        if self.alignment['right']:
+        if self.alignment["right"]:
             r.right = self.rect.right
-        elif self.alignment['centerx']:
+        elif self.alignment["centerx"]:
             r.centerx = self.rect.centerx
         else:
             r.left = self.rect.left
-        if self.alignment['bottom']:
+        if self.alignment["bottom"]:
             r.bottom = self.rect.bottom
-        elif self.alignment['centery']:
+        elif self.alignment["centery"]:
             r.centery = self.rect.centery
         else:
             r.top = self.rect.top
@@ -274,8 +274,8 @@ class Text:
     @property
     def default_style(self):
         return {
-            'fgcolor': self._text_color,
-            'bgcolor': self.text_background_color
+            "fgcolor": self._text_color,
+            "bgcolor": self.text_background_color
         }
         
     @property
@@ -301,7 +301,7 @@ class Text:
         self.set_text(text)
 
     def clear(self):
-        self.set_text('')
+        self.set_text("")
         
     def set_text_size(self, text_size):
         if text_size != self.text_size:
@@ -320,10 +320,10 @@ class Text:
     ):
         if center:
             centerx = centery = True
-        self.alignment['right'] = right
-        self.alignment['bottom'] = bottom
-        self.alignment['centerx'] = centerx
-        self.alignment['centery'] = centery
+        self.alignment["right"] = right
+        self.alignment["bottom"] = bottom
+        self.alignment["centerx"] = centerx
+        self.alignment["centery"] = centery
         
     def set_text_limits(
         self,
@@ -358,33 +358,33 @@ class Text:
         return (mw, mh)
 
     def can_render(self, text):
-        return all({self.font.get_metrics(c, size=1)[0] or c == '\n' for c in text})
+        return all({self.font.get_metrics(c, size=1)[0] or c == "\n" for c in text})
         
-    def wrap_to_width(self, text=None, width=0, end='-'):
+    def wrap_to_width(self, text=None, width=0, end="-"):
         text = text or self.text
         width = width or self.max_line_width
         
-        new_text = ''
-        words = text.split(' ')
+        new_text = ""
+        words = text.split(" ")
         for word in words:
             r = self.get_text_rect(word)
             if r.width <= width:
-                new_text += ' ' + word
+                new_text += " " + word
                 continue
                 
-            current_word = ''
+            current_word = ""
             for char in word:
                 r = self.get_text_rect(current_word + char + end)
                 if r.width > width:
-                    new_text += ' ' + current_word + end
-                    current_word = ''
+                    new_text += " " + current_word + end
+                    current_word = ""
                 current_word += char
                 
-            new_text += ' ' + current_word
+            new_text += " " + current_word
 
         self.set_text(new_text[1:])
         
-    def chop_to_width(self, text=None, width=0, end='...'):
+    def chop_to_width(self, text=None, width=0, end="..."):
         text = text or self.text
         width = width or self.max_line_width
         
@@ -401,12 +401,12 @@ class Text:
             else:
                 break
 
-        self.set_text(text + end if text else '')
+        self.set_text(text + end if text else "")
 
     def fit_text(self):
-        lines = [line.split(' ') for line in self.text.splitlines()]
-        if not self.text or self.text.endswith('\n'):
-            lines.append([''])
+        lines = [line.split(" ") for line in self.text.splitlines()]
+        if not self.text or self.text.endswith("\n"):
+            lines.append([""])
             
         if not self.const_size and not self.inf_height:
             size = min({self.rect.height, self.text_size})
@@ -422,7 +422,7 @@ class Text:
             x = y = 0
             status = 0
             current_line = Container()
-            space_width = self.font.get_rect(' ', size=size).width
+            space_width = self.font.get_rect(" ", size=size).width
 
             for line in lines:
                 for word in line:
@@ -457,7 +457,7 @@ class Text:
                     word_rect.topleft = (x, y)
                     current_word = Container(rect=word_rect)
                     cx, cy = x, y
-                    for character in word + ' ':
+                    for character in word + " ":
                         character = Character(
                             character,
                             size,
@@ -493,23 +493,23 @@ class Text:
 
         else:
 
-            if self.alignment['centerx']:
+            if self.alignment["centerx"]:
                 for line in block:
                     dx = (self.rect.width - line.rect.width) // 2
                     line.move(dx, 0)
                         
-            elif self.alignment['right']:
+            elif self.alignment["right"]:
                 for line in block:
                     dx = self.rect.width - line.rect.right
                     line.move(dx, 0)
                         
-            if self.alignment['centery']:
+            if self.alignment["centery"]:
                 h = sum([line.rect.height for line in block])
                 dy = (self.rect.height - h) // 2
                 for line in block:
                     line.move(0, dy)
           
-            elif self.alignment['bottom']:
+            elif self.alignment["bottom"]:
                 dy = self.rect.height - block.rect.bottom
                 for line in block:
                     line.move(0, dy)

@@ -18,7 +18,7 @@ def join_game(scene):
     elements.append(s)
     
     host_label = Textbox(
-        text='Host:'
+        text="Host:"
     )
     host_label.rect.topleft = (s.rect.left + 15, s.rect.top + 10)
     elements.append(host_label)
@@ -33,14 +33,14 @@ def join_game(scene):
     elements.append(host)
     
     port_label = Textbox(
-        text='Port:'
+        text="Port:"
     )
     port_label.rect.topleft = (host.rect.left, host.rect.bottom + 10)
     elements.append(port_label)
     
     port = Input(
         size=(75, 25),
-        text='5555',
+        text="5555",
         max_length=5,
         text_check=lambda t: t.isnumeric(),
         outline_color=(0, 0, 0),
@@ -55,7 +55,7 @@ def join_game(scene):
         scene.set_return((_host, _port))
 
     b = Button.Text_Button(
-        text='Join Game!',
+        text="Join Game!",
         text_size=35,
         inf_width=False,
         inf_height=False,
@@ -71,19 +71,19 @@ def join_game(scene):
     b.rect.top = host.rect.bottom + 15
     b.set_parent(
         s,
-        left_anchor='left',
+        left_anchor="left",
         left_offset=15,
-        right_anchor='right',
+        right_anchor="right",
         right_offset=-15,
-        bottom_anchor='bottom',
+        bottom_anchor="bottom",
         bottom_offset=-15,
-        top_anchor='top',
+        top_anchor="top",
         top_offset=140
     )
     elements.append(b)
     
     cancel_button = Button.Text_Button(
-        text='Cancel',
+        text="Cancel",
         size=(100, 30),
         center_aligned=True,
         hover_color=(255, 0, 0),
@@ -91,7 +91,7 @@ def join_game(scene):
         outline_color=(255, 255, 255),
         outline_width=2,
         border_radius=5,
-        tag='exit'
+        tag="exit"
     )
     cancel_button.rect.midtop = (s.rect.centerx, s.rect.bottom + 20)
     elements.append(cancel_button)

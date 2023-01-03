@@ -33,8 +33,8 @@ def camera(scene):
     elements.append(current_frame)
 
     camera_button = Button.Text_Button(
-        text=icons['camera'],
-        font_name='icons.ttf',
+        text=icons["camera"],
+        font_name="icons.ttf",
         text_size=40,
         size=(300, 45),
         
@@ -48,9 +48,9 @@ def camera(scene):
     elements.append(camera_button)
     
     camera_button.add_animation([{
-        'attr': 'text_color',
-        'end': (0, 0, 0)
-    }], tag='hover')
+        "attr": "text_color",
+        "end": (0, 0, 0)
+    }], tag="hover")
     
     flash = Image(
         image=pg.Surface(scene.rect.size).convert_alpha(),
@@ -62,13 +62,13 @@ def camera(scene):
     elements.append(flash)
     
     exit_button = Button.Text_Button(
-        text=icons['cross'],
-        font_name='icons.ttf',
+        text=icons["cross"],
+        font_name="icons.ttf",
         text_color=(255, 0, 0),
         pad=5,
         centerx_aligned=True,
         centery_aligned=True,
-        tag='exit'
+        tag="exit"
     )
     exit_button.rect.topright = (scene.rect.right - 20, 20)
     elements.append(exit_button)
@@ -77,14 +77,14 @@ def camera(scene):
     y = current_frame.rect.top + 10
     
     ok_button = Button.Text_Button(
-        text='Ok',
+        text="Ok",
         centery_aligned=True,
         size=(100, 25),
         pad=5,
         hover_color=(0, 255, 0),
         layer=-1,
         func=lambda: current_frame.image,
-        tag='return'
+        tag="return"
     ) 
     ok_button.rect.topleft = (x, y)
     ok_button.set_enabled(False)
@@ -92,16 +92,16 @@ def camera(scene):
     
     ok_button.add_animation(
         [{
-            'attr': 'text_color',
-            'end': (0, 0, 0)
+            "attr": "text_color",
+            "end": (0, 0, 0)
         }],
-        tag='hover'
+        tag="hover"
     )
     
     y += ok_button.rect.height + 15
 
     retake_button = Button.Text_Button(
-        text='Retake',
+        text="Retake",
         centery_aligned=True,
         size=(100, 25),
         pad=5,
@@ -119,18 +119,18 @@ def camera(scene):
         
         ok_button.set_enabled(False)
         retake_button.set_enabled(False)
-        retake_button.cancel_animations('hover')
+        retake_button.cancel_animations("hover")
         
         current_frame.add_animation([{
-            'attr': 'x',
-            'end': current_frame.rect.x + 100,
-            'frames': 10
+            "attr": "x",
+            "end": current_frame.rect.x + 100,
+            "frames": 10
         }])
         
         camera_button.add_animation([{
-            'attr': 'x',
-            'end': camera_button.rect.x + 100,
-            'frames': 10
+            "attr": "x",
+            "end": camera_button.rect.x + 100,
+            "frames": 10
         }])
 
     def stop_camera():
@@ -139,40 +139,40 @@ def camera(scene):
             
         scene.camera.stop()
         
-        camera_button.cancel_animations('hover')
+        camera_button.cancel_animations("hover")
         camera_button.set_enabled(False)
         
         ok_button.set_enabled(True)
         retake_button.set_enabled(True)
 
         flash.add_animation([{
-            'attr': 'alpha',
-            'start': 255,
-            'end': 0,
-            'frames': 10
+            "attr": "alpha",
+            "start": 255,
+            "end": 0,
+            "frames": 10
         }])
         
         current_frame.add_animation([{
-            'attr': 'x',
-            'end': current_frame.rect.x - 100,
-            'frames': 10,
-            'delay': 10
+            "attr": "x",
+            "end": current_frame.rect.x - 100,
+            "frames": 10,
+            "delay": 10
         }])
         
         camera_button.add_animation([{
-            'attr': 'x',
-            'end': camera_button.rect.x - 100,
-            'frames': 10,
-            'delay': 10
+            "attr": "x",
+            "end": camera_button.rect.x - 100,
+            "frames": 10,
+            "delay": 10
         }])
         
     camera_button.add_event(
-        tag='left_click',
+        tag="left_click",
         func=stop_camera
     )
     
     retake_button.add_event(
-        tag='left_click',
+        tag="left_click",
         func=start_camera
     )
 
@@ -191,5 +191,5 @@ def run():
     m = Camera_Scene()
     if m.camera.exists:
         return m.run()
-    m = Notice(text_kwargs={'text': 'No video capture devices could be found.'})
+    m = Notice(text_kwargs={"text": "No video capture devices could be found."})
     m.run() 

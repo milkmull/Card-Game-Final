@@ -11,7 +11,7 @@ from data.constants import CONFIRMATION_CODE
 def scan_connections():
     connections = []
     
-    sent = Network_Base.sendto(CONFIRMATION_CODE, '', 5555, broadcast=True)
+    sent = Network_Base.sendto(CONFIRMATION_CODE, "", 5555, broadcast=True)
     if not sent:
         return connections
     
@@ -27,7 +27,7 @@ def scan_connections():
             break
             
         data, address = data
-        data = data.split('-')
+        data = data.split("-")
         
         if len(data) <= 1 or data.pop(0) != CONFIRMATION_CODE:
             continue
@@ -99,7 +99,7 @@ class Network(Network_Base):
             else:
                 last_ping = time.time()
                 
-                self.send('info')
+                self.send("info")
                 
                 try:
                     reply = self.recv()

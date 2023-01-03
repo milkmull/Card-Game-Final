@@ -12,10 +12,10 @@ class Tree:
         self.tree.clear()
         
     def log_to_key(self, log):
-        pid = log['u']
-        cid = log['c'].id
-        x, y = log['p']
-        return (pid, f'{cid}-{x}-{y}')
+        pid = log["u"]
+        cid = log["c"].id
+        x, y = log["p"]
+        return (pid, f"{cid}-{x}-{y}")
         
     def trim(self, log):
         key = self.log_to_key(log)
@@ -34,7 +34,7 @@ class Tree:
                 turn += 1
 
             scores = [p.score for p in sorted(g.players, key=lambda p: p.pid)]
-            logs = [log for log in g.log if log['t'] == 'play']
+            logs = [log for log in g.log if log["t'] == 'play"]
 
             if logs:
                 self.update_tree(
@@ -90,10 +90,10 @@ class Tree:
         for choice, subbranch in branch.items():
         
             if isinstance(subbranch, list):
-                print((' ' * deapth) + str(subbranch))
+                print((" " * deapth) + str(subbranch))
         
             else:
-                print((' ' * deapth) + str(choice) + ': {')
+                print((" ' * deapth) + str(choice) + ': {")
                 self.print_tree(branch=subbranch, deapth=deapth + indent)
-                print((' ' * deapth) + '}')
+                print((" ' * deapth) + '}")
  

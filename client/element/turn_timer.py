@@ -18,11 +18,11 @@ class Timer(Textbox):
         
     @property
     def max_time(self):
-        return self.client.settings.get('tt', 0)
+        return self.client.settings.get("tt", 0)
         
     def reset(self):
         self.current_time = 0
-        self.set_text('')
+        self.set_text("")
         
     def start(self):
         self.current_time = self.max_time

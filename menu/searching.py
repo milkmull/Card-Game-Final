@@ -27,8 +27,8 @@ def searching(
     
     icon = Image.from_element(
         Textbox(
-            text=icons['spinner3'],
-            font_name='icons.ttf',
+            text=icons["spinner3"],
+            font_name="icons.ttf",
             text_size=30,
             text_color=(128, 128, 255)
         ), 
@@ -38,9 +38,9 @@ def searching(
     window.add_child(icon)
     
     icon.add_animation([{
-        'attr': 'rotation',
-        'end': -360,
-        'frames': 20
+        "attr": "rotation",
+        "end": -360,
+        "frames": 20
     }], loop=True)
 
     return [window]

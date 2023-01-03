@@ -2,7 +2,7 @@ import pygame as pg
 
 from data.save import CONSTANTS
 
-CARD_WIDTH, CARD_HEIGHT = CONSTANTS['card_size']
+CARD_WIDTH, CARD_HEIGHT = CONSTANTS["card_size"]
     
 class Sheet_Manager:
     CACHE = {}

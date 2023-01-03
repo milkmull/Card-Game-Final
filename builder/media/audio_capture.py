@@ -19,7 +19,7 @@ class Audio_Capture:
     SAMPLE_RATE = 44100
     FRAMES_PER_BUFFER = 1024
 
-    OUT = 'data/snd/temp/custom.wav'
+    OUT = "data/snd/temp/custom.wav"
     
     @staticmethod
     def get_path():
@@ -39,7 +39,7 @@ class Audio_Capture:
         except IOError:
             return devices
             
-        numdevices = info.get('deviceCount')
+        numdevices = info.get("deviceCount")
         for i in range(numdevices):
         
             try:
@@ -47,8 +47,8 @@ class Audio_Capture:
             except IOError:
                 return devices
                 
-            name = device.get('name')
-            max_channels = device.get('maxInputChannels')
+            name = device.get("name")
+            max_channels = device.get("maxInputChannels")
             if max_channels > 0:
                 devices.append((name, i))
 
@@ -165,9 +165,9 @@ class Audio_Capture:
         self.finished = True
         
     def write_wav(self):
-        data = b''.join(self.frames)
+        data = b"".join(self.frames)
         try:
-            with wave.open(Audio_Capture.OUT, 'wb') as sound_file:
+            with wave.open(Audio_Capture.OUT, "wb") as sound_file:
                 sound_file.setnchannels(Audio_Capture.CHANNELS)
                 sound_file.setsampwidth(Audio_Capture.WIDTH)
                 sound_file.setframerate(Audio_Capture.SAMPLE_RATE)

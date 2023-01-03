@@ -4,7 +4,7 @@ class Sequence:
     def __init__(
         self,
         sequence,
-        tag='',
+        tag="",
         loop=False,
         name=None,
         end_func=None

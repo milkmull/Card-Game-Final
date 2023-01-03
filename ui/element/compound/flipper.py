@@ -7,7 +7,7 @@ from ..utils.image import get_arrow
 
 class Flipper(Text_Element):
     defaults = {
-        'center_aligned': True
+        "center_aligned": True
     }
     
     @classmethod
@@ -35,11 +35,11 @@ class Flipper(Text_Element):
             self.auto_fit = False
             self.size = self.get_max_size(self.selection)
         
-        if 'size' not in arrow_kwargs:
-            arrow_kwargs = {'size': (self.rect.height - 5, self.rect.height - 5)} | arrow_kwargs
+        if "size" not in arrow_kwargs:
+            arrow_kwargs = {"size": (self.rect.height - 5, self.rect.height - 5)} | arrow_kwargs
             
         left_arrow = get_arrow(
-            '<',
+            "<",
             **arrow_kwargs
         )
 
@@ -50,7 +50,7 @@ class Flipper(Text_Element):
         left_button.add_event(
             self.flip,
             args=[1],
-            tag='left_click'
+            tag="left_click"
         )
 
         right_button = Button.Image_Button(
@@ -60,11 +60,11 @@ class Flipper(Text_Element):
         right_button.add_event(
             self.flip,
             args=[-1],
-            tag='left_click'
+            tag="left_click"
         )
         
-        self.add_child(left_button, right_anchor='left', right_offset=-10, centery_anchor='centery')
-        self.add_child(right_button, left_anchor='right', left_offset=10, centery_anchor='centery')
+        self.add_child(left_button, right_anchor="left", right_offset=-10, centery_anchor="centery")
+        self.add_child(right_button, left_anchor="right", left_offset=10, centery_anchor="centery")
         
     @property
     def current_value(self):
@@ -77,5 +77,5 @@ class Flipper(Text_Element):
     def events(self, events):
         super().events(events)
         
-        if self.hit and (mw := events.get('mw')):
+        if self.hit and (mw := events.get("mw")):
             self.flip(mw.y)

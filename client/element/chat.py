@@ -7,8 +7,8 @@ class Chat(Button.Text_Button):
         self.client = client
         
         super().__init__(
-            text=icons['bubble2'],
-            font_name='icons.ttf',
+            text=icons["bubble2"],
+            font_name="icons.ttf",
             text_size=30,
             center_aligned=True,
             hover_color=(100, 100, 100),
@@ -39,10 +39,10 @@ class Chat(Button.Text_Button):
         self.chat.add_child(self.window, current_offset=True)
         
         self.window.orientation_cache |= {
-            'dir': 1,
-            'marginy': 5,
-            'borderx': 5,
-            'bordery': 5
+            "dir": 1,
+            "marginy": 5,
+            "borderx": 5,
+            "bordery": 5
         }
         
         self.message_box = Input(
@@ -59,12 +59,12 @@ class Chat(Button.Text_Button):
         self.chat.add_child(self.message_box, current_offset=True)
         
         self.message_box.add_event(
-            tag='enter',
+            tag="enter",
             func=self.send
         )
         
         self.send_button = Button.Text_Button(
-            text='Send',
+            text="Send",
             center_aligned=True,
             text_color=(0, 0, 0),
             fill_color=(255, 255, 255),
@@ -87,26 +87,26 @@ class Chat(Button.Text_Button):
         self.animated_box.rect.topleft = self.chat.rect.topleft
         self.add_child(
             self.animated_box,
-            centerx_anchor='centerx',
+            centerx_anchor="centerx",
             centerx_offset=self.animated_box.rect.centerx - self.rect.centerx
         )
 
         self.animated_box.add_animation([{
-            'attr': 'height',
-            'start': 0,
-            'end': self.chat.rect.height,
-            'frames': 8,
-            'method': 'ease_in_quart'
+            "attr": "height",
+            "start": 0,
+            "end": self.chat.rect.height,
+            "frames": 8,
+            "method": "ease_in_quart"
         }])
         
         self.animated_box.add_animation(
             [{
-                'attr': 'width',
-                'start': 5,
-                'end': self.chat.rect.width,
-                'frames': 8,
-                'delay': 8,
-                'method': 'ease_in_quart'
+                "attr": "width",
+                "start": 5,
+                "end": self.chat.rect.width,
+                "frames": 8,
+                "delay": 8,
+                "method": "ease_in_quart"
             }],
             end_func=self.end_open
         )
@@ -119,7 +119,7 @@ class Chat(Button.Text_Button):
         self.is_open = True
         
         self.text_color = (255, 255, 255)
-        self.set_text(icons['bubble2'])
+        self.set_text(icons["bubble2"])
         
     def close(self):
         self.is_open = False
@@ -128,19 +128,19 @@ class Chat(Button.Text_Button):
         self.chat.turn_off()
 
         self.animated_box.add_animation([{
-            'attr': 'width',
-            'end': 5,
-            'frames': 8,
-            'method': 'ease_out_quart'
+            "attr": "width",
+            "end": 5,
+            "frames": 8,
+            "method": "ease_out_quart"
         }])
         
         self.animated_box.add_animation(
             [{
-                'attr': 'height',
-                'end': 0,
-                'frames': 8,
-                'delay': 8,
-                'method': 'ease_out_quart'
+                "attr": "height",
+                "end": 0,
+                "frames": 8,
+                "delay": 8,
+                "method": "ease_out_quart"
             }],
             end_func=self.end_close
         )
@@ -156,15 +156,15 @@ class Chat(Button.Text_Button):
             self.open()
         
     def add_message(self, log):
-        player = self.client.get_player(log['p'])
-        message = log['text']
+        player = self.client.get_player(log["p"])
+        message = log["text"]
 
         name = player.name
         if len(name) > 10:
-            name = f'{name[:10]}...'
-        header = f'<{name}> '
+            name = f"{name[:10]}..."
+        header = f"<{name}> "
         
-        style = {i: {'fgcolor': player.color} for i in range(len(header))}
+        style = {i: {"fgcolor": player.color} for i in range(len(header))}
         text = header + message
         
         tb = Textbox(
@@ -182,12 +182,12 @@ class Chat(Button.Text_Button):
         
         if not self.is_open:
             self.text_color = (255, 0, 0)
-            self.set_text(icons['bubble'])
+            self.set_text(icons["bubble"])
         
     def send(self):
         text = self.message_box.text.strip()
         if text:
-            self.client.send(f'msg-{text}')
+            self.client.send(f"msg-{text}")
             self.message_box.clear()
             
     def clear(self):
@@ -196,7 +196,7 @@ class Chat(Button.Text_Button):
     def events(self, events):
         super().events(events)
         
-        if self.is_open and (('mbd' in events and not self.chat.get_hit()) or events.pop('e', None)):
+        if self.is_open and (("mbd' in events and not self.chat.get_hit()) or events.pop('e", None)):
             self.close()
         
         

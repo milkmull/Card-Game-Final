@@ -12,23 +12,23 @@ def main_scene(scene):
     elements = []
 
     button_kwargs = {
-        'size': (200, 40),
-        'centerx_aligned': True,
-        'centery_aligned': True,
-        'outline_color': (255, 255, 255),
-        'border_radius': 3,
-        'text_size': 30
+        "size": (200, 40),
+        "centerx_aligned": True,
+        "centery_aligned": True,
+        "outline_color": (255, 255, 255),
+        "border_radius": 3,
+        "text_size": 30
     }
     
     hover_animation = {
-        'attr': 'outline_width',
-        'end': 3,
-        'frames': 5,
-        'strict': True
+        "attr": "outline_width",
+        "end": 3,
+        "frames": 5,
+        "strict": True
     }
 
     b = Button.Text_Button(
-        text='single player',
+        text="single player",
         func=run_client_single,
         **button_kwargs
     )
@@ -37,7 +37,7 @@ def main_scene(scene):
     b.rect.y = 150
     
     b = Button.Text_Button(
-        text='sandbox',
+        text="sandbox",
         func=run_sandbox,
         **button_kwargs
     )
@@ -46,7 +46,7 @@ def main_scene(scene):
     elements.append(b)
     
     b = Button.Text_Button(
-        text='card builder',
+        text="card builder",
         func=run_builder,
         **button_kwargs
     )
@@ -55,7 +55,7 @@ def main_scene(scene):
     elements.append(b)
 
     b = Button.Text_Button(
-        text='wireless play',
+        text="wireless play",
         func=run_wireless_play,
         **button_kwargs
     )
@@ -64,8 +64,8 @@ def main_scene(scene):
     elements.append(b)
     
     b = Button.Text_Button(
-        text='exit game',
-        tag='exit',
+        text="exit game",
+        tag="exit",
         **button_kwargs
     )
     b.rect.centerx = body.centerx
@@ -73,7 +73,7 @@ def main_scene(scene):
     elements.append(b)
 
     for b in elements:
-        b.add_animation([hover_animation.copy()], tag='hover')
+        b.add_animation([hover_animation.copy()], tag="hover")
     
     return elements
     

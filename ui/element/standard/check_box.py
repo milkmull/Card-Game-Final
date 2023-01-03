@@ -6,12 +6,12 @@ from ...icons.icons import icons
 
 class Check_Box(Text_Element):
     defaults = {
-        'size': (15, 15),
-        'fill_color': (255, 255, 255),
-        'text_color': (0, 0, 0),
-        'text_size': 15,
-        'pad': 2,
-        'cursor': pg.SYSTEM_CURSOR_HAND
+        "size": (15, 15),
+        "fill_color": (255, 255, 255),
+        "text_color": (0, 0, 0),
+        "text_size": 15,
+        "pad": 2,
+        "cursor": pg.SYSTEM_CURSOR_HAND
     }
 
     def __init__(
@@ -21,8 +21,8 @@ class Check_Box(Text_Element):
     ):
 
         super().__init__(
-            text=icons['check'] if value else '',
-            font_name='icons.ttf',
+            text=icons["check"] if value else "",
+            font_name="icons.ttf",
             center_aligned=True,
             **(Check_Box.defaults | kwargs)
         )
@@ -41,7 +41,7 @@ class Check_Box(Text_Element):
     def set_value(self, value):
         self.value = value
         if value:
-            self.set_text(icons['check'])
+            self.set_text(icons["check"])
         else:
             self.clear()
         

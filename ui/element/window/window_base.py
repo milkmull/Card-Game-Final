@@ -6,7 +6,7 @@ from ..utils.container import Container
 
 class ObjectFitError(Exception):
     def __init__(self, object_size, rect_size, pos):
-        super().__init__(f'Could not fit object of size {object_size} to rect of size {rect_size} at {pos}')
+        super().__init__(f"Could not fit object of size {object_size} to rect of size {rect_size} at {pos}")
 
 class Window_Base:
     def __init__(
@@ -26,7 +26,7 @@ class Window_Base:
         self.bounding_box = Position(pos=self.pos, size=self.size)
         self.bounding_box.set_enabled(False)
         self.bounding_box.set_visible(False)
-        self.add_child(self.bounding_box, left_anchor='left', top_anchor='top')
+        self.add_child(self.bounding_box, left_anchor="left", top_anchor="top")
 
         self.inf_width = inf_width
         self.inf_height = inf_height
@@ -38,35 +38,35 @@ class Window_Base:
             self.x_scroll_bar = Scroll_Bar(size=(1, 0), dir=0, scroll_parent=self, no_wheel=inf_height, **scroll_bar_kwargs)
             self.x_scroll_bar.set_size(self.outline_rect.width)
             if not top_scroll:
-                self.add_child(self.x_scroll_bar, top_anchor='bottom', top_offset=self.pad['bottom'], centerx_anchor='centerx')
+                self.add_child(self.x_scroll_bar, top_anchor="bottom", top_offset=self.pad['bottom'], centerx_anchor="centerx")
             else:
-                self.add_child(self.x_scroll_bar, bottom_anchor='top', bottom_offset=self.pad['top'], centerx_anchor='centerx')
+                self.add_child(self.x_scroll_bar, bottom_anchor="top", bottom_offset=self.pad['top'], centerx_anchor="centerx")
         
         if inf_height:
             self.y_scroll_bar = Scroll_Bar(size=(0, 1), dir=1, scroll_parent=self, **scroll_bar_kwargs)
             self.y_scroll_bar.set_size(self.outline_rect.height)
             if not left_scroll:
-                self.add_child(self.y_scroll_bar, left_anchor='right', left_offset=self.pad['right'], centery_anchor='centery')
+                self.add_child(self.y_scroll_bar, left_anchor="right", left_offset=self.pad['right'], centery_anchor="centery")
             else:
-                self.add_child(self.y_scroll_bar, right_anchor='left', right_offset=self.pad['left'], centery_anchor='centery')
+                self.add_child(self.y_scroll_bar, right_anchor="left", right_offset=self.pad['left'], centery_anchor="centery")
             if self.inf_width:
-                self.y_scroll_bar.pad['bottom'] = (self.x_scroll_bar.rect.bottom - self.y_scroll_bar.rect.bottom)
+                self.y_scroll_bar.pad["bottom"] = (self.x_scroll_bar.rect.bottom - self.y_scroll_bar.rect.bottom)
             
         self.elements = []
             
         self.orientation_cache = {
-            'dir': 0, 
-            'marginx': 0,
-            'marginy': 0,
-            'borderx': 0,
-            'bordery': 0,
-            'centerx_aligned': False,
-            'centery_aligned': False
+            "dir": 0, 
+            "marginx": 0,
+            "marginy": 0,
+            "borderx": 0,
+            "bordery": 0,
+            "centerx_aligned": False,
+            "centery_aligned": False
         }
         
     @property
     def border_rect(self):
-        return self.rect.inflate(-2 * self.orientation_cache['borderx'], -2 * self.orientation_cache['bordery'])
+        return self.rect.inflate(-2 * self.orientation_cache["borderx"], -2 * self.orientation_cache["bordery"])
         
     @property
     def visible_elements(self):
@@ -130,13 +130,13 @@ class Window_Base:
     ):
   
         if use_last:
-            dir = self.orientation_cache['dir']
-            marginx = self.orientation_cache['marginx']
-            marginy = self.orientation_cache['marginy']
-            borderx = self.orientation_cache['borderx']
-            bordery = self.orientation_cache['bordery']
-            centerx_aligned = self.orientation_cache['centerx_aligned']
-            centery_aligned = self.orientation_cache['centery_aligned']
+            dir = self.orientation_cache["dir"]
+            marginx = self.orientation_cache["marginx"]
+            marginy = self.orientation_cache["marginy"]
+            borderx = self.orientation_cache["borderx"]
+            bordery = self.orientation_cache["bordery"]
+            centerx_aligned = self.orientation_cache["centerx_aligned"]
+            centery_aligned = self.orientation_cache["centery_aligned"]
             
         else:
             if margin is not None:
@@ -233,13 +233,13 @@ class Window_Base:
         self.set_total_size(self.rect.union(block.rect).size)
         
         self.orientation_cache = {
-            'dir': dir, 
-            'marginx': marginx,
-            'marginy': marginy,
-            'borderx': borderx,
-            'bordery': bordery,
-            'centerx_aligned': centerx_aligned,
-            'centery_aligned': centery_aligned
+            "dir": dir, 
+            "marginx": marginx,
+            "marginy": marginy,
+            "borderx": borderx,
+            "bordery": bordery,
+            "centerx_aligned": centerx_aligned,
+            "centery_aligned": centery_aligned
         }
         
     def join_elements_custom(

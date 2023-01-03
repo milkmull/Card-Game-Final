@@ -24,7 +24,7 @@ class Points(Position, Text):
 
         Text.__init__(
             self,
-            text=str(points) if points < 0 else f'+{points}',
+            text=str(points) if points < 0 else f"+{points}",
             text_size=30,
             text_color=player.color,
             text_outline_color=(0, 0, 0),
@@ -48,10 +48,10 @@ class Points(Position, Text):
         
     def add_animation(self, animations, loop=False):
         for kwargs in animations:
-            kwargs['element'] = self
+            kwargs["element"] = self
         s = Sequence(
             [Animation(**kwargs) for kwargs in animations], 
-            tag='temp',
+            tag="temp",
             loop=loop
         )
         self.animations.append(s)
@@ -61,7 +61,7 @@ class Points(Position, Text):
         self.points += points
         self.text_size += (2 * points)
         c = self.rect.center
-        self.set_text(str(self.points) if self.points < 0 else f'+{self.points}')
+        self.set_text(str(self.points) if self.points < 0 else f"+{self.points}")
         self.rect.center = c
 
     def merge(self, child):
@@ -107,10 +107,10 @@ class Points(Position, Text):
             end = self.player.spot.points_spot.rect.center
 
         self.add_animation([{
-            'attr': 'center',
-            'end': end,
-            'delay': delay,
-            'frames': 10,
-            'method': 'ease_in_quad'
+            "attr": "center",
+            "end": end,
+            "delay": delay,
+            "frames": 10,
+            "method": "ease_in_quad"
         }])
         

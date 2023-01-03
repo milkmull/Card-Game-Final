@@ -19,7 +19,7 @@ class Button_Base:
  
         if func is not None:
             self.add_event(
-                tag='left_click',
+                tag="left_click",
                 func=func,
                 include_self=include_self,
                 args=args,
@@ -30,10 +30,10 @@ class Button:
 
     class Text_Button(Text_Element, Button_Base):
         defaults = {
-            'inf_width': True,
-            'inf_height': True,
-            'cursor': pg.SYSTEM_CURSOR_HAND,
-            'key_color': (0, 0, 0)
+            "inf_width": True,
+            "inf_height": True,
+            "cursor": pg.SYSTEM_CURSOR_HAND,
+            "key_color": (0, 0, 0)
         }
         
         def __init__(self, **kwargs):
@@ -42,9 +42,9 @@ class Button:
     
     class Image_Button(Image_Element, Button_Base):
         defaults = {
-            'const_size': False,
-            'cursor': pg.SYSTEM_CURSOR_HAND,
-            'key_color': (0, 0, 0)
+            "const_size": False,
+            "cursor": pg.SYSTEM_CURSOR_HAND,
+            "key_color": (0, 0, 0)
         }
         
         def __init__(self, **kwargs):

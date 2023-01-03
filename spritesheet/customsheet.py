@@ -6,16 +6,16 @@ from builder.custom_card_base import Card
 from data.save import SAVE
 from data.constants import CONSTANTS, BASE_NAMES
 
-CARD_WIDTH, CARD_HEIGHT = CONSTANTS['card_size']
+CARD_WIDTH, CARD_HEIGHT = CONSTANTS["card_size"]
 
 def to_classname(name):
-    cname = ''
-    for char in name.title().replace(' ', '_'):
-        if char.isalnum() or char == '_':
+    cname = ""
+    for char in name.title().replace(" ", "_"):
+        if char.isalnum() or char == "_":
             cname += char
             
     if cname[0].isnumeric():
-        cname = '_' + cname
+        cname = "_" + cname
 
     return cname
     
@@ -23,26 +23,26 @@ class Customsheet(Base_Sheet):
     @staticmethod
     def get_blank_custom():
         import os
-        if os.path.exists('data/img/user.png'):
-            img = pg.image.load('data/img/user.png').convert()
+        if os.path.exists("data/img/user.png"):
+            img = pg.image.load("data/img/user.png").convert()
         else:
             img = pg.Surface((1, 1)).convert() 
         img = pg.transform.smoothscale(img, (CARD_WIDTH - 75, 210))
         return img
     
     def __init__(self):
-        names = tuple([c['name'] for c in self.cards])
-        super().__init__(names, 'data/img/customsheet.png', (9, CARD_WIDTH, CARD_HEIGHT))
+        names = tuple([c["name"] for c in self.cards])
+        super().__init__(names, "data/img/customsheet.png", (9, CARD_WIDTH, CARD_HEIGHT))
         if self.failed_to_load():
             self.create_blank_sheet()
             self.restore_data()
         for d in self.cards:
-            path = d['image']
+            path = d["image"]
             self.get_card_image(path)
             
     @property
     def cards(self):
-        return SAVE.get_data('cards')
+        return SAVE.get_data("cards")
             
     def reset(self):
         self.create_blank_sheet()
@@ -50,7 +50,7 @@ class Customsheet(Base_Sheet):
         self.save_card(c)
         
     def refresh_names(self):
-        self.names = tuple([c['name'] for c in self.cards])
+        self.names = tuple([c["name"] for c in self.cards])
         
     def refresh(self):
         self.refresh_names()
@@ -135,7 +135,7 @@ class Customsheet(Base_Sheet):
         return True
         
     def del_card(self, entry):        
-        id = entry['id']
+        id = entry["id"]
         sheet = self.sheet
         cards = self.cards
         

@@ -4,7 +4,7 @@ from ui.element.standard.slider import Slider
 from ui.element.standard.textbox import Textbox
 
 class RGB_Slider(Slider):
-    CHANNELS = ('r', 'g', 'b')
+    CHANNELS = ("r', 'g', 'b")
     
     def __init__(
         self,
@@ -14,7 +14,7 @@ class RGB_Slider(Slider):
         super().__init__(
             range=range(255),
             handel_kwargs={
-                'outline_color': (255, 255, 255)
+                "outline_color": (255, 255, 255)
             },
             **kwargs
         )
@@ -32,10 +32,10 @@ class RGB_Slider(Slider):
         
         color = self.get_color()
         self.textbox = Textbox(pad=1)
-        self.handel.add_child(self.textbox, centerx_anchor='centerx', bottom_anchor='top', bottom_offset=-5)
+        self.handel.add_child(self.textbox, centerx_anchor="centerx', bottom_anchor='top", bottom_offset=-5)
         
         self.textbox.add_event(
-            tag='update',
+            tag="update",
             func=self.update_textbox
         )
  

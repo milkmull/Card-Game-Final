@@ -2,10 +2,10 @@ from ..base.text_element import Text_Element
 
 class Label(Text_Element):
     defaults = {
-        'centerx_aligned': True,
-        'centery_aligned': True,
-        'border_top_left_radius': 10,
-        'border_top_right_radius': 10
+        "centerx_aligned": True,
+        "centery_aligned": True,
+        "border_top_left_radius": 10,
+        "border_top_right_radius": 10
     }
     def __init__(
         self,

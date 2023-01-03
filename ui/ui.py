@@ -14,12 +14,12 @@ def quit():
 def get_constants():
     w, h = pg.display.get_surface().get_size()
     constants = {
-        'WIDTH': w,
-        'HEIGHT': h,
-        'SIZE': (w, h),
-        'CENTER': (w // 2, h // 2),
-        'CENTERX': w // 2,
-        'CENTERY': h // 2
+        "WIDTH": w,
+        "HEIGHT": h,
+        "SIZE": (w, h),
+        "CENTER": (w // 2, h // 2),
+        "CENTERX": w // 2,
+        "CENTERY": h // 2
     }
     
     return constants

@@ -22,8 +22,8 @@ def get_arrow(
     w, h = size
     
     image = Text.render(
-        icons['play3'],
-        font_name='icons.ttf',
+        icons["play3"],
+        font_name="icons.ttf",
         fgcolor=color,
         bgcolor=background_color,
         size=h
@@ -32,11 +32,11 @@ def get_arrow(
 
     a = 0
     match dir:
-        case 'v':
+        case "v":
             a = -90
-        case '<':
+        case "<":
             a = 180
-        case '^':
+        case "^":
             a = 90
     if a:
         image = pg.transform.rotate(image, a)
@@ -75,11 +75,11 @@ def gradient(colors, dir, size, angle=0):
     
 def print_pixel_alphas(surf):
     for y in range(surf.get_height()):
-        row = '['
+        row = "["
         for x in range(surf.get_width()):
             a = str(surf.get_at((x, y))[3])
             row += f"{' ' * (3 - len(a))}{a}, "
-        row = row[:-2] + ']'
+        row = row[:-2] + "]"
         print(row)
     print()
 

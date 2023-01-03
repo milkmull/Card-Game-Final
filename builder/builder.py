@@ -56,18 +56,18 @@ def builder(scene):
     elements = [scene.card]
 
     button_kwargs = {
-        'text_size': 15,
-        'size': (150, 25),
-        'x_pad': 5,
-        'top_pad': 2,
-        'centery_aligned': True,
-        'hover_color': (100, 100, 100)
+        "text_size": 15,
+        "size": (150, 25),
+        "x_pad": 5,
+        "top_pad": 2,
+        "centery_aligned": True,
+        "hover_color": (100, 100, 100)
     }
     
     icon_kwargs = {
-        'font_name': 'icons.ttf',
-        'centerx_aligned': True,
-        'centery_aligned': True
+        "font_name": "icons.ttf",
+        "centerx_aligned": True,
+        "centery_aligned": True
     }
     
 # save section
@@ -77,7 +77,7 @@ def builder(scene):
     save_elements = []
     
     save_button = Button.Text_Button(
-        text='Save',
+        text="Save",
         func=scene.save_card,
         **button_kwargs
     )
@@ -85,11 +85,11 @@ def builder(scene):
     save_elements.append(save_button)
     
     save_icon = Textbox(
-        text=icons['floppy-disk'],
+        text=icons["floppy-disk"],
         text_color=(0, 0, 247),
         **icon_kwargs
     )
-    save_button.add_child(save_icon, right_anchor='right', right_offset=-1, centery_anchor='centery')
+    save_button.add_child(save_icon, right_anchor="right", right_offset=-1, centery_anchor="centery")
     save_icon.set_enabled(False) 
     
     y += save_button.rect.height + 3
@@ -97,7 +97,7 @@ def builder(scene):
     if scene.card.id != 0:
     
         publish_button = Button.Text_Button(
-            text='Publish',
+            text="Publish",
             func=scene.publish_card,
             **button_kwargs
         )
@@ -109,12 +109,12 @@ def builder(scene):
             outline_color=(0, 0, 0),
             outline_width=2
         )
-        publish_button.add_child(publish_icon, right_anchor='right', right_offset=-3, centery_anchor='centery', centery_offset=-1)
+        publish_button.add_child(publish_icon, right_anchor="right", right_offset=-3, centery_anchor="centery", centery_offset=-1)
         publish_icon.set_enabled(False) 
         scene.published = publish_icon
 
         publish_icon.add_event(
-            tag='update',
+            tag="update",
             func=publish_icon.set_value,
             args=[scene.card.get_published]
         )
@@ -122,7 +122,7 @@ def builder(scene):
         y += publish_button.rect.height + 3
     
     export_button = Button.Text_Button(
-        text='Export As Image',
+        text="Export As Image",
         func=scene.export_image,
         **button_kwargs
     )
@@ -130,14 +130,14 @@ def builder(scene):
     save_elements.append(export_button)
     
     export_icon = Textbox(
-        text=icons['folder'],
+        text=icons["folder"],
         text_color=(241, 213, 80),
         **icon_kwargs
     )
-    export_button.add_child(export_icon, right_anchor='right', centery_anchor='centery')
+    export_button.add_child(export_icon, right_anchor="right", centery_anchor="centery")
     export_icon.set_enabled(False) 
     
-    save_section = get_section(save_elements, 'Save:', scene)
+    save_section = get_section(save_elements, "Save:", scene)
     save_section.rect.topleft = (scene.card.rect.right + 20, 20)
     elements.append(save_section)
     
@@ -150,18 +150,18 @@ def builder(scene):
             index=-5,
             text_size=30,
             button_kwargs={
-                'pad': 5,
-                'border_radius': 5
+                "pad": 5,
+                "border_radius": 5
             }
         )
-        weight_section = get_section([weight_flipper], 'Rarity:', scene)
+        weight_section = get_section([weight_flipper], "Rarity:", scene)
         weight_section.rect.inflate_ip(100, 0)
         weight_flipper.rect.center = weight_section.rect.center
         weight_flipper.set_stuck(True)
         elements.append(weight_section)
 
         weight_flipper.add_event(
-            tag='set_text',
+            tag="set_text",
             func=scene.card.set_weight,
             args=[lambda: float(weight_flipper.get_text())]
         )
@@ -181,7 +181,7 @@ def builder(scene):
             tags.append(tag)
             
             b = Button.Text_Button(
-                text=icons['cross'],
+                text=icons["cross"],
                 text_color=(255, 0, 0),
                 **icon_kwargs
             )
@@ -198,7 +198,7 @@ def builder(scene):
                     tag.first_born.set_on_off(text)
        
             b.add_event(
-                tag='left_click',
+                tag="left_click",
                 func=clear
             )
 
@@ -211,7 +211,7 @@ def builder(scene):
         tag_elements += tags
 
         add_button = Button.Text_Button(
-            text=icons['plus'],
+            text=icons["plus"],
             text_color=(0, 255, 0),
             pad=5,
             hover_color=(100, 100, 100),
@@ -233,12 +233,12 @@ def builder(scene):
             fill_color=(255, 255, 255),
             text_color=(0, 0, 0),
             button_kwargs={
-                'hover_color': (100, 100, 100)
+                "hover_color": (100, 100, 100)
             },
             window_kwargs={
-                'fill_color': scene.fill_color,
-                'outline_color': (255, 255, 255),
-                'outline_width': 3
+                "fill_color": scene.fill_color,
+                "outline_color": (255, 255, 255),
+                "outline_width": 3
             },
             layer=1
         )
@@ -257,7 +257,7 @@ def builder(scene):
         )
         tag_elements.append(line)
         
-        tags_section = get_section(tag_elements, 'Tags:', scene)
+        tags_section = get_section(tag_elements, "Tags:", scene)
         elements.append(tags_section)
 
         def add_tag():
@@ -271,12 +271,12 @@ def builder(scene):
                         break
                     
         add_button.add_event(
-            tag='left_click',
+            tag="left_click",
             func=add_tag
         )
         
         tag_select.add_event(
-            tag='enter',
+            tag="enter",
             func=add_tag
         )
   
@@ -288,7 +288,7 @@ def builder(scene):
     y = 10
     
     file_button = Button.Text_Button(
-        text='Import Image',
+        text="Import Image",
         func=scene.open_image,
         **button_kwargs
     )
@@ -296,11 +296,11 @@ def builder(scene):
     image_elements.append(file_button)
     
     file_icon = Textbox(
-        text=icons['folder'],
+        text=icons["folder"],
         text_color=(241, 213, 80),
         **icon_kwargs
     )
-    file_button.add_child(file_icon, right_anchor='right', centery_anchor='centery')
+    file_button.add_child(file_icon, right_anchor="right", centery_anchor="centery")
     file_icon.set_enabled(False)
 
     y += file_button.rect.height + 3
@@ -311,7 +311,7 @@ def builder(scene):
             scene.card.update_image(picture)
             
     camera_button = Button.Text_Button(
-        text='Use Camera',
+        text="Use Camera",
         func=take_picture,
         **button_kwargs
     )
@@ -319,16 +319,16 @@ def builder(scene):
     image_elements.append(camera_button)
     
     camera_icon = Textbox(
-        text=icons['camera'],
+        text=icons["camera"],
         **icon_kwargs
     )
-    camera_button.add_child(camera_icon, right_anchor='right', centery_anchor='centery')
+    camera_button.add_child(camera_icon, right_anchor="right", centery_anchor="centery")
     camera_icon.set_enabled(False) 
 
     y += camera_button.rect.height + 20
 
     rotate_button = Button.Text_Button(
-        text='Rotate Image',
+        text="Rotate Image",
         func=scene.card.rotate_image,
         **button_kwargs
     )
@@ -336,19 +336,19 @@ def builder(scene):
     image_elements.append(rotate_button)
     
     rotate_icon = Textbox(
-        text=icons['spinner11'],
+        text=icons["spinner11"],
         text_size=18,
         **icon_kwargs
     ).to_image()
-    rotate_icon.transform('flip', True, False, overwrite=True)
-    rotate_icon.transform('rotate', -90)
-    rotate_button.add_child(rotate_icon, right_anchor='right', centery_anchor='centery')
+    rotate_icon.transform("flip", True, False, overwrite=True)
+    rotate_icon.transform("rotate", -90)
+    rotate_button.add_child(rotate_icon, right_anchor="right", centery_anchor="centery")
     rotate_icon.set_enabled(False)
     
     y += rotate_button.rect.height + 3
 
     aspect_button = Button.Text_Button(
-        text='Keep Aspect',
+        text="Keep Aspect",
         **button_kwargs
     )
     aspect_button.rect.topleft = (x, y)
@@ -356,11 +356,11 @@ def builder(scene):
     
     keep_aspect = scene.card._pic.keep_aspect
     aspect_icon = Textbox(
-        text=icons['check'] if keep_aspect else icons['cross'],
+        text=icons["check"] if keep_aspect else icons["cross"],
         text_color=(0, 255, 0) if keep_aspect else (255, 0, 0),
         **icon_kwargs
     )
-    aspect_button.add_child(aspect_icon, right_anchor='right', centery_anchor='centery')
+    aspect_button.add_child(aspect_icon, right_anchor="right", centery_anchor="centery")
     aspect_icon.set_enabled(False)
     
     def set_keep_aspect():
@@ -370,17 +370,17 @@ def builder(scene):
         
         if keep_aspect:
             aspect_icon.text_color = (0, 255, 0)
-            aspect_icon.set_text(icons['check'])
+            aspect_icon.set_text(icons["check"])
         else:
             aspect_icon.text_color = (255, 0, 0)
-            aspect_icon.set_text(icons['cross'])
+            aspect_icon.set_text(icons["cross"])
             
-    aspect_button.add_event(tag='left_click', func=set_keep_aspect)
+    aspect_button.add_event(tag="left_click", func=set_keep_aspect)
     
     y += aspect_button.rect.height + 3
 
     outline_button = Button.Text_Button(
-        text='Outline Image',
+        text="Outline Image",
         **button_kwargs
     )
     outline_button.rect.topleft = (x, y)
@@ -388,11 +388,11 @@ def builder(scene):
     
     outline = bool(scene.card._pic.outline_color)
     outline_icon = Textbox(
-        text=icons['check'] if outline else icons['cross'],
+        text=icons["check"] if outline else icons["cross"],
         text_color=(0, 255, 0) if outline else (255, 0, 0),
         **icon_kwargs
     )
-    outline_button.add_child(outline_icon, right_anchor='right', centery_anchor='centery')
+    outline_button.add_child(outline_icon, right_anchor="right", centery_anchor="centery")
     outline_icon.set_enabled(False)
     
     def set_outline():
@@ -402,12 +402,12 @@ def builder(scene):
         
         if outline:
             outline_icon.text_color = (0, 255, 0)
-            outline_icon.set_text(icons['check'])
+            outline_icon.set_text(icons["check"])
         else:
             outline_icon.text_color = (255, 0, 0)
-            outline_icon.set_text(icons['cross'])
+            outline_icon.set_text(icons["cross"])
             
-    outline_button.add_event(tag='left_click', func=set_outline)
+    outline_button.add_event(tag="left_click", func=set_outline)
     
     line = Style(
         size=(outline_button.rect.width - 5, 2),
@@ -419,7 +419,7 @@ def builder(scene):
     )
     image_elements.append(line)
 
-    image_section = get_section(image_elements, 'Image:', scene)
+    image_section = get_section(image_elements, "Image:", scene)
     elements.append(image_section)
     
 # color section
@@ -428,7 +428,7 @@ def builder(scene):
     x = 15
     y = 10
 
-    for i, channel in enumerate(('r', 'g', 'b')):
+    for i, channel in enumerate(("r", "g", "b")):
         
         rgb_slider = RGB_Slider(
             channel,
@@ -449,7 +449,7 @@ def builder(scene):
     color_picker.rect.left += 10
     color_elements.append(color_picker)
 
-    color_section = get_section(color_elements, 'Color:', scene)
+    color_section = get_section(color_elements, "Color:", scene)
     color_section.remove_child(color_picker)
     color_picker.set_parent(color_section, current_offset=True)
     elements.append(color_section)
@@ -466,19 +466,19 @@ def builder(scene):
         scene.card.set_color([r, g, b])
         
     color_picker.add_event(
-        tag='set_color',
+        tag="set_color",
         func=set_color
     )
 
     color_section.add_event(
-        tag='update',
+        tag="update",
         func=lambda: scene.card.set_color([e.get_state() for e in color_elements[:3]])
     )
  
 # audio section
 
     am = Audio_Manager(scene.card)
-    audio_section = get_section([am], 'Audio:', scene)
+    audio_section = get_section([am], "Audio:", scene)
     audio_section.rect.topleft = (color_section.rect.left, color_section.rect.bottom + 20)
     
     elements.append(audio_section)
@@ -490,19 +490,19 @@ def builder(scene):
     navigation_elements = []
     
     back_button = Button.Text_Button(
-        text='Return To Menu',
-        tag='exit',
+        text="Return To Menu",
+        tag="exit",
         **button_kwargs
     )
     back_button.rect.topleft = (x, y)
     navigation_elements.append(back_button)
     
     back_icon = Textbox(
-        text=icons['arrow-left2'],
+        text=icons["arrow-left2"],
         text_color=(255, 0, 0),
         **icon_kwargs
     )
-    back_button.add_child(back_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    back_button.add_child(back_icon, right_anchor="right", right_offset=-2, centery_anchor="centery")
     back_icon.set_enabled(False) 
     
     y += back_button.rect.height + 3
@@ -510,7 +510,7 @@ def builder(scene):
     if scene.card.id != 0:
     
         node_button = Button.Text_Button(
-            text='Node Editor',
+            text="Node Editor",
             func=scene.node_editor.run,
             **button_kwargs
         )
@@ -518,17 +518,17 @@ def builder(scene):
         navigation_elements.append(node_button)
         
         node_icon = Textbox(
-            text=icons['arrow-right2'],
+            text=icons["arrow-right2"],
             text_color=(0, 255, 0),
             **icon_kwargs
         )
-        node_button.add_child(node_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+        node_button.add_child(node_icon, right_anchor="right", right_offset=-2, centery_anchor="centery")
         node_icon.set_enabled(False) 
         
         y += node_button.rect.height + 3
         
         info_button = Button.Text_Button(
-            text='Info Sheet',
+            text="Info Sheet",
             func=run_info_sheet,
             **button_kwargs
         )
@@ -536,14 +536,14 @@ def builder(scene):
         navigation_elements.append(info_button)
         
         info_icon = Textbox(
-            text=icons['file-text'],
+            text=icons["file-text"],
             text_color=(255, 255, 0),
             **icon_kwargs
         )
-        info_button.add_child(info_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+        info_button.add_child(info_icon, right_anchor="right", right_offset=-2, centery_anchor="centery")
         info_icon.set_enabled(False) 
     
-    navigation_section = get_section(navigation_elements, 'Navigation:', scene)
+    navigation_section = get_section(navigation_elements, "Navigation:", scene)
     navigation_section.rect.topleft = (save_section.rect.right + 20, 20)
     elements.append(navigation_section)
     
@@ -551,17 +551,17 @@ def builder(scene):
     
     if scene.card.id != 0:
         sections = {
-            'image': image_section,
-            'color': color_section,
-            'tags': tags_section,
-            'rarity': weight_section,
-            'audio': audio_section
+            "image": image_section,
+            "color": color_section,
+            "tags": tags_section,
+            "rarity": weight_section,
+            "audio": audio_section
         }
     else:
         sections = {
-            'image': image_section,
-            'color': color_section,
-            'audio': audio_section
+            "image": image_section,
+            "color": color_section,
+            "audio": audio_section
         } 
 
     buttons = {}
@@ -571,9 +571,9 @@ def builder(scene):
             b = buttons[t]
 
             section.turn_off()
-            b.unfreeze_animations('hover')
+            b.unfreeze_animations("hover")
             if not b.hit:
-                b.run_animations('hover', reverse=True)
+                b.run_animations("hover", reverse=True)
                 
             if t == tab:
                 section.turn_on()
@@ -581,8 +581,8 @@ def builder(scene):
                     (body.right + scene.card.rect.right) // 2,
                     body.centery
                 )
-                b.run_animations('hover')
-                b.freeze_animations('hover')
+                b.run_animations("hover")
+                b.freeze_animations("hover")
     
     x = save_section.rect.left
     y = save_section.rect.bottom + 25
@@ -605,29 +605,29 @@ def builder(scene):
         elements.append(b)
         y += b.padded_rect.height + 15
         
-    set_tab('image')
+    set_tab("image")
         
     if scene.card.id != 0:
         b = Button.Text_Button(
             size=scene.card._tags.rect.size,
             func=set_tab,
-            args=['tags'],
+            args=["tags"],
             layer=1
         )
-        b.set_parent(scene.card._tags, left_anchor='left', top_anchor='top')
+        b.set_parent(scene.card._tags, left_anchor="left", top_anchor="top")
         elements.append(b)
     
     b = Button.Text_Button(
         size=scene.card._pic.rect.size,
         func=set_tab,
-        args=['image'],
+        args=["image"],
         layer=1
     )
     elements.append(b)
     
     b.add_event(
-        tag='update',
-        func=lambda: setattr(b, 'rect',  scene.card._pic.image_rect.copy())
+        tag="update",
+        func=lambda: setattr(b, "rect",  scene.card._pic.image_rect.copy())
     )
     
     return elements
@@ -647,15 +647,15 @@ class Builder(Scene):
     def events(self):
         events = super().events()
         
-        if events.get('ctrl'):
-            if kd := events.get('kd'):
+        if events.get("ctrl"):
+            if kd := events.get("kd"):
                 if kd.key == pg.K_s:
                     self.save_card()
                     
     def ask_save(self):
         r = 1
         if self.card.get_info() != self.last_save_data:
-            m = Yes_No(text_kwargs={'text': 'Save before quitting?'})
+            m = Yes_No(text_kwargs={"text": "Save before quitting?"})
             r = m.run()
             if r:
                 self.card.save()
@@ -671,14 +671,14 @@ class Builder(Scene):
 
     def open_image(self):        
         files = (
-            ('All Image Files', ('*.jpg', '*.jpeg', '*.png', '*.bmp')),
-            ('JPEG', ('*.jpg', '*.jpeg')),
-            ('PNG', '*.png'),
-            ('BMP', '*.bmp'),
+            ("All Image Files", ("*.jpg", "*.jpeg", "*.png", "*.bmp")),
+            ("JPEG", ("*.jpg", "*.jpeg")),
+            ("PNG", "*.png"),
+            ("BMP", "*.bmp"),
         )
         file = filedialog.askopenfilename(
-            initialdir='/',
-            title='Select An Image',
+            initialdir="/",
+            title="Select An Image",
             filetypes=files
         )
         if file:
@@ -686,20 +686,20 @@ class Builder(Scene):
                 image = pg.image.load(file).convert_alpha()
                 self.card.update_image(image)
             except pg.error:
-                Notice(text_kwargs={'text': 'Error: Unable to load file'}).run()
+                Notice(text_kwargs={"text": "Error: Unable to load file"}).run()
         
     def export_image(self):
         files = (
-            ('JPEG', '*.jpg'),
-            ('PNG', '*.png'),
-            ('BMP', '*.bmp')
+            ("JPEG", "*.jpg"),
+            ("PNG", "*.png"),
+            ("BMP", "*.bmp")
         )
         file = filedialog.asksaveasfilename(
             initialfile=self.card.classname,
-            initialdir='/',
-            title='Save As',
+            initialdir="/",
+            title="Save As",
             filetypes=files,
-            defaultextension='*.*'
+            defaultextension="*.*"
         )
         if file:
             self.card.export_image(file)

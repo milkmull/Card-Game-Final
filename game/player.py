@@ -23,7 +23,7 @@ class Player(player_base.Player_Base):
         
     @property
     def username(self):
-        return self.player_info['name'].replace(' ', '_')
+        return self.player_info["name"].replace(" ", "_")
 
     def get_info(self):
         return self.player_info
@@ -32,7 +32,7 @@ class Player(player_base.Player_Base):
 
     @property
     def max_time(self):
-        return self.game.get_setting('tt')
+        return self.game.get_setting("tt")
         
     @property
     def current_time(self):
@@ -51,32 +51,32 @@ class Player(player_base.Player_Base):
         self.decks[deck][card.cid] = card
         
         self.add_log({
-            't': 'ac',
-            'c': (card.cid, card.name),
-            'd': deck
+            "t": "ac",
+            "c": (card.cid, card.name),
+            "d": deck
         }, exc=True)
         
     def remove_card(self, deck, card):
         self.decks[deck].pop(card.cid)
         
         self.add_log({
-            't': 'rc',
-            'c': card.cid,
-            'd': deck
+            "t": "rc",
+            "c": card.cid,
+            "d": deck
         }, exc=True)
         
     def pop_card(self, deck, cid):
         card = self.decks[deck].pop(cid)
         
         self.add_log({
-            't': 'rc',
-            'c': card.cid,
-            'd': deck
+            "t": "rc",
+            "c": card.cid,
+            "d": deck
         }, exc=True)
         
-        if deck == 'private':
-            if len(self.decks['private']) < 3:
-                self.draw_cards('private', 1)
+        if deck == "private":
+            if len(self.decks["private"]) < 3:
+                self.draw_cards("private", 1)
 
         return card
         
@@ -98,8 +98,8 @@ class Player(player_base.Player_Base):
         card.set_player(self)
         
         self.add_log({
-            't': 'own',
-            'c': card.cid
+            "t": "own",
+            "c": card.cid
         })
 
 # turn stuff
@@ -108,11 +108,11 @@ class Player(player_base.Player_Base):
         super().start_turn()
         self.set_timer()
 
-    def update(self, cmd='', data=[]):
-        if cmd == 'play' and not self.played:
+    def update(self, cmd="", data=[]):
+        if cmd == "play" and not self.played:
             self.play_card_from_data(data)
         
-        elif cmd == 'select' and self.active_card:
+        elif cmd == "select" and self.active_card:
             self.select_card_from_data(data)
             
         if (not self.played or self.active_card) and self.timer_up:
@@ -124,8 +124,8 @@ class Player(player_base.Player_Base):
         self.score = score
         
         self.add_log({
-            't': 'score',
-            'score': self.score
+            "t": "score",
+            "score": self.score
         })
         
 class Auto_Player(Player):   
@@ -141,11 +141,11 @@ class Auto_Player(Player):
             return
         choices = sorted(choices.items(), key=lambda c: c[1], reverse=True)
         decks = {
-            0: 'public',
-            1: 'private'
+            0: "public",
+            1: "private"
         }
         
-        match self.game.get_setting('diff'):
+        match self.game.get_setting("diff"):
             case 1:
                 choices = choices[:15]
                 random.shuffle(choices)
@@ -174,7 +174,7 @@ class Auto_Player(Player):
                     
         elif self.active_card:
         
-            cards = {cid: c for cid, c in self.decks['selection'].items()}
+            cards = {cid: c for cid, c in self.decks["selection"].items()}
 
             for node, score in choices:
                 pid, cid = node.data
@@ -182,7 +182,7 @@ class Auto_Player(Player):
                     return cid
 
     def update(self):
-        if not getattr(self.game, 'cpus_enabled', True):
+        if not getattr(self.game, "cpus_enabled", True):
             return
             
         ct = self.timer - (time.time() - self.start_time)

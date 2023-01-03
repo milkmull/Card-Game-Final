@@ -18,13 +18,13 @@ class Context_Manager(Live_Window):
         self.separators = []
 
         button_kwargs = {
-            'size': (100, 25),
-            'fill_color': (255, 255, 255),
-            'text_color': (0, 0, 0),
-            'text_size': 15,
-            'centery_aligned': True,
-            'hover_color': (100, 100, 100),
-            'left_pad': 5
+            "size": (100, 25),
+            "fill_color": (255, 255, 255),
+            "text_color": (0, 0, 0),
+            "text_size": 15,
+            "centery_aligned": True,
+            "hover_color": (100, 100, 100),
+            "left_pad": 5
         }
         buttons = []
         
@@ -39,14 +39,14 @@ class Context_Manager(Live_Window):
             selected = scene.get_selected()
             
             b = Button.Text_Button(
-                text='Copy',
+                text="Copy",
                 func=scene.copy_nodes,
                 **button_kwargs
             )
             buttons.append(b)
             
             b = Button.Text_Button(
-                text='Delete',
+                text="Delete",
                 func=scene.delete_nodes,
                 **button_kwargs
             )
@@ -56,7 +56,7 @@ class Context_Manager(Live_Window):
             
             if any(p.hidden for p in node.ports):
                 b = Button.Text_Button(
-                    text='Show Ports',
+                    text="Show Ports",
                     func=node.show_ports,
                     **button_kwargs
                 )
@@ -64,7 +64,7 @@ class Context_Manager(Live_Window):
                 
             if any(p.suppressed and not p.hidden for p in node.ports):
                 b = Button.Text_Button(
-                    text='Hide Ports',
+                    text="Hide Ports",
                     func=node.hide_ports,
                     **button_kwargs
                 )
@@ -74,7 +74,7 @@ class Context_Manager(Live_Window):
     
             if node.is_group:
                 b = Button.Text_Button(
-                    text='Ungroup',
+                    text="Ungroup",
                     func=scene.ungroup_node,
                     args=[node],
                     **button_kwargs
@@ -83,7 +83,7 @@ class Context_Manager(Live_Window):
                 
             elif len(selected) > 1:
                 b = Button.Text_Button(
-                    text='Group',
+                    text="Group",
                     func=scene.create_new_group_node,
                     **button_kwargs
                 )
@@ -93,7 +93,7 @@ class Context_Manager(Live_Window):
 
             if node.name in NODE_DATA:
                 b = Button.Text_Button(
-                    text='About Node',
+                    text="About Node",
                     func=run_about,
                     args=[node.name],
                     **button_kwargs
@@ -102,7 +102,7 @@ class Context_Manager(Live_Window):
                 
             if not node.is_group and any(p.visible for p in node.ports):
                 b = Button.Text_Button(
-                    text='View Output',
+                    text="View Output",
                     func=run_output,
                     args=[node],
                     **button_kwargs
@@ -113,7 +113,7 @@ class Context_Manager(Live_Window):
                 
         elif scene.copy_data:
             b = Button.Text_Button(
-                text='Paste',
+                text="Paste",
                 func=scene.paste_nodes,
                 **button_kwargs
             )
@@ -123,7 +123,7 @@ class Context_Manager(Live_Window):
             
         if scene.get_required():
             b = Button.Text_Button(
-                text='Get Required',
+                text="Get Required",
                 func=scene.load_required_nodes,
                 **button_kwargs
             )
@@ -132,11 +132,11 @@ class Context_Manager(Live_Window):
             add_sep()
             
         def select_all(scene):
-            scene.post_event('ctrl', True)
-            scene.post_event('kd', pg.event.Event(pg.KEYDOWN, key=pg.K_a))
+            scene.post_event("ctrl", True)
+            scene.post_event("kd", pg.event.Event(pg.KEYDOWN, key=pg.K_a))
             
         b = Button.Text_Button(
-            text='Select All',
+            text="Select All",
             func=select_all,
             args=[scene],
             **button_kwargs
@@ -144,7 +144,7 @@ class Context_Manager(Live_Window):
         buttons.append(b)
         
         b = Button.Text_Button(
-            text='Clean Up',
+            text="Clean Up",
             func=scene.clean_up,
             **button_kwargs
         )
@@ -153,10 +153,10 @@ class Context_Manager(Live_Window):
         for b in buttons:
             b.add_animation(
                 [{
-                    'attr': 'text_color',
-                    'end': (255, 255, 255)
+                    "attr": "text_color",
+                    "end": (255, 255, 255)
                 }],
-                tag='hover'
+                tag="hover"
             )
             
         super().__init__(

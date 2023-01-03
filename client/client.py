@@ -50,7 +50,7 @@ class Client(Client_Base):
         if p:
             if not p.is_cpu:
                 self.animation_manager.add_text(
-                    text=f'{p.name} joined!',
+                    text=f"{p.name} joined!",
                     text_size=30,
                     text_color=p.color,
                     text_outline_color=(0, 0, 0),
@@ -64,7 +64,7 @@ class Client(Client_Base):
         if p:
             if not p.is_cpu:
                 self.animation_manager.add_text(
-                    text=f'{p.name} left.',
+                    text=f"{p.name} left.",
                     text_size=30,
                     text_color=p.color,
                     text_outline_color=(0, 0, 0),
@@ -79,7 +79,7 @@ class Client(Client_Base):
         
         if s:
             self.animation_manager.add_text(
-                text='Game settings have been updated!',
+                text="Game settings have been updated!",
                 text_size=30,
                 text_color=(255, 255, 0),
                 text_outline_color=(0, 0, 0),
