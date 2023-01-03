@@ -188,7 +188,7 @@ class Sandbox(Client_Base):
             ps = Sandbox_Player_Spot()
             self.add_element(ps)
             
-            p = Player(self, log["name'], pid, Client_Base.COLORS[pid], ps, log['cpu"])
+            p = Player(self, log["name"], pid, Client_Base.COLORS[pid], ps, log["cpu"])
             self.players.append(p)
 
             self.organize_screen()

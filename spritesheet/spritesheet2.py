@@ -44,7 +44,7 @@ class Spritesheet:
             "data/img/customsheet.png",
             (9, CARD_WIDTH, CARD_HEIGHT)
         )
-        self.extras = {"back': pg.image.load('data/img/back.png").convert()}
+        self.extras = {"back": pg.image.load("data/img/back.png").convert()}
         self.sounds = load_sounds()
         
     def refresh_custom(self):
@@ -80,7 +80,7 @@ class Spritesheet:
                 if name in self.extras:
                     img = self.extras[name]
                 else:
-                    img = self.add_extra({"name': name, 'description": "extra"})     
+                    img = self.add_extra({"name": name, "description": "extra"})     
             
         if any(scale):
             img = pg.transform.smoothscale(img, scale)
