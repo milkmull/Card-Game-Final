@@ -9,7 +9,7 @@ def full_error(scene, err):
 
     tb = Textbox(
         text=err,
-        font_name='JetBrainsMonoNL-Regular.ttf',
+        font_name="JetBrainsMonoNL-Regular.ttf",
         text_size=17,
         text_color=(224, 226, 228),
         pad=5,
@@ -27,10 +27,10 @@ def full_error(scene, err):
     window.join_elements([tb], border=5)
     
     exit_button = Button.Text_Button(
-        text=icons['cross'],
-        font_name='icons.ttf',
+        text=icons["cross"],
+        font_name="icons.ttf",
         text_color=(255, 0, 0),
-        tag='exit'
+        tag="exit"
     )
     exit_button.rect.bottomleft = (window.rect.right + 5, window.rect.top - 5)
 
@@ -84,10 +84,10 @@ def error_elements(scene, errors):
         max_line_width=window.rect.width,
         centery_aligned=True
     )
-    window.add_child(error_text, centerx_anchor='centerx', bottom_anchor='top', bottom_offset=-10)
+    window.add_child(error_text, centerx_anchor="centerx", bottom_anchor="top", bottom_offset=-10)
     
     ok_button = Button.Text_Button(
-        text='Ok',
+        text="Ok",
         size=(200, 25),
         centerx_aligned=True,
         centery_aligned=True,
@@ -95,17 +95,17 @@ def error_elements(scene, errors):
         outline_width=3,
         border_radius=5,
         hover_color=(0, 255, 0),
-        tag='exit'
+        tag="exit"
     )
     ok_button.rect.midbottom = (body.centerx, body.height - 20)
     elements.append(ok_button)
     
     ok_button.add_animation(
         [{
-            'attr': 'text_color',
-            'end': (0, 0, 0)
+            "attr": "text_color",
+            "end": (0, 0, 0)
         }],
-        tag='hover'
+        tag="hover"
     )
     
     return elements

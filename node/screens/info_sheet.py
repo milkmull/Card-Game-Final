@@ -39,7 +39,7 @@ def flow_scene(scene, type, nodes):
         
         if i < len(nodes) - 1:
             arrow = Image(
-                image=get_arrow('>', (15, 15))
+                image=get_arrow(">", (15, 15))
             )
             window_elements.append(arrow)
             w += 10 + arrow.rect.width + 10
@@ -55,8 +55,8 @@ def flow_scene(scene, type, nodes):
     )
     window.rect.center = body.center
     
-    style = {'fgcolor': (255, 255, 255), 'style': 4}
-    text = f'Recommended {type.title()} Flow:'
+    style = {"fgcolor': (255, 255, 255), 'style": 4}
+    text = f"Recommended {type.title()} Flow:"
     title = Textbox(
         text=text,
         text_size=40,
@@ -67,7 +67,7 @@ def flow_scene(scene, type, nodes):
     
     b = Button.Text_Button(
         size=body.size,
-        tag='exit',
+        tag="exit",
         layer=-1,
         cursor=0
     )
@@ -115,18 +115,18 @@ def key_scene(scene, type, data):
     window.join_elements(texts, dir=0, marginy=20)
     
     key_text = Textbox(
-        text='Data Key:'
+        text="Data Key:"
     )
     key_text.rect.bottomleft = (window.rect.left, window.rect.top - 10)
     elements.append(key_text)
     
     value_text = Textbox(
-        text='Extracted Value:'
+        text="Extracted Value:"
     )
     value_text.rect.bottomleft = (window.rect.left + 150, window.rect.top - 10)
     elements.append(value_text)
     
-    style = {'fgcolor': (255, 255, 255), 'style': 4}
+    style = {"fgcolor': (255, 255, 255), 'style": 4}
     title = Textbox(
         text=type.title(),
         text_size=40,
@@ -137,7 +137,7 @@ def key_scene(scene, type, data):
 
     b = Button.Text_Button(
         size=body.size,
-        tag='exit',
+        tag="exit",
         layer=-1,
         cursor=0
     )
@@ -145,7 +145,7 @@ def key_scene(scene, type, data):
     
     return elements
 
-def run(sheet='decks'):
+def run(sheet="decks"):
     m = Scene(info_sheet, init_args=[sheet], fill_color=(32, 32, 40))
     m.run()
 
@@ -153,7 +153,7 @@ def info_sheet(scene, sheet):
     elements = []
     body = scene.body
     
-    with open(INFO_SHEET_FILE, 'r') as f:
+    with open(INFO_SHEET_FILE, "r") as f:
         data = json.load(f)
 
     window = Live_Window(
@@ -166,16 +166,16 @@ def info_sheet(scene, sheet):
     elements.append(window)
     
     label = Textbox(
-        text='Logs:',
+        text="Logs:",
         text_size=30
     )
     label.rect.bottomleft = (window.rect.left, window.rect.top - 10)
     window.add_child(label, current_offset=True)
 
     all_keys = (
-        'decks',
-        'requests',
-        'logs'
+        "decks",
+        "requests",
+        "logs"
     )
     current_key = [all_keys.index(sheet) - 1]
 
@@ -183,9 +183,9 @@ def info_sheet(scene, sheet):
         current_key[0] = (current_key[0] + dir) % len(all_keys)
         key = all_keys[current_key[0]]
 
-        label.set_text(key.title() + ':')
+        label.set_text(key.title() + ":")
 
-        if key == 'decks' or key == 'requests':
+        if key == "decks' or key == 'requests":
             texts = []
             for type, info in data[label.text[:-1].lower()].items():
                 info_tb = Textbox(
@@ -201,9 +201,9 @@ def info_sheet(scene, sheet):
             
         else:
             texts = []
-            for type, d in data['logs'].items():
+            for type, d in data["logs"].items():
                 info_tb = Textbox(
-                    text=d['info'],
+                    text=d["info"],
                     max_line_width=window.rect.width * 3 // 4,
                 )
                 type_tb = Button.Text_Button(
@@ -213,7 +213,7 @@ def info_sheet(scene, sheet):
                     right_pad=window.rect.width * 3 // 4,
                     y_pad=5,
                     func=run_key_scene,
-                    args=[type, d['data']]
+                    args=[type, d["data"]]
                 )
                 texts.append(type_tb)
                 texts.append(info_tb)
@@ -221,7 +221,7 @@ def info_sheet(scene, sheet):
         window.join_elements(texts, dir=0, marginy=20)
     
     right_swap = Button.Image_Button(
-        image=get_arrow('>', (20, 20), pad=(5, 5)),
+        image=get_arrow(">", (20, 20), pad=(5, 5)),
         pad=5,
         func=swap,
         args=[1],
@@ -231,7 +231,7 @@ def info_sheet(scene, sheet):
     window.add_child(right_swap, current_offset=True)
     
     left_swap = Button.Image_Button(
-        image=get_arrow('<', (20, 20), pad=(5, 5)),
+        image=get_arrow("<", (20, 20), pad=(5, 5)),
         pad=5,
         func=swap,
         args=[-1],
@@ -243,7 +243,7 @@ def info_sheet(scene, sheet):
     swap(1)
     
     back_button = Button.Text_Button(
-        text='Back',
+        text="Back",
         size=(200, 25),
         centerx_aligned=True,
         centery_aligned=True,
@@ -251,17 +251,17 @@ def info_sheet(scene, sheet):
         outline_width=3,
         border_radius=5,
         hover_color=(255, 0, 0),
-        tag='exit'
+        tag="exit"
     )
     back_button.rect.center = (body.centerx, (window.rect.bottom + body.height) // 2)
     elements.append(back_button)
     
     back_button.add_animation(
         [{
-            'attr': 'text_color',
-            'end': (0, 0, 0)
+            "attr": "text_color",
+            "end": (0, 0, 0)
         }],
-        tag='hover'
+        tag="hover"
     )
 
     return elements

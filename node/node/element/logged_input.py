@@ -6,7 +6,7 @@ class Logged_Input(Input):
     def __init__(
         self,
         port,
-        text='',
+        text="",
         **kwargs
     ):
         super().__init__(text=text, **kwargs)
@@ -35,9 +35,9 @@ class Logged_Input(Input):
         if self.port.manager:
             if self.text != self.last_text:
                 self.port.manager.add_log({
-                    't': 'val',
-                    'e': self,
-                    'v': (self.last_text, self.text)
+                    "t": "val",
+                    "e": self,
+                    "v": (self.last_text, self.text)
                 })
                 self.last_text = self.text
         
@@ -48,7 +48,7 @@ class Logged_Input(Input):
         
             if self.port.connection:
                 self.set_enabled(False)
-                super(Text_Element, self).set_text('-')
+                super(Text_Element, self).set_text("-")
                 
             elif not self.enabled:
                 self.set_enabled(True)
@@ -58,7 +58,7 @@ class Logged_Num_Input(Logged_Input):
     def __init__(
         self,
         port,
-        text=''
+        text=""
     ):
         super().__init__(
             port,
@@ -78,26 +78,26 @@ class Logged_Num_Input(Logged_Input):
         
     def get_output(self):
         out = super().get_output()
-        if not out.lstrip('-'):
-            return '0'
+        if not out.lstrip("-"):
+            return "0"
         return out
         
 class Logged_String_Input(Logged_Input):
     def __init__(
         self,
         port,
-        text=''
+        text=""
     ):
         super().__init__(
             port,
-            text=text.strip("'"),
-            default=port.node.get_default(port.port).strip("'"),
+            text=text.strip("'\""),
+            default=port.node.get_default(port.port).strip("'\""),
             size=(port.node.WIDTH - 19, 22),
             pad=2,
             inf_width=True,
             inf_height=False,
             centery_aligned=True,
-            text_check=lambda text: "'" not in text and '"' not in text and text.isascii(),
+            text_check=lambda text: "'" not in text and "\"" not in text and text.isascii(),
             max_length=25,
             max_lines=1,
             outline_color=(0, 0, 0),
@@ -105,25 +105,25 @@ class Logged_String_Input(Logged_Input):
         )
         
         self.add_animation([{
-            'attr': 'width',
-            'end': 200,
-            'frames': 10
+            "attr": "width",
+            "end": 200,
+            "frames": 10
         }],
-        tag='open')
+        tag="open")
         
     def get_output(self):
-        return f"'{super().get_output()}'"
+        return f"\"{super().get_output()}\""
         
 class Logged_Code_Input(Logged_Input):
     def __init__(
         self,
         port,
-        text=''
+        text=""
     ):
         super().__init__(
             port,
             text=text,
-            font_name='JetBrainsMonoNL-Regular.ttf',
+            font_name="JetBrainsMonoNL-Regular.ttf",
             default=port.node.get_default(port.port),
             size=(port.node.WIDTH - 19, 22),
             x_pad=2,
@@ -143,19 +143,19 @@ class Logged_Code_Input(Logged_Input):
 
         self.add_animation(
             [{
-                'attr': 'width',
-                'end': 300,
-                'frames': 10
+                "attr": "width",
+                "end": 300,
+                "frames": 10
             }],
-            tag='open'
+            tag="open"
         )
         self.add_animation(
             [{
-                'attr': 'height',
-                'end': 300,
-                'frames': 10
+                "attr": "height",
+                "end": 300,
+                "frames": 10
             }],
-            tag='open'
+            tag="open"
         )
         
     def set_text(self, text):
@@ -166,7 +166,7 @@ class Logged_Label_Input(Logged_Input):
     def __init__(
         self,
         node,
-        text=''
+        text=""
     ):
         super().__init__(
             node,
@@ -177,7 +177,7 @@ class Logged_Label_Input(Logged_Input):
             inf_width=False,
             centerx_aligned=True,
             centery_aligned=True,
-            text_check=lambda text: text.replace(' ', '').isalnum(),
+            text_check=lambda text: text.replace(" ", "").isalnum(),
             fill_color=None
         )
         
@@ -188,7 +188,7 @@ class Logged_Vec_Input(Position):
     def __init__(
         self,
         port,
-        text=''
+        text=""
     ):
         super().__init__()
         self.port = port
@@ -198,11 +198,11 @@ class Logged_Vec_Input(Position):
         self.y_val = Logged_Num_Input(port)
         self.y_val.width = port.node.WIDTH // 2 - 18
         
-        self.add_child(self.x_val, left_anchor='left', top_anchor='top')
-        self.add_child(self.y_val, left_anchor='left', left_offset=self.x_val.rect.width + 16, top_anchor='top')
+        self.add_child(self.x_val, left_anchor="left", top_anchor="top")
+        self.add_child(self.y_val, left_anchor="left", left_offset=self.x_val.rect.width + 16, top_anchor="top")
         
         if text:
-            x, y = text.strip('()').split(', ')
+            x, y = text.strip("()").split(", ")
             self.x_val.set_value(x)
             self.y_val.set_value(y)
             
@@ -212,25 +212,25 @@ class Logged_Vec_Input(Position):
         
     @property
     def value(self):
-        return f'({self.x_val.value}, {self.y_val.value})'
+        return f"({self.x_val.value}, {self.y_val.value})"
         
     def get_output(self):
-        return f'({self.x_val.get_output()}, {self.y_val.get_output()})'
+        return f"({self.x_val.get_output()}, {self.y_val.get_output()})"
             
     def set_value(self, text, undo=False):
-        x, y = text.strip('()').split(', ')
+        x, y = text.strip("()").split(", ")
         self.x_val.set_value(x)
         self.y_val.set_value(y)
         
     def reset_value(self, text):
-        x, y = text.strip('()').split(', ')
+        x, y = text.strip("()").split(", ")
         self.x_val.reset_value(x)
         self.y_val.reset_value(y)
         
 INPUTS = {
-    'num': Logged_Num_Input,
-    'string': Logged_String_Input,
-    'code': Logged_Code_Input,
-    'label': Logged_Label_Input,
-    'vec': Logged_Vec_Input
+    "num": Logged_Num_Input,
+    "string": Logged_String_Input,
+    "code": Logged_Code_Input,
+    "label": Logged_Label_Input,
+    "vec": Logged_Vec_Input
 }     

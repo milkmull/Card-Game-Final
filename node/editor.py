@@ -31,13 +31,13 @@ def save_group_node(_nodes):
     import json
     nodes = gn.nodes.copy() + [gn]
     data = pack(nodes)
-    with open('data/node/group_nodes.json', 'r') as f:
+    with open("data/node/group_nodes.json", "r") as f:
         group_data = json.load(f)
     group_data[gn.group_name] = data
-    with open('data/node/group_nodes.json', 'w') as f:
+    with open("data/node/group_nodes.json", "w") as f:
         json.dump(group_data, f, indent=4)
         
-    print('saved')
+    print("saved")
 
 def get_section(elements, label, scene):
     r = elements[0].rect.unionall([e.padded_rect for e in elements]).inflate(20, 30)
@@ -81,18 +81,18 @@ def get_elements(scene):
     elements.append(node_scene)
     
     button_kwargs = {
-        'text_size': 15,
-        'size': (150, 25),
-        'x_pad': 5,
-        'top_pad': 2,
-        'centery_aligned': True,
-        'hover_color': (100, 100, 100)
+        "text_size": 15,
+        "size": (150, 25),
+        "x_pad": 5,
+        "top_pad": 2,
+        "centery_aligned": True,
+        "hover_color": (100, 100, 100)
     }
     
     icon_kwargs = {
-        'font_name': 'icons.ttf',
-        'centerx_aligned': True,
-        'centery_aligned': True
+        "font_name": "icons.ttf",
+        "centerx_aligned": True,
+        "centery_aligned": True
     }
     
 # save section
@@ -102,7 +102,7 @@ def get_elements(scene):
     save_elements = []
     
     save_button = Button.Text_Button(
-        text='Save',
+        text="Save",
         func=scene.builder.save_card,
         **button_kwargs
     )
@@ -110,17 +110,17 @@ def get_elements(scene):
     save_elements.append(save_button)
     
     save_icon = Textbox(
-        text=icons['floppy-disk'],
+        text=icons["floppy-disk"],
         text_color=(0, 0, 247),
         **icon_kwargs
     )
-    save_button.add_child(save_icon, right_anchor='right', right_offset=-1, centery_anchor='centery')
+    save_button.add_child(save_icon, right_anchor="right", right_offset=-1, centery_anchor="centery")
     save_icon.set_enabled(False) 
     
     y += save_button.rect.height + 3
     
     publish_button = Button.Text_Button(
-        text='Publish',
+        text="Publish",
         func=scene.builder.publish_card,
         **button_kwargs
     )
@@ -132,16 +132,16 @@ def get_elements(scene):
         outline_color=(0, 0, 0),
         outline_width=2
     )
-    publish_button.add_child(publish_icon, right_anchor='right', right_offset=-3, centery_anchor='centery', centery_offset=-1)
+    publish_button.add_child(publish_icon, right_anchor="right", right_offset=-3, centery_anchor="centery", centery_offset=-1)
     publish_icon.set_enabled(False)
 
     publish_icon.add_event(
-        tag='update',
+        tag="update",
         func=publish_icon.set_value,
         args=[scene.card.get_published]
     )
     
-    save_section = get_section(save_elements, 'Save:', scene)
+    save_section = get_section(save_elements, "Save:", scene)
     save_section.rect.topleft = (20, 20)
     elements.append(save_section)
     
@@ -152,25 +152,25 @@ def get_elements(scene):
     back_elements = []
     
     back_button = Button.Text_Button(
-        text='Back',
-        tag='exit',
+        text="Back",
+        tag="exit",
         **button_kwargs
     )
     back_button.rect.topleft = (x, y)
     back_elements.append(back_button)
     
     back_icon = Textbox(
-        text=icons['arrow-left2'],
+        text=icons["arrow-left2"],
         text_color=(255, 0, 0),
         **icon_kwargs
     )
-    back_button.add_child(back_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    back_button.add_child(back_icon, right_anchor="right", right_offset=-2, centery_anchor="centery")
     back_icon.set_enabled(False) 
     
     y += back_button.rect.height + 3
     
     info_button = Button.Text_Button(
-        text='Info Sheet',
+        text="Info Sheet",
         func=run_info_sheet,
         **button_kwargs
     )
@@ -178,14 +178,14 @@ def get_elements(scene):
     back_elements.append(info_button)
     
     info_icon = Textbox(
-        text=icons['file-text'],
+        text=icons["file-text"],
         text_color=(255, 255, 0),
         **icon_kwargs
     )
-    info_button.add_child(info_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    info_button.add_child(info_icon, right_anchor="right", right_offset=-2, centery_anchor="centery")
     info_icon.set_enabled(False) 
     
-    back_section = get_section(back_elements, 'Navigation:', scene)
+    back_section = get_section(back_elements, "Navigation:", scene)
     back_section.rect.topleft = (save_section.rect.right + 20, 20)
     elements.append(back_section)
     
@@ -196,7 +196,7 @@ def get_elements(scene):
     do_elements = []
     
     home_button = Button.Text_Button(
-        text='Home',
+        text="Home",
         func=scene.go_home,
         **button_kwargs
     )
@@ -204,16 +204,16 @@ def get_elements(scene):
     do_elements.append(home_button)
     
     home_icon = Textbox(
-        text=icons['home3'],
+        text=icons["home3"],
         **icon_kwargs
     )
-    home_button.add_child(home_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    home_button.add_child(home_icon, right_anchor="right", right_offset=-2, centery_anchor="centery")
     home_icon.set_enabled(False) 
     
     y += home_button.rect.height + 3
     
     undo_button = Button.Text_Button(
-        text='Undo',
+        text="Undo",
         func=scene.undo_log,
         **button_kwargs
     )
@@ -221,16 +221,16 @@ def get_elements(scene):
     do_elements.append(undo_button)
     
     undo_icon = Textbox(
-        text=icons['undo2'],
+        text=icons["undo2"],
         **icon_kwargs
     )
-    undo_button.add_child(undo_icon, right_anchor='right', right_offset=-2, centery_anchor='centery')
+    undo_button.add_child(undo_icon, right_anchor="right", right_offset=-2, centery_anchor="centery")
     undo_icon.set_enabled(False) 
     
     y += undo_button.rect.height + 3
     
     redo_button = Button.Text_Button(
-        text='Redo',
+        text="Redo",
         func=scene.redo_log,
         **button_kwargs
     )
@@ -238,13 +238,13 @@ def get_elements(scene):
     do_elements.append(redo_button)
     
     redo_icon = Textbox(
-        text=icons['redo2'],
+        text=icons["redo2"],
         **icon_kwargs
     )
-    redo_button.add_child(redo_icon, right_anchor='right', centery_anchor='centery')
+    redo_button.add_child(redo_icon, right_anchor="right", centery_anchor="centery")
     redo_icon.set_enabled(False)
     
-    do_section = get_section(do_elements, 'Actions:', scene)
+    do_section = get_section(do_elements, "Actions:", scene)
     do_section.rect.topleft = (back_section.rect.right + 20, 20)
     elements.append(do_section)
 
@@ -309,12 +309,12 @@ class Node_Editor(Scene):
         if self.no_logs:
             return
 
-        if self.logs and log['t'] == 'disconn':
+        if self.logs and log["t"] == "disconn":
             last_log = self.logs[-1]
-            if last_log['t'] == 'conn':
+            if last_log["t"] == "conn":
                 if (
-                    set(last_log['ports']) == set(log['ports']) and 
-                    set(last_log['nodes']) == set(log['nodes'])
+                    set(last_log["ports"]) == set(log["ports"]) and 
+                    set(last_log["nodes"]) == set(log["nodes"])
                 ):
                     self.logs.pop(-1)
                     return
@@ -353,38 +353,38 @@ class Node_Editor(Scene):
 
         for log in logs[::-1]:
         
-            match log['t']:
+            match log["t"]:
 
-                case 'carry':
-                    n = log['node']
-                    dx, dy = log['dist']
+                case "carry":
+                    n = log["node"]
+                    dx, dy = log["dist"]
                     n.move(-dx, -dy)
                     n.pickup_pos = None
                         
-                case 'add':
-                    n = log['node']
+                case "add":
+                    n = log["node"]
                     if not n.is_group:
                         self.del_node(n, d=True)
                     else:
                         self.ungroup_node(n, d=True)
                         
-                case 'del':
-                    n = log['node']
-                    m = log['m']
+                case "del":
+                    n = log["node"]
+                    m = log["m"]
                     self.add_node(n, d=True) 
                     if n.is_group:
                         n.reset_ports(m)
                     dx, dy = self.scroll_offset
-                    px, py = log['pos']
+                    px, py = log["pos"]
                     n.rect.topleft = (px - dx, py - dy)
                         
-                case 'conn':
-                    p0, p1 = log['ports']
+                case "conn":
+                    p0, p1 = log["ports"]
                     Port.disconnect(p0, p1, d=True)
                     
-                case 'disconn':
-                    n0, n1 = log['nodes']
-                    p0, p1 = log['ports']
+                case "disconn":
+                    n0, n1 = log["nodes"]
+                    p0, p1 = log["ports"]
                     if p0 not in n0.ports:
                         n0.ports.append(p0)
                         n0.set_port_pos()
@@ -401,40 +401,40 @@ class Node_Editor(Scene):
                         p1.group_node.set_port_pos()
                     Port.new_connection(p0, p1, force=True, d=True)
 
-                case 'val':
-                    e = log['e']
-                    v0, v1 = log['v']
+                case "val":
+                    e = log["e"]
+                    v0, v1 = log["v"]
                     e.set_value(v0, undo=True)
                     
-                case 'transform':
-                    n = log['node']
-                    n.transform(form=log['form0'], d=True)
+                case "transform":
+                    n = log["node"]
+                    n.transform(form=log["form0"], d=True)
                         
-                case 'suppress':
-                    p = log['p']
-                    s = log['s']
+                case "suppress":
+                    p = log["p"]
+                    s = log["s"]
                     p.set_suppressed(not s, d=True)
                     
-                case 'ap':
-                    n = log['node']
-                    p = log['port']
+                case "ap":
+                    n = log["node"]
+                    p = log["port"]
                     n.rp(p=p)
                     
-                case 'rp':
-                    n = log['node']
-                    p = log['port']
+                case "rp":
+                    n = log["node"]
+                    p = log["port"]
                     n.ap(p=p)
                     
-                case 'hp':
-                    n = log['node']
-                    ports = log['ports']
+                case "hp":
+                    n = log["node"]
+                    ports = log["ports"]
                     for p in ports:
                         p.show()
                     n.set_port_pos()
                     
-                case 'sp':
-                    n = log['node']
-                    ports = log['ports']
+                case "sp":
+                    n = log["node"]
+                    ports = log["ports"]
                     for p in ports:
                         p.hide()
                     n.set_port_pos()
@@ -450,37 +450,37 @@ class Node_Editor(Scene):
 
         for log in logs:
             
-            match log['t']:
+            match log["t"]:
             
-                case 'carry':
-                    n = log['node']
-                    dx, dy = log['dist']
+                case "carry":
+                    n = log["node"]
+                    dx, dy = log["dist"]
                     n.move(dx, dy)
                     n.pickup_pos = None
                         
-                case 'del':
-                    n = log['node']
-                    m = log['m']
-                    if m == 'ug':
+                case "del":
+                    n = log["node"]
+                    m = log["m"]
+                    if m == "ug":
                         self.ungroup_node(n, d=True)
                     else:
                         self.del_node(n, d=True)   
                         
-                case 'add':
-                    n = log['node']
+                case "add":
+                    n = log["node"]
                     self.add_node(n, d=True)
                     if n.is_group:
-                        n.reset_ports('add')
+                        n.reset_ports("add")
                         
-                case 'disconn':
-                    p0, p1 = log['ports']
+                case "disconn":
+                    p0, p1 = log["ports"]
                     Port.disconnect(p0, p1, d=True)
                     p0.node.set_port_pos()
                     p1.node.set_port_pos()
                     
-                case 'conn':
-                    n0, n1 = log['nodes']
-                    p0, p1 = log['ports']
+                case "conn":
+                    n0, n1 = log["nodes"]
+                    p0, p1 = log["ports"]
                     if p0 not in n0.ports:
                         n0.ports.append(p0)
                         n0.set_port_pos()
@@ -497,40 +497,40 @@ class Node_Editor(Scene):
                         p1.group_node.set_port_pos()
                     Port.new_connection(p0, p1, d=True)
                     
-                case 'val':
-                    e = log['e']
-                    v0, v1 = log['v']
+                case "val":
+                    e = log["e"]
+                    v0, v1 = log["v"]
                     e.set_value(v1)
                     
-                case 'transform':
-                    n = log['node']
-                    n.transform(form=log['form1'], d=True)
+                case "transform":
+                    n = log["node"]
+                    n.transform(form=log["form1"], d=True)
                         
-                case 'suppress':
-                    p = log['p']
-                    s = log['s']
+                case "suppress":
+                    p = log["p"]
+                    s = log["s"]
                     p.set_suppressed(s, d=True)
                     
-                case 'ap':
-                    n = log['node']
-                    p = log['port']
+                case "ap":
+                    n = log["node"]
+                    p = log["port"]
                     n.ap(p=p)
                     
-                case 'rp':
-                    n = log['node']
-                    p = log['port']
+                case "rp":
+                    n = log["node"]
+                    p = log["port"]
                     n.rp(p=p)
                     
-                case 'hp':
-                    n = log['node']
-                    ports = log['ports']
+                case "hp":
+                    n = log["node"]
+                    ports = log["ports"]
                     for p in ports:
                         p.hide()
                     n.set_port_pos()
                     
-                case 'sp':
-                    n = log['node']
-                    ports = log['ports']
+                case "sp":
+                    n = log["node"]
+                    ports = log["ports"]
                     for p in ports:
                         p.show()
                     n.set_port_pos()
@@ -569,7 +569,7 @@ class Node_Editor(Scene):
     def get_group_node(self, name, pos=(0, 0), held=True):
         data = Node.GROUP_DATA[name]
         
-        if len(self.nodes) + len(data['nodes']) + 1 > 50:
+        if len(self.nodes) + len(data["nodes"]) + 1 > 50:
             return
         
         nodes = unpack(data, manager=self)
@@ -598,7 +598,7 @@ class Node_Editor(Scene):
                 
     def ungroup_node(self, n, d=False):
         n.ungroup()
-        self.del_node(n, method='ug', d=d)
+        self.del_node(n, method="ug", d=d)
 
     def delete_nodes(self, nodes=None):
         if nodes is None:
@@ -606,7 +606,7 @@ class Node_Editor(Scene):
         for n in nodes:
             self.del_node(n)
             
-    def del_node(self, n, method='del', d=False):
+    def del_node(self, n, method="del", d=False):
         n.kill(method=method, d=d)
         self.nodes.remove(n)
         
@@ -642,7 +642,7 @@ class Node_Editor(Scene):
         Dragger.deselect_all()
         
         data = self.copy_data
-        if not data or len(self.nodes) + len(data['nodes']) > 50:
+        if not data or len(self.nodes) + len(data["nodes"]) > 50:
             return
         nodes = unpack(data, manager=self)
         
@@ -782,9 +782,9 @@ class Node_Editor(Scene):
         if not events:
             return
 
-        if kd := events.get('kd'):
+        if kd := events.get("kd"):
             
-            if events['ctrl']:
+            if events["ctrl"]:
                 
                 match kd.key:
                     case pg.K_s:
@@ -821,7 +821,7 @@ class Node_Editor(Scene):
                     case pg.K_DOWN:
                         self.scroll_vel[1] = -15
                         
-        if (ku := events.get('ku')):
+        if (ku := events.get("ku")):
             match ku.key:
             
                 case pg.K_LEFT:
@@ -833,17 +833,17 @@ class Node_Editor(Scene):
                 case pg.K_DOWN:
                     self.scroll_vel[1] = 0
 
-        if (mbd := events.get('mbd')):
+        if (mbd := events.get("mbd")):
             self.close_context()
             
-            if mbd.button == 1 and not events['clicked']:
+            if mbd.button == 1 and not events["clicked"]:
                 self.scroll_anchor = mbd.pos
                 self.last_scroll_pos = mbd.pos
                 
-            elif mbd.button == 3 and not events['clicked']:
+            elif mbd.button == 3 and not events["clicked"]:
                 self.anchor = mbd.pos
         
-        elif (mbu := events.get('mbu')):
+        elif (mbu := events.get("mbu")):
             if mbu.button == 1:
                 self.scroll_anchor = None
                 
@@ -860,7 +860,7 @@ class Node_Editor(Scene):
         elif any(self.scroll_vel):
             self.scroll_screen(dx=self.scroll_vel[0], dy=self.scroll_vel[1])
             
-        if self.scroll_anchor or (events['ctrl'] and not events['cursor_set']):
+        if self.scroll_anchor or (events["ctrl"] and not events["cursor_set"]):
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_SIZEALL)
 
     def update(self):   

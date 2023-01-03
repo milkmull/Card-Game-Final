@@ -6,17 +6,17 @@ from .node import mapping
 class Compiler:
     @staticmethod
     def unmark(text):
-        return re.sub(r'(#<)([0-9]+)(,-?[0-9]+)(>#)', '', text)
+        return re.sub(r"(#<)([0-9]+)(,-?[0-9]+)(>#)", "", text)
         
     @staticmethod
     def get_ranges(text, id, port=None):
         i = 0
         ranges = []
-        last = ''
+        last = ""
         open = False
 
         while True:
-            res = re.search(r'(#<)([0-9]+)(,-?[0-9]+)(>#)', text)
+            res = re.search(r"(#<)([0-9]+)(,-?[0-9]+)(>#)", text)
             if not res:
                 break
                 
@@ -24,11 +24,11 @@ class Compiler:
             i += res.start()
             text = text[res.end():]
             
-            nid, pid = g.strip('#<>').split(',')
+            nid, pid = g.strip("#<>").split(",")
             
             if nid == str(id) and (port is None or pid == str(port)):
                 if not open:
-                    subtext = re.sub(r'(#<)([0-9]+)(,-?[0-9]+)(>#)', '', text[:text.index(g)])
+                    subtext = re.sub(r"(#<)([0-9]+)(,-?[0-9]+)(>#)", "", text[:text.index(g)])
                     r = (i, i + len(subtext))
                     ranges.append(r)
                     open = True
@@ -45,10 +45,10 @@ class Compiler:
     @property
     def header(self):
         if not self.card:
-            return ''
+            return ""
         return (
             f"\nclass {self.card.classname}(card_base.Card):\n"
-                f"\tname = '{self.card.name}'\n"
+                f"\tname = \"{self.card.name}\"\n"
                 f"\tweight = {self.card.weight}\n"
                 f"\ttags = {self.card.tags}\n"
         )
@@ -66,55 +66,55 @@ class Compiler:
             n.mark = mark
     
         if self.missing:
-            return ''
+            return ""
    
         data = {}
         
         for n in self.funcs:
             data[n.name] = {
-                'header': '\t' + n.get_text(),
-                'start': n.get_start(),
-                'body': '',
-                'end': n.get_end()
+                "header": "\t" + n.get_text(),
+                "start": n.get_start(),
+                "body": "",
+                "end": n.get_end()
             }
             self._compile(n, data[n.name])
             
         out = self.header
 
         for func, info in data.items():
-            header = info['header']
-            start = info['start']
-            body = info['body']
-            end = info['end']
+            header = info["header"]
+            start = info["start"]
+            body = info["body"]
+            end = info["end"]
             if not start + body + end:
-                body = '\t\tpass\n'
+                body = "\t\tpass\n"
             out += header + start + body + end
 
-        return out.replace('\t', '    ')
+        return out.replace("\t", "    ")
             
     def _compile(self, node, data, tabs=2):
-        text = ''
+        text = ""
         
         if not node.is_func:
             out_text = node.get_text()
             if out_text:
                 for line in out_text.splitlines():
-                    text += (tabs * '\t') + line + '\n'
-                data['body'] += text
+                    text += (tabs * "\t") + line + "\n"
+                data["body"] += text
         
         process_found = False
         for op in node.get_output_ports():
-            if op.has_type(Port_Types.PROCESS):
+            if op.is_process:
                 if op.connection:
                     self._compile(op.connection, data, tabs=tabs + 1)
                 process_found = True
                 break
      
         if process_found:
-            if data['body'].endswith(text):
-                data['body'] += ((tabs + 1) * '\t') + 'pass\n'
+            if data["body"].endswith(text):
+                data["body"] += ((tabs + 1) * "\t") + "pass\n"
 
         for op in node.get_output_ports():
-            if op.has_type(Port_Types.FLOW) and not op.has_type(Port_Types.PROCESS):
+            if op.has_type(Port_Types.FLOW) and not op.is_process:
                 if op.connection:
                     self._compile(op.connection, data, tabs=tabs)

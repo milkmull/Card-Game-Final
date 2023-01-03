@@ -13,14 +13,14 @@ class Node_Menu(Popup.Live_Popup):
             size=(560, 450),
             fill_color=(0, 0, 0),
             arrow_kwargs={
-                'color': (0, 0, 0)
+                "color": (0, 0, 0)
             },
             button_kwargs={
-                'hover_color': None
+                "hover_color": None
             },
             animation_kwargs={
-                'frames': 5,
-                'method': 'ease_out_sine'
+                "frames": 5,
+                "method": "ease_out_sine"
             },
             layer=4
         )
@@ -49,10 +49,10 @@ class Node_Menu(Popup.Live_Popup):
             
             b.add_animation(
                 [{
-                    'attr': 'text_color',
-                    'end': (0, 0, 0)
+                    "attr": "text_color",
+                    "end": (0, 0, 0)
                 }],
-                tag='hover'
+                tag="hover"
             )
             
             self.buttons[tab] = b
@@ -61,20 +61,20 @@ class Node_Menu(Popup.Live_Popup):
             y += b.padded_rect.height + 5
 
         tab = list(self.tabs)[0]
-        self.buttons[tab].run_animations('hover')
+        self.buttons[tab].run_animations("hover")
         self.set_tab(tab)
         
         self.label = Label(
             self,
             height=30,
-            text='Nodes',
+            text="Nodes",
             fill_color=(0, 198, 195),
             text_color=(0, 0, 0),
             layer=self.layer - 1
         )
 
         self.label.add_event(
-            tag='left_click',
+            tag="left_click",
             func=self.open_close
         )
         
@@ -93,7 +93,7 @@ class Node_Menu(Popup.Live_Popup):
         
     def set_tab(self, tab):
         elements = []
-        style = {'fgcolor': (255, 255, 255), 'style': 4}
+        style = {"fgcolor": (255, 255, 255), "style": 4}
         for subtab, names in self.tabs[tab].items():
         
             label = Textbox(
@@ -107,7 +107,7 @@ class Node_Menu(Popup.Live_Popup):
             buttons = []
             
             for name in names:
-                if tab == 'group':
+                if tab == "group":
                     data = Node.GROUP_DATA[name]
                     b = Button.Image_Button(
                         image=unpack(data, map=False)[-1].get_raw_image(scale=0.75),
@@ -135,12 +135,12 @@ class Node_Menu(Popup.Live_Popup):
         self.y_scroll_bar.go_to_top()
         
         for t, b in self.buttons.items():
-            b.unfreeze_animations('hover')
+            b.unfreeze_animations("hover")
             if not b.hit:
-                b.run_animations('hover', reverse=True)
+                b.run_animations("hover", reverse=True)
             if t == tab:
-                b.run_animations('hover')
-                b.freeze_animations('hover')
+                b.run_animations("hover")
+                b.freeze_animations("hover")
 
     def get_node(self, *args, **kwargs):
         self.manager.get_node(*args, **kwargs)
@@ -154,7 +154,7 @@ class Node_Menu(Popup.Live_Popup):
         super().events(events)
         self.label.events(events)
 
-        if (mbd := events.get('mbd')) and (not self.get_hit() and self.is_open):
+        if (mbd := events.get("mbd")) and (not self.get_hit() and self.is_open):
             if mbd.button == 1 or mbd.button == 3:
                 self.close() 
                     

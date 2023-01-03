@@ -29,7 +29,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
     elements.append(node)
     
     id_text = Textbox(
-        text=f'Node ID: {original_node.id}',
+        text=f"Node ID: {original_node.id}",
         text_size=25
     )
     id_text.rect.topleft = (20, 20)
@@ -53,7 +53,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
     text_window.add_child(text_label, current_offset=True)
     
     out_text = Textbox(
-        font_name='JetBrainsMonoNL-Regular.ttf',
+        font_name="JetBrainsMonoNL-Regular.ttf",
         text_size=17,
         text_color=(224, 226, 228),
         enabled=False
@@ -94,24 +94,24 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         pg.draw.lines(surf, self.port.color, False, points, width=3)
     
     wire = Base_Element(draw=draw)
-    setattr(wire, 'port', None)
+    setattr(wire, "port", None)
     elements.append(wire)
 
     full_output = Check_Box(value=show_full_out)
     full_output.rect.topright = (node.rect.right - 10, node.rect.bottom + 20)
     full_output.add_event(
-        tag='set_text',
-        func=lambda: wire.port.button.run_events('left_click')
+        tag="set_text",
+        func=lambda: wire.port.button.run_events("left_click")
     )
     elements.append(full_output)
     
     tb = Textbox(
-        text='Full Output:'
+        text="Full Output:"
     )
     tb.rect.midright = (full_output.rect.left - 5, full_output.rect.centery)
     elements.append(tb)
     tb.add_event(
-        tag='left_click',
+        tag="left_click",
         func=full_output.left_click
     )
     
@@ -119,13 +119,13 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         port = wire.port.true_port
         scene.args = [original_node.get_port(port).connection]
         scene.kwargs = {
-            'show_full_out': full_output.value,
-            'last_port': original_node.get_port(port).connection_port.true_port
+            "show_full_out": full_output.value,
+            "last_port": original_node.get_port(port).connection_port.true_port
         }
         scene.refresh()
 
     navigation_button = Button.Text_Button(
-        text='Go To',
+        text="Go To",
         size=(100, 25),
         centerx_aligned=True,
         centery_aligned=True,
@@ -142,7 +142,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         original_node.manager.nodes,
         card=original_node.manager.card,
     )
-    compiled_text = compiler.compile(ignore_missing=True, mark=True).strip() or 'Error: No Start Node Found'
+    compiled_text = compiler.compile(ignore_missing=True, mark=True).strip() or "Error: No Start Node Found"
 
     def view_text(visible_port, node, port): 
         wire.port = visible_port
@@ -164,7 +164,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
                 full_text = node.get_text() if port.is_flow else node.get_output(port.port)
                 
             else:
-                full_text = 'No Connection'
+                full_text = "No Connection"
 
         else:
             input = node.get_input_from(port.port)
@@ -174,7 +174,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
                     full_text = output
                     break
             else:
-                full_text = 'Error: No Data Found'
+                full_text = "Error: No Data Found"
                 
         full_text = full_text.strip()
        
@@ -186,7 +186,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
             
             i = Button.Image_Button(
                 image=get_arrow(
-                    '<' if visible_port.port > 0 else '>',
+                    "<" if visible_port.port > 0 else ">",
                     (20, 20),
                     pad=(5, 5),
                     color=visible_port.color
@@ -206,8 +206,8 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
             port=port.true_port if not port.is_flow else 0
         )
         style = {
-            'bgcolor': visible_port.color,
-            'fgcolor': color_shade(visible_port.color)
+            "bgcolor": visible_port.color,
+            "fgcolor": color_shade(visible_port.color)
         }
         for s, e in ranges:
             text_style.update({i: style for i in range(s, e)})
@@ -221,9 +221,9 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         text_label.set_text(f"Port {visible_port.port} {'Input' if visible_port.port > 0 else 'Output'}:")
         
         if text_window.y_scroll_bar.visible:
-            text_label.pad['right'] = text_window.y_scroll_bar.width
+            text_label.pad["right"] = text_window.y_scroll_bar.width
         else:
-            text_label.pad['right'] = 5
+            text_label.pad["right"] = 5
         
     found_port = False
 
@@ -239,14 +239,14 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         b.rect.center = p.rect.center
         b.set_parent(p, current_offset=True)
         elements.append(b)
-        setattr(p, 'button', b)
+        setattr(p, "button", b)
         
         if not found_port and (last_port is None or (last_port is not None and p.port == last_port)):
-            b.run_events('left_click')
+            b.run_events("left_click")
             found_port = True
             
     back_button = Button.Text_Button(
-        text='Back',
+        text="Back",
         size=(200, 25),
         centerx_aligned=True,
         centery_aligned=True,
@@ -254,17 +254,17 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
         outline_width=3,
         border_radius=5,
         hover_color=(255, 0, 0),
-        tag='exit'
+        tag="exit"
     )
     back_button.rect.midbottom = (body.centerx, body.height - 20)
     elements.append(back_button)
     
     back_button.add_animation(
         [{
-            'attr': 'text_color',
-            'end': (0, 0, 0)
+            "attr": "text_color",
+            "end": (0, 0, 0)
         }],
-        tag='hover'
+        tag="hover"
     )
     
     return elements

@@ -19,11 +19,11 @@ def run_tester(card):
     t = Tester(card)
     m = Loading(
         func_kwargs={
-            'func': step_test, 
-            'args': [t]
+            "func": step_test, 
+            "args": [t]
         },
         text_kwargs={
-            'text': 'Testing Card...'
+            "text": "Testing Card..."
         },
         fps=240
     )
@@ -50,10 +50,10 @@ class Tester:
     @staticmethod
     def get_settings():
         return {
-            'size': [5, 5],
-            'tt': 200,
-            'cpus': 3,
-            'diff': 3
+            "size": [5, 5],
+            "tt": 200,
+            "cpus": 3,
+            "diff": 3
         }
         
     def __init__(self, card):
@@ -66,8 +66,8 @@ class Tester:
         self.errors = []
         
     def write_card(self):         
-        with open(TEST_CARD_FILE, 'wb') as f:
-            f.write((TEST_CARD_HEADER + self.card.code).encode('utf-8'))
+        with open(TEST_CARD_FILE, "wb") as f:
+            f.write((TEST_CARD_HEADER + self.card.code).encode("utf-8"))
             
         from . import testing_card
         importlib.reload(testing_card)
@@ -79,14 +79,14 @@ class Tester:
         return [err.splitlines()[-2].strip() for err in self.errors]
         
     def get_formatted_errors(self):
-        return [err.replace(os.getcwd(), '') for err in self.errors]
+        return [err.replace(os.getcwd(), "") for err in self.errors]
         
     def get_error_lines(self):
         lines = []
         
         for err in self.errors:
-            end = err.split('line ')[-1]
-            text = ''
+            end = err.split("line ")[-1]
+            text = ""
             for char in end:
                 if char.isnumeric():
                     text += char
@@ -97,9 +97,9 @@ class Tester:
         return lines
         
     def filter_errors(self):
-        endings = set(err.split('line ')[-1] for err in self.errors)
+        endings = set(err.split("line ")[-1] for err in self.errors)
         for err in self.errors.copy():
-            end = err.split('line ')[-1]
+            end = err.split("line ")[-1]
             if end in endings:
                 endings.remove(end)
             else:
@@ -117,7 +117,7 @@ class Tester:
         
     def sim(self, num):
         for _ in range(num):
-            g = game_base.Game_Base('test', self.settings, self.cards)
+            g = game_base.Game_Base("test", self.settings, self.cards)
             g.add_cpus()
             g.new_game()
 
@@ -141,14 +141,14 @@ class Tester:
         self.filter_errors()
     
 def test_run(card):
-    text = ''
-    g = game.Game(mode='single', cards=Tester.get_cards(card))
+    text = ""
+    g = game.Game(mode="single", cards=Tester.get_cards(card))
     c = TestClient(g)
     try:
         c.run()
     except:
         err = traceback.format_exc()
-        text = f'the following errors occurred: {err.splitlines()[-2]}'
+        text = f"the following errors occurred: {err.splitlines()[-2]}"
     finally:
         c.quit()
         return text

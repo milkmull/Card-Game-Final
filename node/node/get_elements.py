@@ -5,15 +5,15 @@ from .element.logged_dropdown import Logged_Dropdown as Const_Dropdown, Logged_I
 from ui.element.utils.image import get_arrow
 from ui.icons.icons import icons
 
-def set_input_element(port, type, value=''):
+def set_input_element(port, type, value=""):
     i = INPUTS[type](
         port,
         text=value
     )
     port.set_element(i)
     
-def set_vec_element(port, value=''):
-    v = INPUTS['vec'](
+def set_vec_element(port, value=""):
+    v = INPUTS["vec"](
         port,
         text=value
     )
@@ -22,7 +22,7 @@ def set_vec_element(port, value=''):
 def set_check_element(port):
     cb = Check_Box(
         port,
-        value=port.node._get_default(port.port) == 'True'
+        value=port.node._get_default(port.port) == "True"
     )
     port.set_element(cb)
     
@@ -43,7 +43,7 @@ def set_dropdown_element(port, options, value=None, const=False):
 
 def get_transform_button(node):
     h = node.label_rect.height - 10
-    i = get_arrow('>', (h, h))
+    i = get_arrow(">", (h, h))
     
     b = Button.Image_Button(
         image=i,
@@ -59,8 +59,8 @@ def get_transform_button(node):
 def get_ar_buttons(node, io):
     h = node.label_rect.height - 5
     a = Button.Text_Button(
-        text=icons['+'],
-        font_name='icons.ttf',
+        text=icons["+"],
+        font_name="icons.ttf",
         size=(h, h),
         pad=2,
         centerx_aligned=True,
@@ -71,8 +71,8 @@ def get_ar_buttons(node, io):
         hover_color=(100, 100, 100)
     )
     r = Button.Text_Button(
-        text=icons['-'],
-        font_name='icons.ttf',
+        text=icons["-"],
+        font_name="icons.ttf",
         size=(h, h),
         pad=2,
         centerx_aligned=True,
@@ -84,10 +84,10 @@ def get_ar_buttons(node, io):
     )
     if io == 1:
         a.rect.midleft = (node.label_rect.left + 5, node.label_rect.top + 10)
-        r.rect.midleft = (a.padded_rect.right + r.pad['left'] + 5, a.rect.centery)
+        r.rect.midleft = (a.padded_rect.right + r.pad["left"] + 5, a.rect.centery)
     elif io == -1:
         r.rect.midright = (node.label_rect.right - 5, node.label_rect.top + 10)
-        a.rect.midright = (r.padded_rect.left - a.pad['right'] - 5, r.rect.centery)
+        a.rect.midright = (r.padded_rect.left - a.pad["right"] - 5, r.rect.centery)
     node.add_child(a, current_offset=True)
     node.add_child(r, current_offset=True)
  

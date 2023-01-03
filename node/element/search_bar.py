@@ -27,11 +27,11 @@ class Search_Bar(Input):
         
         self.buttons = []
         button_kwargs = {
-            'size': self.size,
-            'pad': 5,
-            'text_size': self.text_size,
-            'hover_color': (100, 100, 100),
-            'centery_aligned': True
+            "size": self.size,
+            "pad": 5,
+            "text_size": self.text_size,
+            "hover_color": (100, 100, 100),
+            "centery_aligned": True
         }
 
         for name, obj in Node.NODE_DATA.items():
@@ -67,7 +67,7 @@ class Search_Bar(Input):
     def open_search(self, p):
         self.rect.center = p
         self.open()
-        self.highlight_section('')
+        self.highlight_section("")
         self.set_visible(True)
        
     def close(self):
@@ -88,7 +88,7 @@ class Search_Bar(Input):
         if self.visible:
             super().events(events)
 
-        if not events['clicked'] and (mbd := events.get('mbd')):
+        if not events["clicked"] and (mbd := events.get("mbd")):
             if mbd.button == 1:
                 if self.open_timer < self.CLICK_TIMER_MAX:
                     self.open_search(mbd.pos)
