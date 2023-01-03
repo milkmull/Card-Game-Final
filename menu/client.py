@@ -18,7 +18,7 @@ from .find_online import run_find_online
 from .host_game import run_host_game
 
 def scan():
-    m = Searching('Searching for games...')
+    m = Searching("Searching for games...")
 
     def _scan():
         results = scan_connections()
@@ -32,7 +32,7 @@ def scan():
     return results
     
 def start_server(port):
-    m = Searching('Starting game...')
+    m = Searching("Starting game...")
 
     def _start_server(): 
         if port_in_use(port):
@@ -40,7 +40,7 @@ def start_server(port):
             return
             
         proc = subprocess.Popen(
-            [sys.executable, 'server.py', str(port)],
+            [sys.executable, "server.py", str(port)],
             stdout=sys.stdout,
             stderr=sys.stderr,
             start_new_session=True
@@ -56,7 +56,7 @@ def start_server(port):
     return r
     
 def connect(n, timeout=5):
-    m = Searching('Connecting to game...')
+    m = Searching("Connecting to game...")
     
     def _connect():
         t = time.time()
@@ -72,12 +72,12 @@ def connect(n, timeout=5):
     t.join()
 
 def run_client_single():
-    g = Game('single')
+    g = Game("single")
     c = Client_Base(g)
     c.run()
     
 def run_sandbox():
-    g = Sandbox_Game('single')
+    g = Sandbox_Game("single")
     c = Sandbox(g)
     c.run()
     
@@ -88,8 +88,8 @@ def host_game():
 
     r = start_server(port)
     if not r:
-        text = 'The specified port is currently in use.'
-        m = Notice(text_kwargs={'text': text})
+        text = "The specified port is currently in use."
+        m = Notice(text_kwargs={"text": text})
         m.run()
         return
         
@@ -97,8 +97,8 @@ def host_game():
         connect(n)
         
         if not n.connected:
-            text = 'Game could not be started.'
-            m = Notice(text_kwargs={'text': text})
+            text = "Game could not be started."
+            m = Notice(text_kwargs={"text": text})
             m.run()
             return
 
@@ -108,15 +108,15 @@ def host_game():
         except OSError:
             pass
         except Exception:
-            text = 'An error occurred.'
-            m = Notice(text_kwargs={'text': text})
+            text = "An error occurred."
+            m = Notice(text_kwargs={"text": text})
             m.run()   
             return
         
 def find_local_game():
     results = scan()
     if not results:
-        m = Notice(text_kwargs={'text': 'No games could be found.'})
+        m = Notice(text_kwargs={"text": "No games could be found."})
         m.run()  
         return
 
@@ -130,8 +130,8 @@ def find_local_game():
         connect(n)
 
         if not n.connected:
-            text = 'Failed to connect to game.'
-            m = Notice(text_kwargs={'text': text})
+            text = "Failed to connect to game."
+            m = Notice(text_kwargs={"text": text})
             m.run()
             return
 
@@ -139,13 +139,13 @@ def find_local_game():
             with Client(n) as c:
                 c.run()
         except OSError:
-            text = 'The game has been closed.'
-            m = Notice(text_kwargs={'text': text})
+            text = "The game has been closed."
+            m = Notice(text_kwargs={"text": text})
             m.run()   
             return
         except Exception:
-            text = 'An error occurred.'
-            m = Notice(text_kwargs={'text': text})
+            text = "An error occurred."
+            m = Notice(text_kwargs={"text": text})
             m.run()   
             return
             
@@ -160,8 +160,8 @@ def find_global_game():
         connect(n)
         
         if not n.connected:
-            text = 'No game could be found.'
-            m = Notice(text_kwargs={'text': text})
+            text = "No game could be found."
+            m = Notice(text_kwargs={"text": text})
             m.run()
             return    
 
@@ -169,13 +169,13 @@ def find_global_game():
             with Client(n) as c:
                 c.run()
         except OSError:
-            text = 'The game has been closed.'
-            m = Notice(text_kwargs={'text': text})
+            text = "The game has been closed."
+            m = Notice(text_kwargs={"text": text})
             m.run()   
             return  
         except Exception:
-            text = 'An error occurred.'
-            m = Notice(text_kwargs={'text': text})
+            text = "An error occurred."
+            m = Notice(text_kwargs={"text": text})
             m.run()   
             return
             

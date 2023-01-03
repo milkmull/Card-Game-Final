@@ -21,14 +21,14 @@ class Text_Element(Element, Text):
             
     @property
     def hover_text_color(self):
-        a = self.get_animation_by_name('hover_text_color')
+        a = self.get_animation_by_name("hover_text_color")
         if a:
             return a.sequence[0].end_value
             
     @hover_text_color.setter
     def hover_text_color(self, hover_text_color):
         if hover_text_color:
-            a = self.get_animation_by_name('hover_text_color')
+            a = self.get_animation_by_name("hover_text_color")
             if a:
                 a.sequence[0].end_value = hover_text_color
                 if self.hit:
@@ -36,18 +36,18 @@ class Text_Element(Element, Text):
             else:
                 self.add_animation(
                     [{
-                        'attr': 'text_color',
-                        'end': hover_text_color
+                        "attr": "text_color",
+                        "end": hover_text_color
                     }],
-                    tag='hover',
-                    name='hover_text_color'
+                    tag="hover",
+                    name="hover_text_color"
                 )
         else:
-            self.remove_animation('hover_text_color')
+            self.remove_animation("hover_text_color")
 
     def set_text(self, text, force=False, style=None):
         super().set_text(text, force=force, style=style)
-        self.run_events('set_text')
+        self.run_events("set_text")
         
     def draw(self, surf):
         self.draw_rect(surf)

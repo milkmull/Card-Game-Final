@@ -78,9 +78,9 @@ class Moving_Card(Base_Element):
     @property
     def phase(self):
         match self.type:
-            case 'play':
+            case "play":
                 return 0
-            case 'kill':
+            case "kill":
                 return 1
             case _:
                 return 2
@@ -91,10 +91,10 @@ class Moving_Card(Base_Element):
         
     def add_animation(self, animations, loop=False):
         for kwargs in animations:
-            kwargs['element'] = self
+            kwargs["element"] = self
         s = Sequence(
             [Animation(**kwargs) for kwargs in animations], 
-            tag='temp',
+            tag="temp",
             loop=loop
         )
         self.animations.append(s)
@@ -106,7 +106,7 @@ class Moving_Card(Base_Element):
         else:
             self.card.turn_on()
             
-            if self.type == 'kill':
+            if self.type == "kill":
                 self.pack.manager.client.get_kill_particles(self.card.rect, self.card.player.color)
             
     def update(self):
@@ -134,73 +134,73 @@ class Moving_Card(Base_Element):
             
         match self.type:
 
-            case 'play':
+            case "play":
 
                 self.add_animation([{
-                    'attr': 'center',
-                    'start': start,
-                    'end': self.card.rect.center,
-                    'frames': 10,
-                    'method': 'ease_out_expo'
+                    "attr": "center",
+                    "start": start,
+                    "end": self.card.rect.center,
+                    "frames": 10,
+                    "method": "ease_out_expo"
                 }])
 
                 self.add_animation([
                     {
-                        'attr': 'size',
-                        'start': (0, 0),
-                        'end': self.card.rect.inflate(self.card.rect.width * 3, self.card.rect.height * 3).size,
-                        'frames': 10,
-                        'method': 'ease_out_expo'
+                        "attr": "size",
+                        "start": (0, 0),
+                        "end": self.card.rect.inflate(self.card.rect.width * 3, self.card.rect.height * 3).size,
+                        "frames": 10,
+                        "method": "ease_out_expo"
                     },
                     {
-                        'attr': 'size',
-                        'end': self.card.rect.size,
-                        'frames': 10,
-                        'delay': 5,
-                        'method': 'ease_in_expo'
+                        "attr": "size",
+                        "end": self.card.rect.size,
+                        "frames": 10,
+                        "delay": 5,
+                        "method": "ease_in_expo"
                     }
                 ])
                 
-            case 'shift':
+            case "shift":
                 
                 self.add_animation([{
-                    'attr': 'center',
-                    'start': start,
-                    'end': self.card.rect.center,
-                    'frames': 10,
-                    'method': 'ease_in_out_expo'
+                    "attr": "center",
+                    "start": start,
+                    "end": self.card.rect.center,
+                    "frames": 10,
+                    "method": "ease_in_out_expo"
                 }])
                 
-            case 'kill':
+            case "kill":
                 
                 self.add_animation([{
-                    'attr': 'x',
-                    'end': self.card.rect.x - 5,
-                    'frames': 20,
-                    'method': 'random_shake'
+                    "attr": "x",
+                    "end": self.card.rect.x - 5,
+                    "frames": 20,
+                    "method": "random_shake"
                 }])
                 
                 self.add_animation([{
-                    'attr': 'y',
-                    'end': self.card.rect.y - 5,
-                    'frames': 20,
-                    'method': 'random_shake'
+                    "attr": "y",
+                    "end": self.card.rect.y - 5,
+                    "frames": 20,
+                    "method": "random_shake"
                 }])
                 
-            case 'own' | 'tf':
+            case "own" | "tf":
                 
                 self.add_animation([
                     {
-                        'attr': 'w',
-                        'end': 0,
-                        'frames': 10,
-                        'method': 'ease_in_expo'
+                        "attr": "w",
+                        "end": 0,
+                        "frames": 10,
+                        "method": "ease_in_expo"
                     },
                     {
-                        'attr': 'w',
-                        'end': self.card.rect.width,
-                        'frames': 10,
-                        'method': 'ease_out_expo'
+                        "attr": "w",
+                        "end": self.card.rect.width,
+                        "frames": 10,
+                        "method": "ease_out_expo"
                     }
                 ])
         

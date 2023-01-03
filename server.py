@@ -14,14 +14,14 @@ class Server(Network_Base):
         port = int(sys.argv[1])
         super().__init__(get_local_ip(), port)
 
-        self.game = Game('online')
+        self.game = Game("online")
         
     def check_close_host(self):
         return not self.connections
 
     def close(self):
         super().close()
-        print('server closed')
+        print("server closed")
         
     def add_connection(self, conn, address):     
         if not self.connections:
@@ -31,7 +31,7 @@ class Server(Network_Base):
 
         super().add_connection(conn, address)
         
-        print('connected to', address)
+        print("connected to", address)
 
         t = threading.Thread(target=self.threaded_client, args=(address, conn))
         t.start()
@@ -62,7 +62,7 @@ class Server(Network_Base):
             print(e)
             print(traceback.format_exc())
                 
-        print('lost connection to', address)
+        print("lost connection to", address)
         self.close_connection(conn, address)
         
     def client_process(self, conn):
@@ -120,7 +120,7 @@ class Server(Network_Base):
             if data != CONFIRMATION_CODE:
                 continue
                 
-            reply = f'{CONFIRMATION_CODE}-{self.port}'
+            reply = f"{CONFIRMATION_CODE}-{self.port}"
             Network_Base.sendto(reply, address[0], 5556)
     
 with Server() as s:

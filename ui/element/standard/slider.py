@@ -5,9 +5,9 @@ from ..base.style import Style
 
 class Slider(Element):
     handel_defaults = {
-        'fill_color': (255, 255, 255),
-        'outline_color': (0, 0, 0),
-        'outline_width': 1
+        "fill_color": (255, 255, 255),
+        "outline_color": (0, 0, 0),
+        "outline_width": 1
     }
 
     def __init__(
@@ -28,12 +28,12 @@ class Slider(Element):
         self.held = False
         self.held_pos = None
         
-        if 'size' not in handel_kwargs:
+        if "size" not in handel_kwargs:
             if not self.dir:
                 size = (10, self.rect.height * 2)
             else:
                 size = (self.rect.width * 2, 10)
-            handel_kwargs['size'] = size
+            handel_kwargs["size"] = size
         self.handel = Style(**(Slider.handel_defaults | handel_kwargs))
         
         if not dir:
@@ -42,7 +42,7 @@ class Slider(Element):
                 current_offset=True,
                 left_limit=self.handel.rect.width // 2,
                 right_limit=self.handel.rect.width // 2,
-                centery_anchor='centery'
+                centery_anchor="centery"
             )
             
         else:
@@ -51,7 +51,7 @@ class Slider(Element):
                 current_offset=True,
                 top_limit=self.handel.rect.height // 2,
                 bottom_limit=self.handel.rect.height // 2,
-                centerx_anchor='centerx'
+                centerx_anchor="centerx"
             )
             
         if state is None:

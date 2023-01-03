@@ -14,7 +14,7 @@ class Game_Base:
 
         self.pid = 0
         self.cid = 0
-        self.status = ''
+        self.status = ""
         self.turn = 0
         self.current_turn = 0
         
@@ -23,7 +23,7 @@ class Game_Base:
         self.multipliers = {}
         self.wait = {}
         self.players = [] 
-        self.grid = Grid(self, self.get_setting('size'))
+        self.grid = Grid(self, self.get_setting("size"))
         
         if seed is None:
             seed = datetime.now().timestamp()
@@ -32,7 +32,7 @@ class Game_Base:
         
     @property
     def done(self):
-        return self.status == 'new game'
+        return self.status == "new game"
         
     def copy(self, seed=None):
         g = Game_Base(self.mode, self.settings, self.cards, seed=seed)
@@ -70,11 +70,11 @@ class Game_Base:
         self.turn = 0
         self.current_turn = 0
         
-        self.new_status('waiting')  
+        self.new_status("waiting")  
 
     def new_game(self):
         self.reset()
-        self.new_status('playing') 
+        self.new_status("playing") 
         
         for p in self.players:
             p.start()
@@ -87,7 +87,7 @@ class Game_Base:
                 
     def add_cpus(self, num=0):
         self.pid = 0
-        for _ in range(num or self.get_setting('cpus')):  
+        for _ in range(num or self.get_setting("cpus")):  
             p = player_base.Player_Base(self, self.pid)
             self.players.append(p)      
             self.pid += 1
@@ -99,7 +99,7 @@ class Game_Base:
         
     def get_last_log(self, types):
         for log in reverse(self.log):
-            if log['t'] in types:
+            if log["t"] in types:
                 return log
 
 # player stuff 
@@ -131,15 +131,15 @@ class Game_Base:
         name = random.choices(list(deck.keys()), weights=weights, k=1)[0]
         
         self.add_log({
-            'u': caller.player.pid,
-            't': 'rand',
-            'len': len(deck)
+            "u": caller.player.pid,
+            "t": "rand",
+            "len": len(deck)
         })
         self.add_log({
-            'u': caller.player.pid,
-            't': 'randres',
-            'res': deck[name].sid,
-            'w': deck[name].weight
+            "u": caller.player.pid,
+            "t": "randres",
+            "res": deck[name].sid,
+            "w": deck[name].weight
         })
         
         return self.get_card(name)
@@ -168,7 +168,7 @@ class Game_Base:
             
     def pop_public(self, cid):
         card = self.public_deck.pop(cid)
-        if self.mode == 'test' and len(self.public_deck) < 9:
+        if self.mode == "test" and len(self.public_deck) < 9:
             self.add_public(self.draw_cards()[0])
         return card
         
@@ -216,7 +216,7 @@ class Game_Base:
     def new_turn(self):
         self.current_turn = (self.current_turn + 1) % len(self.players)
         self.players[self.current_turn].start_turn()
-        self.run_wait('nt', player=self.players[self.current_turn])
+        self.run_wait("nt", player=self.players[self.current_turn])
         
     def card_update(self):
         cards = sorted(self.grid.cards, key=lambda c: c.priority, reverse=True)
@@ -242,7 +242,7 @@ class Game_Base:
                 c.run_wait(data)
 
     def main(self):
-        if self.status == 'playing':
+        if self.status == "playing":
             p = self.players[self.current_turn]
             p.update()
             if p.done_turn:
@@ -250,17 +250,17 @@ class Game_Base:
                 self.advance_turn() 
     
     def advance_turn(self):
-        if self.status != 'playing':
+        if self.status != "playing":
             return 
 
-        if self.grid.full or (not self.public_deck and all({not p.decks['private'] for p in self.players})):
+        if self.grid.full or (not self.public_deck and all({not p.decks["private"] for p in self.players})):
             self.end_game()
             
         else:
             self.new_turn()
             
     def end_game(self):
-        self.new_status('new game') 
+        self.new_status("new game") 
             
 # ending stuff
 

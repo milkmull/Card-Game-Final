@@ -6,5 +6,5 @@ class Textbox(Text_Element):
         return Image(image=self.text_surf, **kwargs)
         
     def clear(self):
-        self.set_text('')
+        self.set_text("")
         

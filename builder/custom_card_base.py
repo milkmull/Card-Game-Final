@@ -18,7 +18,7 @@ from ui.element.elements import Textbox, Image, Button, Input
 
 from .element.fitted_image import Fitted_Image
 
-CARD_SIZE = CONSTANTS['card_size']
+CARD_SIZE = CONSTANTS["card_size"]
 CARD_WIDTH, CARD_HEIGHT = CARD_SIZE
 IMAGE_SIZE = (CARD_WIDTH - 75, 210)
 
@@ -37,13 +37,13 @@ class Card(Image_Element):
     def __init__(
         self,
         
-        name='name',
-        description='description',
+        name="name",
+        description="description",
         tags=None,
         color=[161, 195, 161],
         id=None, 
         
-        image='',
+        image="",
         keep_aspect=False,
         rotation=0,
         outline=True,
@@ -52,7 +52,7 @@ class Card(Image_Element):
         
         node_data={},
         weight=1,
-        code='',
+        code="",
         lines=(0, 0),
         published=False,
         
@@ -84,18 +84,18 @@ class Card(Image_Element):
         self.bg = bg
         
         style_kwargs = {
-            'outline_width': 2,
-            'outline_color': (0, 0, 0),
+            "outline_width": 2,
+            "outline_color": (0, 0, 0),
         }
         
         text_kwargs = {
-            'fill_color': (255, 255, 255),
-            'text_color': (0, 0, 0),
-            'pad': 5,
-            'inf_width': False,
-            'inf_height': False,
-            'centerx_aligned': True,
-            'centery_aligned': True
+            "fill_color": (255, 255, 255),
+            "text_color": (0, 0, 0),
+            "pad": 5,
+            "inf_width": False,
+            "inf_height": False,
+            "centerx_aligned": True,
+            "centery_aligned": True
         }
 
         name = Input(
@@ -137,11 +137,11 @@ class Card(Image_Element):
         self.add_child(desc, current_offset=True)
         self._desc = desc
         
-        text_kwargs['pad'] = 1
+        text_kwargs["pad"] = 1
 
         tags = Textbox(
             size=(pic.rect.width - 20, 20),
-            text=str(tags).replace("'", '') if tags else '', 
+            text=str(tags).replace("'", "") if tags else "", 
             text_size=45,
             **text_kwargs,
             **style_kwargs
@@ -164,17 +164,17 @@ class Card(Image_Element):
         
     @property
     def tags(self):
-        return [tag for tag in self._tags.text.strip('[]').split(', ') if tag]
+        return [tag for tag in self._tags.text.strip("[]").split(", ") if tag]
         
     @property
     def classname(self):
-        cname = ''
-        for char in self.name.title().replace(' ', '_'):
-            if char.isalnum() or char == '_':
+        cname = ""
+        for char in self.name.title().replace(" ", "_"):
+            if char.isalnum() or char == "_":
                 cname += char
                 
         if cname[0].isnumeric():
-            cname = '_' + cname
+            cname = "_" + cname
 
         return cname
         
@@ -188,31 +188,31 @@ class Card(Image_Element):
         
     @property
     def image_path(self):
-        return f'{CUSTOM_IMG_PATH}{self.cid}.png'
+        return f"{CUSTOM_IMG_PATH}{self.cid}.png"
         
     @property
     def sound_path(self):
-        return f'{CUSTOM_SND_PATH}{self.cid}.wav'
+        return f"{CUSTOM_SND_PATH}{self.cid}.wav"
         
     def get_info(self):
         info = {
-            'name': self.name,
-            'description': self.description,
-            'tags': self.tags, 
-            'color': self.color, 
-            'image': self.image_path,
-            'keep_aspect': self._pic.keep_aspect,
-            'rotation': self._pic.rotation,
-            'outline': bool(self._pic.outline_color),
-            'sound': self.sound,
-            'id': self.cid,
-            'weight': self.weight, 
-            'classname': self.classname, 
-            'custom': True,
-            'code': self.code,
-            'lines': self.lines,
-            'published': self.published,
-            'node_data': self.node_data
+            "name": self.name,
+            "description": self.description,
+            "tags": self.tags, 
+            "color": self.color, 
+            "image": self.image_path,
+            "keep_aspect": self._pic.keep_aspect,
+            "rotation": self._pic.rotation,
+            "outline": bool(self._pic.outline_color),
+            "sound": self.sound,
+            "id": self.cid,
+            "weight": self.weight, 
+            "classname": self.classname, 
+            "custom": True,
+            "code": self.code,
+            "lines": self.lines,
+            "published": self.published,
+            "node_data": self.node_data
         }
         return info
  
@@ -251,20 +251,20 @@ class Card(Image_Element):
         tags = self.tags
         if tag and tag not in tags and len(tags) < 3:
             tags.append(tag)
-            self._tags.set_text(str(tags).replace("'", ''))
+            self._tags.set_text(str(tags).replace("'", ""))
             return 1
         
     def remove_tag(self, tag):
         tags = self.tags
         if tag in tags:
             tags.remove(tag)
-            self._tags.set_text(str(tags).replace("'", '') if tags else '')
+            self._tags.set_text(str(tags).replace("'", "") if tags else "")
             
     def set_weight(self, weight):
         self.weight = weight
             
     def set_sound(self):
-        path = f'{TEMP_SND_PATH}custom.wav'
+        path = f"{TEMP_SND_PATH}custom.wav"
         if os.path.exists(path):
             shutil.copyfile(path, self.sound_path)
             self.sound = self.sound_path
@@ -305,23 +305,23 @@ class Card(Image_Element):
             missing = compiler.missing
             if missing:
                 if len(missing) == 1:
-                    text = f'Missing {missing[0]} node.\n'
+                    text = f"Missing {missing[0]} node.\n"
                 else:
                     text = f"Missing {', '.join(missing)} nodes.\n"
-                Notice(text_kwargs={'text': text}).run()
+                Notice(text_kwargs={"text": text}).run()
                 return
             
         if not self.code:
-            Notice(text_kwargs={'text': 'No writable nodes found.'}).run()
+            Notice(text_kwargs={"text": "No writable nodes found."}).run()
             return
             
         saved = self.save(suppress=True)
         if not saved:
-            Notice(text_kwargs={'text': 'An error occurred while saving.'}).run()
+            Notice(text_kwargs={"text": "An error occurred while saving."}).run()
             return
         
         if not is_valid_code(self.code):
-            Notice(text_kwargs={'text': 'Error: invalid code.'}).run()
+            Notice(text_kwargs={"text": "Error: invalid code."}).run()
             return
   
         passed = tester.run_tester(self)
@@ -335,12 +335,12 @@ class Card(Image_Element):
         self.published = True
         self.save(suppress=True)
         
-        Notice(text_kwargs={'text': 'Card has been published successfully!'}).run()
+        Notice(text_kwargs={"text": "Card has been published successfully!"}).run()
         
     def unpublish(self, nodes=None):
         saved = self.save(nodes=nodes, suppress=True)
         if not saved:
-            Notice(text_kwargs={'text': 'An error occurred while saving.'}).run()
+            Notice(text_kwargs={"text": "An error occurred while saving."}).run()
             return
             
         from data.save import SAVE
@@ -350,7 +350,7 @@ class Card(Image_Element):
         self.published = False
         self.save(suppress=True)
         
-        Notice(text_kwargs={'text': 'Card has been unpublished.'}).run()
+        Notice(text_kwargs={"text": "Card has been unpublished."}).run()
             
     def save(self, nodes=None, suppress=False):
         self.set_sound()
@@ -362,10 +362,10 @@ class Card(Image_Element):
         saved = CUSTOMSHEET.save_card(self)
         if not suppress:
             if not saved:
-                scene = Notice(text_kwargs={'text': 'A card with that name already exists.'}, overlay=True)
+                scene = Notice(text_kwargs={"text": "A card with that name already exists."}, overlay=True)
                 scene.run()
                 return
             else:
-                scene = Notice(text_kwargs={'text': 'Card saved successfully!'}, overlay=True)
+                scene = Notice(text_kwargs={"text": "Card saved successfully!"}, overlay=True)
                 scene.run()
         return saved

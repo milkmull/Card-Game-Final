@@ -28,10 +28,10 @@ class Moving_Text(Position, Text):
 
     def add_animation(self, animations, loop=False):
         for kwargs in animations:
-            kwargs['element'] = self
+            kwargs["element"] = self
         s = Sequence(
             [Animation(**kwargs) for kwargs in animations], 
-            tag='temp',
+            tag="temp",
             loop=loop
         )
         self.animations.append(s)
@@ -60,30 +60,30 @@ class Moving_Text(Position, Text):
         
         self.add_animation([
             {
-                'attr': 'x',
-                'end': end,
-                'frames': 10,
-                'method': 'ease_out_quad'
+                "attr": "x",
+                "end": end,
+                "frames": 10,
+                "method": "ease_out_quad"
             },
             {
-                'attr': '_id',
-                'end': self.id,
-                'delay': 60
+                "attr": "_id",
+                "end": self.id,
+                "delay": 60
             }
         ])
         
     def shift(self, y):
         self.add_animation([
             {
-                'attr': 'y',
-                'end': self.rect.y - y,
-                'frames': 5,
-                'method': 'ease_out_expo'
+                "attr": "y",
+                "end": self.rect.y - y,
+                "frames": 5,
+                "method": "ease_out_expo"
             },
             {
-                'attr': '_id',
-                'end': self.id,
-                'delay': 40
+                "attr": "_id",
+                "end": self.id,
+                "delay": 40
             }
         ])
         

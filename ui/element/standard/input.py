@@ -12,18 +12,18 @@ class Input(Text_Element):
     BLINK_TIMER_MAX = 20
     
     defaults = {
-        'size': (200, 20),
-        'left_pad': 2,
-        'right_pad': 2,
-        'top_pad': 2,
-        'bottom_pad': 2,
-        'inf_width': True,
-        'centery_aligned': True,
-        'fill_color': (255, 255, 255),
-        'text_color': (0, 0, 0),
-        'cursor': pg.SYSTEM_CURSOR_IBEAM,
-        'clip': True,
-        'max_lines': 1
+        "size": (200, 20),
+        "left_pad": 2,
+        "right_pad": 2,
+        "top_pad": 2,
+        "bottom_pad": 2,
+        "inf_width": True,
+        "centery_aligned": True,
+        "fill_color": (255, 255, 255),
+        "text_color": (0, 0, 0),
+        "cursor": pg.SYSTEM_CURSOR_IBEAM,
+        "clip": True,
+        "max_lines": 1
     }
 
     @classmethod
@@ -45,7 +45,7 @@ class Input(Text_Element):
 
     def __init__(
         self,
-        default='',
+        default="",
         
         highlight_color=(0, 100, 255),
         highlight_text_color=(0, 0, 0),
@@ -59,8 +59,8 @@ class Input(Text_Element):
         **kwargs
     ):
 
-        if not kwargs.get('text'):
-            kwargs['text'] = default
+        if not kwargs.get("text"):
+            kwargs["text"] = default
         super().__init__(**(Input.defaults | kwargs))
 
         self.default = default or self.text
@@ -94,11 +94,11 @@ class Input(Text_Element):
         
     @property
     def can_scroll_x(self):
-        return self.inf_width and not (self.alignment['right'] or self.alignment['centerx'])
+        return self.inf_width and not (self.alignment["right"] or self.alignment["centerx"])
         
     @property
     def can_scroll_y(self):
-        return self.inf_height and not (self.alignment['bottom'] or self.alignment['centery'])
+        return self.inf_height and not (self.alignment["bottom"] or self.alignment["centery"])
         
     @property
     def text_rect(self):
@@ -152,13 +152,13 @@ class Input(Text_Element):
         
     @property
     def selected_text(self):
-        return ''.join([c.character for c in self.selected_characters])
+        return "".join([c.character for c in self.selected_characters])
         
     def open(self):
         self.is_open = True
         self.blink_timer.reset()
         self.index = len(self.text)
-        self.run_animations('open')
+        self.run_animations("open")
         
     def close(self):
         if not self.text:
@@ -169,7 +169,7 @@ class Input(Text_Element):
         self.index = 0
         self.end_index = 0
         self.held_key = None
-        self.run_animations('open', reverse=True)
+        self.run_animations("open", reverse=True)
                         
     def set_index(self, index):
         if index < 0:
@@ -236,7 +236,7 @@ class Input(Text_Element):
         return added
             
     def clear(self):
-        self.set_text('')
+        self.set_text("")
         self.set_index(0)
 
     def add_text(self, text):
@@ -294,9 +294,9 @@ class Input(Text_Element):
             self.selecting = True
         elif self.is_open:
             if self.clicks == 2:
-                self.highlight_section(',;:.?!(){}[] \n')
+                self.highlight_section(",;:.?!(){}[] \n")
             elif self.clicks == 3:
-                self.highlight_section('\n')
+                self.highlight_section("\n")
                 
     def click_up(self, button):
         if button == 1:
@@ -305,26 +305,26 @@ class Input(Text_Element):
     def events(self, events):  
         super().events(events)
         
-        if 'mbd' in events and self.click_close:
+        if "mbd" in events and self.click_close:
             self.close()
 
         if self.is_open:
 
-            if events.get('text'):
-                self.add_text(events['text'].text)
+            if events.get("text"):
+                self.add_text(events["text"].text)
                 self.held_key = None
 
-            kd = events.get('kd', self.held_key if self.key_timer.time > 15 else None)
+            kd = events.get("kd", self.held_key if self.key_timer.time > 15 else None)
             if kd:
                 
-                if kd.key != getattr(self.held_key, 'key', None):
+                if kd.key != getattr(self.held_key, "key", None):
                     self.held_key = kd
                     self.key_timer.reset()
 
-                if events['ctrl']:
+                if events["ctrl"]:
                     match kd.key:
                         case pg.K_a:
-                            self.highlight_section('')
+                            self.highlight_section("")
                         case pg.K_c:
                             Input.copy(self.selected_text)
                         case pg.K_x:
@@ -358,15 +358,15 @@ class Input(Text_Element):
 
                         case pg.K_RETURN:
                             if self.max_lines > 1:
-                                self.add_text('\n')
+                                self.add_text("\n")
                             else:
-                                self.run_events('enter')
+                                self.run_events("enter")
                         case pg.K_TAB:
-                            self.add_text('    ')
+                            self.add_text("    ")
                     
-                events.pop('kd', None)
+                events.pop("kd", None)
 
-            if 'ku' in events and self.held_key:
+            if "ku" in events and self.held_key:
                 self.held_key = None
                     
             if self.selecting:

@@ -52,7 +52,7 @@ class Scene(Base_Loop):
         elements = set()
         for e in self.elements:
             elements.add(e)
-            if hasattr(e, 'all_children'):
+            if hasattr(e, "all_children"):
                 elements |= e.all_children
         return elements
         
@@ -72,15 +72,15 @@ class Scene(Base_Loop):
     def set_funcs(self):
         for e in self.all_elements:
             match e.tag:
-                case 'exit':
-                    e.add_event(tag='left_click', func=self.exit)
-                case 'return':
+                case "exit":
+                    e.add_event(tag="left_click", func=self.exit)
+                case "return":
                     e.add_event(
-                        tag='left_click',
-                        func=lambda e=e: self.set_return(e.get_return('left_click'))
+                        tag="left_click",
+                        func=lambda e=e: self.set_return(e.get_return("left_click"))
                     )
-                case 'refresh':
-                    e.add_event(tag='left_click', func=self.refresh)
+                case "refresh":
+                    e.add_event(tag="left_click", func=self.refresh)
 
     def set_return(self, value):
         self.return_value = value

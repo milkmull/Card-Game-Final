@@ -26,9 +26,9 @@ def select_device(scene, mic):
         left_pad=5,
         right_pad=20,
         window_kwargs={
-            'fill_color': (0, 0, 0),
-            'outline_color': (255, 255, 255),
-            'outline_width': 3
+            "fill_color": (0, 0, 0),
+            "outline_color": (255, 255, 255),
+            "outline_width": 3
         }
     )
     mic_select.rect.width = max(300, mic_select.rect.width)
@@ -43,12 +43,12 @@ def select_device(scene, mic):
                 break
             
     mic_select.add_event(
-        tag='set_text',
+        tag="set_text",
         func=select
     )
     
     label = Textbox(
-        text='Audio Input Device:',
+        text="Audio Input Device:",
         text_size=18
     )
     label.rect.bottomleft = (mic_select.rect.left, mic_select.padded_rect.top - 5)
@@ -59,8 +59,8 @@ def select_device(scene, mic):
         scene.refresh()
         
     exit_button = Button.Text_Button(
-        text=icons['cross'],
-        font_name='icons.ttf',
+        text=icons["cross"],
+        font_name="icons.ttf",
         centerx_aligned=True,
         centery_aligned=True,
         left_pad=5,
@@ -69,7 +69,7 @@ def select_device(scene, mic):
         bottom_pad=2,
         text_color=(255, 0, 0),
         hover_color=(100, 100, 100),
-        tag='exit'
+        tag="exit"
     )
     exit_button.rect.bottomright = (
         mic_select.padded_rect.right,
@@ -78,8 +78,8 @@ def select_device(scene, mic):
     mic_select.add_child(exit_button, current_offset=True)
     
     refresh_button = Button.Text_Button(
-        text=icons['spinner11'],
-        font_name='icons.ttf',
+        text=icons["spinner11"],
+        font_name="icons.ttf",
         text_size=17,
         centerx_aligned=True,
         centery_aligned=True,
@@ -87,7 +87,7 @@ def select_device(scene, mic):
         text_color=(0, 255, 0),
         hover_color=(100, 100, 100),
         func=refresh,
-        description='Refresh'
+        description="Refresh"
     )
     refresh_button.rect.topright = (exit_button.padded_rect.left - 10, exit_button.rect.top)
     mic_select.add_child(refresh_button, current_offset=True)
@@ -95,7 +95,7 @@ def select_device(scene, mic):
     b = Button.Text_Button(
         size=body.size,
         cursor=0,
-        tag='exit',
+        tag="exit",
         layer=-1
     )
     elements.append(b)
@@ -106,7 +106,7 @@ def run_select_device(mic):
     if mic.devices:
         Scene(select_device, init_args=[mic], overlay=True).run()
     else:
-        Notice(text_kwargs={'text': 'No audio recording devices could be found'}).run()
+        Notice(text_kwargs={"text": "No audio recording devices could be found"}).run()
 
 def audio_manager(manager):
     elements = []
@@ -116,9 +116,9 @@ def audio_manager(manager):
         size=(255, 5),
         fill_color=(255, 255, 255),
         handel_kwargs={
-            'size': (10, 10),
-            'fill_color': (255, 0, 0),
-            'outline_color': None
+            "size": (10, 10),
+            "fill_color": (255, 0, 0),
+            "outline_color": None
         }
     )
     slider.set_enabled(False)
@@ -131,26 +131,26 @@ def audio_manager(manager):
         pg.draw.rect(surf, (255, 0, 0), pg.Rect(slider.rect.topleft, (w, h)))
     
     slider.add_event(
-        tag='draw',
+        tag="draw",
         func=draw_slider,
         args=[pg.display.get_surface()]
     )
     
     button_Kwargs = {
-        'centerx_aligned': True,
-        'centery_aligned': True,
-        'pad': 5,
-        'hover_color': (100, 100, 100)
+        "centerx_aligned": True,
+        "centery_aligned": True,
+        "pad": 5,
+        "hover_color": (100, 100, 100)
     }
     
     x = slider.rect.x
     
     record_button = Button.Text_Button(
-        text=icons['mic'],
-        font_name='icons.ttf',
+        text=icons["mic"],
+        font_name="icons.ttf",
         text_color=(255, 0, 0),
         func=manager.record,
-        description='Record',
+        description="Record",
         **button_Kwargs
     )
     record_button.rect.bottomleft = (slider.rect.left + 5, slider.rect.top - 20)
@@ -159,11 +159,11 @@ def audio_manager(manager):
     x += record_button.padded_rect.width + 10
     
     play_button = Button.Text_Button(
-        text=icons['play3'],
-        font_name='icons.ttf',
+        text=icons["play3"],
+        font_name="icons.ttf",
         text_color=(0, 255, 0),
         func=manager.play_stop,
-        description='Play',
+        description="Play",
         **button_Kwargs
     )
     play_button.rect.midleft = (x, record_button.rect.centery)
@@ -172,12 +172,12 @@ def audio_manager(manager):
     x = slider.rect.right
     
     settings_button = Button.Text_Button(
-        text=icons['cog'],
-        font_name='icons.ttf',
+        text=icons["cog"],
+        font_name="icons.ttf",
         text_color=(200, 200, 200),
         func=run_select_device,
         args=[manager.mic],
-        description='Settings',
+        description="Settings",
         **button_Kwargs
     )
     settings_button.rect.bottomright = (x - 5, slider.rect.top - 20)
@@ -186,11 +186,11 @@ def audio_manager(manager):
     x -= settings_button.padded_rect.width + 10
     
     file_button = Button.Text_Button(
-        text=icons['folder'],
-        font_name='icons.ttf',
+        text=icons["folder"],
+        font_name="icons.ttf",
         text_color=(241, 213, 80),
         func=manager.import_file,
-        description='Import Sound',
+        description="Import Sound",
         **button_Kwargs
     )
     file_button.rect.midright = (x, settings_button.rect.centery)
@@ -199,11 +199,11 @@ def audio_manager(manager):
     x -= file_button.padded_rect.width + 5
 
     clear_button = Button.Text_Button(
-        text=icons['cross'],
-        font_name='icons.ttf',
+        text=icons["cross"],
+        font_name="icons.ttf",
         text_color=(255, 0, 0),
         func=manager.clear_sound,
-        description='Clear',
+        description="Clear",
         **button_Kwargs
     )
     clear_button.rect.midright = (x, file_button.rect.centery)
@@ -253,7 +253,7 @@ class Audio_Manager(Position):
         
     def record(self):
         if not self.mic.devices:
-            Notice(text_kwargs={'text': 'No audio recording devices could be found'}).run()
+            Notice(text_kwargs={"text": "No audio recording devices could be found"}).run()
             return
 
         if not self.mic.recording:
@@ -267,8 +267,8 @@ class Audio_Manager(Position):
         self.mic.start()
         
         self.record_button.text_color = (0, 0, 255)
-        self.record_button.set_text(icons['stop2'])
-        self.record_button.description = 'Stop'
+        self.record_button.set_text(icons["stop2"])
+        self.record_button.description = "Stop"
 
     def stop_record(self):
         self.mic.stop()
@@ -276,24 +276,24 @@ class Audio_Manager(Position):
         if self.mic.saved_file:
             self.load_sound()
         else:
-            Notice(text_kwargs={'text': 'Sound could.not be saved'}).run()
+            Notice(text_kwargs={"text": "Sound could.not be saved"}).run()
             
         self.mic.reset()
         self.bar.set_state(0)
         
         self.record_button.text_color = (255, 0, 0)
-        self.record_button.set_text(icons['mic'])
-        self.record_button.description = 'Record'
+        self.record_button.set_text(icons["mic"])
+        self.record_button.description = "Record"
         
     def import_file(self):
         files = (
-            ('All Audio Files', ('*.wav', '*.ogg')),
-            ('WAV', '*.wav'),
-            ('OGG', '*.ogg')
+            ("All Audio Files", ("*.wav", "*.ogg")),
+            ("WAV", "*.wav"),
+            ("OGG", "*.ogg")
         )
         file = filedialog.askopenfilename(
-            initialdir='/',
-            title='Import Audio File',
+            initialdir="/",
+            title="Import Audio File",
             filetypes=files
         )
         if file:
@@ -308,7 +308,7 @@ class Audio_Manager(Position):
             self.sound = pg.mixer.Sound(temp_path)
         except pg.error:
             self.clear_sound()
-            Notice(text_kwargs={'text': 'Error: Unable to load file'}).run()
+            Notice(text_kwargs={"text": "Error: Unable to load file"}).run()
             return
         
         length = self.sound.get_length()
@@ -319,7 +319,7 @@ class Audio_Manager(Position):
             
         else:
             self.clear_sound()
-            Notice(text_kwargs={'text': 'Error: Sound length must be between 0.5 and 5 seconds'}).run()
+            Notice(text_kwargs={"text": "Error: Sound length must be between 0.5 and 5 seconds"}).run()
         
     def play_stop(self):
         if not self.playing_sound:
@@ -334,8 +334,8 @@ class Audio_Manager(Position):
             self.sound.play()
             
             self.play_button.text_color = (0, 0, 255)
-            self.play_button.set_text(icons['stop2'])
-            self.play_button.description = 'Stop'
+            self.play_button.set_text(icons["stop2"])
+            self.play_button.description = "Stop"
         
     def stop_sound(self):
         if self.sound:
@@ -344,8 +344,8 @@ class Audio_Manager(Position):
             self.bar.set_state(0)
             
             self.play_button.text_color = (0, 255, 0)
-            self.play_button.set_text(icons['play3'])
-            self.play_button.description = 'Play'
+            self.play_button.set_text(icons["play3"])
+            self.play_button.description = "Play"
         
     def clear_sound(self):
         if self.sound:

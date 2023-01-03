@@ -132,13 +132,13 @@ class Dragger:
     def events(self, events):
         super().events(events)
 
-        if not events['ctrl'] and not self.hit:
-            if (mbd := events.get('mbd')):
+        if not events["ctrl"] and not self.hit:
+            if (mbd := events.get("mbd")):
                 if mbd.button == 1:
                     self.deselect_on_update = True
 
         if self.held:
-            if 'mbu' in events:
+            if "mbu" in events:
                 self.drop()
         
     def update(self):

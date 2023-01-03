@@ -1,7 +1,7 @@
 
 class Card:
     sid = -1
-    name = 'base'
+    name = "base"
     weight = 0
     tags = []
     
@@ -32,7 +32,7 @@ class Card:
         return self.name
         
     def __eq__(self, other):
-        return getattr(other, 'id', None) == self.cid
+        return getattr(other, "id", None) == self.cid
             
     def __hash__(self):
         return self.cid

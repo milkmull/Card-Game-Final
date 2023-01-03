@@ -15,7 +15,7 @@ class Spot(Position):
         self.hover = False
         
         super().__init__(
-            size=CONSTANTS['mini_card_size']
+            size=CONSTANTS["mini_card_size"]
         )
         
     @property
@@ -30,7 +30,7 @@ class Spot(Position):
             case 1:
                 if self.client.held_card and not self.client.held_card.player:
                     self.client.send(
-                        f'play-{self.client.held_card.deck}-{self.client.held_card.cid}-{self._pos[0]}-{self._pos[1]}'
+                        f"play-{self.client.held_card.deck}-{self.client.held_card.cid}-{self._pos[0]}-{self._pos[1]}"
                     )
 
     def events(self, events):
@@ -38,9 +38,9 @@ class Spot(Position):
             self.child_events(events)
             return
             
-        if self.rect.collidepoint(events['p']):
+        if self.rect.collidepoint(events["p"]):
             self.hover = True
-            if (mbu := events.get('mbu')):
+            if (mbu := events.get("mbu")):
                 self.click_up(mbu.button)
         else:
             self.hover = False
@@ -107,8 +107,8 @@ class Grid(Position):
         self.grid = {y: {x: Spot(self.client, self, (x, y)) for x in range(size[0])} for y in range(size[1])}
         c = self.rect.center
         self.size = (
-            (size[0] * CONSTANTS['cw']) + ((size[0] + 1) * Grid.SPACE),
-            (size[1] * CONSTANTS['ch']) + ((size[1] + 1) * Grid.SPACE)
+            (size[0] * CONSTANTS["cw"]) + ((size[0] + 1) * Grid.SPACE),
+            (size[1] * CONSTANTS["ch"]) + ((size[1] + 1) * Grid.SPACE)
         )
         
         self.spots.clear()

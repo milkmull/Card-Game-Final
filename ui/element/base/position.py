@@ -4,28 +4,28 @@ from .base import Base_Element
 
 class AnchorError(Exception):
     def __init__(self, anchor):
-        super().__init__(f"Invalid anchor '{anchor}'")
+        super().__init__(f"Invalid anchor \"{anchor}\"")
 
 class Position(Base_Element):
     ANCHORS = (
-        'left',
-        'right',
-        'centerx',
-        'top',
-        'bottom',
-        'centery'
+        "left",
+        "right",
+        "centerx",
+        "top",
+        "bottom",
+        "centery"
     )
     
     STUCK_ANCHORS = (
-        'topleft',
-        'midleft',
-        'bottomleft',
-        'midbottom',
-        'bottomright',
-        'midright',
-        'topright',
-        'midtop',
-        'center'
+        "topleft",
+        "midleft",
+        "bottomleft",
+        "midbottom",
+        "bottomright",
+        "midright",
+        "topright",
+        "midtop",
+        "center"
     )
     
     @classmethod
@@ -67,19 +67,19 @@ class Position(Base_Element):
         self.stuck_pos = None
         
         self.anchors = {
-            'left': (None, 0),
-            'right': (None, 0),
-            'centerx': (None, 0),
-            'top': (None, 0),
-            'bottom': (None, 0),
-            'centery': (None, 0)
+            "left": (None, 0),
+            "right": (None, 0),
+            "centerx": (None, 0),
+            "top": (None, 0),
+            "bottom": (None, 0),
+            "centery": (None, 0)
         }
         
         self.limits = {
-            'left': None,
-            'right': None,
-            'top': None,
-            'bottom': None
+            "left": None,
+            "right": None,
+            "top": None,
+            "bottom": None
         }
 
         self.children = []
@@ -94,7 +94,7 @@ class Position(Base_Element):
         children = set()
         for c in self.children:
             children.add(c)
-            if hasattr(c, 'all_children'):
+            if hasattr(c, "all_children"):
                 children |= c.all_children
         return children
 
@@ -172,51 +172,51 @@ class Position(Base_Element):
         
     @property
     def left_offset(self):
-        return self.anchors['left'][1]
+        return self.anchors["left"][1]
         
     @left_offset.setter
     def left_offset(self, left_offset):
-        self.anchors['left'] = (self.anchors['left'][0], left_offset)
+        self.anchors["left"] = (self.anchors["left"][0], left_offset)
         
     @property
     def right_offset(self):
-        return self.anchors['right'][1]
+        return self.anchors["right"][1]
         
     @right_offset.setter
     def right_offset(self, right_offset):
-        self.anchors['right'] = (self.anchors['right'][0], right_offset)
+        self.anchors["right"] = (self.anchors["right"][0], right_offset)
         
     @property
     def centerx_offset(self):
-        return self.anchors['centerx'][1]
+        return self.anchors["centerx"][1]
         
     @centerx_offset.setter
     def centerx_offset(self, centerx_offset):
-        self.anchors['centerx'] = (self.anchors['centerx'][0], centerx_offset)
+        self.anchors["centerx"] = (self.anchors["centerx"][0], centerx_offset)
         
     @property
     def top_offset(self):
-        return self.anchors['top'][1]
+        return self.anchors["top"][1]
         
     @top_offset.setter
     def top_offset(self, top_offset):
-        self.anchors['top'] = (self.anchors['top'][0], top_offset)
+        self.anchors["top"] = (self.anchors["top"][0], top_offset)
         
     @property
     def bottom_offset(self):
-        return self.anchors['bottom'][1]
+        return self.anchors["bottom"][1]
         
     @bottom_offset.setter
     def bottom_offset(self, bottom_offset):
-        self.anchors['bottom'] = (self.anchors['bottom'][0], bottom_offset)
+        self.anchors["bottom"] = (self.anchors["bottom"][0], bottom_offset)
         
     @property
     def centery_offset(self):
-        return self.anchors['centery'][1]
+        return self.anchors["centery"][1]
         
     @centery_offset.setter
     def centery_offset(self, centery_offset):
-        self.anchors['centery'] = (self.anchors['centery'][0], centery_offset)
+        self.anchors["centery"] = (self.anchors["centery"][0], centery_offset)
 
     @property
     def first_born(self):
@@ -288,7 +288,7 @@ class Position(Base_Element):
         self.limits = other.limits.copy()
         self.anchors = {anchor: (a, o) for anchor, (a, o) in other.anchors.items()}
 
-    def set_stuck(self, stuck, anchor='topleft'):
+    def set_stuck(self, stuck, anchor="topleft"):
         self.stuck = stuck
         if stuck:
             Position.check_stuck_anchor(anchor)
@@ -311,10 +311,10 @@ class Position(Base_Element):
         top=None,
         bottom=None
     ):
-        self.limits['left'] = left
-        self.limits['right'] = right
-        self.limits['top'] = top
-        self.limits['bottom'] = bottom
+        self.limits["left"] = left
+        self.limits["right"] = right
+        self.limits["top"] = top
+        self.limits["bottom"] = bottom
 
     def set_anchors(
         self,
@@ -350,12 +350,12 @@ class Position(Base_Element):
         for anchor in anchors:
             Position.check_anchor(anchor)
         
-        self.anchors['left'] = (left, left_offset)
-        self.anchors['right'] = (right, right_offset)
-        self.anchors['centerx'] = (centerx, centerx_offset)
-        self.anchors['top'] = (top, top_offset)
-        self.anchors['bottom'] = (bottom, bottom_offset)
-        self.anchors['centery'] = (centery, centery_offset)
+        self.anchors["left"] = (left, left_offset)
+        self.anchors["right"] = (right, right_offset)
+        self.anchors["centerx"] = (centerx, centerx_offset)
+        self.anchors["top"] = (top, top_offset)
+        self.anchors["bottom"] = (bottom, bottom_offset)
+        self.anchors["centery"] = (centery, centery_offset)
             
     def set_parent(
         self, 
@@ -397,8 +397,8 @@ class Position(Base_Element):
             left_limit = right_limit = top_limit = bottom_limit = 0
             
         if center:
-            centerx_anchor = 'centerx'
-            centery_anchor = 'centery'
+            centerx_anchor = "centerx"
+            centery_anchor = "centery"
             centerx_offset = centery_offset = 0
             
         self.set_limits(
@@ -448,45 +448,45 @@ class Position(Base_Element):
             setattr(self.rect, self.stuck_anchor, self.stuck_pos)
             
     def update_anchors(self):
-        if self.anchors['left'][0] is not None and self.anchors['right'][0] is not None:
+        if self.anchors["left"][0] is not None and self.anchors["right"][0] is not None:
             self.rect.width = (
-                (getattr(self.parent.rect, self.anchors['right'][0]) + self.anchors['right'][1]) -
-                (getattr(self.parent.rect, self.anchors['left'][0]) + self.anchors['left'][1])
+                (getattr(self.parent.rect, self.anchors["right"][0]) + self.anchors["right"][1]) -
+                (getattr(self.parent.rect, self.anchors["left"][0]) + self.anchors["left"][1])
             )
         
-        if self.anchors['centerx'][0] is not None:
-            self.rect.centerx = getattr(self.parent.rect, self.anchors['centerx'][0]) + self.anchors['centerx'][1]
-        if self.anchors['left'][0] is not None:
-            self.rect.left = getattr(self.parent.rect, self.anchors['left'][0]) + self.anchors['left'][1]
-        if self.anchors['right'][0] is not None:
-            self.rect.right = getattr(self.parent.rect, self.anchors['right'][0]) + self.anchors['right'][1]
+        if self.anchors["centerx"][0] is not None:
+            self.rect.centerx = getattr(self.parent.rect, self.anchors["centerx"][0]) + self.anchors["centerx"][1]
+        if self.anchors["left"][0] is not None:
+            self.rect.left = getattr(self.parent.rect, self.anchors["left"][0]) + self.anchors["left"][1]
+        if self.anchors["right"][0] is not None:
+            self.rect.right = getattr(self.parent.rect, self.anchors["right"][0]) + self.anchors["right"][1]
             
-        if self.anchors['top'][0] is not None and self.anchors['bottom'][0] is not None:
+        if self.anchors["top"][0] is not None and self.anchors["bottom"][0] is not None:
             self.rect.height = (
-                (getattr(self.parent.rect, self.anchors['bottom'][0]) + self.anchors['bottom'][1]) -
-                (getattr(self.parent.rect, self.anchors['top'][0]) + self.anchors['top'][1])
+                (getattr(self.parent.rect, self.anchors["bottom"][0]) + self.anchors["bottom"][1]) -
+                (getattr(self.parent.rect, self.anchors["top"][0]) + self.anchors["top"][1])
             )
         
-        if self.anchors['centery'][0] is not None:
-            self.rect.centery = getattr(self.parent.rect, self.anchors['centery'][0]) + self.anchors['centery'][1]
-        if self.anchors['top'][0] is not None:
-            self.rect.top = getattr(self.parent.rect, self.anchors['top'][0]) + self.anchors['top'][1]
-        if self.anchors['bottom'][0] is not None:
-            self.rect.bottom = getattr(self.parent.rect, self.anchors['bottom'][0]) + self.anchors['bottom'][1]
+        if self.anchors["centery"][0] is not None:
+            self.rect.centery = getattr(self.parent.rect, self.anchors["centery"][0]) + self.anchors["centery"][1]
+        if self.anchors["top"][0] is not None:
+            self.rect.top = getattr(self.parent.rect, self.anchors["top"][0]) + self.anchors["top"][1]
+        if self.anchors["bottom"][0] is not None:
+            self.rect.bottom = getattr(self.parent.rect, self.anchors["bottom"][0]) + self.anchors["bottom"][1]
             
     def update_limits(self):
-        if self.limits['left'] is not None:
-            if self.parent.rect.left - self.rect.left > self.limits['left']:
-                self.rect.left = self.parent.rect.left - self.limits['left']
-        if self.limits['right'] is not None:
-            if self.rect.right - self.parent.rect.right > self.limits['right']:
-                self.rect.right = self.parent.rect.right + self.limits['right']
-        if self.limits['top'] is not None:
-            if self.parent.rect.top - self.rect.top > self.limits['top']:
-                self.rect.top = self.parent.rect.top - self.limits['top']
-        if self.limits['bottom'] is not None:
-            if self.rect.bottom - self.parent.rect.bottom > self.limits['bottom']:
-                self.rect.bottom = self.parent.rect.bottom + self.limits['bottom']
+        if self.limits["left"] is not None:
+            if self.parent.rect.left - self.rect.left > self.limits["left"]:
+                self.rect.left = self.parent.rect.left - self.limits["left"]
+        if self.limits["right"] is not None:
+            if self.rect.right - self.parent.rect.right > self.limits["right"]:
+                self.rect.right = self.parent.rect.right + self.limits["right"]
+        if self.limits["top"] is not None:
+            if self.parent.rect.top - self.rect.top > self.limits["top"]:
+                self.rect.top = self.parent.rect.top - self.limits["top"]
+        if self.limits["bottom"] is not None:
+            if self.rect.bottom - self.parent.rect.bottom > self.limits["bottom"]:
+                self.rect.bottom = self.parent.rect.bottom + self.limits["bottom"]
         
     def update_position(self, all=False):
         if self.stuck:

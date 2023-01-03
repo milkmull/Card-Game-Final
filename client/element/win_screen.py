@@ -36,11 +36,11 @@ class Winner_Text(Textbox):
         
         style = {}
         i = 0
-        for j, char in enumerate('Game Over!'): 
+        for j, char in enumerate("Game Over!"): 
             if char.isspace():
                 continue
 
-            style[j] = {'fgcolor': colors[i % len(colors)]}
+            style[j] = {"fgcolor": colors[i % len(colors)]}
             i += 1
    
         return style
@@ -48,7 +48,7 @@ class Winner_Text(Textbox):
     def start(self):
         self.turn_on()
         
-        self.set_text('Game Over!', style=self.get_win_style())
+        self.set_text("Game Over!", style=self.get_win_style())
         self.bottom_pad = 10
         self.rect.centerx = self.client.rect.centerx
 
@@ -65,22 +65,22 @@ class Winner_Text(Textbox):
             
             match place:
                 case 1:
-                    suffix = 'st'
+                    suffix = "st"
                     text_color = (255, 215, 0)
                 case 2:
-                    suffix = 'nd'
+                    suffix = "nd"
                     text_color = (192, 192, 192)
                 case 3:
-                    suffix = 'rd'
+                    suffix = "rd"
                     text_color = (205, 127, 50)
                 case _:
-                    suffix = 'th'
+                    suffix = "th"
                     text_color = (150, 150, 170)
                     
-            text = f'{place}{suffix}: {p.name}'
-            l1 = len(text.split(':')[0]) + 1
-            style1 = {i: {'fgcolor': text_color} for i in range(l1)}
-            style2 = {i: {'fgcolor': p.color} for i in range(l1, len(text))}
+            text = f"{place}{suffix}: {p.name}"
+            l1 = len(text.split(":")[0]) + 1
+            style1 = {i: {"fgcolor": text_color} for i in range(l1)}
+            style2 = {i: {"fgcolor": p.color} for i in range(l1, len(text))}
                     
             tb = Textbox(
                 text=text,
@@ -100,31 +100,31 @@ class Winner_Text(Textbox):
         r.center = self.client.rect.center
 
         self.add_animation([{
-            'attr': 'y',
-            'start': -self.rect.height,
-            'end': r.top,
-            'frames': 20,
-            'method': 'ease_out_expo'
+            "attr": "y",
+            "start": -self.rect.height,
+            "end": r.top,
+            "frames": 20,
+            "method": "ease_out_expo"
         }])
         
         self.add_animation([{
-            'attr': 'bottom_pad',
-            'end': r.height - self.rect.height + 10,
-            'frames': 10,
-            'delay': 15,
-            'method': 'ease_in_back'
+            "attr": "bottom_pad",
+            "end": r.height - self.rect.height + 10,
+            "frames": 10,
+            "delay": 15,
+            "method": "ease_in_back"
         }])
  
         y = r.top + self.rect.height
         for i, tb in enumerate(textboxes):
             tb.rect.y = y
             tb.add_animation([{
-                'attr': 'centerx',
-                'start': self.client.rect.width + (tb.rect.width // 2),
-                'end': self.client.rect.centerx,
-                'frames': 10,
-                'delay': 20 + (5 * (i + 1)),
-                'method': 'ease_out_expo'
+                "attr": "centerx",
+                "start": self.client.rect.width + (tb.rect.width // 2),
+                "end": self.client.rect.centerx,
+                "frames": 10,
+                "delay": 20 + (5 * (i + 1)),
+                "method": "ease_out_expo"
             }])
             self.add_child(tb)
             y += tb.rect.height + line_space

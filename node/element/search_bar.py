@@ -14,7 +14,8 @@ class Search_Bar(Input):
             size=(0, 25),
             text_size=15,
             pad=5,
-            clip=True
+            clip=True,
+            max_lines=1
         )
         self.manager = menu
 

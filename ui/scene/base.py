@@ -5,18 +5,18 @@ import pygame as pg
 from .. import ui
 
 cursors = (
-    'SYSTEM_CURSOR_ARROW',
-    'SYSTEM_CURSOR_IBEAM',
-    'SYSTEM_CURSOR_WAIT',
-    'SYSTEM_CURSOR_CROSSHAIR',
-    'SYSTEM_CURSOR_WAITARROW',
-    'SYSTEM_CURSOR_SIZENWSE',
-    'SYSTEM_CURSOR_SIZENESW',
-    'SYSTEM_CURSOR_SIZEWE',
-    'SYSTEM_CURSOR_SIZENS',
-    'SYSTEM_CURSOR_SIZEALL',
-    'SYSTEM_CURSOR_NO',
-    'SYSTEM_CURSOR_HAND'
+    "SYSTEM_CURSOR_ARROW",
+    "SYSTEM_CURSOR_IBEAM",
+    "SYSTEM_CURSOR_WAIT",
+    "SYSTEM_CURSOR_CROSSHAIR",
+    "SYSTEM_CURSOR_WAITARROW",
+    "SYSTEM_CURSOR_SIZENWSE",
+    "SYSTEM_CURSOR_SIZENESW",
+    "SYSTEM_CURSOR_SIZEWE",
+    "SYSTEM_CURSOR_SIZENS",
+    "SYSTEM_CURSOR_SIZEALL",
+    "SYSTEM_CURSOR_NO",
+    "SYSTEM_CURSOR_HAND"
 )
 
 class Base_Loop:
@@ -34,8 +34,8 @@ class Base_Loop:
         event_batch = pg.event.get()
 
         events = {}
-        events['all'] = event_batch
-        events['p'] = pg.mouse.get_pos()
+        events["all"] = event_batch
+        events["p"] = pg.mouse.get_pos()
         
         mbd = False
         mbu = False
@@ -47,37 +47,37 @@ class Base_Loop:
             match e.type:
 
                 case pg.QUIT:
-                    events['q'] = e
+                    events["q"] = e
 
                 case pg.MOUSEBUTTONDOWN:
                     if not mbd:
-                        events['mbd'] = e
+                        events["mbd"] = e
                         mbd = True
                     else:
                         pg.event.post(e)
                 case pg.MOUSEBUTTONUP:
                     if not mbu:
-                        events['mbu'] = e
+                        events["mbu"] = e
                         mbu = True
                     else:
                         pg.event.post(e)
                     
                 case pg.MOUSEWHEEL:
-                    events['mw'] = e
+                    events["mw"] = e
                 
                 case pg.KEYDOWN:
                     if not kd:
-                        events['kd'] = e
+                        events["kd"] = e
                         kd = True
                     else:
                         pg.event.post(e)
                     if e.key == pg.K_ESCAPE:
-                        events['e'] = e
+                        events["e"] = e
                     elif e.key == pg.K_RCTRL or e.key == pg.K_LCTRL:
                         cls.CTRL = True
                 case pg.KEYUP:
                     if not ku:
-                        events['ku'] = e
+                        events["ku"] = e
                         ku = True
                     else:
                         pg.event.post(e)
@@ -85,12 +85,12 @@ class Base_Loop:
                         cls.CTRL = False
                         
                 case pg.TEXTINPUT:
-                    events['text'] = e
+                    events["text"] = e
 
-        events['ctrl'] = cls.CTRL
-        events['cursor_set'] = False
-        events['clicked'] = None
-        events['hover'] = None
+        events["ctrl"] = cls.CTRL
+        events["cursor_set"] = False
+        events["clicked"] = None
+        events["hover"] = None
 
         return events
     
@@ -157,16 +157,16 @@ class Base_Loop:
     def events(self):
         events = self.get_events()
 
-        if self.can_quit and 'q' in events:
+        if self.can_quit and "q" in events:
             self.quit()
 
         self.sub_events(events)
         
-        if self.can_quit and 'e' in events:
+        if self.can_quit and "e" in events:
             self.exit()
             return {}
         
-        if not events['cursor_set']:
+        if not events["cursor_set"]:
             pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
             
         return events

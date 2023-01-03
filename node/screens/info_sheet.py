@@ -55,7 +55,7 @@ def flow_scene(scene, type, nodes):
     )
     window.rect.center = body.center
     
-    style = {"fgcolor': (255, 255, 255), 'style": 4}
+    style = {"fgcolor": (255, 255, 255), "style": 4}
     text = f"Recommended {type.title()} Flow:"
     title = Textbox(
         text=text,
@@ -126,7 +126,7 @@ def key_scene(scene, type, data):
     value_text.rect.bottomleft = (window.rect.left + 150, window.rect.top - 10)
     elements.append(value_text)
     
-    style = {"fgcolor': (255, 255, 255), 'style": 4}
+    style = {"fgcolor": (255, 255, 255), "style": 4}
     title = Textbox(
         text=type.title(),
         text_size=40,
@@ -185,7 +185,7 @@ def info_sheet(scene, sheet):
 
         label.set_text(key.title() + ":")
 
-        if key == "decks' or key == 'requests":
+        if key == "decks" or key == "requests":
             texts = []
             for type, info in data[label.text[:-1].lower()].items():
                 info_tb = Textbox(

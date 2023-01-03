@@ -31,8 +31,8 @@ def join_game(scene, games):
         index = Textbox(center_aligned=True)
         s.add_child(
             index,
-            centerx_anchor='centerx',
-            bottom_anchor='top',
+            centerx_anchor="centerx",
+            bottom_anchor="top",
             bottom_offset=-20
         )
     
@@ -55,7 +55,7 @@ def join_game(scene, games):
     if len(games) > 1:
     
         right_arrow = Button.Image_Button(
-            image=get_arrow('>', size=(30, 30)),
+            image=get_arrow(">", size=(30, 30)),
             func=swap,
             args=(1,)
         )
@@ -63,7 +63,7 @@ def join_game(scene, games):
         elements.append(right_arrow)
         
         left_arrow = Button.Image_Button(
-            image=get_arrow('<', size=(30, 30)),
+            image=get_arrow("<", size=(30, 30)),
             func=swap,
             args=(-1,)
         )
@@ -75,7 +75,7 @@ def join_game(scene, games):
         scene.set_return(r)
 
     b = Button.Text_Button(
-        text='Join Game!',
+        text="Join Game!",
         text_size=35,
         inf_width=False,
         inf_height=False,
@@ -91,19 +91,19 @@ def join_game(scene, games):
     b.rect.top = host.rect.bottom + 15
     b.set_parent(
         s,
-        left_anchor='left',
+        left_anchor="left",
         left_offset=15,
-        right_anchor='right',
+        right_anchor="right",
         right_offset=-15,
-        bottom_anchor='bottom',
+        bottom_anchor="bottom",
         bottom_offset=-15,
-        top_anchor='top',
+        top_anchor="top",
         top_offset=b.rect.top - s.rect.top
     )
     elements.append(b)
     
     cancel_button = Button.Text_Button(
-        text='Cancel',
+        text="Cancel",
         size=(100, 30),
         center_aligned=True,
         hover_color=(255, 0, 0),
@@ -111,7 +111,7 @@ def join_game(scene, games):
         outline_color=(255, 255, 255),
         outline_width=2,
         border_radius=5,
-        tag='exit'
+        tag="exit"
     )
     cancel_button.rect.midtop = (s.rect.centerx, s.rect.bottom + 20)
     elements.append(cancel_button)

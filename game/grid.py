@@ -102,9 +102,9 @@ class Grid:
     def get_spot_group(self, group):
         match group:
             
-            case 'all':
+            case "all":
                 return self.spots.copy()
-            case 'corner':
+            case "corner":
                 w, h = self.grid.size
                 return [
                     self.grid.grid[0][0], 
@@ -112,11 +112,11 @@ class Grid:
                     self.grid.grid[h - 1][0],
                     self.grid.grid[h - 1][w - 1]
                 ]
-            case 'edge':
+            case "edge":
                 return [s for s in self.spots if s.is_edge]
-            case 'open':
+            case "open":
                 return [s for s in self.spots if s.is_open]
-            case 'closed':
+            case "closed":
                 return [s for s in self.spots if not s.is_open]
                 
     def get_card_group(self, group, check=lambda c: True):
@@ -125,10 +125,10 @@ class Grid:
     def get_row(self, row):
         if 0 <= row < self.height:
             return list(self.grid[row].values())
-        raise Exception(f'Row out of bounds: {row}')
+        raise Exception(f"Row out of bounds: {row}")
         
     def get_column(self, col):
         if 0 <= col < self.width:
             return [row[col] for row in self.grid.values()]
-        raise Exception(f'Row out of bounds: {col}')
+        raise Exception(f"Row out of bounds: {col}")
         

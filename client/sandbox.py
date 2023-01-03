@@ -16,7 +16,7 @@ def sandbox_screen(scene):
     scene.turn_timer.turn_off()
 
     turn_button = Button.Text_Button(
-        text='Next Turn',
+        text="Next Turn",
         text_size=20, 
         pad=5,
         center_aligned=True,
@@ -32,8 +32,8 @@ def sandbox_screen(scene):
     scene.turn_button = turn_button
     
     b = Button.Text_Button(
-        text=icons['plus'],
-        font_name='icons.ttf',
+        text=icons["plus"],
+        font_name="icons.ttf",
         text_size=10,
         center_aligned=True,
         text_color=(0, 255, 0),
@@ -44,15 +44,15 @@ def sandbox_screen(scene):
     scene.public.add_child(b, current_offset=True)
 
     b.add_event(
-        tag='left_click',
+        tag="left_click",
         func=scene.click_button,
         args=[b],
-        kwargs={'deck': 'public'}
+        kwargs={"deck": "public"}
     )
     
     b = Button.Text_Button(
-        text=icons['plus'],
-        font_name='icons.ttf',
+        text=icons["plus"],
+        font_name="icons.ttf",
         text_size=10,
         center_aligned=True,
         text_color=(0, 255, 0),
@@ -63,10 +63,10 @@ def sandbox_screen(scene):
     scene.private.add_child(b, current_offset=True)
 
     b.add_event(
-        tag='left_click',
+        tag="left_click",
         func=scene.click_button,
         args=[b],
-        kwargs={'deck': 'private'}
+        kwargs={"deck": "private"}
     )
     
     return elements
@@ -98,28 +98,28 @@ class Sandbox(Client_Base):
         
     def get_selecting_player(self):
         for p in self.game.players:
-            if p.decks['selection']:
+            if p.decks["selection"]:
                 return self.get_player(p.pid)
                 
     def switch_view(self, pid):
         if pid != self.pid:
             self.get_info()
             p = self.get_player(self.pid)
-            p.spot.unfreeze_animations('hover')
+            p.spot.unfreeze_animations("hover")
             if not p.spot.hit:
-                p.spot.run_animations('hover', reverse=True)
+                p.spot.run_animations("hover", reverse=True)
 
             self.pid = pid
             self.game.switch_view(pid)
             
             p = self.get_player(pid)
-            p.spot.run_animations('hover')
-            p.spot.freeze_animations('hover')
+            p.spot.run_animations("hover")
+            p.spot.freeze_animations("hover")
             
     def check_player_selecting(self):
         if (p := self.get_selecting_player()):
             m = Yes_No(
-                text_kwargs={'text': 'Cannot make changes while player is selecting.\n\nGo to selecting player?'},
+                text_kwargs={"text": "Cannot make changes while player is selecting.\n\nGo to selecting player?"},
                 overlay=True
             )
             if m.run():
@@ -131,7 +131,7 @@ class Sandbox(Client_Base):
         if not self.running:
             return
             
-        if data.startswith('play'):
+        if data.startswith("play"):
             if self.check_player_selecting():
                 return
             self.game.set_turn(self.pid)
@@ -144,16 +144,16 @@ class Sandbox(Client_Base):
     def set_card(self, log):
         super().set_card(log)
         
-        spot = self.spot_buttons[log['pos']]
+        spot = self.spot_buttons[log["pos"]]
         spot.text_color = (255, 0, 0)
-        spot.set_text(icons['cross'])
+        spot.set_text(icons["cross"])
         
     def clear_card(self, log):
         super().clear_card(log)
         
-        spot = self.spot_buttons[log['pos']]
+        spot = self.spot_buttons[log["pos"]]
         spot.text_color = (0, 255, 0)
-        spot.set_text(icons['plus'])
+        spot.set_text(icons["plus"])
             
     def manual_set_card(self, spot, name, player_name):
         c = self.game.get_card(name)
@@ -161,7 +161,7 @@ class Sandbox(Client_Base):
         
         p = self.game.get_player(self.get_player_by_name(player_name).pid)
         self.switch_view(p.pid)
-        self.send(f'play-public-{c.cid}-{spot._pos[0]}-{spot._pos[1]}')
+        self.send(f"play-public-{c.cid}-{spot._pos[0]}-{spot._pos[1]}")
         
     def manual_delete_card(self, spot):
         s = self.game.grid.get_spot(spot._pos)
@@ -178,23 +178,23 @@ class Sandbox(Client_Base):
         p = self.game.get_player(self.get_player_by_name(player_name).pid)
         c = self.game.get_card(name)
         self.game.set_turn(p.pid)
-        p.add_card('private', c)
+        p.add_card("private", c)
         
 # new ui
             
     def add_player(self, log):
-        pid = log['p']
+        pid = log["p"]
         if not self.get_player(pid):
             ps = Sandbox_Player_Spot()
             self.add_element(ps)
             
-            p = Player(self, log['name'], pid, Client_Base.COLORS[pid], ps, log['cpu'])
+            p = Player(self, log["name"], pid, Client_Base.COLORS[pid], ps, log["cpu"])
             self.players.append(p)
 
             self.organize_screen()
 
             ps.add_event(
-                tag='left_click',
+                tag="left_click",
                 func=self.switch_view,
                 args=[p.pid]
             )
@@ -205,26 +205,26 @@ class Sandbox(Client_Base):
                 self.game.get_player(p.pid).update_score(score)
             
             ps.points_spot.add_event(
-                tag='close',
+                tag="close",
                 func=update_score
             )
             
             if p.pid == self.pid:
-                ps.run_animations('hover')
-                ps.freeze_animations('hover')
+                ps.run_animations("hover")
+                ps.freeze_animations("hover")
                 
             return p
 
     def click_button(self, b, spot=None, deck=None):
-        if self.game.status != 'playing':
+        if self.game.status != "playing":
             return
             
         if self.check_player_selecting():
             return
 
-        if b.text == icons['plus']:
+        if b.text == icons["plus"]:
             run_add_card(self, spot=spot, deck=deck)
-        elif b.text == icons['cross']:
+        elif b.text == icons["cross"]:
             if spot.card.visible:
                 self.manual_delete_card(spot)
                 
@@ -239,8 +239,8 @@ class Sandbox(Client_Base):
         for spot in self.grid.spots:
             
             b = Button.Text_Button(
-                text=icons['plus'],
-                font_name='icons.ttf',
+                text=icons["plus"],
+                font_name="icons.ttf",
                 text_size=10,
                 center_aligned=True,
                 text_color=(0, 255, 0),
@@ -252,17 +252,17 @@ class Sandbox(Client_Base):
             
             b.set_parent(
                 spot,
-                right_anchor='right',
+                right_anchor="right",
                 right_offset=-5,
-                top_anchor='top',
+                top_anchor="top",
                 top_offset=5
             )
   
             b.add_event(
-                tag='left_click',
+                tag="left_click",
                 func=self.click_button,
                 args=[b],
-                kwargs={'spot': spot}
+                kwargs={"spot": spot}
             )
             
             self.add_element(b)
@@ -278,7 +278,7 @@ class Sandbox(Client_Base):
         if self.hover_card:
             self.draw_hover_card()
             
-        if self.game.status == 'playing':
+        if self.game.status == "playing":
             for b in self.spot_buttons.values():
                 b.draw(self.window)
             

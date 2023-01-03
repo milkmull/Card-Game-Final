@@ -6,11 +6,11 @@ class Card_Window(Live_Window):
         super().__init__(*args, **kwargs)
 
         self.orientation_cache.update({
-            'dir': dir,
-            'marginx': Card_Window.SEP,
-            'marginy': Card_Window.SEP,
-            'borderx': Card_Window.SEP,
-            'bordery': Card_Window.SEP
+            "dir": dir,
+            "marginx": Card_Window.SEP,
+            "marginy": Card_Window.SEP,
+            "borderx": Card_Window.SEP,
+            "bordery": Card_Window.SEP
         })
             
     def clear(self):

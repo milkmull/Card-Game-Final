@@ -9,7 +9,7 @@ class Animation:
         
     @property
     def moving(self):
-        return any({a.attr in ('x', 'y', 'pos') for s in self.active_animations for a in s.sequence})
+        return any({a.attr in ("x", "y", "pos") for s in self.active_animations for a in s.sequence})
         
     def get_animation_by_name(self, name):
         for tag, animations in self.animations.items():
@@ -17,10 +17,10 @@ class Animation:
                 if a.name == name:
                     return a
         
-    def add_animation(self, animations, tag='temp', **kw):
+    def add_animation(self, animations, tag="temp", **kw):
         for kwargs in animations:
-            if 'element' not in kwargs:
-                kwargs['element'] = self
+            if "element" not in kwargs:
+                kwargs["element"] = self
   
         a = Sequence(
             [_Animation(**kwargs) for kwargs in animations], 
@@ -28,7 +28,7 @@ class Animation:
             **kw
         )
 
-        if tag == 'temp':
+        if tag == "temp":
             self.active_animations.append(a)
         else:
             if tag not in self.animations:

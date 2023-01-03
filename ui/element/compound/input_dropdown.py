@@ -18,11 +18,11 @@ class Input_Dropdown(Dropdown, Input):
         
         self.arrow.set_enabled(True)
         self.arrow.add_event(
-            tag='left_click',
+            tag="left_click",
             func=self.flip
         )
 
-        self._events['left_click'].pop(-1)
+        self._events["left_click"].pop(-1)
         
     @property
     def click_close(self):

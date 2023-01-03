@@ -29,7 +29,7 @@ class Video_Capture:
         if self.cap:
             ret, frame = self.cap.read()
             if ret:
-                image = pg.image.frombuffer(frame.tobytes(), frame.shape[1::-1], 'BGR').convert_alpha()
+                image = pg.image.frombuffer(frame.tobytes(), frame.shape[1::-1], "BGR").convert_alpha()
                 return image
             
     

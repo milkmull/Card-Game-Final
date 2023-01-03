@@ -7,21 +7,21 @@ from ..utils.image import get_arrow
 
 class Popup_Base:
     animation_defaults = {
-        'frames': 15
+        "frames": 15
     }
     
     arrow_defaults = {
-        'size': (20, 20)
+        "size": (20, 20)
     }
 
     button_defaults = {
-        'hover_color': (100, 100, 100)
+        "hover_color": (100, 100, 100)
     }
 
     def __init__(
         self,
         
-        dir='^',
+        dir="^",
         animation_kwargs={},
         arrow_kwargs={},
         button_kwargs={},
@@ -40,21 +40,21 @@ class Popup_Base:
         )
         
         match dir:
-            case '^':
+            case "^":
                 self.button.rect.bottomright = (self.rect.right, self.rect.top - 15)
-            case 'v':
+            case "v":
                 self.button.rect.topright = (self.rect.right, self.rect.bottom + 15)
-            case '>':
+            case ">":
                 self.button.rect.topleft = (self.rect.right + 15, self.rect.bottom - self.button.size[1])
-            case '<':
+            case "<":
                 self.button.rect.topright = (self.rect.left - 15, self.rect.bottom - self.button.size[1])  
             
         self.open_animation = self.add_animation(
             [{
-                'attr': 'y' if dir in 'v^' else 'x',
-                'end': 0
+                "attr": "y" if dir in "v^" else "x",
+                "end": 0
             } | self.animation_kwargs],
-            tag='open'
+            tag="open"
         ).sequence[0]
             
         self.add_child(self.button, current_offset=True)
@@ -71,13 +71,13 @@ class Popup_Base:
         
     def open(self):
         match self.dir:
-            case '^':
+            case "^":
                 end = self.rect.top - self.rect.height
-            case 'v':
+            case "v":
                 end = self.rect.bottom
-            case '>':
+            case ">":
                 end = self.rect.right
-            case '<':
+            case "<":
                 end = self.rect.left - self.rect.width
                 
         self.open_animation.start_value = [self.rect.y]

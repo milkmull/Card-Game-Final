@@ -3,7 +3,7 @@ import random
 from . import exceptions
      
 class Player_Base:
-    type = 'player'
+    type = "player"
     tags = []
             
     def __init__(self, game, pid):
@@ -14,9 +14,9 @@ class Player_Base:
         self.played = True
 
         self.decks = {
-            'private': {},
-            'public': game.public_deck,
-            'selection': {}
+            "private": {},
+            "public": game.public_deck,
+            "selection": {}
         }
         self.active_card = None
 
@@ -24,7 +24,7 @@ class Player_Base:
         
     @property
     def name(self):
-        return f'player {self.pid}'
+        return f"player {self.pid}"
         
     @property
     def id(self):
@@ -35,7 +35,7 @@ class Player_Base:
         return True
         
     def __eq__(self, other):
-        return getattr(other, 'id', None) == self.pid
+        return getattr(other, "id", None) == self.pid
             
     def __hash__(self):
         return self.pid
@@ -50,15 +50,15 @@ class Player_Base:
 
     def reset(self):
         self.played = True
-        self.decks['private'].clear()
-        self.decks['selection'].clear()
+        self.decks["private"].clear()
+        self.decks["selection"].clear()
         self.active_card = None
         self.log.clear()
         self.update_score(0)
 
     def start(self):
         self.update_score(20)
-        self.draw_cards('private', 3)
+        self.draw_cards("private", 3)
         
     def copy(self, game):
         p = Player_Base(game, self.pid)
@@ -69,10 +69,10 @@ class Player_Base:
     def copy_cards_to(self, game):
         p = game.get_player(self.pid)
         
-        p.decks['private'] = {cid: c.game_copy(game) for cid, c in self.decks['private'].items()}
+        p.decks["private"] = {cid: c.game_copy(game) for cid, c in self.decks["private"].items()}
         
-        selection = p.decks['selection']
-        for cid, c in self.decks['selection'].items():
+        selection = p.decks["selection"]
+        for cid, c in self.decks["selection"].items():
             if c.spot:
                 spot = game.grid.get_spot(c.spot.pos)
                 card = spot.card
@@ -117,10 +117,10 @@ class Player_Base:
         
     def play_card(self, deck, cid, spot):
         match deck:
-            case 'private':
+            case "private":
                 card = self.pop_card(deck, cid)
                 deck = 1
-            case 'public':
+            case "public":
                 card = self.game.pop_public(cid)
                 deck = 0
                 
@@ -131,11 +131,11 @@ class Player_Base:
         spot.set_card(card)
         
         self.add_log({
-            't': 'p',
-            'd': deck,
-            'c': card.cid,
-            'id': card.sid,
-            'pos': spot.pos
+            "t": "p",
+            "d": deck,
+            "c": card.cid,
+            "id": card.sid,
+            "pos": spot.pos
         })
         
         card.play()
@@ -154,19 +154,19 @@ class Player_Base:
                 card.select(selection[0])
             else:
                 for c in selection:
-                    self.add_card('selection', c)
+                    self.add_card("selection", c)
                 self.active_card = card
             
     def end_select(self):
-        self.clear_deck('selection')
+        self.clear_deck("selection")
         self.active_card = None
         
     def select_card(self, cid):
-        card = self.decks['selection'][cid]
+        card = self.decks["selection"][cid]
         
         self.add_log({
-            't': 's',
-            'c': card.cid
+            "t": "s",
+            "c": card.cid
         }, exc=True)
         
         active_card = self.active_card
@@ -176,11 +176,11 @@ class Player_Base:
 # log stuff
 
     def add_log(self, log, exc=False):
-        log['u'] = self.pid
+        log["u"] = self.pid
         if exc:
-            log['exc'] = self.pid
+            log["exc"] = self.pid
         self.log.append(log)
-        if not (log['t'] == 'p' and self.played):
+        if not (log["t"] == "p" and self.played):
             self.game.add_log(log)
         return log
 
@@ -200,28 +200,28 @@ class Player_Base:
         
     @property
     def done_game(self):
-        return not self.decks['private'] and not self.active_card
+        return not self.decks["private"] and not self.active_card
         
     def random_choice(self, choices, caller):
         choice = random.choice(choices)
         
         self.add_log({
-            't': 'rand',
-            'len': len(choices)
+            "t": "rand",
+            "len": len(choices)
         })
         
         self.add_log({
-            't': 'randres',
-            'res': choices.index(choice),
-            'w': 1
+            "t": "randres",
+            "res": choices.index(choice),
+            "w": 1
         })
         
         return choice
         
     def choose_random_play(self):
         choices = (
-            [('private', cid) for cid in self.decks['private']] +
-            [('public', cid) for cid in self.decks['public']]
+            [("private", cid) for cid in self.decks["private"]] +
+            [("public", cid) for cid in self.decks["public"]]
         )
         return random.choice(choices)
 
@@ -239,7 +239,7 @@ class Player_Base:
             self.played = True
         
     def random_selection(self):
-        cid = random.choice(list(self.decks['selection']))
+        cid = random.choice(list(self.decks["selection"]))
         Player_Base.select_card(self, cid)
 
     def update(self):
@@ -269,10 +269,10 @@ class Player_Base:
         self.update_score(self.score + gp)
 
         self.add_log({
-            't': 'gp',
-            'points': gp,
-            'c': card.cid,
-            'e': extra.cid if extra else None
+            "t": "gp",
+            "points": gp,
+            "c": card.cid,
+            "e": extra.cid if extra else None
         })
         
     def steal(self, sp, card, target, extra=None):
@@ -287,11 +287,11 @@ class Player_Base:
         self.update_score(self.score + sp)
         
         self.add_log({
-            't': 'sp',
-            'points': sp,
-            'c': card.cid,
-            'target': target.pid,
-            'e': extra.cid if extra else None
+            "t": "sp",
+            "points": sp,
+            "c": card.cid,
+            "target": target.pid,
+            "e": extra.cid if extra else None
         })
 
 

@@ -9,12 +9,12 @@ from ...ui import get_size
 
 class Dropdown(Button.Text_Button):
     defaults = {
-        'centery_aligned': True
+        "centery_aligned": True
     }
     
     button_defaults = {
-        'centery_aligned': True,
-        'hover_color': (100, 100, 100)
+        "centery_aligned": True,
+        "hover_color": (100, 100, 100)
     }
     
     @staticmethod
@@ -66,7 +66,7 @@ class Dropdown(Button.Text_Button):
         if self.auto_fit:
             self.auto_fit = False
             self.size = self.get_max_size(self.find_all_text(selection))
-            self.width += self.pad['left']
+            self.width += self.pad["left"]
                     
         self.button_kwargs = Dropdown.button_defaults | button_kwargs
         self.window_kwargs = window_kwargs.copy()
@@ -76,16 +76,16 @@ class Dropdown(Button.Text_Button):
         self.max_buttons = max_buttons
         self.windows = {}
         
-        if 'size' not in arrow_kwargs:
-            arrow_kwargs['size'] = (self.height - 5, self.height - 5)
+        if "size" not in arrow_kwargs:
+            arrow_kwargs["size"] = (self.height - 5, self.height - 5)
         down_arrow = get_arrow(
-            'v',
+            "v",
             color=self.text_color,
             **arrow_kwargs
         )
         self.right_arrow = get_arrow(
-            '>',
-            color=self.button_kwargs.get('text_color', (255, 255, 255)),
+            ">",
+            color=self.button_kwargs.get("text_color", (255, 255, 255)),
             **arrow_kwargs
         )
 
@@ -95,7 +95,7 @@ class Dropdown(Button.Text_Button):
             pad=5,
             enabled=False
         )
-        self.add_child(self.arrow, left_anchor='right', centery_anchor='centery')
+        self.add_child(self.arrow, left_anchor="right", centery_anchor="centery")
         self.right_pad = self.arrow.rect.width + 3
         
         self.original_width = self.rect.width
@@ -155,13 +155,13 @@ class Dropdown(Button.Text_Button):
         found = False
         
         for w, info in self.windows.copy().items():
-            if info['level'] >= level:
+            if info["level"] >= level:
                 self.remove_child(w)
                 self.windows.pop(w)
-                if (p := info['parent']):
-                    p.unfreeze_animations('hover')
+                if (p := info["parent"]):
+                    p.unfreeze_animations("hover")
                     if not p.hit:
-                        p.run_animations('hover', reverse=True)
+                        p.run_animations("hover", reverse=True)
                     if p is last:
                         found = True
         
@@ -180,16 +180,16 @@ class Dropdown(Button.Text_Button):
                 
             if v is None:
                 b.add_event(
-                    tag='left_click',
+                    tag="left_click",
                     func=self.set_value, 
                     args=[k]
                 )
             else:
                 b.add_event(
-                    tag='left_click',
+                    tag="left_click",
                     func=self.new_window,
                     args=[v],
-                    kwargs={'last': b, 'level': level + 1}
+                    kwargs={"last": b, "level": level + 1}
                 )
                 
                 i = Image(image=self.right_arrow)
@@ -206,20 +206,20 @@ class Dropdown(Button.Text_Button):
         )
 
         self.windows[window] = {
-            'parent': last,
-            'level': level,
+            "parent": last,
+            "level": level,
         }
 
         if last is not None:
             window.rect.topleft = (
-                last.outline_rect.right + self.pad['left'] + window.outline_width + 2,
-                last.outline_rect.top - self.pad['top'] - window.outline_width
+                last.outline_rect.right + self.pad["left"] + window.outline_width + 2,
+                last.outline_rect.top - self.pad["top"] - window.outline_width
             )
-            last.freeze_animations('hover')
+            last.freeze_animations("hover")
         else:
             window.rect.midtop = (
                 self.padded_rect.centerx,
-                self.padded_rect.bottom + self.pad['top'] + window.outline_width + 2
+                self.padded_rect.bottom + self.pad["top"] + window.outline_width + 2
             )
             
         w, h = get_size()
@@ -230,16 +230,16 @@ class Dropdown(Button.Text_Button):
         self.add_child(window, current_offset=True)
         window.join_elements(
             buttons,
-            borderx=self.pad['left'],
-            bordery=self.pad['top'],
-            marginx=self.pad['left'],
-            marginy=self.pad['top'] + self.pad['bottom']
+            borderx=self.pad["left"],
+            bordery=self.pad["top"],
+            marginx=self.pad["left"],
+            marginy=self.pad["top"] + self.pad["bottom"]
         )
         
     def events(self, events):
         super().events(events)
 
-        mbd = events.get('mbd')
+        mbd = events.get("mbd")
         if mbd and self.click_close:
             if mbd.button == 1 or mbd.button == 3:
                 if self.is_open:

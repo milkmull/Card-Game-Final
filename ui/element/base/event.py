@@ -11,7 +11,7 @@ class Event:
         include_self=False,
         
         no_call=False,
-        tag='update'
+        tag="update"
     ):
         if func is None:
             return

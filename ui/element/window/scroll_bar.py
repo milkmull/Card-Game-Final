@@ -7,23 +7,23 @@ from ..utils.image import get_arrow
 
 class Scroll_Bar(Slider):
     defaults = {
-        'fill_color': (255, 255, 255)
+        "fill_color": (255, 255, 255)
     }
     
     handel_defaults = {
-        'fill_color': (100, 100, 100),
-        'outline_color': None
+        "fill_color": (100, 100, 100),
+        "outline_color": None
     }
     
     arrow_defaults = {
-        'color': (100, 100, 100),
-        'background_color': (255, 255, 255)
+        "color": (100, 100, 100),
+        "background_color": (255, 255, 255)
     }
 
     button_defaults = {
-        'fill_color': (255, 255, 255),
-        'hover_color': (100, 100, 100),
-        'layer': -1
+        "fill_color": (255, 255, 255),
+        "hover_color": (100, 100, 100),
+        "layer": -1
     }
     
     def __init__(
@@ -47,11 +47,11 @@ class Scroll_Bar(Slider):
         elif not height:
             height = 16
 
-        if 'size' not in handel_kwargs:
+        if "size" not in handel_kwargs:
             if dir:
-                handel_kwargs['size'] = (width - 4, 10)
+                handel_kwargs["size"] = (width - 4, 10)
             else:
-                handel_kwargs['size'] = (10, height - 4)
+                handel_kwargs["size"] = (10, height - 4)
 
         super().__init__(
             size=(width, height),
@@ -67,7 +67,7 @@ class Scroll_Bar(Slider):
             self.handel.set_limits(top=0, bottom=0)
             
             arrow = get_arrow(
-                '^',
+                "^",
                 size=(self.rect.width, self.rect.width),
                 **(Scroll_Bar.arrow_defaults | arrow_kwargs)
             )
@@ -76,31 +76,31 @@ class Scroll_Bar(Slider):
                 image=arrow,
                 **(Scroll_Bar.button_defaults | button_kwargs)
             )
-            self.up_button.add_event(self.scroll, args=[-1], tag='left_click')
+            self.up_button.add_event(self.scroll, args=[-1], tag="left_click")
 
             self.down_button = Button.Image_Button(
                 image=pg.transform.flip(arrow, False, True),
                 **(Scroll_Bar.button_defaults | button_kwargs)
             )
-            self.down_button.add_event(self.scroll, args=[1], tag='left_click')
+            self.down_button.add_event(self.scroll, args=[1], tag="left_click")
 
             self.add_child(
                 self.up_button, 
-                bottom_anchor='top',
-                centerx_anchor='centerx'
+                bottom_anchor="top",
+                centerx_anchor="centerx"
             )
 
             self.add_child(
                 self.down_button, 
-                top_anchor='bottom',
-                centerx_anchor='centerx'
+                top_anchor="bottom",
+                centerx_anchor="centerx"
             )
             
         else:
             self.handel.set_limits(left=0, right=0)
             
             arrow = get_arrow(
-                '<',
+                "<",
                 size=(self.rect.height, self.rect.height),
                 **(Scroll_Bar.arrow_defaults | arrow_kwargs)
             )
@@ -109,24 +109,24 @@ class Scroll_Bar(Slider):
                 image=arrow,
                 **(Scroll_Bar.button_defaults | button_kwargs)
             )
-            self.left_button.add_event(self.scroll, args=[-1], tag='left_click')
+            self.left_button.add_event(self.scroll, args=[-1], tag="left_click")
             
             self.right_button = Button.Image_Button(
                 image=pg.transform.flip(arrow, True, False),
                 **(Scroll_Bar.button_defaults | button_kwargs)
             )
-            self.right_button.add_event(self.scroll, args=[1], tag='left_click')
+            self.right_button.add_event(self.scroll, args=[1], tag="left_click")
             
             self.add_child(
                 self.left_button, 
-                right_anchor='left',
-                centery_anchor='centery'
+                right_anchor="left",
+                centery_anchor="centery"
             )
             
             self.add_child(
                 self.right_button, 
-                left_anchor='right',
-                centery_anchor='centery'
+                left_anchor="right",
+                centery_anchor="centery"
             )
             
         self.turn_off()
@@ -216,6 +216,6 @@ class Scroll_Bar(Slider):
         super().events(events)
         
         if not self.no_wheel:
-            if (mw := events.get('mw')):
+            if (mw := events.get("mw")):
                 if self.can_scroll():
                     self.scroll(-mw.y)

@@ -46,10 +46,10 @@ class Style(Position):
         
         self.border_radius = border_radius
         self.border = {
-            'topleft': border_top_left_radius,
-            'topright': border_top_right_radius,
-            'bottomleft': border_bottom_left_radius,
-            'bottomright': border_bottom_right_radius
+            "topleft": border_top_left_radius,
+            "topright": border_top_right_radius,
+            "bottomleft": border_bottom_left_radius,
+            "bottomright": border_bottom_right_radius
         }
 
         if pad is not None:
@@ -61,18 +61,18 @@ class Style(Position):
                 top_pad = bottom_pad = y_pad
 
         self.pad = {
-            'left': left_pad,
-            'right': right_pad,
-            'top': top_pad,
-            'bottom': bottom_pad
+            "left": left_pad,
+            "right": right_pad,
+            "top": top_pad,
+            "bottom": bottom_pad
         }
 
     @property
     def padded_rect(self):
-        w = self.rect.width + self.pad['left'] + self.pad['right']
-        h = self.rect.height + self.pad['top'] + self.pad['bottom']
-        x = self.rect.x - self.pad['left']
-        y = self.rect.y - self.pad['top']
+        w = self.rect.width + self.pad["left"] + self.pad["right"]
+        h = self.rect.height + self.pad["top"] + self.pad["bottom"]
+        x = self.rect.x - self.pad["left"]
+        y = self.rect.y - self.pad["top"]
         return pg.Rect(x, y, w, h)
         
     @property
@@ -85,64 +85,64 @@ class Style(Position):
         
     @padding.setter
     def padding(self, padding):
-        self.pad['left'], self.pad['right'], self.pad['top'], self.pad['bottom'] = padding
+        self.pad["left"], self.pad["right"], self.pad["top"], self.pad["bottom"] = padding
         
     @property
     def left_pad(self):
-        return self.pad['left']
+        return self.pad["left"]
         
     @left_pad.setter
     def left_pad(self, left_pad):
-        self.pad['left'] = left_pad
+        self.pad["left"] = left_pad
         
     @property
     def right_pad(self):
-        return self.pad['right']
+        return self.pad["right"]
         
     @right_pad.setter
     def right_pad(self, right_pad):
-        self.pad['right'] = right_pad
+        self.pad["right"] = right_pad
         
     @property
     def top_pad(self):
-        return self.pad['top']
+        return self.pad["top"]
         
     @top_pad.setter
     def top_pad(self, top_pad):
-        self.pad['top'] = top_pad
+        self.pad["top"] = top_pad
         
     @property
     def bottom_pad(self):
-        return self.pad['bottom']
+        return self.pad["bottom"]
         
     @bottom_pad.setter
     def bottom_pad(self, bottom_pad):
-        self.pad['bottom'] = bottom_pad
+        self.pad["bottom"] = bottom_pad
         
     @property
     def x_pad(self):
-        return self.pad['left']
+        return self.pad["left"]
         
     @x_pad.setter
     def x_pad(self, x_pad):
-        self.pad['left'] = self.pad['right'] = x_pad
+        self.pad["left"] = self.pad["right"] = x_pad
         
     @property
     def y_pad(self):
-        return self.pad['top']
+        return self.pad["top"]
         
     @y_pad.setter
     def y_pad(self, y_pad):
-        self.pad['top'] = self.pad['bottom'] = y_pad
+        self.pad["top"] = self.pad["bottom"] = y_pad
         
     @property
     def border_kwargs(self):
         return {
-            'border_radius': self.border_radius,
-            'border_top_left_radius': self.border['topleft'],
-            'border_top_right_radius': self.border['topright'],
-            'border_bottom_left_radius': self.border['bottomleft'],
-            'border_bottom_right_radius': self.border['bottomright']
+            "border_radius": self.border_radius,
+            "border_top_left_radius": self.border["topleft"],
+            "border_top_right_radius": self.border["topright"],
+            "border_bottom_left_radius": self.border["bottomleft"],
+            "border_bottom_right_radius": self.border["bottomright"]
         }
         
     @property
@@ -159,10 +159,10 @@ class Style(Position):
     ):
         if pad:
             left_pad = right_pad = top_pad = bottom_pad = pad
-        self.pad['left'] = left
-        self.pad['right'] = right
-        self.pad['top'] = top
-        self.pad['bottom'] = bottom
+        self.pad["left"] = left
+        self.pad["right"] = right
+        self.pad["top"] = top
+        self.pad["bottom"] = bottom
 
     def restore_fill(self):
         self.fill_color = self.original_fill_color

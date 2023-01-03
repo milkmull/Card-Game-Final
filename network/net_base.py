@@ -8,25 +8,25 @@ import ipaddress
 import struct
     
 def get_lan():
-    out = subprocess.check_output(['arp', '-a']).decode()
-    hosts = re.findall(r'[0-9]+(?:\.[0-9]+){3}', out)
+    out = subprocess.check_output(["arp", "-a"]).decode()
+    hosts = re.findall(r"[0-9]+(?:\.[0-9]+){3}", out)
     return hosts
     
 def get_host_range(start, end):
-    start = struct.unpack('>I', socket.inet_aton(start))[0]
-    end = struct.unpack('>I', socket.inet_aton(end))[0]
-    return [socket.inet_ntoa(struct.pack('>I', i)) for i in range(start, end)]
+    start = struct.unpack(">I", socket.inet_aton(start))[0]
+    end = struct.unpack(">I", socket.inet_aton(end))[0]
+    return [socket.inet_ntoa(struct.pack(">I", i)) for i in range(start, end)]
 
 def get_local_ip():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        sock.connect(('8.8.8.8', 80))
+        sock.connect(("8.8.8.8", 80))
         ip = sock.getsockname()[0]
         return ip
     
 def get_public_ip():
     ip = None
     try:
-        ip = urllib.request.urlopen('https://api.ipify.org').read().decode()
+        ip = urllib.request.urlopen("https://api.ipify.org").read().decode()
     except urllib.error.URLError:
         pass
     return ip
@@ -75,8 +75,8 @@ class Network_Base:
     @staticmethod
     def pack_data(data):
         if not isinstance(data, (bytes, bytearray)):
-            data = bytes(data, encoding='utf-8')
-        size = len(data).to_bytes(4, byteorder='big')
+            data = bytes(data, encoding="utf-8")
+        size = len(data).to_bytes(4, byteorder="big")
         return size + data
         
     @staticmethod
@@ -85,7 +85,7 @@ class Network_Base:
         
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             if broadcast:
-                host = '<broadcast>'
+                host = "<broadcast>"
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
             data = Network_Base.pack_data(data)[4:]
@@ -107,7 +107,7 @@ class Network_Base:
             sock.settimeout(timeout)
             
             try:
-                sock.bind(('', port))
+                sock.bind(("", port))
             except socket.error:
                 return
 
@@ -135,7 +135,7 @@ class Network_Base:
         
         self.timeout = timeout
         self.sock = Network_Base.TCP(timeout=self.timeout)
-        self.buffer = b''
+        self.buffer = b""
         
     def __enter__(self):
         return self
@@ -153,11 +153,11 @@ class Network_Base:
     def close(self):
         for address, conn in self.connections.copy().items():
             self.close_connection(conn, address)
-        if hasattr(self, 'sock'):
+        if hasattr(self, "sock"):
             self.sock.close()
         self.connected = False
         self.listening = False
-        self.buffer = b''
+        self.buffer = b""
         
         for t in self.threads:
             t.join()
@@ -167,7 +167,7 @@ class Network_Base:
         self.connected = False
         
         if port_in_use(self.port):
-            raise Exception('PortNotAvailable')
+            raise Exception("PortNotAvailable")
             
         try: 
             self.sock.bind(self.address)
@@ -276,7 +276,7 @@ class Network_Base:
             size += d
             
         size = self.trim(size, 4)
-        size = int.from_bytes(size, byteorder='big')
+        size = int.from_bytes(size, byteorder="big")
 
         data = self.read_buffer(size=size)
         while len(data) < size:

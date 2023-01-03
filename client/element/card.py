@@ -13,7 +13,7 @@ class Card(Position):
         self.deck = deck
         self.spot_pos = None
         
-        super().__init__(size=CONSTANTS['mini_card_size'])
+        super().__init__(size=CONSTANTS["mini_card_size"])
  
     def __eq__(self, other):
         return self.cid == other.cid and self.name == other.name
@@ -35,18 +35,18 @@ class Card(Position):
         if not self.is_select:
             self.client.set_held_card(self)
         else:
-            self.client.send(f'select-{self.cid}')
+            self.client.send(f"select-{self.cid}")
         
     def right_click(self):
         self.client.set_view_card(self)
                 
     def events(self, events):
-        if not events['hover']:
+        if not events["hover"]:
         
             if self.rect.collidepoint(pg.mouse.get_pos()):
                 self.client.set_hover_card(self)
                 
-                if (mbd := events.pop('mbd', None)):
+                if (mbd := events.pop("mbd", None)):
                     
                     match mbd.button:
                         case 1:

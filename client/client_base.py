@@ -38,7 +38,7 @@ def client_screen(scene):
     scene.grid = grid
     
     main_button = Button.Text_Button(
-        text='Start',
+        text="Start",
         size=(100, 30),
         text_size=30, 
         pad=5,
@@ -56,12 +56,12 @@ def client_screen(scene):
     
     def click_main():
         match main_button.text:
-            case 'Reset':
-                scene.send('reset')
-            case 'Start':
-                scene.send('start')
+            case "Reset":
+                scene.send("reset")
+            case "Start":
+                scene.send("start")
                     
-    main_button.add_event(func=click_main, tag='left_click')
+    main_button.add_event(func=click_main, tag="left_click")
     
     if not scene.is_single:
         chat = Chat(scene)
@@ -71,8 +71,8 @@ def client_screen(scene):
 
     def get_size(w, h):
         return (
-            (w * CONSTANTS['cw']) + ((w + 1) * sep),
-            (h * CONSTANTS['ch']) + ((h + 1) * sep)
+            (w * CONSTANTS["cw"]) + ((w + 1) * sep),
+            (h * CONSTANTS["ch"]) + ((h + 1) * sep)
         )
 
     public = Card_Window(
@@ -86,7 +86,7 @@ def client_screen(scene):
     scene.public = public
     
     public_label = Textbox(
-        text='Public:',
+        text="Public:",
         text_size=15,
         text_color=(255, 0, 0),
         text_outline_color=(0, 0, 0),
@@ -108,7 +108,7 @@ def client_screen(scene):
     scene.private = private
     
     private_label = Textbox(
-        text='Private:',
+        text="Private:",
         text_size=15,
         text_color=(255, 255, 0),
         text_outline_color=(0, 0, 0),
@@ -128,7 +128,7 @@ def client_screen(scene):
     scene.selection = selection
     
     selection_label = Textbox(
-        text='Selection:',
+        text="Selection:",
         text_size=15,
         text_color=(100, 150, 255),
         text_outline_color=(0, 0, 0),
@@ -138,8 +138,8 @@ def client_screen(scene):
     selection.add_child(selection_label, current_offset=True)
 
     settings_button = Button.Text_Button(
-        text=icons['cog'],
-        font_name='icons.ttf',
+        text=icons["cog"],
+        font_name="icons.ttf",
         text_size=30,
         center_aligned=True,
         func=run_settings,
@@ -153,7 +153,7 @@ def client_screen(scene):
     scene.settings_button = settings_button
     
     turn_timer = Timer(scene)
-    turn_timer.set_parent(scene, centerx_anchor='right', centerx_offset=-100, top_anchor='top', top_offset=30)
+    turn_timer.set_parent(scene, centerx_anchor="right", centerx_offset=-100, top_anchor="top", top_offset=30)
     elements.append(turn_timer)
     scene.turn_timer = turn_timer
     
@@ -183,7 +183,7 @@ class Client_Base(Scene):
 
         self.log_queue = []
 
-        self.view_rect = pg.Rect((0, 0), CONSTANTS['card_size'])
+        self.view_rect = pg.Rect((0, 0), CONSTANTS["card_size"])
         self.view_rect.center = self.body.center
         self.view_card = None
         self.view_image = None
@@ -224,7 +224,7 @@ class Client_Base(Scene):
         for p in self.players:
             p.end_turn()
             
-        self.main_button.set_text('Start')
+        self.main_button.set_text("Start")
         self.main_button.hover_color = (0, 255, 0)
             
         self.turn_timer.reset()
@@ -244,7 +244,7 @@ class Client_Base(Scene):
             return reply
             
     def get_info(self):
-        logs = self.send('info')
+        logs = self.send("info")
         self.update_logs(logs)
         
     def update_logs(self, logs):
@@ -257,51 +257,51 @@ class Client_Base(Scene):
             
             print(log)
 
-            match log['t']:
+            match log["t"]:
                 
-                case 'pid':
-                    self.set_pid(log['pid'])
+                case "pid":
+                    self.set_pid(log["pid"])
             
-                case 'res':
+                case "res":
                     self.reset()
 
-                case 'ap':
+                case "ap":
                     self.add_player(log)
-                case 'rp':
-                    self.remove_player(log['p'])
+                case "rp":
+                    self.remove_player(log["p"])
                     
-                case 'set':
+                case "set":
                     self.update_settings(log)
 
-                case 'nt':
+                case "nt":
                     self.new_turn(log)
  
-                case 'sc':
+                case "sc":
                     self.set_card(log)
-                case 'cc':
+                case "cc":
                     self.clear_card(log)
 
-                case 'ac':
-                    self.add_card(log['d'], *log['c'])
-                case 'rc':
-                    self.remove_card(log['d'], log['c'])
+                case "ac":
+                    self.add_card(log["d"], *log["c"])
+                case "rc":
+                    self.remove_card(log["d"], log["c"])
                     
-                case 'score':
+                case "score":
                     self.update_score(log)
-                case 'gp' | 'sp':
+                case "gp" | "sp":
                     self.add_points(log)
                     
-                case 'p':
+                case "p":
                     self.play_card(log)
-                case 'own':
+                case "own":
                     self.set_owner(log)
-                case 'tf':
+                case "tf":
                     self.transform(log)
                     
-                case 'fin':
+                case "fin":
                     self.end_game(log)
                     
-                case 'msg':
+                case "msg":
                     self.chat.add_message(log)
             
 # log process stuff
@@ -315,8 +315,8 @@ class Client_Base(Scene):
             self.chat.rect.center = self.main_button.rect.center
 
     def update_settings(self, log):
-        self.settings = log['settings']
-        self.grid.set_size(self.settings['size'])
+        self.settings = log["settings"]
+        self.grid.set_size(self.settings["size"])
         for p in self.players:
             p.spot.update_name()
         
@@ -324,81 +324,81 @@ class Client_Base(Scene):
         for p in self.players:
             p.end_turn()
         self.sort_by_score()
-        self.get_player(log['p']).start_turn()
+        self.get_player(log["p"]).start_turn()
         
         if not self.turn:
-            self.main_button.set_text('Reset')
+            self.main_button.set_text("Reset")
             self.main_button.hover_color = (255, 0, 0)
         
         self.turn += 1
         self.turn_timer.start()
         
     def set_card(self, log):
-        p = self.get_player(log['p'])
+        p = self.get_player(log["p"])
         start = None
         
-        if (card := self.grid.get_card(log['c'][0])):
+        if (card := self.grid.get_card(log["c"][0])):
             start = card.rect.center
         else:
-            card = self.get_card(log['c'][1], log['c'][0], player=p, add=False)
+            card = self.get_card(log["c"][1], log["c"][0], player=p, add=False)
             
-        if (parent := log['parent']):
+        if (parent := log["parent"]):
             start = self.grid.get_card(parent).rect.center
             
-        self.grid.set_card(card, log['pos'])
+        self.grid.set_card(card, log["pos"])
         if start:
-            self.animation_manager.add_card(card, 'shift', start=start, delay=20 if p is not self.main_p else 0)
+            self.animation_manager.add_card(card, "shift", start=start, delay=20 if p is not self.main_p else 0)
             
     def clear_card(self, log):
-        self.grid.clear_card(log['pos'])
-        if log['k']:
-            self.animation_manager.add_card(self.grid.cards[log['c']], 'kill')
+        self.grid.clear_card(log["pos"])
+        if log["k"]:
+            self.animation_manager.add_card(self.grid.cards[log["c"]], "kill")
             
     def add_card(self, deck, cid, name):
         card = self.get_card(name, cid, deck=deck)
         
         match deck:
             
-            case 'private':
+            case "private":
                 self.private.add_element(card)
-            case 'public':
+            case "public":
                 self.public.add_element(card)
-            case 'selection':
+            case "selection":
                 self.selection.add_element(card)
                 
     def remove_card(self, deck, cid):
         match deck:
             
-            case 'private':
+            case "private":
                 self.private.remove_element(cid)
-            case 'public':
+            case "public":
                 self.public.remove_element(cid)
-            case 'selection':
+            case "selection":
                 self.selection.remove_element(cid)
             
     def update_score(self, log):
-        p = self.get_player(log['u'])
-        p.update_score(log['score'])
+        p = self.get_player(log["u"])
+        p.update_score(log["score"])
         
     def play_card(self, log):
-        p = self.get_player(log['u'])
+        p = self.get_player(log["u"])
         
         if not p.is_main:
 
-            if not (card := self.cards.get(log['c'])):
-                card = self.grid.get_card(log['c'])
+            if not (card := self.cards.get(log["c"])):
+                card = self.grid.get_card(log["c"])
                 start = self.public.rect.center
             else:
-                start = self.cards[log['c']].rect.center
+                start = self.cards[log["c"]].rect.center
 
-            self.animation_manager.add_card(self.grid.cards[log['c']], 'play', start=start)
+            self.animation_manager.add_card(self.grid.cards[log["c"]], "play", start=start)
             
     def set_owner(self, log):
-        self.grid.cards[log['c']].player = self.get_player(log['u'])
-        self.animation_manager.add_card(self.grid.cards[log['c']], 'own')
+        self.grid.cards[log["c"]].player = self.get_player(log["u"])
+        self.animation_manager.add_card(self.grid.cards[log["c"]], "own")
         
     def transform(self, log):
-        self.animation_manager.add_card(self.grid.cards[log['c']], 'tf')
+        self.animation_manager.add_card(self.grid.cards[log["c"]], "tf")
         
     def end_game(self, log):
         self.turn += 1
@@ -432,12 +432,12 @@ class Client_Base(Scene):
                 return p
 
     def add_player(self, log):
-        pid = log['p']
+        pid = log["p"]
         if not self.get_player(pid):
             ps = Player_Spot()
             self.add_element(ps)
             
-            p = Player(self, log['name'], pid, Client_Base.COLORS[pid], ps, log['cpu'])
+            p = Player(self, log["name"], pid, Client_Base.COLORS[pid], ps, log["cpu"])
             self.players.append(p)
 
             self.organize_screen()
@@ -467,10 +467,10 @@ class Client_Base(Scene):
         spots2 = sorted(spots, key=lambda s: int(s.points_spot.text), reverse=True)
         for s in spots1:
             s.add_animation([{
-                'attr': 'pos',
-                'end': spots1[spots2.index(s)].pos,
-                'frames': 10,
-                'method': 'ease_out_expo'
+                "attr": "pos",
+                "end": spots1[spots2.index(s)].pos,
+                "frames": 10,
+                "method": "ease_out_expo"
             }])
             
 # card stuff
@@ -541,12 +541,12 @@ class Client_Base(Scene):
 
     def add_points(self, log):
         self.animation_manager.add_points(
-            log['t'],
-            self.get_player(log['u']),
-            self.grid.cards.get(log['c']),
-            log['points'],
-            extra=self.grid.cards.get(log['e']) if log['e'] else None,
-            target=self.get_player(log.get('target'))
+            log["t"],
+            self.get_player(log["u"]),
+            self.grid.cards.get(log["c"]),
+            log["points"],
+            extra=self.grid.cards.get(log["e"]) if log["e"] else None,
+            target=self.get_player(log.get("target"))
         )
                 
 # particle stuff
@@ -571,7 +571,7 @@ class Client_Base(Scene):
 # running stuff
 
     def exit(self):
-        m = Yes_No(text_kwargs={'text': 'Are you sure you want to exit the game?'}, overlay=True)
+        m = Yes_No(text_kwargs={"text": "Are you sure you want to exit the game?"}, overlay=True)
         if m.run():
             super().exit()
     
@@ -584,7 +584,7 @@ class Client_Base(Scene):
         
         if self.held_card or self.view_card:
         
-            if (mbu := events.get('mbu')):
+            if (mbu := events.get("mbu")):
                 match mbu.button:
                     
                     case 1:

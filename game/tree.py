@@ -16,7 +16,7 @@ class Node:
         return str(self.data)
         
     def __repr__(self):
-        return f'{self.type}: {str(self.data)}'
+        return f"{self.type}: {str(self.data)}"
 
 def analyze(scores, pid):
     player_score = scores[pid]
@@ -25,10 +25,10 @@ def analyze(scores, pid):
 
 class Tree:
     log_types = (
-        'p', 
-        's', 
-        'rand', 
-        'randres'
+        "p", 
+        "s", 
+        "rand", 
+        "randres"
     )
     
     def __init__(self, game):
@@ -53,33 +53,33 @@ class Tree:
     def save_tree(self):
         import json
         
-        with open('other/tree.json', 'w') as f:
+        with open("other/tree.json", "w") as f:
             json.dump(self.remap_to_string(), f, indent=4)
         
     def log_to_key(self, log):
-        match (type := log['t']):
+        match (type := log["t"]):
             
-            case 'p':
-                pid = log['u']
-                deck = log['d']
-                cid = log['c']
-                x, y = log['pos']
+            case "p":
+                pid = log["u"]
+                deck = log["d"]
+                cid = log["c"]
+                x, y = log["pos"]
                 return Node(type, (pid, deck, cid, x, y))
             
-            case 's':
-                pid = log['u']
-                cid = log['c']
+            case "s":
+                pid = log["u"]
+                cid = log["c"]
                 return Node(type, (pid, cid))
                 
-            case 'rand':
-                pid = log['u']
-                len = log['len']
+            case "rand":
+                pid = log["u"]
+                len = log["len"]
                 return Node(type, (pid, len))
                 
-            case 'randres':
-                pid = log['u']
-                res = log['res']
-                w = log.get('w', 1)
+            case "randres":
+                pid = log["u"]
+                res = log["res"]
+                w = log.get("w", 1)
                 return Node(type, (pid, res, w))
         
     def trim(self, log):
@@ -99,7 +99,7 @@ class Tree:
                 turn += 1
 
             scores = [p.score for p in sorted(g.players, key=lambda p: p.pid)]
-            logs = [log for log in g.log if log['t'] in Tree.log_types]
+            logs = [log for log in g.log if log["t"] in Tree.log_types]
 
             self.update_tree(
                 scores,
@@ -150,7 +150,7 @@ class Tree:
         if not scores:
             return 0
             
-        if node and node.type == 'rand':
+        if node and node.type == "rand":
             return sum(scores.values()) / node.data[1]
 
         score = 0
@@ -158,7 +158,7 @@ class Tree:
             score = max(scores.values())
         score = min(scores.values())
         
-        if node.type == 'randres':
+        if node.type == "randres":
             score *= node.data[2]
             
         return score
@@ -168,11 +168,11 @@ class Tree:
             branch = self.tree
             
         if isinstance(branch, list):
-            print((' ' * deapth) + str(branch))
+            print((" " * deapth) + str(branch))
             
         else:
             for choice, subbranch in branch.items():
-                print((' ' * deapth) + str(choice) + ': {')
+                print((" " * deapth) + str(choice) + ": {")
                 self.print_tree(branch=subbranch, deapth=deapth + indent)
-                print((' ' * deapth) + '}')
+                print((" " * deapth) + "}")
  

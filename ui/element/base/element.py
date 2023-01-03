@@ -48,14 +48,14 @@ class Element(Style, Event, Animation):
         
     @property
     def hover_color(self):
-        a = self.get_animation_by_name('hover_color')
+        a = self.get_animation_by_name("hover_color")
         if a:
             return a.sequence[0].end
             
     @hover_color.setter
     def hover_color(self, hover_color):
         if hover_color:
-            a = self.get_animation_by_name('hover_color')
+            a = self.get_animation_by_name("hover_color")
             if a:
                 a.sequence[0].end_value = hover_color
                 if self.hit:
@@ -63,22 +63,22 @@ class Element(Style, Event, Animation):
             else:
                 self.add_animation(
                     [{
-                        'attr': 'fill_color',
-                        'end': hover_color
+                        "attr": "fill_color",
+                        "end": hover_color
                     }],
-                    tag='hover',
-                    name='hover_color'
+                    tag="hover",
+                    name="hover_color"
                 )
         else:
-            self.remove_animation('hover_color')
+            self.remove_animation("hover_color")
 
     def open(self):
         self.is_open = True
-        self.run_animations('open')
+        self.run_animations("open")
         
     def close(self):
         self.is_open = False
-        self.run_animations('open', reverse=True)
+        self.run_animations("open", reverse=True)
 
     def left_click(self):
         if self.click_timer.time < Element.CLICK_TIMER_MAX:
@@ -100,37 +100,37 @@ class Element(Style, Event, Animation):
         super().events(events)
         
         last_hit = self.hit
-        self.hit = self.get_hit() and not events['hover']
+        self.hit = self.get_hit() and not events["hover"]
         if self.hit:
             if not last_hit:
-                self.run_animations('hover')
-            events['hover'] = self
+                self.run_animations("hover")
+            events["hover"] = self
                     
-            if not events['cursor_set']:
+            if not events["cursor_set"]:
                 pg.mouse.set_cursor(self.cursor)
-                events['cursor_set'] = True
+                events["cursor_set"] = True
                     
         elif last_hit:
-            self.run_animations('hover', reverse=True)
+            self.run_animations("hover", reverse=True)
 
-        if not events['clicked']:    
-            if self.hit and (mbd := events.get('mbd')):
-                events['clicked'] = self
+        if not events["clicked"]:    
+            if self.hit and (mbd := events.get("mbd")):
+                events["clicked"] = self
                 match mbd.button:
                     case 1:
                         self.left_click()
-                        self.run_events('left_click')
+                        self.run_events("left_click")
                     case 3:
                         self.right_click()
-                        self.run_events('right_click')
+                        self.run_events("right_click")
                         
-        if (mbu := events.get('mbu')):
+        if (mbu := events.get("mbu")):
             self.click_up(mbu.button)
-            self.run_events('click_up')
+            self.run_events("click_up")
 
     def update(self):
         self.update_animations()
-        self.run_events('update')
+        self.run_events("update")
         super().update()
         self.click_timer.step()
 
