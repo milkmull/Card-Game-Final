@@ -130,6 +130,7 @@ class Card(Image_Element):
             text_size=25,
             max_length=300,
             max_lines=5,
+            text_check=lambda t: "\"" not in t,
             **text_kwargs,
             **style_kwargs
         )
@@ -321,6 +322,7 @@ class Card(Image_Element):
             return
         
         if not is_valid_code(self.code):
+            print(self.code)
             Notice(text_kwargs={"text": "Error: invalid code."}).run()
             return
   

@@ -995,6 +995,12 @@ class Node(Dragger, Element):
         end = self.get_end()
         nl = "\n"
         return f"{header}{start}{f'...{nl}' if end else ''}{end}"
+        
+    def lambda_input(self, type, name):
+        ipp = mapping.find_all_input_ports(self)
+        for ip in ipp:
+            if ip.type == type:
+                ip.node.defaults[ip.port] = name
      
 # port stuff
 

@@ -1,6 +1,7 @@
 from . import card_base
 
-class New_Card(card_base.Card):
-    name = "New Card"
+class HLO(card_base.Card):
+    name = "h\"l\"\"o"
     weight = 1
-    tags = []
+    tags = ()
+    print(type(tags))

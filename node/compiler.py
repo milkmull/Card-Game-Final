@@ -46,11 +46,15 @@ class Compiler:
     def header(self):
         if not self.card:
             return ""
+        classname = self.card.classname
+        name = self.card.name.replace("\"", "\\\"")
+        weight = self.card.weight
+        tags = str(tuple(self.card.tags)).replace("'", "\"")
         return (
-            f"\nclass {self.card.classname}(card_base.Card):\n"
-                f"\tname = \"{self.card.name}\"\n"
-                f"\tweight = {self.card.weight}\n"
-                f"\ttags = {self.card.tags}\n"
+            f"\nclass {classname}(card_base.Card):\n"
+                f"\tname = \"{name}\"\n"
+                f"\tweight = {weight}\n"
+                f"\ttags = {tags}\n"
         )
         
     @property

@@ -1378,11 +1378,7 @@ class Get_Card_At(Node):
                 return "True"
 
     def _get_output(self, p):
-        ipp = mapping.find_all_input_ports(self)
-        for ip in ipp:
-            if ip.type == Port_Types.CARD:
-                ip.node.defaults[ip.port] = "c"
-                
+        self.lambda_input(Port_Types.CARD, "c")
         return "self.spot.get_card_at({0}, check=lambda c: {1})".format(*self.get_input())
         
 class Get_Spot_At(Node):

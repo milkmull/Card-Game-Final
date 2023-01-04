@@ -3,7 +3,7 @@ class Card:
     sid = -1
     name = "base"
     weight = 0
-    tags = []
+    tags = ()
     
     @classmethod
     def get_subclasses(cls):
