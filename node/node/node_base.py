@@ -44,6 +44,7 @@ def pack(_nodes):
                 "visible": p.visible,
                 "hidden": p.hidden,
                 "type": p.type,
+                "is_array": p.is_array,
                 "element_value": p.value
             }
         node_data["ports"] = ports
@@ -92,6 +93,7 @@ def unpack(data, manager=None, map=True):
             visible = ports[port]["visible"]
             hidden = ports[port]["hidden"]
             type = ports[port]["type"]
+            is_array = ports[port]["is_array"]
             element_value = ports[port]["element_value"]
             if added:
                 n0.ap()
@@ -100,6 +102,7 @@ def unpack(data, manager=None, map=True):
             port = int(port)
             p0 = n0.get_port(port)
             p0.set_type(type)
+            p0.is_array = is_array
             p0.suppressed = suppressed
             p0.visible = visible
             if hidden:
@@ -220,6 +223,7 @@ class Port_Types(StrEnum):
     SPOT = "SPOT"
     VEC = "VEC"
     ANY = "ANY"
+    ANYANY = "ANYANY"
     FLOW = "FLOW"
                 
     @staticmethod
@@ -239,14 +243,14 @@ class Port_Types(StrEnum):
                 return "spot"
             case Port_Types.VEC:
                 return "vec"
-            case Port_Types.ANY:
+            case Port_Types.ANY | Port_Types.ANYANY:
                 return "any"
             case Port_Types.FLOW:
                 return "flow" if not port.is_process else "process"
                 
     @staticmethod
     def get_color(port, contains=False):
-        if port.is_array and not contains:
+        if (port.is_array and not contains) or (contains and port.type == Port_Types.ANY):
             return (0, 255, 0)
             
         match port.type:
@@ -267,7 +271,7 @@ class Port_Types(StrEnum):
             case Port_Types.SPOT:
                 return (0, 161, 255)
             case _:
-                return (100, 100, 100)
+                return (255, 255, 0)
 
 class Port(Element):
     ACTIVE_PORT = None
@@ -280,13 +284,16 @@ class Port(Element):
     
     @staticmethod
     def are_compatible(p0, p1):
-        array_check = p0.is_array == p1.is_array
         t0 = p0.type
+        a0 = p0.is_array
         t1 = p1.type
-        type_check = t0 == t1
+        a1 = p1.is_array
+        
+        array_check = a0 == a1
+        type_check = t0 == t1 or (t0 == Port_Types.ANY or t1 == Port_Types.ANY)
         any_check = (
-            t0 == Port_Types.ANY and t1 != Port_Types.FLOW or
-            t1 == Port_Types.ANY and t0 != Port_Types.FLOW
+            t0 == Port_Types.ANYANY and t1 != Port_Types.FLOW or
+            t1 == Port_Types.ANYANY and t0 != Port_Types.FLOW
         )
 
         return (array_check and type_check) or any_check
@@ -296,10 +303,10 @@ class Port(Element):
         n0 = p0.node
         n1 = p1.node
         
-        if (Port.are_compatible(p0, p1) or force) and p0.is_output() != p1.is_output():
+        if (force or Port.are_compatible(p0, p1)) and p0.is_output() != p1.is_output():
             p0.connect(n1, p1)
             p1.connect(n0, p0)
-            
+
             local_funcs, scope_output, loop_output = mapping.check_bad_connection(n0, n1)
             can_connect0 = n0.can_connect(p0, n1, p1)
             can_connect1 = n1.can_connect(p1, n0, p0)
@@ -309,12 +316,15 @@ class Port(Element):
                 
             else:
                 Node.new_wire(p0, p1)
+                n0.ripple_update = True
                 
                 if p0.manager and not d:
                     p0.manager.add_log({
                         "t": "conn",
                         "nodes": (n0, n1),
-                        "ports": (p0, p1)
+                        "ports": (p0, p1),
+                        "types": (p0.type, p1.type),
+                        "is_arrays": (p0.is_array, p1.is_array)
                     })
     
     @staticmethod
@@ -326,7 +336,9 @@ class Port(Element):
             p0.manager.add_log({
                 "t": "disconn",
                 "ports": (p0, p1),
-                "nodes": (n0, n1)
+                "nodes": (n0, n1),
+                "types": (p0.type, p1.type),
+                "is_arrays": (p0.is_array, p1.is_array)
             })
             
         if p0.wire:
@@ -341,6 +353,9 @@ class Port(Element):
         p1.connection = None
         p1.connection_port = None
         p1.wire = None
+        
+        n0.ripple_update = True
+        n1.ripple_update = True
             
     @classmethod
     def set_active_port(cls, port):
@@ -469,7 +484,7 @@ class Port(Element):
     def copy(self):
         n = self.node
         p = Port(self.node.get_new_output_port(), self.type, is_array=self.is_array)
-        p.parent_port = self.port
+        p.parent_port = self.parent_port or self.port
         p.node = n
         p.rect = self.rect.copy()
         n.ports.append(p)
@@ -526,23 +541,28 @@ class Port(Element):
     def set_type(self, type):
         self.type = type
         
-    def update_type(self, type):
-        if not self.check_connection(type):
+    def update_type(self, type, is_array=None):
+        if is_array is None:
+            is_array = self.is_array
+        if not self.check_connection(type, is_array):
             self.clear()
         self.type = type
+        self.is_array = is_array
         for p in self.get_child_ports():
-            p.update_type(type)
+            p.update_type(type, is_array=is_array)
         
-    def check_connection(self, t0):
+    def check_connection(self, t0, a0):
         if not self.connection:
             return True
             
-        array_check = self.is_array == self.connection_port.is_array
         t1 = self.connection_port.type
-        type_check = t0 == t1
+        a1 = self.connection_port.is_array
+
+        array_check = a0 == a1
+        type_check = t0 == t1 or (t0 == Port_Types.ANY or t1 == Port_Types.ANY)
         any_check = (
-            t0 == Port_Types.ANY and t1 != Port_Types.FLOW or
-            t1 == Port_Types.ANY and t0 != Port_Types.FLOW
+            t0 == Port_Types.ANYANY and t1 != Port_Types.FLOW or
+            t1 == Port_Types.ANYANY and t0 != Port_Types.FLOW
         )
 
         return (array_check and type_check) or any_check
@@ -739,6 +759,8 @@ class Node(Dragger, Element):
         self.rect.topleft = pos
 
         self.label = self.get_label()
+        
+        self.ripple_update = False
 
     def __str__(self):
         return self.name
@@ -1108,17 +1130,26 @@ class Node(Dragger, Element):
                 "node": self,
                 "ports": shown
             })
-            
-    def io_sync(self, ipp, opp, default_type):
-        ip = self.get_port(ipp)
-        op = self.get_port(opp)
 
-        if ip.connection:
-            t = ip.connection_port.type
-            if t != op.type:
-                op.update_type(t)
-        elif op.type != default_type:
-            op.update_type(default_type)
+    def port_sync(self, pp1, pp0, default_type, default_is_array=None):
+        p0 = self.get_port(pp0)
+        p1 = self.get_port(pp1)
+
+        if p0.connection:
+            t = p0.connection_port.type
+            if default_is_array is not None:
+                a = p0.connection_port.is_array
+            else:
+                a = default_is_array
+        else:
+            t = default_type
+            if default_is_array is not None:
+                a = default_is_array
+            else:
+                a = p1.is_array
+
+        if p1.type != t or p1.is_array != a:
+            p1.update_type(t, is_array=a)
             
     def scope_check(self, ipp, node_type):
         ip = self.get_port(ipp)
@@ -1131,6 +1162,21 @@ class Node(Dragger, Element):
             else:
                 ip.clear()
                 
+    def ripple_connection_update(self, checked=None):
+        if checked is None:
+            checked = set()
+        checked.add(self.id)
+        
+        for ip in self.get_input_ports():
+            if ip.connection and ip.connection.id not in checked:
+                ip.connection.ripple_connection_update(checked=checked)
+
+        self.connection_update()
+                
+        for op in self.get_output_ports():
+            if op.connection and op.connection.id not in checked:
+                op.connection.ripple_connection_update(checked=checked)
+       
 # drag stuff
 
     @property
@@ -1168,12 +1214,14 @@ class Node(Dragger, Element):
             if button == 3 and self.context_click() and not self.manager.cm:
                 self.manager.new_context(node=self)
         
-    def update(self):
-        super().update()
-        self.connection_update()
-        
     def connection_update(self):
         pass
+        
+    def update(self):
+        super().update()
+        if self.ripple_update:
+            self.ripple_connection_update()
+            self.ripple_update = False
         
 # draw stuff
         

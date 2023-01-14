@@ -308,16 +308,8 @@ class Node_Editor(Scene):
     def add_log(self, log):
         if self.no_logs:
             return
-
-        if self.logs and log["t"] == "disconn":
-            last_log = self.logs[-1]
-            if last_log["t"] == "conn":
-                if (
-                    set(last_log["ports"]) == set(log["ports"]) and 
-                    set(last_log["nodes"]) == set(log["nodes"])
-                ):
-                    self.logs.pop(-1)
-                    return
+                    
+        print("d", log)
                     
         self.logs.append(log)
         self.card.set_node_data(self.nodes)
@@ -352,6 +344,8 @@ class Node_Editor(Scene):
         logs = self.log_history[self.log_index]
 
         for log in logs[::-1]:
+            
+            print("u", log)
         
             match log["t"]:
 
@@ -400,6 +394,12 @@ class Node_Editor(Scene):
                         p1.group_node.sort_ports()
                         p1.group_node.set_port_pos()
                     Port.new_connection(p0, p1, force=True, d=True)
+                    t0, t1 = log["types"]
+                    a0, a1 = log["is_arrays"]
+                    p0.type = t0
+                    p0.is_array = a0
+                    p1.type = t1
+                    p1.is_array = a1
 
                 case "val":
                     e = log["e"]
@@ -449,6 +449,8 @@ class Node_Editor(Scene):
         logs = self.log_history[self.log_index + 1]
 
         for log in logs:
+        
+            print("r", log)
             
             match log["t"]:
             

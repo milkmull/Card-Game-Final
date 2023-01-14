@@ -78,7 +78,7 @@ class If(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANY, description="condition"),
+            Port(1, Port_Types.ANYANY, description="condition"),
             Port(2, Port_Types.FLOW),
             Port(-1, Port_Types.FLOW, is_process=True),
             Port(-2, Port_Types.FLOW)
@@ -99,7 +99,7 @@ class Elif(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANY, description="condition"),
+            Port(1, Port_Types.ANYANY, description="condition"),
             Port(2, Port_Types.FLOW),
             Port(-1, Port_Types.FLOW, is_process=True),
             Port(-2, Port_Types.FLOW)
@@ -146,11 +146,28 @@ class Ternary(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.NUM, description="if true"),
-            Port(2, Port_Types.NUM, description="if false"),
-            Port(3, Port_Types.ANY),
+            Port(1, Port_Types.ANYANY, description="if true"),
+            Port(2, Port_Types.ANYANY, description="if false"),
+            Port(3, Port_Types.ANYANY),
             Port(-1, Port_Types.NUM, description="out")
         ])
+        
+    def connection_update(self):
+        c1 = self.get_port(1).connection
+        c2 = self.get_port(2).connection
+        if c1 and not c2:
+            self.port_sync(2, 1, Port_Types.ANYANY, default_is_array=False)
+            self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
+        elif c2 and not c1:
+            self.port_sync(1, 2, Port_Types.ANYANY, default_is_array=False)
+            self.port_sync(-1, 2, Port_Types.NUM, default_is_array=False)
+        elif c1 and c2:
+            self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
+        else:
+            self.port_sync(1, 1, Port_Types.ANYANY, default_is_array=False)
+            self.port_sync(2, 1, Port_Types.ANYANY, default_is_array=False)
+            self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
+            
      
     def _get_default(self, p):
         if p == 1 or p == 2:
@@ -218,12 +235,12 @@ class Extend(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANY, description=" "),
+            Port(1, Port_Types.ANYANY, description=" "),
             Port(-1, Port_Types.BOOL, description=" ")
         ])
         
     def connection_update(self):
-        self.io_sync(1, -1, Port_Types.BOOL)
+        self.port_sync(-1, 1, Port_Types.BOOL, default_is_array=False)
         
     def _get_default(self, p):
         return "True"
@@ -238,8 +255,8 @@ class And(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANY, description="x"),
-            Port(2, Port_Types.ANY, description="y"),
+            Port(1, Port_Types.ANYANY, description="x"),
+            Port(2, Port_Types.ANYANY, description="y"),
             Port(-1, Port_Types.BOOL, description="x and y")
         ])
         
@@ -257,8 +274,8 @@ class Or(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANY, description="x"),
-            Port(2, Port_Types.ANY, description="y"),
+            Port(1, Port_Types.ANYANY, description="x"),
+            Port(2, Port_Types.ANYANY, description="y"),
             Port(-1, Port_Types.BOOL, description="x or y")
         ])
         
@@ -276,7 +293,7 @@ class Not(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANY, description="x"),
+            Port(1, Port_Types.ANYANY, description="x"),
             Port(-1, Port_Types.BOOL, description="not x")
         ])
         
@@ -293,8 +310,8 @@ class Equal(Node):
         super().__init__(id, **kwargs)
 
         self.set_ports([
-            Port(1, Port_Types.ANY, description="x"),
-            Port(2, Port_Types.ANY, description="y"),
+            Port(1, Port_Types.ANYANY, description="x"),
+            Port(2, Port_Types.ANYANY, description="y"),
             Port(-1, Port_Types.BOOL, description="x == y")
         ])
         
@@ -551,7 +568,7 @@ class Exists(Node):
         super().__init__(id, **kwargs)
             
         self.set_ports([
-            Port(1, Port_Types.ANY, description="x"),
+            Port(1, Port_Types.ANYANY, description="x"),
             Port(-1, Port_Types.BOOL, description="x is not None")
         ])
         
@@ -576,7 +593,7 @@ class For(Node):
         ])
 
     def connection_update(self):
-        self.io_sync(1, -1, Port_Types.NUM)
+        self.port_sync(-1, 1, Port_Types.NUM)
 
     def get_loop_var(self):
         op = self.get_port(-1)
@@ -797,7 +814,7 @@ class Filter(Node):
         return f"x{self.id}"
         
     def connection_update(self):
-        self.io_sync(2, -1, Port_Types.NUM)
+        self.port_sync(-1, 2, Port_Types.NUM)
             
     def _get_default(self, p):
         if p == 1:
@@ -1017,7 +1034,7 @@ class Index(Node):
         self.set_port_pos()
         
     def connection_update(self):
-        self.io_sync(2, -1, Port_Types.NUM)
+        self.port_sync(-1, 2, Port_Types.NUM)
 
     def _get_output(self, p):
         return "{1}[{0}]".format(*self.get_input())
@@ -1522,14 +1539,14 @@ class Store_Value(Node):
         super().__init__(id, **kwargs)  
 
         self.set_ports([
-            Port(1, Port_Types.ANY, description="value"),
+            Port(1, Port_Types.ANYANY, description="value"),
             Port(2, Port_Types.FLOW),
             Port(-1, Port_Types.NUM, description="value"),
             Port(-2, Port_Types.FLOW)
         ])
 
     def connection_update(self):
-        self.io_sync(1, -1, Port_Types.NUM)
+        self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
 
     def _get_output(self, p):
         return f"value_{self.id}"

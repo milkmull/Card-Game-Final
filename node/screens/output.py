@@ -1,6 +1,7 @@
 import pygame as pg
 
 from ..compiler import Compiler
+from ..node.node_base import Port_Types
 
 from ui.scene.scene import Scene
 
@@ -91,7 +92,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
                 end
             )
         
-        pg.draw.lines(surf, self.port.color, False, points, width=3)
+        pg.draw.lines(surf, Port_Types.get_color(self.port), False, points, width=3)
     
     wire = Base_Element(draw=draw)
     setattr(wire, "port", None)
@@ -189,7 +190,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
                     "<" if visible_port.port > 0 else ">",
                     (20, 20),
                     pad=(5, 5),
-                    color=visible_port.color
+                    color=Port_Types.get_color(visible_port)
                 ),
                 func=refresh
             )
@@ -205,19 +206,20 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
             node.id,
             port=port.true_port if not port.is_flow else 0
         )
+        color = Port_Types.get_color(visible_port)
         style = {
-            "bgcolor": visible_port.color,
-            "fgcolor": color_shade(visible_port.color)
+            "bgcolor": color,
+            "fgcolor": color_shade(color)
         }
         for s, e in ranges:
             text_style.update({i: style for i in range(s, e)})
 
         out_text.set_text(Compiler.unmark(full_text).strip(), force=True, style=text_style)
         text_window.join_elements([out_text], border=5)
-        text_window.outline_color = visible_port.color
+        text_window.outline_color = color
 
-        text_label.text_color = color_shade(visible_port.color)
-        text_label.fill_color = visible_port.color
+        text_label.text_color = color_shade(color)
+        text_label.fill_color = color
         text_label.set_text(f"Port {visible_port.port} {'Input' if visible_port.port > 0 else 'Output'}:")
         
         if text_window.y_scroll_bar.visible:
