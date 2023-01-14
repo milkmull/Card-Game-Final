@@ -393,13 +393,13 @@ class Node_Editor(Scene):
                         p1.group_node.ports.append(p1)
                         p1.group_node.sort_ports()
                         p1.group_node.set_port_pos()
-                    Port.new_connection(p0, p1, force=True, d=True)
                     t0, t1 = log["types"]
                     a0, a1 = log["is_arrays"]
                     p0.type = t0
                     p0.is_array = a0
                     p1.type = t1
                     p1.is_array = a1
+                    Port.new_connection(p0, p1, d=True)
 
                 case "val":
                     e = log["e"]
