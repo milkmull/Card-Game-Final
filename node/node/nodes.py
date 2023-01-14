@@ -89,8 +89,7 @@ class If(Node):
             return "True"
         
     def _get_text(self):
-        text = "if {0}:\n".format(*self.get_input())   
-        return text
+        return "if {0}:\n".format(*self.get_input()) 
         
 class Elif(Node):
     cat = "flow"
@@ -114,9 +113,8 @@ class Elif(Node):
         if p == 1:
             return "True"
         
-    def _get_text(self):
-        text = "elif {0}:\n".format(*self.get_input())   
-        return text
+    def _get_text(self): 
+        return "elif {0}:\n".format(*self.get_input())
         
 class Else(Node):
     cat = "flow"
@@ -136,8 +134,7 @@ class Else(Node):
         return True
         
     def _get_text(self):
-        text = "else:\n"  
-        return text
+        return "else:\n" 
  
 class Ternary(Node):
     cat = "flow"
@@ -148,7 +145,7 @@ class Ternary(Node):
         self.set_ports([
             Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="if true"),
             Port(2, Port_Types.ANY_TYPE_OR_ARRAY, description="if false"),
-            Port(3, Port_Types.ANY_TYPE_OR_ARRAY),
+            Port(3, Port_Types.ANY_TYPE_OR_ARRAY, description="condition"),
             Port(-1, Port_Types.NUM, description="out")
         ])
         
@@ -156,9 +153,11 @@ class Ternary(Node):
         c1 = self.get_port(1).connection
         c2 = self.get_port(2).connection
         if c1 and not c2:
+            self.port_sync(1, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(2, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
         elif c2 and not c1:
+            self.port_sync(2, 2, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(1, 2, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(-1, 2, Port_Types.NUM, default_is_array=False)
         elif c1 and c2:
@@ -175,9 +174,8 @@ class Ternary(Node):
         elif p == 3:
             return "True"
         
-    def _get_output(self, p):
-        text = "({0} if {2} else {1})".format(*self.get_input())   
-        return text
+    def _get_output(self, p):  
+        return "({0} if {2} else {1})".format(*self.get_input())
  
 class Bool(Node):
     cat = "boolean"
@@ -263,9 +261,8 @@ class And(Node):
     def _get_default(self, p):
         return "True"
         
-    def _get_output(self, p):
-        text = "({} and {})".format(*self.get_input())     
-        return text
+    def _get_output(self, p): 
+        return "({} and {})".format(*self.get_input())  
         
 class Or(Node):
     cat = "boolean"
@@ -282,9 +279,8 @@ class Or(Node):
     def _get_default(self, p):
         return "True"
         
-    def _get_output(self, p):
-        text = "({} or {})".format(*self.get_input())     
-        return text
+    def _get_output(self, p):   
+        return "({} or {})".format(*self.get_input()) 
         
 class Not(Node):
     cat = "boolean"
@@ -300,9 +296,8 @@ class Not(Node):
     def _get_default(self, p):
         return "True"
 
-    def _get_output(self, p):
-        text = "(not {})".format(*self.get_input())    
-        return text
+    def _get_output(self, p):  
+        return "(not {})".format(*self.get_input())
         
 class Equal(Node):
     cat = "boolean"
@@ -335,9 +330,8 @@ class Equal(Node):
             case _:
                 return "None"
 
-    def _get_output(self, p):
-        text = "({} == {})".format(*self.get_input())    
-        return text
+    def _get_output(self, p): 
+        return "({} == {})".format(*self.get_input()) 
       
 class Greater(Node):
     cat = "numeric"
@@ -358,9 +352,8 @@ class Greater(Node):
     def _get_default(self, p):
         return "0"
 
-    def _get_output(self, p):
-        text = "({0} > {1})".format(*self.get_input())    
-        return text
+    def _get_output(self, p):  
+        return "({0} > {1})".format(*self.get_input())
         
 class Less(Node):
     cat = "numeric"
@@ -382,8 +375,7 @@ class Less(Node):
         return "0"
 
     def _get_output(self, p):
-        text = "({0} < {1})".format(*self.get_input())    
-        return text
+        return "({0} < {1})".format(*self.get_input()) 
      
 class Max(Node):
     cat = "numeric"
@@ -400,9 +392,8 @@ class Max(Node):
     def _get_default(self, p):
         return "[]"
 
-    def _get_output(self, p):
-        text = "max({0}, 0)".format(*self.get_input())    
-        return text
+    def _get_output(self, p): 
+        return "max({0}, 0)".format(*self.get_input()) 
         
 class Min(Node):
     cat = "numeric"
@@ -419,8 +410,7 @@ class Min(Node):
         return "[]"
 
     def _get_output(self, p):
-        text = "min({0}, 0)".format(*self.get_input())    
-        return text
+        return "min({0}, 0)".format(*self.get_input())    
      
 class Add(Node):
     cat = "numeric"
@@ -612,9 +602,8 @@ class For(Node):
             return "range(1)"
         
     def _get_text(self):
-        input = [self.get_output(-1)] + self.get_input()
-        text = "for {0} in {1}:\n".format(*input)   
-        return text
+        input = [self.get_output(-1)] + self.get_input()  
+        return "for {0} in {1}:\n".format(*input)
         
     def _get_output(self, p):
         return self.get_loop_var()
@@ -670,8 +659,7 @@ class Range(Node):
         return "0"
         
     def _get_output(self, p):
-        text = "range({0}, {1})".format(*self.get_input()) 
-        return text
+        return "range({0}, {1})".format(*self.get_input())
        
 class Player(Node):
     cat = "player"
@@ -749,8 +737,7 @@ class Has_Tag(Node):
             return "self"
         
     def _get_output(self, p):
-        text = "{1}.has_tag({0})".format(*self.get_input())
-        return text
+        return "{1}.has_tag({0})".format(*self.get_input())
       
 class Get_Name(Node):
     cat = "card"
@@ -767,8 +754,7 @@ class Get_Name(Node):
         return "self"
         
     def _get_output(self, p):
-        text = "{0}.name".format(*self.get_input())
-        return text 
+        return "{0}.name".format(*self.get_input()) 
       
 class Has_Name(Node):
     cat = "card"
@@ -792,8 +778,7 @@ class Has_Name(Node):
             return "self"
         
     def _get_output(self, p):
-        text = "{1}.has_name({0})".format(*self.get_input())
-        return text
+        return "{1}.has_name({0})".format(*self.get_input())
         
 class Filter(Node):
     cat = "iterator"
@@ -823,16 +808,10 @@ class Filter(Node):
             return "[]"
             
     def _get_output(self, p):
-        ipp = mapping.find_all_input_ports(self)
-        contains = self.get_port(-1).type
-        for ip in ipp:
-            if ip.type == contains:
-                ip.node.defaults[ip.port] = self.get_list_var()
+        self.lambda_input(self.get_port(-1).type, self.get_list_var())
         input = self.get_input() + [self.get_list_var()]
-        for ip in ipp:
-            ip.node.defaults.clear()
-        text = "[{2} for {2} in {1} if {0}]".format(*input)
-        return text
+        self.clear_lambda_input(self.get_port(-1).type)
+        return "[{2} for {2} in {1} if {0}]".format(*input)
 
 class Gain(Node):
     cat = "player"
@@ -861,8 +840,7 @@ class Gain(Node):
                 return "self.player"
         
     def _get_text(self):
-        text = "{2}.gain({1}, self, extra={0})\n".format(*self.get_input())
-        return text      
+        return "{2}.gain({1}, self, extra={0})\n".format(*self.get_input())      
 
 class Steal(Node):
     cat = "player"
@@ -892,8 +870,7 @@ class Steal(Node):
                 return "self.player"
         
     def _get_text(self):
-        text = "{2}.steal({1}, self, {3}, extra={0})\n".format(*self.get_input())
-        return text      
+        return "{2}.steal({1}, self, {3}, extra={0})\n".format(*self.get_input())      
           
 class Start_Select(Node):
     cat = "func"
@@ -907,8 +884,7 @@ class Start_Select(Node):
         ])
 
     def _get_text(self):
-        text = "self.player.start_select(self, {0})\n".format(*self.get_input())
-        return text
+        return "self.player.start_select(self, {0})\n".format(*self.get_input())
 
 class Select(Node):
     cat = "func"
@@ -942,8 +918,7 @@ class Start_Wait(Node):
         self.set_port_pos()
                 
     def _get_text(self):
-        text = "self.start_wait({0})".format(*self.get_input())
-        return text
+        return "self.start_wait({0})".format(*self.get_input())
         
     def _get_default(self, p):
         return "\"\""
@@ -992,8 +967,7 @@ class Extract_Value(Node):
         self.set_port_pos()
         
     def _get_output(self, p):
-        text = "{1}.get({0})".format(*self.get_input())
-        return text
+        return "{1}.get({0})".format(*self.get_input())
         
     def _get_default(self, p):
         match p:
@@ -1043,7 +1017,7 @@ class Index(Node):
         if p == 1:
             return "-1"
         elif p == 2:
-            return "player.string_to_deck(\"played\")"
+            return "player.string_to_deck(\"private\")"
             
 class Copy_Card(Node):
     cat = "card"
@@ -1105,8 +1079,7 @@ class Transfom(Node):
                 return "self"
 
     def _get_output(self, p):
-        text = "self.game.transform({2}, self.game.get_card({1}))".format(*self.get_input())
-        return text
+        return "self.game.transform({2}, self.game.get_card({1}))".format(*self.get_input())
             
 class Swap_With(Node):
     cat = "card"
@@ -1121,8 +1094,7 @@ class Swap_With(Node):
         ])
 
     def _get_text(self):
-        text = "self.swap_with({0})\n".format(*self.get_input())
-        return text
+        return "self.swap_with({0})\n".format(*self.get_input())
         
     def _get_default(self, p):
         return "self"
@@ -1139,12 +1111,12 @@ class Get_Deck(Node):
             Port(-1, Port_Types.CARD, description="deck", is_array=True)
         ])
         
-        set_dropdown_element(self.get_port(1), DECKS_DICT, value="played")
+        set_dropdown_element(self.get_port(1), DECKS_DICT, value="private")
         self.set_port_pos()
         
     def _get_default(self, p):
         if p == 1:
-            return "\"played\""
+            return "\"private\""
         elif p == 2:
             return "player"
             
@@ -1237,8 +1209,7 @@ class Get_Spot_Group(Node):
         self.set_port_pos()
         
     def _get_output(self, p):
-        text = "self.spot.get_spot_group({0})".format(*self.get_input())
-        return text
+        return "self.spot.get_spot_group({0})".format(*self.get_input())
         
 class Get_Card_Group(Node):
     def __init__(self, id, **kwargs):
@@ -1257,13 +1228,10 @@ class Get_Card_Group(Node):
         return "True"
         
     def _get_output(self, p):
-        ipp = mapping.find_all_input_ports(self)
-        for ip in ipp:
-            if ip.type == Port_Types.CARD:
-                ip.node.defaults[ip.port] = "c"
-                
-        text = "self.spot.get_card_group({0}, check=lambda c: {1})".format(*self.get_input())
-        return text
+        self.lambda_input(Port_Types.CARD, "c")
+        input = self.get_input()
+        self.clear_lambda_input(Port_Types.CARD)
+        return "self.spot.get_card_group({0}, check=lambda c: {1})".format(*input)
         
 class Register(Node):
     def __init__(self, id, **kwargs):
@@ -1396,7 +1364,9 @@ class Get_Card_At(Node):
 
     def _get_output(self, p):
         self.lambda_input(Port_Types.CARD, "c")
-        return "self.spot.get_card_at({0}, check=lambda c: {1})".format(*self.get_input())
+        input = self.get_input()
+        self.clear_lambda_input(Port_Types.CARD)
+        return "self.spot.get_card_at({0}, check=lambda c: {1})".format(*input)
         
 class Get_Spot_At(Node):
     def __init__(self, id, **kwargs):
@@ -1529,9 +1499,8 @@ class Process(Node):
     def _get_default(self, p):
         return ""
         
-    def _get_text(self):
-        text = "{0}\n".format(*self.get_input())   
-        return text
+    def _get_text(self): 
+        return "{0}\n".format(*self.get_input())
         
 class Store_Value(Node):
     cat = "flow"
@@ -1557,5 +1526,4 @@ class Store_Value(Node):
     def _get_text(self):
         input = self.get_input()
         input.insert(0, self.get_output(-1))
-        text = "{0} = {1}\n".format(*input)   
-        return text
+        return "{0} = {1}\n".format(*input) 

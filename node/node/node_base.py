@@ -1023,6 +1023,12 @@ class Node(Dragger, Element):
         for ip in ipp:
             if ip.type == type:
                 ip.node.defaults[ip.port] = name
+                
+    def clear_lambda_input(self, type):
+        ipp = mapping.find_all_input_ports(self)
+        for ip in ipp:
+            if ip.type == type:
+                ip.node.defaults.pop(ip.port, None)
      
 # port stuff
 
