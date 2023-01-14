@@ -5,8 +5,8 @@ from .element.logged_dropdown import Logged_Dropdown as Const_Dropdown, Logged_I
 from ui.element.utils.image import get_arrow
 from ui.icons.icons import icons
 
-def set_input_element(port, type, value=""):
-    i = INPUTS[type](
+def set_input_element(port, value=""):
+    i = INPUTS[port.type.lower()](
         port,
         text=value
     )

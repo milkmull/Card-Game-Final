@@ -78,7 +78,7 @@ class If(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="condition"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="condition"),
             Port(2, Port_Types.FLOW),
             Port(-1, Port_Types.FLOW, is_process=True),
             Port(-2, Port_Types.FLOW)
@@ -99,7 +99,7 @@ class Elif(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="condition"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="condition"),
             Port(2, Port_Types.FLOW),
             Port(-1, Port_Types.FLOW, is_process=True),
             Port(-2, Port_Types.FLOW)
@@ -146,9 +146,9 @@ class Ternary(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="if true"),
-            Port(2, Port_Types.ANYANY, description="if false"),
-            Port(3, Port_Types.ANYANY),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="if true"),
+            Port(2, Port_Types.ANY_TYPE_OR_ARRAY, description="if false"),
+            Port(3, Port_Types.ANY_TYPE_OR_ARRAY),
             Port(-1, Port_Types.NUM, description="out")
         ])
         
@@ -156,16 +156,16 @@ class Ternary(Node):
         c1 = self.get_port(1).connection
         c2 = self.get_port(2).connection
         if c1 and not c2:
-            self.port_sync(2, 1, Port_Types.ANYANY, default_is_array=False)
+            self.port_sync(2, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
         elif c2 and not c1:
-            self.port_sync(1, 2, Port_Types.ANYANY, default_is_array=False)
+            self.port_sync(1, 2, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(-1, 2, Port_Types.NUM, default_is_array=False)
         elif c1 and c2:
             self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
         else:
-            self.port_sync(1, 1, Port_Types.ANYANY, default_is_array=False)
-            self.port_sync(2, 1, Port_Types.ANYANY, default_is_array=False)
+            self.port_sync(1, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
+            self.port_sync(2, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
             
      
@@ -203,7 +203,7 @@ class Num(Node):
             Port(-1, Port_Types.NUM)
         ])
         
-        set_input_element(self.get_port(-1), "num", value="0")
+        set_input_element(self.get_port(-1))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -212,7 +212,7 @@ class Num(Node):
     def _get_output(self, p):
         return self.get_port(-1).get_output()
         
-class String():
+class String(Node):
     cat = "string"
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
@@ -221,7 +221,7 @@ class String():
             Port(-1, Port_Types.STRING)
         ])
         
-        set_input_element(self.get_port(-1), "string")
+        set_input_element(self.get_port(-1))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -235,7 +235,7 @@ class Extend(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description=" "),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description=" "),
             Port(-1, Port_Types.BOOL, description=" ")
         ])
         
@@ -255,8 +255,8 @@ class And(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="x"),
-            Port(2, Port_Types.ANYANY, description="y"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="x"),
+            Port(2, Port_Types.ANY_TYPE_OR_ARRAY, description="y"),
             Port(-1, Port_Types.BOOL, description="x and y")
         ])
         
@@ -274,8 +274,8 @@ class Or(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="x"),
-            Port(2, Port_Types.ANYANY, description="y"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="x"),
+            Port(2, Port_Types.ANY_TYPE_OR_ARRAY, description="y"),
             Port(-1, Port_Types.BOOL, description="x or y")
         ])
         
@@ -293,7 +293,7 @@ class Not(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="x"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="x"),
             Port(-1, Port_Types.BOOL, description="not x")
         ])
         
@@ -310,8 +310,8 @@ class Equal(Node):
         super().__init__(id, **kwargs)
 
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="x"),
-            Port(2, Port_Types.ANYANY, description="y"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="x"),
+            Port(2, Port_Types.ANY_TYPE_OR_ARRAY, description="y"),
             Port(-1, Port_Types.BOOL, description="x == y")
         ])
         
@@ -351,8 +351,8 @@ class Greater(Node):
             Port(-1, Port_Types.BOOL, description="x > y")
         ])
         
-        set_input_element(self.get_port(1), "num")
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(1))
+        set_input_element(self.get_port(2))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -374,8 +374,8 @@ class Less(Node):
             Port(-1, Port_Types.BOOL, description="x < y")
         ])
         
-        set_input_element(self.get_port(1), "num")
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(1))
+        set_input_element(self.get_port(2))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -434,8 +434,8 @@ class Add(Node):
             Port(-1, Port_Types.NUM, description="a + b")
         ])
         
-        set_input_element(self.get_port(1), "num")
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(1))
+        set_input_element(self.get_port(2))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -490,8 +490,8 @@ class Subtract(Node):
             Port(-1, Port_Types.NUM, description="a - b")
         ])
         
-        set_input_element(self.get_port(1), "num")
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(1))
+        set_input_element(self.get_port(2))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -512,8 +512,8 @@ class Multiply(Node):
             Port(-1, Port_Types.NUM, description="a * b")
         ])
         
-        set_input_element(self.get_port(1), "num")
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(1))
+        set_input_element(self.get_port(2))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -551,8 +551,8 @@ class Divide(Node):
             Port(-1, Port_Types.NUM, description="a / b")
         ])
         
-        set_input_element(self.get_port(1), "num")
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(1))
+        set_input_element(self.get_port(2))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -568,7 +568,7 @@ class Exists(Node):
         super().__init__(id, **kwargs)
             
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="x"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="x"),
             Port(-1, Port_Types.BOOL, description="x is not None")
         ])
         
@@ -585,7 +585,7 @@ class For(Node):
         super().__init__(id, **kwargs)  
         
         self.set_ports([
-            Port(1, Port_Types.ANY, description="list", is_array=True),
+            Port(1, Port_Types.ANY_TYPE, description="list", is_array=True),
             Port(2, Port_Types.FLOW),
             Port(-1, Port_Types.NUM, description="list value"),
             Port(-2, Port_Types.FLOW, is_process=True),
@@ -662,8 +662,8 @@ class Range(Node):
             Port(-1, Port_Types.NUM, description="[min, ..., max]", is_array=True)
         ])
         
-        set_input_element(self.get_port(1), "num")
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(1))
+        set_input_element(self.get_port(2))
         self.set_port_pos()
         
     def _get_default(self, p):
@@ -717,7 +717,7 @@ class Length(Node):
         super().__init__(id, **kwargs)
 
         self.set_ports([
-            Port(1, Port_Types.ANY, description="list", is_array=True),
+            Port(1, Port_Types.ANY_TYPE, description="list", is_array=True),
             Port(-1, Port_Types.NUM, description="length of list")
         ])
         
@@ -802,8 +802,8 @@ class Filter(Node):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.ANY, description="condition"),
-            Port(2, Port_Types.ANY, description="list", is_array=True),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="condition"),
+            Port(2, Port_Types.ANY_TYPE, description="list", is_array=True),
             Port(-1, Port_Types.NUM, description="filtered list", is_array=True)
         ])
         
@@ -848,7 +848,7 @@ class Gain(Node):
             Port(-1, Port_Types.FLOW)
         ])
         
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(2))
         self.set_port_pos()
      
     def _get_default(self, p):
@@ -879,7 +879,7 @@ class Steal(Node):
             Port(-1, Port_Types.FLOW)
         ])
         
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(2))
         self.set_port_pos()
      
     def _get_default(self, p):
@@ -984,7 +984,7 @@ class Extract_Value(Node):
         
         self.set_ports([
             Port(1, Port_Types.STRING, description="key"),
-            Port(2, Port_Types.ANY, description="log"),
+            Port(2, Port_Types.ANY_TYPE, description="log"),
             Port(-1, Port_Types.NUM, description="value")
         ])
         
@@ -1026,11 +1026,11 @@ class Index(Node):
         
         self.set_ports([
             Port(1, Port_Types.NUM, description="index"),
-            Port(2, Port_Types.ANY, description="list", is_array=True),
+            Port(2, Port_Types.ANY_TYPE, description="list", is_array=True),
             Port(-1, Port_Types.NUM, description="list value at index")
         ])
         
-        set_input_element(self.get_port(1), "num")
+        set_input_element(self.get_port(1))
         self.set_port_pos()
         
     def connection_update(self):
@@ -1183,8 +1183,8 @@ class Cards_From_Vector(Node):
         ])
         
         set_vec_element(self.get_port(1))
-        set_input_element(self.get_port(2), "num")
-        set_input_element(self.get_port(3), "num")
+        set_input_element(self.get_port(2))
+        set_input_element(self.get_port(3))
         set_check_element(self.get_port(5))
         self.get_port(5).hide()
         set_check_element(self.get_port(6))
@@ -1478,7 +1478,7 @@ class Slide_Card(Node):
         ])
         
         set_vec_element(self.get_port(1))
-        set_input_element(self.get_port(2), "num")
+        set_input_element(self.get_port(2))
         self.get_port(2).hide()
         self.set_port_pos()
         
@@ -1521,7 +1521,7 @@ class Process(Node):
         super().__init__(id, **kwargs)  
 
         self.set_ports([
-            Port(1, Port_Types.ANY, description="value"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="value"),
             Port(2, Port_Types.FLOW),
             Port(-1, Port_Types.FLOW)
         ])
@@ -1539,7 +1539,7 @@ class Store_Value(Node):
         super().__init__(id, **kwargs)  
 
         self.set_ports([
-            Port(1, Port_Types.ANYANY, description="value"),
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="value"),
             Port(2, Port_Types.FLOW),
             Port(-1, Port_Types.NUM, description="value"),
             Port(-2, Port_Types.FLOW)

@@ -110,9 +110,6 @@ def unpack(data, manager=None, map=True):
             elif p0.hidden:
                 p0.show()
             p0.parent_port = parent_port
-            if parent_port:
-                p0.remove_child(p0.label)
-                p0.label = None
             p0.added = added
             if connection is not None and port < 0:
                 connection = id_map.get(connection)
@@ -222,8 +219,8 @@ class Port_Types(StrEnum):
     CARD = "CARD"
     SPOT = "SPOT"
     VEC = "VEC"
-    ANY = "ANY"
-    ANYANY = "ANYANY"
+    ANY_TYPE = "ANY_TYPE"
+    ANY_TYPE_OR_ARRAY = "ANY_TYPE_OR_ARRAY"
     FLOW = "FLOW"
                 
     @staticmethod
@@ -243,14 +240,14 @@ class Port_Types(StrEnum):
                 return "spot"
             case Port_Types.VEC:
                 return "vec"
-            case Port_Types.ANY | Port_Types.ANYANY:
+            case Port_Types.ANY_TYPE | Port_Types.ANY_TYPE_OR_ARRAY:
                 return "any"
             case Port_Types.FLOW:
                 return "flow" if not port.is_process else "process"
                 
     @staticmethod
     def get_color(port, contains=False):
-        if (port.is_array and not contains) or (contains and port.type == Port_Types.ANY):
+        if (port.is_array and not contains) or (contains and port.type == Port_Types.ANY_TYPE):
             return (0, 255, 0)
             
         match port.type:
@@ -290,10 +287,10 @@ class Port(Element):
         a1 = p1.is_array
         
         array_check = a0 == a1
-        type_check = t0 == t1 or (t0 == Port_Types.ANY or t1 == Port_Types.ANY)
+        type_check = t0 == t1 or (t0 == Port_Types.ANY_TYPE or t1 == Port_Types.ANY_TYPE)
         any_check = (
-            t0 == Port_Types.ANYANY and t1 != Port_Types.FLOW or
-            t1 == Port_Types.ANYANY and t0 != Port_Types.FLOW
+            t0 == Port_Types.ANY_TYPE_OR_ARRAY and t1 != Port_Types.FLOW or
+            t1 == Port_Types.ANY_TYPE_OR_ARRAY and t0 != Port_Types.FLOW
         )
 
         return (array_check and type_check) or any_check
@@ -388,22 +385,25 @@ class Port(Element):
         
         self.rect = pg.Rect(0, 0, Port.SIZE, Port.SIZE)
 
-        self.label = Textbox(
-            text=description if description else Port_Types.get_description(self),
-            text_size=15,
-            size=(Node.WIDTH - 18, 0),
-            inf_width=False,
-            inf_height=True,
-            auto_fit=True
-        )
-        self.label.set_enabled(False)
-        
-        if self.port > 0:
-            self.label.rect.topleft = (self.rect.right + 5, self.rect.y)
+        if not self.parent_port:
+            self.label = Textbox(
+                text=description or Port_Types.get_description(self),
+                text_size=15,
+                size=(Node.WIDTH - 18, 0),
+                inf_width=False,
+                inf_height=True,
+                auto_fit=True
+            )
+            self.label.set_enabled(False)
+            if self.port > 0:
+                self.label.rect.topleft = (self.rect.right + 5, self.rect.y)
+            else:
+                self.label.rect.topright = (self.rect.left - 5, self.rect.y)
+            self.add_child(self.label, current_offset=True)
+            
         else:
-            self.label.rect.topright = (self.rect.left - 5, self.rect.y)
-        self.add_child(self.label, current_offset=True)
-        
+            self.label = None
+
     def __str__(self):
         data = {
             "port": self.port,
@@ -559,10 +559,10 @@ class Port(Element):
         a1 = self.connection_port.is_array
 
         array_check = a0 == a1
-        type_check = t0 == t1 or (t0 == Port_Types.ANY or t1 == Port_Types.ANY)
+        type_check = t0 == t1 or (t0 == Port_Types.ANY_TYPE or t1 == Port_Types.ANY_TYPE)
         any_check = (
-            t0 == Port_Types.ANYANY and t1 != Port_Types.FLOW or
-            t1 == Port_Types.ANYANY and t0 != Port_Types.FLOW
+            t0 == Port_Types.ANY_TYPE_OR_ARRAY and t1 != Port_Types.FLOW or
+            t1 == Port_Types.ANY_TYPE_OR_ARRAY and t0 != Port_Types.FLOW
         )
 
         return (array_check and type_check) or any_check
