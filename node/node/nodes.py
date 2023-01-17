@@ -12,6 +12,7 @@ from data.constants import (
 
 from . import mapping
 from .node_base import Node, Port, Port_Types
+from .categories import Categories
 
 from ui.element.elements import Textbox, Input
 from .get_elements import (
@@ -24,7 +25,7 @@ from .get_elements import (
 )
 
 class Play(Node):
-    cat = "func"
+    categories = ((Categories.FUNCTION, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, tag="func", **kwargs)
         
@@ -36,7 +37,7 @@ class Play(Node):
         return "\n\tdef play(self):\n"
         
 class Remove(Node):
-    cat = "func"
+    categories = ((Categories.FUNCTION, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, tag="func", **kwargs)
         
@@ -48,7 +49,7 @@ class Remove(Node):
         return "\n\tdef remove(self):\n"
         
 class Move(Node):
-    cat = "func"
+    categories = ((Categories.FUNCTION, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, tag="func", **kwargs)
         
@@ -59,8 +60,21 @@ class Move(Node):
     def _get_text(self):
         return "\n\tdef move(self):\n"
         
+class Run_Move(Node):
+    categories = ((Categories.PROCESS, Categories.BASE),)
+    def __init__(self, id, **kwargs):
+        super().__init__(id, tag="func", **kwargs)
+        
+        self.set_ports([
+            Port(1, Port_Types.FLOW),
+            Port(-1, Port_Types.FLOW)
+        ])
+
+    def _get_text(self):
+        return "self.move()\n"
+        
 class Update(Node):
-    cat = "func"
+    categories = ((Categories.FUNCTION, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, tag="func", **kwargs)
         
@@ -70,10 +84,51 @@ class Update(Node):
 
     def _get_text(self):
         return "\n\tdef update(self):\n"
+        
+class Spawn(Node):
+    categories = ((Categories.FUNCTION, Categories.BASE),)
+    def __init__(self, id, **kwargs):
+        super().__init__(id, tag="func", **kwargs)
+        
+        self.set_ports([
+            Port(-1, Port_Types.FLOW)
+        ])
+
+    def _get_text(self):
+        return "\n\tdef spawn(self):\n"
+        
+class Multiplier(Node):
+    categories = ((Categories.FUNCTION, Categories.MULTIPLIER),)
+    def __init__(self, id, **kwargs):
+        super().__init__(id, tag="func", **kwargs)
+        
+        self.set_ports([
+            Port(-1, Port_Types.NUM, is_reference=True),
+            Port(-2, Port_Types.CARD, is_reference=True),
+            Port(-3, Port_Types.FLOW)
+        ])
+        
+    def get_output(self, p):
+        match p:
+            case -1:
+                return "m"
+            case -2:
+                return "card"
+
+    def _get_text(self):
+        return "\n\tdef multiply(self, card):\n"
+        
+    def _get_start(self):
+        return "\t\tm = 1\n"
+        
+    def _get_end(self):
+        return "\t\treturn m\n"
        
 class If(Node):
-    cat = "flow"
-    subcat = "conditional"
+    categories = (
+        (Categories.PROCESS, Categories.CONDITIONAL), 
+        (Categories.BOOLEAN, Categories.PROCESS)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -92,8 +147,10 @@ class If(Node):
         return "if {0}:\n".format(*self.get_input()) 
         
 class Elif(Node):
-    cat = "flow"
-    subcat = "conditional"
+    categories = (
+        (Categories.PROCESS, Categories.CONDITIONAL), 
+        (Categories.BOOLEAN, Categories.PROCESS)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -117,8 +174,10 @@ class Elif(Node):
         return "elif {0}:\n".format(*self.get_input())
         
 class Else(Node):
-    cat = "flow"
-    subcat = "conditional"
+    categories = (
+        (Categories.PROCESS, Categories.CONDITIONAL), 
+        (Categories.BOOLEAN, Categories.PROCESS)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -137,8 +196,10 @@ class Else(Node):
         return "else:\n" 
  
 class Ternary(Node):
-    cat = "flow"
-    subcat = "conditional"
+    categories = (
+        (Categories.PROCESS, Categories.CONDITIONAL), 
+        (Categories.BOOLEAN, Categories.PROCESS)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -166,7 +227,6 @@ class Ternary(Node):
             self.port_sync(1, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(2, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
             self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
-            
      
     def _get_default(self, p):
         if p == 1 or p == 2:
@@ -178,7 +238,10 @@ class Ternary(Node):
         return "({0} if {2} else {1})".format(*self.get_input())
  
 class Bool(Node):
-    cat = "boolean"
+    categories = (
+        (Categories.TYPES, Categories.BASE), 
+        (Categories.BOOLEAN, Categories.BASE)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -193,7 +256,10 @@ class Bool(Node):
         return self.get_port(-1).get_output()
         
 class Num(Node):
-    cat = "numeric"
+    categories = (
+        (Categories.TYPES, Categories.BASE), 
+        (Categories.NUMERIC, Categories.BASE)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -211,7 +277,7 @@ class Num(Node):
         return self.get_port(-1).get_output()
         
 class String(Node):
-    cat = "string"
+    categories = ((Categories.TYPES, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -229,6 +295,7 @@ class String(Node):
         return self.get_port(-1).get_output()
         
 class Extend(Node):
+    categories = ((Categories.OTHER, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -237,18 +304,24 @@ class Extend(Node):
             Port(-1, Port_Types.BOOL, description=" ")
         ])
         
+    def can_connect(self, p0, n1, p1):
+        p0.is_reference = p1.is_reference
+        return True
+        
     def connection_update(self):
         self.port_sync(-1, 1, Port_Types.BOOL, default_is_array=False)
+        ip = self.get_port(1)
+        if not ip.connection:
+            self.clear_connections()
         
     def _get_default(self, p):
         return "True"
         
     def _get_output(self, p):
-        return self.get_input()
+        return self.get_input()[0]
 
 class And(Node):
-    cat = "boolean"
-    subcat = "operators"
+    categories = ((Categories.BOOLEAN, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -265,8 +338,7 @@ class And(Node):
         return "({} and {})".format(*self.get_input())  
         
 class Or(Node):
-    cat = "boolean"
-    subcat = "operators"
+    categories = ((Categories.BOOLEAN, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -283,8 +355,7 @@ class Or(Node):
         return "({} or {})".format(*self.get_input()) 
         
 class Not(Node):
-    cat = "boolean"
-    subcat = "operators"
+    categories = ((Categories.BOOLEAN, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -300,7 +371,10 @@ class Not(Node):
         return "(not {})".format(*self.get_input())
         
 class Equal(Node):
-    cat = "boolean"
+    categories = (
+        (Categories.BOOLEAN, Categories.COMPARE),
+        (Categories.NUMERIC, Categories.COMPARE)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
 
@@ -334,8 +408,10 @@ class Equal(Node):
         return "({} == {})".format(*self.get_input()) 
       
 class Greater(Node):
-    cat = "numeric"
-    subcat = "boolean"
+    categories = (
+        (Categories.BOOLEAN, Categories.COMPARE),
+        (Categories.NUMERIC, Categories.COMPARE)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -356,8 +432,10 @@ class Greater(Node):
         return "({0} > {1})".format(*self.get_input())
         
 class Less(Node):
-    cat = "numeric"
-    subcat = "boolean"
+    categories = (
+        (Categories.BOOLEAN, Categories.COMPARE),
+        (Categories.NUMERIC, Categories.COMPARE)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -378,43 +456,41 @@ class Less(Node):
         return "({0} < {1})".format(*self.get_input()) 
      
 class Max(Node):
-    cat = "numeric"
-    subcat = "statistic"
+    categories = ((Categories.NUMERIC, Categories.COMPARE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.NUM, description="[0, 1, 2...]", is_array=True),
-            Port(2, Port_Types.NUM, description="[0, 1, 2...]", is_array=True),
-            Port(-1, Port_Types.NUM, description="max value")
+            Port(1, Port_Types.NUM, description="a"),
+            Port(2, Port_Types.NUM, description="b"),
+            Port(-1, Port_Types.NUM, description="max(a, b)")
         ])
         
     def _get_default(self, p):
-        return "[]"
+        return "0"
 
     def _get_output(self, p): 
-        return "max({0}, 0)".format(*self.get_input()) 
+        return "max({0}, {1})".format(*self.get_input()) 
         
 class Min(Node):
-    cat = "numeric"
-    subcat = "statistic"
+    categories = ((Categories.NUMERIC, Categories.COMPARE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
         self.set_ports([
-            Port(1, Port_Types.NUM, description="[0, 1, 2...]", is_array=True),
-            Port(-1, Port_Types.NUM, description="min value")
+            Port(1, Port_Types.NUM, description="a"),
+            Port(2, Port_Types.NUM, description="b"),
+            Port(-1, Port_Types.NUM, description="min(a, b)")
         ])
         
     def _get_default(self, p):
-        return "[]"
+        return "0"
 
     def _get_output(self, p):
-        return "min({0}, 0)".format(*self.get_input())    
+        return "min({0}, {1})".format(*self.get_input())    
      
 class Add(Node):
-    cat = "numeric"
-    subcat = "operators"
+    categories = ((Categories.NUMERIC, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -435,8 +511,7 @@ class Add(Node):
         return "({} + {})".format(*self.get_input())
         
 class Increment(Node):
-    cat = "numeric"
-    subcat = "operators"
+    categories = ((Categories.NUMERIC, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -452,8 +527,7 @@ class Increment(Node):
         return "({} + 1)".format(*self.get_input())
         
 class Decrement(Node):
-    cat = "numeric"
-    subcat = "operators"
+    categories = ((Categories.NUMERIC, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -469,8 +543,7 @@ class Decrement(Node):
         return "({} - 1)".format(*self.get_input())
         
 class Subtract(Node):
-    cat = "numeric"
-    subcat = "operators"
+    categories = ((Categories.NUMERIC, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -491,8 +564,7 @@ class Subtract(Node):
         return "({0} - {1})".format(*self.get_input())
         
 class Multiply(Node):
-    cat = "numeric"
-    subcat = "operators"
+    categories = ((Categories.NUMERIC, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -513,8 +585,7 @@ class Multiply(Node):
         return "({0} * {1})".format(*self.get_input())
         
 class Negate(Node):
-    cat = "numeric"
-    subcat = "operators"
+    categories = ((Categories.NUMERIC, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -530,8 +601,7 @@ class Negate(Node):
         return "(-1 * {0})".format(*self.get_input())
         
 class Divide(Node):
-    cat = "numeric"
-    subcat = "operators"
+    categories = ((Categories.NUMERIC, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -552,8 +622,7 @@ class Divide(Node):
         return "({0} // {1})".format(*self.get_input())
   
 class Exists(Node):
-    cat = "boolean"
-    subcat = "operators"
+    categories = ((Categories.BOOLEAN, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
             
@@ -569,8 +638,7 @@ class Exists(Node):
         return "({0} is not None)".format(*self.get_input())
   
 class For(Node):
-    cat = "flow"
-    subcat = "loop"
+    categories = ((Categories.PROCESS, Categories.LOOP),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)  
         
@@ -609,8 +677,7 @@ class For(Node):
         return self.get_loop_var()
         
 class Break(Node):
-    cat = "flow"
-    subcat = "loop"
+    categories = ((Categories.PROCESS, Categories.LOOP),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
@@ -618,15 +685,18 @@ class Break(Node):
             Port(1, Port_Types.FLOW)
         ])
         
+    def can_connect(self, *args):
+        return self.scope_check(1, lambda p: isinstance(p.connection, For) and p.connection_port.is_process)
+        
     def connection_update(self):
-        self.scope_check(1, For)
+        if not self.scope_check(1, lambda p: isinstance(p.connection, For) and p.connection_port.is_process):
+            self.get_port(1).clear()
         
     def _get_text(self):
         return "break\n"
         
 class Continue(Node):
-    cat = "flow"
-    subcat = "loop"
+    categories = ((Categories.PROCESS, Categories.LOOP),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
@@ -634,14 +704,18 @@ class Continue(Node):
             Port(1, Port_Types.FLOW)
         ])
         
+    def can_connect(self, *args):
+        return self.scope_check(1, lambda p: isinstance(p.connection, For) and p.connection_port.is_process)
+        
     def connection_update(self):
-        self.scope_check(1, For)
+        if not self.scope_check(1, lambda p: isinstance(p.connection, For) and p.connection_port.is_process):
+            self.get_port(1).clear()
         
     def _get_text(self):
         return "continue\n"
         
 class Range(Node):
-    cat = "iterator"
+    categories = ((Categories.NUMERIC, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -662,7 +736,10 @@ class Range(Node):
         return "range({0}, {1})".format(*self.get_input())
        
 class Player(Node):
-    cat = "player"
+    categories = (
+        (Categories.TYPES, Categories.BASE),
+        (Categories.PLAYER, Categories.BASE)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)  
         
@@ -674,8 +751,7 @@ class Player(Node):
         return "self.player"
        
 class All_Players(Node):
-    cat = "player"
-    subcat = "lists"
+    categories = ((Categories.PLAYER, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -687,7 +763,10 @@ class All_Players(Node):
         return "self.game.get_players()"
         
 class Card(Node):
-    cat = "card"
+    categories = (
+        (Categories.TYPES, Categories.BASE),
+        (Categories.CARD, Categories.BASE)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)  
         
@@ -697,27 +776,9 @@ class Card(Node):
 
     def _get_output(self, p):
         return "self"
-      
-class Length(Node):
-    cat = "iterator"
-    subcat = "operators"
-    def __init__(self, id, **kwargs):
-        super().__init__(id, **kwargs)
-
-        self.set_ports([
-            Port(1, Port_Types.ANY_TYPE, description="list", is_array=True),
-            Port(-1, Port_Types.NUM, description="length of list")
-        ])
-        
-    def _get_default(self, port):
-        return "[]"
-        
-    def _get_output(self, p):
-        return "len({})".format(*self.get_input())
          
 class Has_Tag(Node):
-    cat = "card"
-    subcat = "boolean"
+    categories = ((Categories.CARD, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -740,8 +801,7 @@ class Has_Tag(Node):
         return "{1}.has_tag({0})".format(*self.get_input())
       
 class Get_Name(Node):
-    cat = "card"
-    subcat = "attributes"
+    categories = ((Categories.CARD, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -757,8 +817,7 @@ class Get_Name(Node):
         return "{0}.name".format(*self.get_input()) 
       
 class Has_Name(Node):
-    cat = "card"
-    subcat = "boolean"
+    categories = ((Categories.CARD, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -780,9 +839,24 @@ class Has_Name(Node):
     def _get_output(self, p):
         return "{1}.has_name({0})".format(*self.get_input())
         
+class Length(Node):
+    categories = ((Categories.CONTAINER, Categories.ATTRIBUTES),)
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)
+
+        self.set_ports([
+            Port(1, Port_Types.ANY_TYPE, description="list", is_array=True),
+            Port(-1, Port_Types.NUM, description="length of list")
+        ])
+        
+    def _get_default(self, port):
+        return "[]"
+        
+    def _get_output(self, p):
+        return "len({})".format(*self.get_input())
+        
 class Filter(Node):
-    cat = "iterator"
-    subcat = "filter"
+    categories = ((Categories.CONTAINER, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -814,8 +888,7 @@ class Filter(Node):
         return "[{2} for {2} in {1} if {0}]".format(*input)
 
 class Gain(Node):
-    cat = "player"
-    subcat = "points"
+    categories = ((Categories.PLAYER, Categories.POINTS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
 
@@ -843,8 +916,7 @@ class Gain(Node):
         return "{2}.gain({1}, self, extra={0})\n".format(*self.get_input())      
 
 class Steal(Node):
-    cat = "player"
-    subcat = "points"
+    categories = ((Categories.PLAYER, Categories.POINTS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)  
         
@@ -873,8 +945,7 @@ class Steal(Node):
         return "{2}.steal({1}, self, {3}, extra={0})\n".format(*self.get_input())      
           
 class Start_Select(Node):
-    cat = "func"
-    subcat = "select"
+    categories = ((Categories.FUNCTION, Categories.SELECT),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
@@ -887,8 +958,7 @@ class Start_Select(Node):
         return "self.player.start_select(self, {0})\n".format(*self.get_input())
 
 class Select(Node):
-    cat = "func"
-    subcat = "select"
+    categories = ((Categories.FUNCTION, Categories.SELECT),)
     def __init__(self, id, **kwargs):
         super().__init__(id, tag="func", **kwargs) 
         
@@ -904,8 +974,7 @@ class Select(Node):
         return "card"
 
 class Start_Wait(Node):
-    cat = "func"
-    subcat = "wait"
+    categories = ((Categories.FUNCTION, Categories.WAIT),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
@@ -924,8 +993,7 @@ class Start_Wait(Node):
         return "\"\""
         
 class Run_Wait(Node):
-    cat = "func"
-    subcat = "wait"
+    categories = ((Categories.FUNCTION, Categories.WAIT),)
     def __init__(self, id, **kwargs):
         super().__init__(id, tag="func", **kwargs) 
         
@@ -938,8 +1006,7 @@ class Run_Wait(Node):
         return "\n\tdef run_wait(self, data):\n"
        
 class End_Wait(Node):
-    cat = "func"
-    subcat = "wait"
+    categories = ((Categories.FUNCTION, Categories.WAIT),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
@@ -952,8 +1019,7 @@ class End_Wait(Node):
         return "self.end_wait()\n"
 
 class Extract_Value(Node):
-    cat = "func"
-    subcat = "wait"
+    categories = ((Categories.FUNCTION, Categories.WAIT),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs) 
         
@@ -993,8 +1059,7 @@ class Extract_Value(Node):
             op.update_type(t)
        
 class Index(Node):
-    cat = "iterator"
-    subcat = "index"
+    categories = ((Categories.CONTAINER, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -1020,8 +1085,7 @@ class Index(Node):
             return "player.string_to_deck(\"private\")"
             
 class Copy_Card(Node):
-    cat = "card"
-    subcat = "operators"
+    categories = ((Categories.CARD, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -1037,7 +1101,10 @@ class Copy_Card(Node):
         return "{0}.copy()".format(*self.get_input())
    
 class Get_New_Card(Node):
-    cat = "card"
+    categories = (
+        (Categories.TYPES, Categories.BASE),
+        (Categories.CARD, Categories.BASE)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -1056,8 +1123,7 @@ class Get_New_Card(Node):
         return "self.name"
      
 class Transfom(Node):
-    cat = "card"
-    subcat = "operators"
+    categories = ((Categories.CARD, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -1082,8 +1148,7 @@ class Transfom(Node):
         return "self.game.transform({2}, self.game.get_card({1}))".format(*self.get_input())
             
 class Swap_With(Node):
-    cat = "card"
-    subcat = "operators"
+    categories = ((Categories.CARD, Categories.MOVE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)
         
@@ -1100,8 +1165,10 @@ class Swap_With(Node):
         return "self"
               
 class Get_Deck(Node):
-    cat = "player"
-    subcat = "lists"
+    categories = (
+        (Categories.PLAYER, Categories.ATTRIBUTES),
+        (Categories.CARD, Categories.CONTAINER)
+    )
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)  
         
@@ -1124,7 +1191,7 @@ class Get_Deck(Node):
         return "{1}.string_to_deck({0})".format(*self.get_input())
         
 class Get_Score(Node):
-    cat = "player"
+    categories = ((Categories.PLAYER, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1140,6 +1207,7 @@ class Get_Score(Node):
         return "{0}.score".format(*self.get_input())
     
 class Cards_From_Vector(Node):
+    categories = ((Categories.CARD, Categories.GRID),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1178,10 +1246,9 @@ class Cards_From_Vector(Node):
                 return "False"
 
     def _get_output(self, p):
-        ipp = mapping.find_all_input_ports(self)
-        for ip in ipp:
-            if ip.type == Port_Types.CARD:
-                ip.node.defaults[ip.port] = "c"
+        self.lambda_input(Port_Types.CARD, "c")
+        input = self.get_input()
+        self.clear_lambda_input(Port_Types.CARD)
                 
         text = (
             "self.spot.cards_from_vector("
@@ -1193,10 +1260,11 @@ class Cards_From_Vector(Node):
                 "stop_on_fail={5}, "
                 "reverse={6}"
             ")"
-        ).format(*self.get_input())
+        ).format(*input)
         return text
         
 class Get_Spot_Group(Node):
+    categories = ((Categories.CARD, Categories.GRID),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1212,6 +1280,7 @@ class Get_Spot_Group(Node):
         return "self.spot.get_spot_group({0})".format(*self.get_input())
         
 class Get_Card_Group(Node):
+    categories = ((Categories.CARD, Categories.GRID),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1234,6 +1303,7 @@ class Get_Card_Group(Node):
         return "self.spot.get_card_group({0}, check=lambda c: {1})".format(*input)
         
 class Register(Node):
+    categories = ((Categories.CARD, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1249,6 +1319,7 @@ class Register(Node):
         return "self.register({})".format(*self.get_input())
         
 class Get_Player(Node):
+    categories = ((Categories.CARD, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1264,6 +1335,7 @@ class Get_Player(Node):
         return "{0}.player".format(*self.get_input())
 
 class Set_Player(Node):
+    categories = ((Categories.CARD, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1284,6 +1356,7 @@ class Set_Player(Node):
         return "{1}.change_player({0})".format(*self.get_input())
         
 class Get_Spot(Node):
+    categories = ((Categories.CARD, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1299,6 +1372,7 @@ class Get_Spot(Node):
         return "{0}.spot".format(*self.get_input())
         
 class Get_Direction_Of(Node):
+    categories = ((Categories.CARD, Categories.GRID),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1314,6 +1388,7 @@ class Get_Direction_Of(Node):
         return "self.spot.get_direction({0})".format(*self.get_input())
         
 class Get_Direction(Node):
+    categories = ((Categories.CARD, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1325,6 +1400,7 @@ class Get_Direction(Node):
         return "self.direction"
         
 class Set_Direction(Node):
+    categories = ((Categories.CARD, Categories.ATTRIBUTES),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1343,6 +1419,7 @@ class Set_Direction(Node):
         return "self.set_direction({0})".format(*self.get_input())
         
 class Get_Card_At(Node):
+    categories = ((Categories.CARD, Categories.GRID),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1369,6 +1446,7 @@ class Get_Card_At(Node):
         return "self.spot.get_card_at({0}, check=lambda c: {1})".format(*input)
         
 class Get_Spot_At(Node):
+    categories = ((Categories.CARD, Categories.GRID),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1387,6 +1465,7 @@ class Get_Spot_At(Node):
         return "self.spot.get_spot_at({0})".format(*self.get_input())
         
 class Copy_To(Node):
+    categories = ((Categories.CARD, Categories.MOVE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1402,6 +1481,7 @@ class Copy_To(Node):
         return "self.copy_to({0})".format(*self.get_input())
         
 class Move_In(Node):
+    categories = ((Categories.CARD, Categories.MOVE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1421,6 +1501,7 @@ class Move_In(Node):
         return "{1}.move_in({0})".format(*self.get_input())
         
 class Kill_Card(Node):
+    categories = ((Categories.CARD, Categories.OPERATORS),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1437,6 +1518,7 @@ class Kill_Card(Node):
         return "{0}.kill(self)\n".format(*self.get_input())
         
 class Slide_Card(Node):
+    categories = ((Categories.CARD, Categories.MOVE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1465,6 +1547,7 @@ class Slide_Card(Node):
         return "self.game.grid.slide({2}, {0}, max_dist={1})".format(*self.get_input())
         
 class Add_To_Private(Node):
+    categories = ((Categories.PLAYER, Categories.CARD),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)   
         
@@ -1486,7 +1569,7 @@ class Add_To_Private(Node):
         return "{0}.add_card(\"private\", {1}.copy())\n".format(*self.get_input())
         
 class Process(Node):
-    cat = "flow"
+    categories = ((Categories.PROCESS, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)  
 
@@ -1503,14 +1586,14 @@ class Process(Node):
         return "{0}\n".format(*self.get_input())
         
 class Store_Value(Node):
-    cat = "flow"
+    categories = ((Categories.PROCESS, Categories.BASE),)
     def __init__(self, id, **kwargs):
         super().__init__(id, **kwargs)  
 
         self.set_ports([
             Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="value"),
             Port(2, Port_Types.FLOW),
-            Port(-1, Port_Types.NUM, description="value"),
+            Port(-1, Port_Types.NUM, description="value", is_reference=True),
             Port(-2, Port_Types.FLOW)
         ])
 
@@ -1527,3 +1610,72 @@ class Store_Value(Node):
         input = self.get_input()
         input.insert(0, self.get_output(-1))
         return "{0} = {1}\n".format(*input) 
+        
+class Set_Value(Node):
+    categories = ((Categories.PROCESS, Categories.BASE),)
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)  
+
+        self.set_ports([
+            Port(1, Port_Types.ANY_TYPE_OR_ARRAY, description="new value"),
+            Port(2, Port_Types.ANY_TYPE_OR_ARRAY, description="value"),
+            Port(3, Port_Types.FLOW),
+            Port(-1, Port_Types.NUM, description="value", is_reference=True),
+            Port(-2, Port_Types.FLOW)
+        ])
+        
+    def can_connect(self, p0, n1, p1):
+        if p0.port != 2:
+            return True
+        return p1.is_reference
+
+    def connection_update(self):
+        c1 = self.get_port(1).connection
+        c2 = self.get_port(2).connection
+        if c1 and not c2:
+            self.port_sync(1, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
+            self.port_sync(2, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
+            self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
+        elif c2 and not c1:
+            self.port_sync(2, 2, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
+            self.port_sync(1, 2, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
+            self.port_sync(-1, 2, Port_Types.NUM, default_is_array=False)
+        elif c1 and c2:
+            self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
+        else:
+            self.port_sync(1, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
+            self.port_sync(2, 1, Port_Types.ANY_TYPE_OR_ARRAY, default_is_array=False)
+            self.port_sync(-1, 1, Port_Types.NUM, default_is_array=False)
+            
+    def _get_output(self, p):
+        ip = self.get_port(2)
+        if ip.connection:
+            print(ip.connection, ip.connection_port.port)
+            return ip.connection._get_output(ip.connection_port.port)
+        return f"value_{self.id}"
+        
+    def _get_default(self, p):
+        print(p)
+        match p:
+            case 1:
+                return "0"
+            case 2:
+                return f"value_{self.id}"
+        
+    def _get_text(self):
+        return "{1} = {0}\n".format(*self.get_input()) 
+        
+class Skip_Next_Move(Node):
+    categories = ((Categories.CARD, Categories.MOVE),)
+    def __init__(self, id, **kwargs):
+        super().__init__(id, **kwargs)   
+        
+        self.set_ports([
+            Port(1, Port_Types.FLOW),
+            Port(-1, Port_Types.FLOW)
+        ])
+
+    def _get_text(self, p):
+        return "self.skip_move = True\n"
+        
+        

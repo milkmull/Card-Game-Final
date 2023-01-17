@@ -201,11 +201,7 @@ class Gambling_Man(card_base.Card):
         if spots:
             spot = self.player.random_choice(spots, self)
             self.player.play_card("private", card.cid, spot)
-            
-            if spot.is_corner:
-                self.player.gain(4, self)
-            else:
-                self.player.gain(-4, self)
+            self.player.gain(4 if self.is_corner else -4, self)
             
 class Parade(card_base.Card):
     sid = 15

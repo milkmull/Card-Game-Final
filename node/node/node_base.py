@@ -101,7 +101,7 @@ def unpack(data, manager=None, map=True):
                 n0.get_port(parent_port).copy()
             port = int(port)
             p0 = n0.get_port(port)
-            p0.set_type(type)
+            p0.type = type
             p0.is_array = is_array
             p0.suppressed = suppressed
             p0.visible = visible
@@ -307,9 +307,8 @@ class Port(Element):
             local_funcs, scope_output, loop_output = mapping.check_bad_connection(n0, n1)
             can_connect0 = n0.can_connect(p0, n1, p1)
             can_connect1 = n1.can_connect(p1, n0, p0)
-            if not can_connect0 or not can_connect1 or (len(local_funcs) > 1 or scope_output or loop_output):
-                p0.clear()
-                p1.clear()
+            if not force and (not can_connect0 or not can_connect1 or (len(local_funcs) > 1 or scope_output or loop_output)):
+                Port.disconnect(p0, p1, d=True)
                 
             else:
                 Node.new_wire(p0, p1)
@@ -363,13 +362,14 @@ class Port(Element):
         cls.ACTIVE_PORT = None
         cls.CLOSE_ACIVE_PORT = False
 
-    def __init__(self, port, type, is_array=False, is_process=False, description=None):
+    def __init__(self, port, type, is_array=False, is_process=False, is_reference=False, description=None):
         super().__init__()
         
         self.port = port
         self.type = type
         self.is_array = is_array
         self.is_process = is_process
+        self.is_reference = is_reference
      
         self.parent_port = None
         self.node = None
@@ -483,7 +483,7 @@ class Port(Element):
 
     def copy(self):
         n = self.node
-        p = Port(self.node.get_new_output_port(), self.type, is_array=self.is_array)
+        p = Port(self.node.get_new_output_port(), self.type, is_array=self.is_array, is_reference=self.is_reference)
         p.parent_port = self.parent_port or self.port
         p.node = n
         p.rect = self.rect.copy()
@@ -654,8 +654,7 @@ class Port(Element):
         )
 
 class Node(Dragger, Element):
-    cat = "base"
-    subcat = "base"
+    categories = (("Base", "Base"),)
 
     LABEL_HEIGHT = 20
     OUTLINE_SPACE = 3
@@ -689,9 +688,7 @@ class Node(Dragger, Element):
     def get_categories(cls):
         categories = {}
         for name, n in cls.NODE_DATA.items():
-            if hasattr(n, "cat"):
-                cat = n.cat
-                subcat = getattr(n, "subcat", "base")
+            for cat, subcat in n.categories:
                 if cat not in categories:
                     categories[cat] = {}
                 if subcat not in categories[cat]:
@@ -1156,17 +1153,16 @@ class Node(Dragger, Element):
 
         if p1.type != t or p1.is_array != a:
             p1.update_type(t, is_array=a)
-            
-    def scope_check(self, ipp, node_type):
+
+    def scope_check(self, ipp, check):
         ip = self.get_port(ipp)
         if ip.connection:
             ports = mapping.map_ports(self, [], skip_op=True, in_type=Port_Types.FLOW)
             for p in ports:
                 if p.connection:
-                    if isinstance(p.connection, node_type) and p.connection_port.is_process:
-                        break
-            else:
-                ip.clear()
+                    if check(p):
+                        return True
+        return False
                 
     def ripple_connection_update(self, checked=None):
         if checked is None:

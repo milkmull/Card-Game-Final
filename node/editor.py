@@ -399,7 +399,7 @@ class Node_Editor(Scene):
                     p0.is_array = a0
                     p1.type = t1
                     p1.is_array = a1
-                    Port.new_connection(p0, p1, d=True)
+                    Port.new_connection(p0, p1, force=True, d=True)
 
                 case "val":
                     e = log["e"]

@@ -171,6 +171,7 @@ def info_scene(scene, node, show_full_out=False, last_port=None):
             input = node.get_input_from(port.port)
             for op in node.get_output_ports():
                 output = node.get_text() if op.is_flow else node.get_output(op.port)
+                print(op.port, node)
                 if input in output:
                     full_text = output
                     break
