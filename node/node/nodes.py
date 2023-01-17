@@ -305,7 +305,8 @@ class Extend(Node):
         ])
         
     def can_connect(self, p0, n1, p1):
-        p0.is_reference = p1.is_reference
+        if p0.port == 1:
+            self.get_port(-1).is_reference = p1.is_reference
         return True
         
     def connection_update(self):
@@ -313,6 +314,7 @@ class Extend(Node):
         ip = self.get_port(1)
         if not ip.connection:
             self.clear_connections()
+            self.get_port(-1).is_reference = False
         
     def _get_default(self, p):
         return "True"
@@ -1650,7 +1652,6 @@ class Set_Value(Node):
     def _get_output(self, p):
         ip = self.get_port(2)
         if ip.connection:
-            print(ip.connection, ip.connection_port.port)
             return ip.connection._get_output(ip.connection_port.port)
         return f"value_{self.id}"
         
